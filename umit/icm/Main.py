@@ -22,6 +22,7 @@ import os
 import sys
 
 from umit.icm.tests.WebsiteTest import WebsiteTest
+from umit.icm.tests.HTTPFetcher import HTTPFetcher
 
 #----------------------------------------------------------------------
 def Main():
@@ -42,6 +43,6 @@ def WaitForEnd():
     pass    
 
 if __name__ == "__main__":
-    test = WebsiteTest()
+    test = HTTPFetcher("http://www.baidu.com", "baidu.html")
     test.execute()
     

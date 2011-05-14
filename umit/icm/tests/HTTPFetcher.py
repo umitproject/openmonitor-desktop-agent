@@ -18,24 +18,43 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
+import webbrowser
+
+from Test import Test
+from twisted.internet import reactor
+from twisted.web.client import HTTPDownloader
+from twisted.python import log
+
 ########################################################################
-class WebpageFetcher:
-    """
-    Fetch a certain URL
-    """
-    
+class HTTPFetcher(Test):
+    """Fetch a certain URL"""    
 
     #----------------------------------------------------------------------
-    def __init__(self):
+    def __init__(self, url, savePath):
         """Constructor"""
+        if not url.startswith("http://"):
+            raise Exception("URL must start with 'http://'")
+        self.url = url
+        self.path = savePath
         pass
         
     #----------------------------------------------------------------------
     def setup(self, params):
-        """
-        Setup the test
-        """
+        """Setup the test"""
         
+    #----------------------------------------------------------------------
+    def execute(self):
+        """"""
+        factory = HTTPDownloader(self.url, self.path)
+        factory.deferred.addCallback(self.downloadComplete).addErrback(log.err)
+        reactor.connectTCP(factory.host, factory.port, factory)
+        reactor.run()
+        
+    def downloadComplete(self, result):
+        print("download Complete")
+        reactor.stop()
+        webbrowser.open(self.path)
+                                    
         
         
     
