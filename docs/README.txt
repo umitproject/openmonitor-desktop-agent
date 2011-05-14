@@ -1,0 +1,1 @@
+This folder is reserved for the epydoc to put auto-generated documents in it.
