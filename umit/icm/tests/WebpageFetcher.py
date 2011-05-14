@@ -18,30 +18,25 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
-import os
-import sys
-
-from umit.icm.tests.WebsiteTest import WebsiteTest
-
-#----------------------------------------------------------------------
-def Main():
+########################################################################
+class WebpageFetcher:
     """
-    The Main function 
+    Fetch a certain URL
     """
-    CreateGUI();
-    WaitForEnd();
     
-#----------------------------------------------------------------------
-def CreateGUI():
-    """"""
-    pass
-    
-#----------------------------------------------------------------------
-def WaitForEnd():
-    """"""
-    pass    
 
-if __name__ == "__main__":
-    test = WebsiteTest()
-    test.execute()
+    #----------------------------------------------------------------------
+    def __init__(self):
+        """Constructor"""
+        pass
+        
+    #----------------------------------------------------------------------
+    def setup(self, params):
+        """
+        Setup the test
+        """
+        
+        
+        
+    
     

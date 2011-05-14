@@ -18,30 +18,3 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
-import os
-import sys
-
-from umit.icm.tests.WebsiteTest import WebsiteTest
-
-#----------------------------------------------------------------------
-def Main():
-    """
-    The Main function 
-    """
-    CreateGUI();
-    WaitForEnd();
-    
-#----------------------------------------------------------------------
-def CreateGUI():
-    """"""
-    pass
-    
-#----------------------------------------------------------------------
-def WaitForEnd():
-    """"""
-    pass    
-
-if __name__ == "__main__":
-    test = WebsiteTest()
-    test.execute()
-    
