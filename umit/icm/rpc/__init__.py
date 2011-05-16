@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-# Copyright (C) 2011 Zhongjie Wang
+# Copyright (C) 2011 Adriano Monteiro Marques
 #
 # Author:  Zhongjie Wang <wzj401@gmail.com>
 #

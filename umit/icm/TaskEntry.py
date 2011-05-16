@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-# Copyright (C) 2011 Zhongjie Wang
+# Copyright (C) 2011 Adriano Monteiro Marques
 #
 # Author:  Zhongjie Wang <wzj401@gmail.com>
 #
@@ -18,3 +18,17 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
+
+
+########################################################################
+class TaskEntry:
+    """"""
+
+    #----------------------------------------------------------------------
+    def __init__(self):
+        """Constructor"""
+        self.Id = "";
+        self.Runtime = "";
+        self.Targets = "";
+        
+    

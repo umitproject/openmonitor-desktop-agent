@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-# Copyright (C) 2011 Zhongjie Wang
+# Copyright (C) 2011 Adriano Monteiro Marques
 #
 # Author:  Zhongjie Wang <wzj401@gmail.com>
 #
@@ -17,6 +17,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
+
 
 import os
 import sys
