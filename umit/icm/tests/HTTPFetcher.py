@@ -18,17 +18,16 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
-
-
 import webbrowser
 
-from Test import Test
 from twisted.internet import reactor
 from twisted.web.client import HTTPDownloader
 from twisted.python import log
 
+from umit.icm.tests.BaseTest import BaseTest
+
 ########################################################################
-class HTTPFetcher(Test):
+class HTTPFetcher(BaseTest):
     """Fetch a certain URL"""    
 
     #----------------------------------------------------------------------
@@ -41,8 +40,8 @@ class HTTPFetcher(Test):
         pass
         
     #----------------------------------------------------------------------
-    def setup(self, params):
-        """Setup the test"""
+    def prepare(self, params):
+        """Prepare for the test"""
         
     #----------------------------------------------------------------------
     def execute(self):

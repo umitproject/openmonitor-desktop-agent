@@ -18,36 +18,13 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
-import os
-import sys
-
-from twisted.internet import reactor
-
-from umit.icm.tests.WebsiteTest import WebsiteTest
-from umit.icm.tests.HTTPFetcher import HTTPFetcher
-
-#----------------------------------------------------------------------
-def Main():
-    """
-    The Main function 
-    """
-    CreateGUI();
-    WaitForEnd();
+class BaseTest(object):
+    def __init__(self):
+        pass
     
-#----------------------------------------------------------------------
-def CreateGUI():
-    """"""
-    pass
-    
-#----------------------------------------------------------------------
-def WaitForEnd():
-    """"""
-    pass    
-
-if __name__ == "__main__":
-    reactor.run()
-    test = WebsiteTest('https://www.alipay.com')
-    test.prepare()
-    test.execute()    
-    reactor.stop()
+    def prepare(self):
+        pass
+        
+    def execute(self):
+        pass
     
