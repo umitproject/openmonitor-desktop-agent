@@ -32,10 +32,10 @@ if os.name == 'nt':
     # See http://msdn.microsoft.com/en-us/library/bb762181(VS.85).aspx
     # for SHGetFolderPath reference.
     HOME = shell.SHGetFolderPath(0, shellcon.CSIDL_LOCAL_APPDATA, 0, 0)
-    UMIT_CFG_DIR = 'umit'
+    UMIT_CFG_DIR = 'umit-icm-agent'
 else:
     HOME = os.path.expanduser("~")
-    UMIT_CFG_DIR = '.umit'
+    UMIT_CFG_DIR = '.umit-icm-agent'
 
 CURRENT_DIR = os.getcwd()
 
@@ -54,17 +54,18 @@ else:
         # checkout.
         main_dir = os.path.abspath(os.path.join(main_dir, os.path.pardir))
 
-CONFIG_DIR = os.path.join(main_dir, "share", "umit", "config")
+main_dir = "F:\\workspace\\PyWork\\icm-agent\\"
+CONFIG_DIR = os.path.join(main_dir, "share", "umit-icm-agent", "config")
 LOCALE_DIR = os.path.join(main_dir, "share", "locale")
-MISC_DIR = os.path.join(main_dir, "share", "umit", "misc")
-ICONS_DIR = os.path.join(main_dir, "share", "icons", "umit")
-PIXMAPS_DIR = os.path.join(main_dir, "share", "pixmaps", "umit")
-PLUGINS_DIR = os.path.join(main_dir, "share", "umit", "plugins")
-DOCS_DIR = os.path.join(main_dir, "share", "doc", "umit", "html")
-STYLES_DIR = os.path.join(main_dir, "share", "umit", "styles")
-LANGUAGES_DIR = os.path.join(main_dir, "share", "umit", "languages")
+MISC_DIR = os.path.join(main_dir, "share", "umit-icm-agent", "misc")
+ICONS_DIR = os.path.join(main_dir, "share", "icons", "umit-icm-agent")
+PIXMAPS_DIR = os.path.join(main_dir, "share", "pixmaps", "umit-icm-agent")
+PLUGINS_DIR = os.path.join(main_dir, "share", "umit-icm-agent", "plugins")
+DOCS_DIR = os.path.join(main_dir, "share", "doc", "umit-icm-agent", "html")
+STYLES_DIR = os.path.join(main_dir, "share", "umit-icm-agent", "styles")
+LANGUAGES_DIR = os.path.join(main_dir, "share", "umit-icm-agent", "languages")
 
-base_paths = dict(config_file = 'umit.conf',
+base_paths = dict(config_file = 'umit-icm-agent.conf',
                   config_dir = UMIT_CFG_DIR,
                   user_dir = os.path.join(HOME, UMIT_CFG_DIR),
                   scan_profile = 'scan_profile.usp',
@@ -73,12 +74,12 @@ base_paths = dict(config_file = 'umit.conf',
                   target_list = 'target_list.txt',
                   wizard = 'wizard.xml',
                   options = 'options.xml',
-                  umit_opf = 'umit.opf',
-                  umit_opt = 'umit.opt',
+                  umit_opf = 'umit-icm-agent.opf',
+                  umit_opt = 'umit-icm-agent.opt',
                   pixmaps_dir = PIXMAPS_DIR,
                   plugins_dir = PLUGINS_DIR,
                   i18n_dir = LOCALE_DIR,
-                  i18n_message_file = 'umit.mo',
+                  i18n_message_file = 'umit-icm-agent.mo',
                   scan_results_extension = 'usr',  # comes from umit scan result
                   scan_profile_extension = 'usp',  # comes from umit scan profile
                   user_home = HOME,
@@ -87,7 +88,7 @@ base_paths = dict(config_file = 'umit.conf',
                   pixmaps_search_sequence = [os.path.join(CURRENT_DIR, PIXMAPS_DIR),
                                              HOME],
                   i18n_search_sequence = [os.path.join(CURRENT_DIR, LOCALE_DIR), HOME],
-                  umitdb = "umit.db",
+                  umitdb = "umit-icm-agent.db",
 
                   # new generation database
                   umitdb_ng = "umitng.db",
@@ -116,18 +117,18 @@ base_paths = dict(config_file = 'umit.conf',
 if PLATFORM == 'linux2' or PLATFORM == 'linux1':
     base_paths.update(dict(user_home = HOME,
                            basic_search_sequence = [os.path.join(HOME, base_paths['config_dir']),
-                                                    '/opt/umit', HOME, CURRENT_DIR],
+                                                    '/opt/umit-icm-agent', HOME, CURRENT_DIR],
                            config_search_sequence = [os.path.join(HOME, base_paths['config_dir']),
                                                      CURRENT_DIR, '/etc'],
                            pixmaps_search_sequence = [os.path.join(CURRENT_DIR, PIXMAPS_DIR),
-                                                      '/usr/share/pixmaps/umit',
-                                                      '/opt/umit', HOME],
+                                                      '/usr/share/pixmaps/umit-icm-agent',
+                                                      '/opt/umit-icm-agent', HOME],
                            i18n_search_sequence = [os.path.join(CURRENT_DIR, LOCALE_DIR),
                                                    '/usr/share/locale',
                                                    HOME, CURRENT_DIR]))
 elif PLATFORM == 'win32':
     PROGRAM_FILES = os.environ.get("PROGRAMFILES", "\\")
-    UMIT_DIR = os.path.join(PROGRAM_FILES, "Umit")
+    UMIT_DIR = os.path.join(PROGRAM_FILES, "Umit-icm-agent")
     PIXMAPS_DIR = os.path.join(UMIT_DIR, PIXMAPS_DIR)
     
     base_paths.update(dict(\
