@@ -22,13 +22,12 @@
 package org.umit.icm.proto;
 
 message ICMReport {
-	required int64 reportID = 1;
-	required int64 senderID = 2;
-	required int64 timestamp = 3;
-	required int32 testID = 4;
-	repeated bytes passedNodes = 5;	// the peer in the way of routing 
-									// to the aggregator, this field is repeated
-	repeated WebsiteReportDetail websiteReport = 100;
+    required int64 reportID = 1;
+    required int64 senderID = 2;
+    required int64 timestamp = 3;
+    required int32 testID = 4;
+    repeated bytes passedNodes = 5;	// the peer in the way of routing to the aggregator, this field is repeated
+    repeated WebsiteReportDetail websiteReport = 100;
     repeated ServiceReportDetail serviceReport = 101;
     // extensions 100 to max;
 }
@@ -41,18 +40,18 @@ extend ICMReport {
 */
 
 message WebsiteReportDetail {
-	required string websiteURL = 2;
-	required int32 statusCode = 3;
-	optional double responseTime = 4;
-	optional double bandwidth = 5;
-	extensions 10 to 99;	// can add more fields later
+    required string websiteURL = 2;
+    required int32 statusCode = 3;
+    optional double responseTime = 4;
+    optional double bandwidth = 5;
+    extensions 10 to 99;	// can add more fields later
 }
 
 message ServiceReportDetail {
-	required string serviceName = 2;
-	required int32 statusCode = 3;
-	optional double responseTime = 4;
-	optional double bandwidth = 5;
-	extensions 10 to 99;	// can add more fields later
+    required string serviceName = 2;
+    required int32 statusCode = 3;
+    optional double responseTime = 4;
+    optional double bandwidth = 5;
+    extensions 10 to 99;	// can add more fields later
 }
 
