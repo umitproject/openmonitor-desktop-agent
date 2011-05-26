@@ -27,6 +27,7 @@ message ICMReport {
     required int64 timestamp = 3;
     required int32 testID = 4;
     repeated bytes passedNodes = 5;	// the peer in the way of routing to the aggregator, this field is repeated
+    // report details
     repeated WebsiteReportDetail websiteReport = 100;
     repeated ServiceReportDetail serviceReport = 101;
     // extensions 100 to max;
