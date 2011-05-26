@@ -11,7 +11,7 @@ from google.protobuf import descriptor_pb2
 DESCRIPTOR = descriptor.FileDescriptor(
   name='report.proto',
   package='org.umit.icm.proto',
-  serialized_pb='\n\x0creport.proto\x12\x12org.umit.icm.proto\"\xe7\x01\n\tICMReport\x12\x10\n\x08reportID\x18\x01 \x02(\x03\x12\x10\n\x08senderID\x18\x02 \x02(\x03\x12\x11\n\ttimestamp\x18\x03 \x02(\x03\x12\x0e\n\x06testID\x18\x04 \x02(\x05\x12\x13\n\x0bpassedNodes\x18\x05 \x03(\x0c\x12>\n\rwebsiteReport\x18\x64 \x03(\x0b\x32\'.org.umit.icm.proto.WebsiteReportDetail\x12>\n\rserviceReport\x18\x65 \x03(\x0b\x32\'.org.umit.icm.proto.ServiceReportDetail\"l\n\x13WebsiteReportDetail\x12\x12\n\nwebsiteURL\x18\x02 \x02(\t\x12\x12\n\nstatusCode\x18\x03 \x02(\x05\x12\x14\n\x0cresponseTime\x18\x04 \x01(\x01\x12\x11\n\tbandwidth\x18\x05 \x01(\x01*\x04\x08\n\x10\x64\"m\n\x13ServiceReportDetail\x12\x13\n\x0bserviceName\x18\x02 \x02(\t\x12\x12\n\nstatusCode\x18\x03 \x02(\x05\x12\x14\n\x0cresponseTime\x18\x04 \x01(\x01\x12\x11\n\tbandwidth\x18\x05 \x01(\x01*\x04\x08\n\x10\x64')
+  serialized_pb='\n\x0creport.proto\x12\x12org.umit.icm.proto\"\xe6\x01\n\tICMReport\x12\x10\n\x08reportID\x18\x01 \x02(\x03\x12\x10\n\x08senderID\x18\x02 \x02(\x03\x12\x11\n\ttimestamp\x18\x03 \x02(\x03\x12\x0e\n\x06testID\x18\x04 \x02(\x05\x12\x12\n\npassedNode\x18\x05 \x03(\x0c\x12>\n\rwebsiteReport\x18\x64 \x03(\x0b\x32\'.org.umit.icm.proto.WebsiteReportDetail\x12>\n\rserviceReport\x18\x65 \x03(\x0b\x32\'.org.umit.icm.proto.ServiceReportDetail\"l\n\x13WebsiteReportDetail\x12\x12\n\nwebsiteURL\x18\x02 \x02(\t\x12\x12\n\nstatusCode\x18\x03 \x02(\x05\x12\x14\n\x0cresponseTime\x18\x04 \x01(\x01\x12\x11\n\tbandwidth\x18\x05 \x01(\x01*\x04\x08\n\x10\x64\"m\n\x13ServiceReportDetail\x12\x13\n\x0bserviceName\x18\x02 \x02(\t\x12\x12\n\nstatusCode\x18\x03 \x02(\x05\x12\x14\n\x0cresponseTime\x18\x04 \x01(\x01\x12\x11\n\tbandwidth\x18\x05 \x01(\x01*\x04\x08\n\x10\x64')
 
 
 
@@ -52,7 +52,7 @@ _ICMREPORT = descriptor.Descriptor(
       is_extension=False, extension_scope=None,
       options=None),
     descriptor.FieldDescriptor(
-      name='passedNodes', full_name='org.umit.icm.proto.ICMReport.passedNodes', index=4,
+      name='passedNode', full_name='org.umit.icm.proto.ICMReport.passedNode', index=4,
       number=5, type=12, cpp_type=9, label=3,
       has_default_value=False, default_value=[],
       message_type=None, enum_type=None, containing_type=None,
@@ -82,7 +82,7 @@ _ICMREPORT = descriptor.Descriptor(
   is_extendable=False,
   extension_ranges=[],
   serialized_start=37,
-  serialized_end=268,
+  serialized_end=267,
 )
 
 
@@ -130,8 +130,8 @@ _WEBSITEREPORTDETAIL = descriptor.Descriptor(
   options=None,
   is_extendable=True,
   extension_ranges=[(10, 100), ],
-  serialized_start=270,
-  serialized_end=378,
+  serialized_start=269,
+  serialized_end=377,
 )
 
 
@@ -179,8 +179,8 @@ _SERVICEREPORTDETAIL = descriptor.Descriptor(
   options=None,
   is_extendable=True,
   extension_ranges=[(10, 100), ],
-  serialized_start=380,
-  serialized_end=489,
+  serialized_start=379,
+  serialized_end=488,
 )
 
 _ICMREPORT.fields_by_name['websiteReport'].message_type = _WEBSITEREPORTDETAIL

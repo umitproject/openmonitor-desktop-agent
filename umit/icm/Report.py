@@ -34,7 +34,8 @@ if __name__ == "__main__":
     report.senderID = 10000
     report.timestamp = long(time.time() * 1000)
     report.testID = 100
-    report.passedNodes.append("127.0.0.1:8080")
+    report.passedNode.append("219.223.222.99:6060")
+    report.passedNode.append("219.223.192.198:6060")
     wr = report.websiteReport.add()
     wr.websiteURL = "http://www.baidu.com"
     wr.statusCode = 200
