@@ -27,7 +27,7 @@ from umit.icm.BasePaths import ICONS_DIR
 
 class Main(object):
     def __init__(self):
-        pass
+        self.prefernce_window = Preference()        
     
     def show_menu(self, status_icon, button, activate_time, menu):
         menu.popup(None, None, None, button, activate_time, status_icon)
@@ -54,7 +54,7 @@ class Main(object):
         tray_menu.append(gtk.SeparatorMenuItem())
 
         menu_item = gtk.MenuItem("Preference")
-        #menu_item.connect("activate", lambda w: gtk.main_quit())
+        menu_item.connect("activate", lambda w: self.prefernce_window.show())
         tray_menu.append(menu_item)
 
         menu_item = gtk.MenuItem("About")

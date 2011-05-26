@@ -18,28 +18,21 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
-import time
+import gtk
 
-from umit.icm.comm.report_pb2 import ICMReport
-
-class Report:
-    """"""
-    #----------------------------------------------------------------------
+class Preference(object):
     def __init__(self):
-        """Constructor"""
+        self.window = gtk.Window()
+        self.window.set_border_width(10)
+        
+        self.button = gtk.Button("Hello World")        
+        self.window.add(self.button)    
+        
+    def show(self):
+        self.window.show_all()
+                
         
 if __name__ == "__main__":
-    report = ICMReport()
-    report.reportID = 89734
-    report.senderID = 10000
-    report.timestamp = long(time.time() * 1000)
-    report.testID = 100
-    report.passedNodes.append("127.0.0.1:8080")
-    wr = report.websiteReport.add()
-    wr.websiteURL = "http://www.baidu.com"
-    wr.statusCode = 200
-    wr = report.websiteReport.add()
-    wr.websiteURL = "https://www.alipay.com"
-    wr.statusCode = 200
-    print(report.__str__())
-    
+    pref = Preference()
+    pref.show()
+    gtk.main()
