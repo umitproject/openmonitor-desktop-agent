@@ -18,42 +18,34 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
+__all__ = ['log', 'file_log']
+
 import os
 import sys
 
-from twisted.internet import gtk2reactor # for gtk-2.0
-gtk2reactor.install()
+from umit.icm.Basic import LOG_DIR
 
-from twisted.internet import reactor
+from common.UmitLogging import Log
 
-from umit.icm.tests.WebsiteTest import WebsiteTest
-from umit.icm.tests.HTTPFetcher import HTTPFetcher
+LOGLEVEL = 0
+if not os.path.exists(LOG_DIR):
+    os.mkdir(LOG_DIR)
+log_filename = os.path.join(LOG_DIR, 'icm-desktop.log')
 
-#----------------------------------------------------------------------
-def Main():
-    """
-    The Main function 
-    """
-    gtk_main = GtkMain();
-    gtk_main.start();
-    #WaitForEnd();
-        
-    reactor.run()
-    test = WebsiteTest('https://www.alipay.com')
-    test.prepare()
-    test.execute()    
-    reactor.stop()
-    
-#----------------------------------------------------------------------
-def CreateGUI():
-    """"""
-    pass
-    
-#----------------------------------------------------------------------
-def WaitForEnd():
-    """"""
-    pass    
+log = Log("ICM Desktop Agent", LOGLEVEL)
+open(log_filename, 'a')
+file_log = Log("ICM Desktop Agent File Log", LOGLEVEL, log_filename)
 
 if __name__ == "__main__":
-    Main()
-    
+    log.debug("Debug Message")
+    log.info("Info Message")
+    log.warning("Warning Message")
+    log.error("Error Message")
+    log.critical("Critical Message")
+
+    file_log.debug("Debug Message")
+    file_log.info("Info Message")
+    file_log.warning("Warning Message")
+    file_log.error("Error Message")
+    file_log.critical("Critical Message")
+

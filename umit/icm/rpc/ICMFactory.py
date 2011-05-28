@@ -18,42 +18,28 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
-import os
-import sys
-
-from twisted.internet import gtk2reactor # for gtk-2.0
-gtk2reactor.install()
-
 from twisted.internet import reactor
+from twisted.internet.protocol import Factory, Protocol
 
-from umit.icm.tests.WebsiteTest import WebsiteTest
-from umit.icm.tests.HTTPFetcher import HTTPFetcher
+from umit.icm.Config import config
 
-#----------------------------------------------------------------------
-def Main():
-    """
-    The Main function 
-    """
-    gtk_main = GtkMain();
-    gtk_main.start();
-    #WaitForEnd();
-        
-    reactor.run()
-    test = WebsiteTest('https://www.alipay.com')
-    test.prepare()
-    test.execute()    
-    reactor.stop()
-    
-#----------------------------------------------------------------------
-def CreateGUI():
+########################################################################
+class MessageHandler(Protocol):
     """"""
-    pass
-    
-#----------------------------------------------------------------------
-def WaitForEnd():
-    """"""
-    pass    
 
+    #----------------------------------------------------------------------
+    def __init__(self):
+        """Constructor"""
+    
 if __name__ == "__main__":
-    Main()
+    ICMFactory = Factory()
+    ICMFactory.protocol = MessageHandler
+    
+    port = config.getint('network', 'listen_port')
+    reactor.listenTCP(port, ICMFactory)    
+        
+    
+        
+        
+    
     

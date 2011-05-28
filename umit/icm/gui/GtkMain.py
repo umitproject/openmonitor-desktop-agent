@@ -22,10 +22,12 @@ import gtk
 import gobject
 import os
 
+from higwidgets import HIGWindow
+
 from umit.common.I18N import _
 from umit.icm.BasePaths import ICONS_DIR
 
-class Main(object):
+class GtkMain(HIGWindow):
     def __init__(self):
         self.prefernce_window = Preference()        
     
@@ -81,5 +83,5 @@ if __name__ == "__main__":
     #splash.show()
     #gobject.timeout_add(3000, splash.hide) # 3*1000 miliseconds
     
-    main = Main()
+    main = GtkMain()
     main.main()

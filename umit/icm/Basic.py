@@ -21,39 +21,16 @@
 import os
 import sys
 
-from twisted.internet import gtk2reactor # for gtk-2.0
-gtk2reactor.install()
+__all__ = ['ROOT_DIR', 'CONFIG_DIR']
 
-from twisted.internet import reactor
-
-from umit.icm.tests.WebsiteTest import WebsiteTest
-from umit.icm.tests.HTTPFetcher import HTTPFetcher
-
-#----------------------------------------------------------------------
-def Main():
-    """
-    The Main function 
-    """
-    gtk_main = GtkMain();
-    gtk_main.start();
-    #WaitForEnd();
+ROOT_DIR = os.path.abspath(os.path.dirname(sys.argv[0]))
+while not os.path.exists(os.path.join(ROOT_DIR, 'umit')):
+    new_dir = os.path.abspath(os.path.join(ROOT_DIR, os.path.pardir))
+    if ROOT_DIR == new_dir:
+        raise Exception("Can't find root dir.")
+    ROOT_DIR = new_dir
+    
+#ROOT_DIR = "F:\\workspace\\PyWork\\icm-agent\\"
         
-    reactor.run()
-    test = WebsiteTest('https://www.alipay.com')
-    test.prepare()
-    test.execute()    
-    reactor.stop()
-    
-#----------------------------------------------------------------------
-def CreateGUI():
-    """"""
-    pass
-    
-#----------------------------------------------------------------------
-def WaitForEnd():
-    """"""
-    pass    
-
-if __name__ == "__main__":
-    Main()
-    
+CONFIG_DIR = os.path.join(ROOT_DIR, 'conf')
+LOG_DIR = os.path.join(ROOT_DIR, 'log')

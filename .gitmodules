@@ -1,0 +1,9 @@
+[submodule "umit-common"]
+	path = umit-common
+	url = http://git.umitproject.org/umit-common.git
+[submodule "higwidgets"]
+	path = higwidgets
+	url = http://git.umitproject.org/higwidgets
+[submodule "icm-common"]
+	path = icm-common
+	url = umitgit@git.umitproject.org:/icm-common.git
