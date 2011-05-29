@@ -34,3 +34,6 @@ while not os.path.exists(os.path.join(ROOT_DIR, 'umit')):
         
 CONFIG_DIR = os.path.join(ROOT_DIR, 'conf')
 LOG_DIR = os.path.join(ROOT_DIR, 'log')
+LOCALES_DIR = os.path.join(ROOT_DIR, 'share', 'locales')
+IMAGES_DIR = os.path.join(ROOT_DIR, 'share', 'images')
+ICONS_DIR = os.path.join(ROOT_DIR, 'share', 'icons')

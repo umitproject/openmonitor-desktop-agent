@@ -25,7 +25,7 @@ import sys
 
 from umit.icm.Basic import LOG_DIR
 
-from common.UmitLogging import Log
+from umit.common.UmitLogging import Log
 
 LOGLEVEL = 0
 if not os.path.exists(LOG_DIR):

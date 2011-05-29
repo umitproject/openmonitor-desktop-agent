@@ -30,13 +30,15 @@ class MessageHandler(Protocol):
     #----------------------------------------------------------------------
     def __init__(self):
         """Constructor"""
+        
+    
     
 if __name__ == "__main__":
     ICMFactory = Factory()
     ICMFactory.protocol = MessageHandler
     
     port = config.getint('network', 'listen_port')
-    reactor.listenTCP(port, ICMFactory)    
+    reactor.listenTCP(port, ICMFactory)
         
     
         

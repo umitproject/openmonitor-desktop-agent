@@ -26,34 +26,35 @@ gtk2reactor.install()
 
 from twisted.internet import reactor
 
+# find the root directory of icm-agent
+ROOT_DIR = os.path.abspath(os.path.dirname(sys.argv[0]))
+while not os.path.exists(os.path.join(ROOT_DIR, 'umit')):
+    new_dir = os.path.abspath(os.path.join(ROOT_DIR, os.path.pardir))
+    if ROOT_DIR == new_dir:
+        raise Exception("Can't find root dir.")
+    ROOT_DIR = new_dir
+execfile(os.path.join(ROOT_DIR, 'deps', 'umit-common', 'utils', 'importer.py'))
+
+from umit.icm.gui.GtkMain import GtkMain
 from umit.icm.tests.WebsiteTest import WebsiteTest
 from umit.icm.tests.HTTPFetcher import HTTPFetcher
 
-#----------------------------------------------------------------------
-def Main():
+def main():
     """
     The Main function 
     """
-    gtk_main = GtkMain();
-    gtk_main.start();
-    #WaitForEnd();
+    gtk_main = GtkMain()
+    gtk_main.show_all()
         
     reactor.run()
-    test = WebsiteTest('https://www.alipay.com')
-    test.prepare()
-    test.execute()    
+    #test = WebsiteTest('https://www.alipay.com')
+    #test.prepare()
+    #test.execute() 
+    
+def quit():
     reactor.stop()
-    
-#----------------------------------------------------------------------
-def CreateGUI():
-    """"""
-    pass
-    
-#----------------------------------------------------------------------
-def WaitForEnd():
-    """"""
-    pass    
+
 
 if __name__ == "__main__":
-    Main()
+    main()
     

@@ -24,17 +24,12 @@ import os
 
 from higwidgets import HIGWindow
 
-from umit.common.I18N import _
-from umit.icm.BasePaths import ICONS_DIR
+#from umit.common.I18N import _
+from umit.icm.Basic import ICONS_DIR
 
 class GtkMain(HIGWindow):
-    def __init__(self):
-        self.prefernce_window = Preference()        
-    
-    def show_menu(self, status_icon, button, activate_time, menu):
-        menu.popup(None, None, None, button, activate_time, status_icon)
-    
-    def main(self):
+    def __init__(self, *args, **kwargs):
+        super(GtkMain, self).__init__(*args, **kwargs)        
         tray_menu = gtk.Menu()
 
         menu_item = gtk.MenuItem("ICM Webpage")
@@ -72,9 +67,11 @@ class GtkMain(HIGWindow):
         
         tray_icon = gtk.status_icon_new_from_file(
             os.path.join(ICONS_DIR, "tray_icon_32.ico"))
-        tray_icon.connect('popup-menu', self.show_menu, tray_menu)
-        
-        gtk.main() 
+        tray_icon.connect('popup-menu', self.show_menu, tray_menu)        
+    
+    def show_menu(self, status_icon, button, activate_time, menu):
+        menu.popup(None, None, None, button, activate_time, status_icon)
+    
         
         
 if __name__ == "__main__":
@@ -84,4 +81,7 @@ if __name__ == "__main__":
     #gobject.timeout_add(3000, splash.hide) # 3*1000 miliseconds
     
     main = GtkMain()
-    main.main()
+    main.show_all()
+    gtk.main()
+    
+    
