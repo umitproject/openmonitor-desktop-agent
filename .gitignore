@@ -1,5 +1,3 @@
 *.pyc
 icm-agent.wpr
 icm-agent-docs.prj
-conf
-log

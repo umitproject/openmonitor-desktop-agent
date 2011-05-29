@@ -23,7 +23,7 @@
 __all__ = ['config']
 
 import os
-from ConfigParser import ConfigParser, DEFAULTSECT
+from ConfigParser import ConfigParser, DEFAULTSECT, NoOptionError, NoSectionError
 
 from umit.icm.Basic import CONFIG_DIR
 from umit.icm.Logging import log
@@ -36,14 +36,14 @@ class Config(ConfigParser):
         ConfigParser.__init__(self)
         filename = self.read(filename)
 
-    def get(self, section, option):
-        try:
-            result = ConfigParser.get(self, section, option)
-            return result
-        except NoOptionError:
-            return None
-        except NoSectionError:
-            return None
+    #def get(self, section, option):
+        #try:
+            #result = ConfigParser.get(self, section, option)
+            #return result
+        #except NoOptionError:
+            #return None
+        #except NoSectionError:
+            #return None
         
     def set(self, section, option, value):
         if not self.has_section(section):

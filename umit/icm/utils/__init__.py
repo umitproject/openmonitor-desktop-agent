@@ -18,30 +18,3 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
-from twisted.internet import reactor
-from twisted.internet.protocol import Factory, Protocol
-
-from umit.icm.Config import config
-
-########################################################################
-class MessageHandler(Protocol):
-    """"""
-
-    #----------------------------------------------------------------------
-    def __init__(self):
-        """Constructor"""
-        
-    
-    
-if __name__ == "__main__":
-    ICMFactory = Factory()
-    ICMFactory.protocol = MessageHandler
-    
-    port = config.getint('network', 'listen_port')
-    reactor.listenTCP(port, ICMFactory)
-        
-    
-        
-        
-    
-    

@@ -18,4 +18,27 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
-from AssignTaskResponser import AssignTaskResponser
+import sys
+import umit.icm.rpc.messages_pb2
+#from umit.icm.rpc.messages_pb2 import AssignTask
+from AggregatorResponser import AggregatorResponser
+from umit.icm.TaskEntry import TaskEntry
+from umit.icm.TaskManager import TaskManager
+
+class AssignTaskResponser(AggregatorResponser):
+    """"""
+    
+    def __init__(self, message):
+        """Constructor"""
+        self.message = message
+        
+    def execute(self):
+        assignTaskMsg = messages_pb2.AssignTask()
+        print(assignTaskMsg)
+    
+if __name__ == "__main__":
+    print(sys.modules)
+    assignTaskMsg = messages_pb2.AssignTask()    
+    pass
+    
+    
