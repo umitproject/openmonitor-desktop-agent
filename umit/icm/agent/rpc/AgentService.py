@@ -18,16 +18,16 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
+from twisted.application import service
 from twisted.internet import reactor
 from twisted.internet.protocol import Factory, Protocol, ServerFactory
 
 import sys
-import UmitImporter
-from umit.icm.Config import config
-from umit.icm.Logging import log
-from umit.icm.rpc.aggregator import *
-from umit.icm.rpc.Message import Message, MalformedMessageError
-from umit.icm.rpc.MessageType import *
+from umit.icm.agent.Config import config
+from umit.icm.agent.Logging import log
+from umit.icm.agent.rpc.aggregator import *
+from umit.icm.agent.rpc.Message import Message, MalformedMessageError
+from umit.icm.agent.rpc.MessageType import *
 
 ########################################################################
 class AgentProtocol(Protocol):
@@ -95,7 +95,25 @@ class AgentFactory(ServerFactory):
         self.connectionNum = 0;
         self.peers = []
     
+########################################################################
+class AgentService(service.Service):
+    """"""
+
+    #----------------------------------------------------------------------
+    def __init__(self):
+        """Constructor"""
+        
+    def getAgentFactory(self):
+        f = ServerFactory()
+        f.protocol = AgentProtocol
+        return f
+        
+    def startService(self):
+        service.Service.startService(self) 
     
+    def stopService(self):
+        service.Service.stopService(self)
+        self.call.cancel()
         
 if __name__ == "__main__":
     port = config.getint('network', 'listen_port')

@@ -18,34 +18,31 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
-import os
-import sys
 
-from twisted.internet import gtk2reactor # for gtk-2.0
-gtk2reactor.install()
+########################################################################
+class TaskManager(object):
+    """"""
 
-from twisted.internet import reactor
-
-import UmitImporter
-from umit.icm.gui.GtkMain import GtkMain
-from umit.icm.tests.WebsiteTest import WebsiteTest
-from umit.icm.tests.HTTPFetcher import HTTPFetcher
-
-def main():
-    """
-    The Main function 
-    """
-    gtk_main = GtkMain()
-    gtk_main.show_all()
+    #----------------------------------------------------------------------
+    def __init__(self):
+        """Constructor"""
         
-    reactor.run()
-    #test = WebsiteTest('https://www.alipay.com')
-    #test.prepare()
-    #test.execute() 
+    #----------------------------------------------------------------------
+    def add_task(self, task):
+        """"""
+        pass
     
-def quit():
-    reactor.stop()
+    #----------------------------------------------------------------------
+    def remove_task(self, task):
+        """"""
+        pass
+    
+    #----------------------------------------------------------------------
+    def list_tasks(self):
+        """"""
+        pass
+        
 
-if __name__ == "__main__":
-    main()
+        
+    
     

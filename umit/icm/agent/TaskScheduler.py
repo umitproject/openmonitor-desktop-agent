@@ -18,45 +18,18 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
-import webbrowser
+########################################################################
+class TaskScheduler(object):
+    """"""
 
-from twisted.internet import reactor
-from twisted.web.client import HTTPDownloader
-from twisted.python import log
-
-from umit.icm.tests.BaseTest import BaseTest
+    #----------------------------------------------------------------------
+    def __init__(self):
+        """Constructor"""
 
 ########################################################################
-class HTTPFetcher(BaseTest):
-    """Fetch a certain URL"""    
+class TaskRunner(object):
+    """"""
 
     #----------------------------------------------------------------------
-    def __init__(self, url, savePath):
+    def __init__(self):
         """Constructor"""
-        if not url.startswith("http://"):
-            raise Exception("URL must start with 'http://'")
-        self.url = url
-        self.path = savePath
-        pass
-        
-    #----------------------------------------------------------------------
-    def prepare(self, params):
-        """Prepare for the test"""
-        
-    #----------------------------------------------------------------------
-    def execute(self):
-        """"""
-        factory = HTTPDownloader(self.url, self.path)
-        factory.deferred.addCallback(self.downloadComplete).addErrback(log.err)
-        reactor.connectTCP(factory.host, factory.port, factory)
-        reactor.run()
-        
-    def downloadComplete(self, result):
-        print("download Complete")
-        reactor.stop()
-        webbrowser.open(self.path)
-                                    
-        
-        
-    
-    

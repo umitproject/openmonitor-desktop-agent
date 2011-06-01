@@ -25,8 +25,8 @@ __all__ = ['config']
 import os
 from ConfigParser import ConfigParser, DEFAULTSECT, NoOptionError, NoSectionError
 
-from umit.icm.Basic import CONFIG_DIR
-from umit.icm.Logging import log
+from umit.icm.agent.Basic import CONFIG_DIR
+from umit.icm.agent.Logging import log
 
 class Config(ConfigParser):
     filenames = None

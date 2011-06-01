@@ -25,9 +25,9 @@ import os
 from higwidgets import HIGWindow
 
 #from umit.common.I18N import _
-from umit.icm.Basic import ICONS_DIR
+from umit.icm.agent.Basic import ICONS_DIR
 
-class GtkMain(HIGWindow):
+class GtkMain(object):
     def __init__(self, *args, **kwargs):
         super(GtkMain, self).__init__(*args, **kwargs)        
         tray_menu = gtk.Menu()
@@ -81,7 +81,7 @@ if __name__ == "__main__":
     #gobject.timeout_add(3000, splash.hide) # 3*1000 miliseconds
     
     main = GtkMain()
-    main.show_all()
+    #main.show_all()
     gtk.main()
     
     

@@ -17,28 +17,42 @@
 # You should have received a copy of the GNU General Public License
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
+"""
+Entrance of ICM Desktop Agent
+"""
 
+import os
 import sys
-import umit.icm.rpc.messages_pb2
-#from umit.icm.rpc.messages_pb2 import AssignTask
-from AggregatorResponser import AggregatorResponser
-from umit.icm.TaskEntry import TaskEntry
-from umit.icm.TaskManager import TaskManager
 
-class AssignTaskResponser(AggregatorResponser):
-    """"""
+from twisted.internet import gtk2reactor # for gtk-2.0
+gtk2reactor.install()
+
+from twisted.internet import reactor
+
+from umit.icm.agent.Logging import log
+from umit.icm.agent.gui.GtkMain import GtkMain
+from umit.icm.agent.rpc.AgentService import AgentService
+
+class Main(object):
+    def start():
+        """
+        The Main function 
+        """        
+        log.info("Starting ICM agent...")
+        # Start backend service
+        port = config.getint('network', 'listen_port')
+        reactor.listenTCP(port, AgentFactory())
+        # Create GUI
+        gtk_main = GtkMain()
+        reactor.run()
+        #test = WebsiteTest('https://www.alipay.com')
+        #test.prepare()
+        #test.execute() 
     
-    def __init__(self, message):
-        """Constructor"""
-        self.message = message
-        
-    def execute(self):
-        assignTaskMsg = messages_pb2.AssignTask()
-        print(assignTaskMsg)
-    
+    def quit():
+        reactor.stop()
+
 if __name__ == "__main__":
-    print(sys.modules)
-    assignTaskMsg = messages_pb2.AssignTask()    
-    pass
-    
+    main = Main()
+    main.start()
     

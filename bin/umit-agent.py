@@ -18,3 +18,22 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
+import os
+import sys
+
+ROOT_DIR = os.path.abspath(
+    os.path.join(os.path.dirname(__file__), os.path.pardir))
+
+execfile(join(ROOT_DIR, 'deps', 'umit-common', 'utils', 'importer.py'))
+sys.path.insert(0, join(ROOT_DIR, 'deps'))
+sys.path.insert(0, join(ROOT_DIR, 'deps', 'icm-common'))
+sys.path.insert(0, join(ROOT_DIR, 'deps', 'umit-common'))
+
+from umit.icm.agent.Main import Main
+
+def main(args):
+    main = Main()
+    main.start()
+
+if __name__ == "__main__":
+    main(sys.args)

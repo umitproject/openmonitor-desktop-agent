@@ -20,8 +20,8 @@
 
 import struct
 
-import umit.icm.rpc.messages_pb2
-from umit.icm.utils.BinaryHelper import BinaryReader
+import umit.icm.agent.rpc.messages_pb2
+from umit.icm.agent.utils.BinaryHelper import BinaryReader
 
 MAX_MESSAGE_LENGTH = 1024 * 1024   # max message length is 1M
 
