@@ -23,7 +23,58 @@ __all__ = ['AssignTaskResponser']
 import os
 import sys
 
+from twisted.web import client
+
 import umit.icm.rpc.messages_pb2
+
+########################################################################
+class AggregatorAPI(object):
+    """"""
+
+    #----------------------------------------------------------------------
+    def __init__(self):
+        """Constructor"""
+        pass
+    
+    """ Peer """
+    #----------------------------------------------------------------------
+    def sendRegistration(self):
+        pass
+    
+    def sendPeerInfo(self):
+        pass
+    
+    def getSuperPeerList(self):
+        pass
+    
+    def getPeerList(self):
+        pass
+    
+    def getEvents(self):
+        pass
+    
+    """ Report """
+    #----------------------------------------------------------------------
+    def sendReport(self):
+        pass
+    
+    """ Suggestion """
+    #----------------------------------------------------------------------
+    def sendWebsiteSuggestion(self):
+        pass
+    
+    def sendServiceSuggestion(self):
+        pass
+    
+    def _sendRequest(self, method, uri, data="", mimeType=None):
+        headers = {}
+        if mimeType:
+            headers['Content-Type'] = mimeType
+        if data:
+            headers['Content-Length'] = str(len(data))
+        return client.getPage(uri, method=method, postdata=data, 
+                              headers=headers)
+    
 
 ########################################################################
 class AggregatorResponser(object):

@@ -24,13 +24,19 @@ class ExceedLengthError(Exception):
     "The reading operation exceeds the str length."
     
 class BinaryReader(object):
-    def __init__(self, bytes_):
-        self.bytes_ = bytes_
-        self.length = len(bytes_)
+    def __init__(self, str_=''):
+        self.str_ = str_
+        self.length = len(str_)
         self.offset = 0
         self.remaining = self.length
         
     def reset(self):
+        self.offset = 0
+        self.remaining = self.length
+        
+    def setString(self, str_):
+        self.str_ = str_
+        self.length = len(str_)
         self.offset = 0
         self.remaining = self.length
 
@@ -38,7 +44,7 @@ class BinaryReader(object):
         if self.remaining == 0:
             raise ExceedLengthError
         else:
-            byte = self.bytes_[offset]
+            byte = self.str_[offset]
             self.offset = self.offset + 1
             self.remaining = self.remaining - 1
             return byte
@@ -47,7 +53,7 @@ class BinaryReader(object):
         if self.remaining < length:
             raise ExceedLengthError
         else:
-            bytes = self.bytes_[self.offset:self.offset+length]
+            bytes = self.str_[self.offset:self.offset+length]
             self.offset = self.offset + length 
             self.remaining = self.remaining - length
             return bytes
@@ -90,11 +96,11 @@ class BinaryReader(object):
         return self.unpack(str(length) + 's', length)
     
     def readSzString(self):        
-        endPos = self.bytes_.find('\x00', self.offset)
+        endPos = self.str_.find('\x00', self.offset)
         if endPos == -1:
             raise ExceedLengthError
         else:
-            szStr = self.bytes_[self.offset:endPos]
+            szStr = self.str_[self.offset:endPos]
             self.offset = endPos + 1
             self.remaining = self.length - self.offset
             return szStr
@@ -102,12 +108,81 @@ class BinaryReader(object):
     def unpack(self, fmt, length = 1):
         return unpack(fmt, self.readBytes(length))[0]
     
+class BinaryWriter(object):
+    def __init__(self, str_=''):
+        self.str_ = str_
+    
+    def reset(self):
+        self.str_ = ''
+        
+    def getString(self):
+        return self.str_
+
+    def writeByte(self, byte):
+        self.str_ = self.str_ + byte
+
+    def writeBytes(self, bytes_):
+        self.str_ = self.str_ + bytes_
+
+    def writeChar(self, c):
+        self.pack('b', c)
+
+    def writeUChar(self, uc):
+        self.pack('B', uc)
+
+    def writeBool(self, b):
+        self.pack('?', b)
+
+    def writeInt16(self, s):
+        self.pack('h', s)
+
+    def writeUInt16(self, us):
+        self.pack('H', us)
+
+    def writeInt32(self, i):
+        self.pack('i', i)
+
+    def writeUInt32(self, ui):
+        self.pack('I', ui)
+
+    def writeInt64(self, l):
+        self.pack('q', l)
+
+    def writeUInt64(self, ul):
+        self.pack('Q', ul)
+
+    def writeFloat(self, f):
+        self.pack('f', f)
+
+    def writeDouble(self, d):
+        self.pack('d', d)
+
+    def writeString(self, str_):
+        self.writeUInt16(len(str_))
+        self.pack(str(len(str_)) + 's', str_)
+    
+    def writeSzString(self, str_):
+        self.pack(str(len(str_)) + 's', str_)
+        self.writeChar(0)
+
+    def pack(self, fmt, param):
+        self.writeBytes(pack(fmt, param))
+    
+    
 if __name__ == "__main__":
     br = BinaryReader("\x01\x00\x00\x00\x03\x00ABCDEF\x00GHI\x00")
     print(br.readInt32())
     print(br.readString())
     print(br.readSzString())
-    print(br.readSzString())
+    print(br.readSzString())    
+    bw = BinaryWriter()
+    bw.writeBool(False)
+    bw.writeString('h')
+    bw.writeSzString('good')
+    bw.writeInt32(65)
+    print(bw.getString())
+    
+    
     
     
     

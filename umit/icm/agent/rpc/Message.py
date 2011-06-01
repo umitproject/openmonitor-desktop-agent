@@ -20,18 +20,17 @@
 
 import struct
 
-import umit.icm.agent.rpc.messages_pb2
-from umit.icm.agent.utils.BinaryHelper import BinaryReader
+from umit.icm.agent.rpc.messages_pb2 import *
+from umit.icm.agent.utils.StringBinaryHelper import BinaryReader, BinaryWriter
 
 MAX_MESSAGE_LENGTH = 1024 * 1024   # max message length is 1M
 
 class MalformedMessageError(Exception):
     """ Received a malformed message """
-
-class Message(object):
+    
+class RawMessage(object):
     """"""
-
-    #----------------------------------------------------------------------
+    
     def __init__(self):
         """Constructor"""
         self.length = 0
@@ -40,9 +39,6 @@ class Message(object):
         self.remaining = 0
         self.completed = False
         self.content = None
-        self.reader = None
-        self.type_ = None
-        self.encrypted = False
         
     def fill(self, data):
         if self.completed: 
@@ -69,7 +65,6 @@ class Message(object):
             data = data[self.remaining+offset:]
             self.remaining = 0
             self.completed = True
-            self.reader = BinaryReader(self.content)
         else:
             self.content[self.offset:self.offset+dataLen] = data[offset:]
             self.offset += dataLen
@@ -77,26 +72,58 @@ class Message(object):
             return ''
         
         return data
+
+class MessageFactory(object):
+    """"""
+
+    #----------------------------------------------------------------------
+    def __init__(self):
+        """Constructor"""
+        self.reader = BinaryReader()
+        self.writer = BinaryWriter()
+        self.creator = {'AssignTask': AssignTask}
+        
+    def create(self, msg_type):
+        return self.creator[msg_type]()
+            
+    def encode(self, message):
+        self.writer.reset()
+        self.writer.writeSzString(message.DESCRIPTOR.name)
+        self.writer.writeString(message.SerializeToString())
+        return self.writer.getString()
     
-    def decode(self):
-        if not self.completed: 
-            return
-                
-        self.type_ = self.reader.readSzString()
+    def decode(self, str_):
+        self.reader.setString(str_)
+        msg_type = self.reader.readSzString()
+        message = self.create(msg_type)
+        msg_str = self.reader.readString()
+        message.ParseFromString(msg_str)
+        return message
+    
+    def encrypt(self):
         pass
     
     def decrypt(self):
-        if not self.completed: 
-            return
         pass
         
         
 if __name__ == "__main__":
-    data = '\x03\x00\x00\x00'
-    msg = Message()
-    data = msg.fill('\x05\x00')
-    data = msg.fill('\x00\x00A')
-    data = msg.fill('B')
-    data = msg.fill('CDEFG')
-    print(msg.content)
-    print(data)
+    s = AssignTask()
+    #s.header = RequestHeader()
+    s.header.token = "xxx"
+    s.header.agentID = 123123
+    print(s.SerializeToString())
+    f = MessageFactory()
+    str_ = f.encode(s)
+    print(str_)
+    msg = f.decode(str_)
+    print(s.SerializeToString())
+            
+    #data = '\x03\x00\x00\x00'
+    #msg = RawMessage()
+    #data = msg.fill('\x05\x00')
+    #data = msg.fill('\x00\x00A')
+    #data = msg.fill('B')
+    #data = msg.fill('CDEFG')
+    #print(msg.content)
+    #print(data)

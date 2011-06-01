@@ -17,19 +17,23 @@
 # You should have received a copy of the GNU General Public License
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
+"""
+This will create a thread for sending test reports
+"""
+
+import threading
 
 ########################################################################
-class TaskScheduler(object):
+class ReportThread(threading.Thread):
     """"""
 
     #----------------------------------------------------------------------
     def __init__(self):
         """Constructor"""
-
-########################################################################
-class TaskRunner(object):
-    """"""
-
-    #----------------------------------------------------------------------
-    def __init__(self):
-        """Constructor"""
+        
+    def run(self):
+        pass
+    
+    def stop(self):
+        pass
+    

@@ -35,8 +35,8 @@ class AgentProtocol(Protocol):
 
     #----------------------------------------------------------------------
     def __init__(self):
-        """Constructor"""
-        self.message = Message()
+        """Constructor"""        
+        self.rawMessage = RawMessage()
         
     def connectionMade(self):
         self.factory.connectionNum = self.factory.connectionNum + 1
@@ -56,16 +56,16 @@ class AgentProtocol(Protocol):
         print(data)        
         while len(data) != 0:
             try:
-                data = self.message.fill(data)
+                data = self.rawMessage.fill(data)
             except MalformedMessageError:
                 self.transport.write("Malformed message received. Connection tear down.") 
                 log.warning("Malformed message received. Connection tear down. %s\n%s" % (self.transport.getHost(), data))
                 self.transport.loseConnection()
                 return
                 
-            if self.message.completed:
-                self.handleMessage(self.message)
-                self.message = Message()
+            if self.rawMessage.completed:
+                self.handleMessage(self.rawMessage)
+                self.rawMessage = RawMessage()
         
     def handleMessage(self, message):
         message.decode()
@@ -114,6 +114,7 @@ class AgentService(service.Service):
     def stopService(self):
         service.Service.stopService(self)
         self.call.cancel()
+        
         
 if __name__ == "__main__":
     port = config.getint('network', 'listen_port')
