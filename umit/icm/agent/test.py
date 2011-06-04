@@ -20,7 +20,7 @@
 
 __all__ = ['WebsiteTest', 'ServiceTest']
 
-VERSION = '0.0'
+TEST_PACKAGE_VERSION = '0.0'
 
 import re
 import sys

@@ -21,22 +21,39 @@
 This will create a thread for doing all sort of testing jobs
 """
 
+execfile('F:\\workspace\\PyWork\\icm-agent\\umit\\icm\\agent\\UmitImporter.py')
+
 import threading
+
+from umit.icm.agent import test
 from umit.icm.agent.core.Test import Test
 from umit.icm.agent.core.TestManager import TestManager
 from umit.icm.agent.core.TestScheduler import TestScheduler
+from umit.icm.agent.Logging import log
+
+test_manager = TestManager()
+
+tests = {}
 
 ########################################################################
 class TestThread(threading.Thread):
     """"""
 
     #----------------------------------------------------------------------
-    def __init__(self):
+    def __init__(self, name='TestThread'):
         """Constructor"""
+        threading.Thread.__init__(self, name=name)
+        self.manager = TestManager()
+        self.scheduler = TestScheduler()
+        
+    def loadTests()
         
     def run(self):
-        # Load test plug-ins
-                
+        log.info("Test thread started. Current version: %s" % 
+                 test.TEST_PACKAGE_VERSION)
+        
+        
+        
         
         
         pass
@@ -44,4 +61,8 @@ class TestThread(threading.Thread):
     def stop(self):
         pass
     
+if __name__ == "__main__":
+    rt = TestThread()
+    rt.start()
+    print('hello')
     

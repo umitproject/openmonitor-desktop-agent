@@ -22,18 +22,24 @@ This will create a thread for sending test reports
 """
 
 import threading
+import time
 
 ########################################################################
 class ReportThread(threading.Thread):
     """"""
 
     #----------------------------------------------------------------------
-    def __init__(self):
+    def __init__(self, name='ReportThread'):
         """Constructor"""
+        threading.Thread.__init__(self, name=name)
         
-    def run(self):
+    def run(self):        
         pass
     
     def stop(self):
         pass
     
+if __name__ == "__main__":
+    rt = ReportThread()
+    rt.start()
+    print('hello')

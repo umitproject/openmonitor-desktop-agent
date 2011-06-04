@@ -40,9 +40,15 @@ class Main(object):
         The Main function 
         """        
         log.info("Starting ICM agent...")
+        
         # Start backend service
         port = config.getint('network', 'listen_port')
         reactor.listenTCP(port, AgentFactory())
+        
+        # Start Test Thread
+        
+        # Start Report Thread
+        
         # Create GUI
         gtk_main = GtkMain()
         reactor.run()

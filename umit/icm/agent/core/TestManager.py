@@ -18,6 +18,10 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
+execfile('F:\\workspace\\PyWork\\icm-agent\\umit\\icm\\agent\\UmitImporter.py')
+
+from umit.common.CronParser import CronParser
+
 
 ########################################################################
 class TestManager(object):
@@ -29,9 +33,12 @@ class TestManager(object):
         self.tests = {}
         
     #----------------------------------------------------------------------
-    def add_test(self, test):
+    def add_test(self, test_entry):
         """"""
         test = Test()
+        test.id = test_entry['id']
+        test.
+        
         pass
     
     #----------------------------------------------------------------------
