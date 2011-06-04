@@ -21,7 +21,6 @@
 DBHelper is a class used to store/retrieve data from a relational SQL database
 for the agent.
 """
-execfile('F:\\workspace\\PyWork\\icm-agent\\umit\\icm\\agent\\UmitImporter.py')
 
 import os
 
@@ -55,18 +54,6 @@ class DBHelper(object):
         """Select statement execution, return a result set"""
         return self.db_helper.select(statement)
     
-    def insert(self):
-        self.db_helper.insert()
-        pass
-    
-    def update(self):
-        self.db_helper.insert()
-        pass
-    
-    def delete(self):
-        self.db_helper.delete()
-        pass
-
     def execute(self, statement):
         """Non-select statement execution"""
         self.db_helper.execute(statement)

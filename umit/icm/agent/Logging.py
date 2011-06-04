@@ -23,8 +23,6 @@ __all__ = ['log', 'file_log']
 import os
 import sys
 
-execfile('F:\\workspace\\PyWork\\icm-agent\\umit\\icm\\agent\\UmitImporter.py')
-
 from umit.common.UmitLogging import Log
 from umit.icm.agent.Basic import LOG_DIR
 
