@@ -18,23 +18,11 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
-import os
-import sys
+def check_sum(str_):
+    pass
 
-__all__ = ['ROOT_DIR', 'CONFIG_DIR']
+def check_sum(file_):
+    pass
 
-ROOT_DIR = os.path.abspath(os.path.dirname(sys.argv[0]))
-while not os.path.exists(os.path.join(ROOT_DIR, 'umit')):
-    new_dir = os.path.abspath(os.path.join(ROOT_DIR, os.path.pardir))
-    if ROOT_DIR == new_dir:
-        raise Exception("Can't find root dir.")
-    ROOT_DIR = new_dir
-    
-#ROOT_DIR = "F:\\workspace\\PyWork\\icm-agent\\"
-        
-CONFIG_DIR = os.path.join(ROOT_DIR, 'conf')
-LOG_DIR = os.path.join(ROOT_DIR, 'log')
-LOCALES_DIR = os.path.join(ROOT_DIR, 'share', 'locales')
-IMAGES_DIR = os.path.join(ROOT_DIR, 'share', 'images')
-ICONS_DIR = os.path.join(ROOT_DIR, 'share', 'icons')
-DB_DIR = os.path.join(ROOT_DIR, 'share', 'db')
+def check_sum(dir_):
+    pass

@@ -29,12 +29,13 @@ gtk2reactor.install()
 
 from twisted.internet import reactor
 
+from umit.icm.agent.Config import config
 from umit.icm.agent.Logging import log
 from umit.icm.agent.gui.GtkMain import GtkMain
-from umit.icm.agent.rpc.AgentService import AgentService
+from umit.icm.agent.rpc.AgentService import AgentFactory
 
 class Main(object):
-    def start():
+    def start(self):
         """
         The Main function 
         """        
@@ -49,7 +50,7 @@ class Main(object):
         #test.prepare()
         #test.execute() 
     
-    def quit():
+    def quit(self):
         reactor.stop()
 
 if __name__ == "__main__":

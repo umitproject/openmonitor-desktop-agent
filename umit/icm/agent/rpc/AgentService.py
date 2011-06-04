@@ -26,7 +26,8 @@ import sys
 from umit.icm.agent.Config import config
 from umit.icm.agent.Logging import log
 from umit.icm.agent.rpc.aggregator import *
-from umit.icm.agent.rpc.Message import Message, MalformedMessageError
+from umit.icm.agent.rpc.message import RawMessage, MessageFactory, \
+     MalformedMessageError
 from umit.icm.agent.rpc.MessageType import *
 
 ########################################################################

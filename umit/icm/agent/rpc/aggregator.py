@@ -25,7 +25,7 @@ import sys
 
 from twisted.web import client
 
-import umit.icm.rpc.messages_pb2
+from umit.icm.agent.rpc.messages_pb2 import *
 
 ########################################################################
 class AggregatorAPI(object):
@@ -91,8 +91,7 @@ class AggregatorResponser(object):
 class AssignTaskResponser(AggregatorResponser):
     """"""
     #from umit.icm.rpc.messages_pb2 import AssignTask
-    from umit.icm.TaskEntry import TaskEntry
-    from umit.icm.TaskManager import TaskManager
+    from umit.icm.agent.core.TestManager import TestManager
     
     def __init__(self, message):
         """Constructor"""
@@ -105,7 +104,7 @@ class AssignTaskResponser(AggregatorResponser):
 
 if __name__ == "__main__":
     print(sys.modules)
-    assignTaskMsg = messages_pb2.AssignTask()    
+    assignTaskMsg = AssignTask()    
     pass
     
         

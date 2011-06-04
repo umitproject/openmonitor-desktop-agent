@@ -29,7 +29,10 @@ from umit.icm.agent.Basic import ICONS_DIR
 
 class GtkMain(object):
     def __init__(self, *args, **kwargs):
-        super(GtkMain, self).__init__(*args, **kwargs)        
+        super(GtkMain, self).__init__(*args, **kwargs)
+        
+        # if it's first time running, register        
+        
         tray_menu = gtk.Menu()
 
         menu_item = gtk.MenuItem("ICM Webpage")

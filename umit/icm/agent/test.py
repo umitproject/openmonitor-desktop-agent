@@ -20,6 +20,8 @@
 
 __all__ = ['WebsiteTest', 'ServiceTest']
 
+VERSION = '0.0'
+
 import re
 import sys
 import time

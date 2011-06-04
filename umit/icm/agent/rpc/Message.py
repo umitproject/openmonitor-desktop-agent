@@ -88,13 +88,13 @@ class MessageFactory(object):
             
     def encode(self, message):
         self.writer.reset()
-        self.writer.writeSzString(message.DESCRIPTOR.name)
+        self.writer.writeString(message.DESCRIPTOR.name)
         self.writer.writeString(message.SerializeToString())
         return self.writer.getString()
     
     def decode(self, str_):
         self.reader.setString(str_)
-        msg_type = self.reader.readSzString()
+        msg_type = self.reader.readString()
         message = self.create(msg_type)
         msg_str = self.reader.readString()
         message.ParseFromString(msg_str)

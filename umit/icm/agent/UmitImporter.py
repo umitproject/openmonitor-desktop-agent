@@ -97,4 +97,18 @@ class UmitImporter(object):
             raise
         return mod
 
-sys.path_hooks.insert(0, UmitImporter)
+if sys.path_hooks[0].__name__ != 'UmitImporter':
+    #print("importing UmitImporter")
+    sys.path_hooks.insert(0, UmitImporter)
+
+    ROOT_DIR = os.path.abspath(os.path.dirname(sys.argv[0]))
+    while not os.path.exists(os.path.join(ROOT_DIR, 'umit')):
+        new_dir = os.path.abspath(os.path.join(ROOT_DIR, os.path.pardir))
+        if ROOT_DIR == new_dir:
+            raise Exception("Can't find root dir.")
+        ROOT_DIR = new_dir
+
+    sys.path.insert(0, os.path.join(ROOT_DIR, 'deps'))
+    sys.path.insert(0, os.path.join(ROOT_DIR, 'deps', 'icm-common'))
+    sys.path.insert(0, os.path.join(ROOT_DIR, 'deps', 'umit-common'))
+
