@@ -33,28 +33,38 @@ from umit.icm.agent.Config import config
 from umit.icm.agent.Logging import log
 from umit.icm.agent.gui.GtkMain import GtkMain
 from umit.icm.agent.rpc.AgentService import AgentFactory
+from umit.icm.agent.Version import VERSION
+from umit.icm.agent.core.TestThread import TestThread
+from umit.icm.agent.core.ReportThread import ReportThread
 
 class Main(object):
     def start(self):
         """
         The Main function 
-        """        
-        log.info("Starting ICM agent...")
+        """
+        log.info("Starting ICM agent. Version: %s", VERSION)
         
         # Start backend service
         port = config.getint('network', 'listen_port')
         reactor.listenTCP(port, AgentFactory())
         
         # Start Test Thread
+        test_thread = TestThread()
+        test_thread.start()
         
         # Start Report Thread
+        report_thread = ReportThread()
+        report_thread.start()
         
         # Create GUI
         gtk_main = GtkMain()
         reactor.run()
         #test = WebsiteTest('https://www.alipay.com')
         #test.prepare()
-        #test.execute() 
+        #test.execute()
+        
+        test_thread.stop()
+        report_thread.stop()
     
     def quit(self):
         reactor.stop()

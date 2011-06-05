@@ -18,7 +18,9 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
-__all__ = ['WebsiteTest', 'ServiceTest']
+execfile('F:\\workspace\\PyWork\\icm-agent\\umit\\icm\\agent\\UmitImporter.py')
+
+__all__ = ['test_by_id', 'WebsiteTest', 'ServiceTest']
 
 TEST_PACKAGE_VERSION = '0.0'
 
@@ -41,7 +43,7 @@ if sys.platform == "win32":
 else:
     # On most other platforms the best timer is time.time()
     default_timer = time.time
-
+    
 ########################################################################
 class Test(object):
     """"""
@@ -49,70 +51,57 @@ class Test(object):
     #----------------------------------------------------------------------
     def __init__(self):
         """Constructor"""
-        pass
+        
+    def prepare(self, param):
+        """Setup parameters and prepare for running"""
         
     def execute(self):
-        pass
+        """Need to be implemented"""
         
 ########################################################################
 class WebsiteTest(Test):
     def __init__(self):
         """Constructor"""
-        self.targets = [];
+        self.url = None
+        self.pattern = None
+        self._done = False
         self._agent = Agent(reactor)
         
-    def add_target(self, url, pattern=None):
-        """Add a website target"""
-        target = {'url': url, 'pattern_str': pattern, 'pattern': None, 
-                  'done': False}
-        if pattern is not None:
-            target['pattern'] = re.compile(pattern)
-        self.targets.append(target)
-        
-    def set_targets(targets):
-        """Set the website targets"""
-        self.targets = targets
-        
-    def prepare(self):
+    def prepare(self, param):
         """Prepare for the test"""
+        self.url = param['url']
+        if 'pattern' in param:
+            self.pattern = re.compile(param['pattern'])
            
     def execute(self):
         """Run the test"""        
-        for target in self.targets:
-            log.info("Testing website: %s" % target['url'])
-            d = self._agent.request('GET', 
-                                    target['url'], 
-                                    Headers({'User-Agent': 
-                                             ['ICM Website Test']}), 
-                                    None)
-            target['time_start'] = default_timer()
-            d.addCallback(self.handle_response, target)
-            d.addErrback(log.error)
-            #d._time_start = default_timer()            
+        log.info("Testing website: %s" % self.url)
+        d = self._agent.request('GET', 
+                                self.url, 
+                                Headers({'User-Agent': 
+                                         ['ICM Website Test']}), 
+                                None)
+        self.time_start = default_timer()
+        d.addCallback(self.handle_response)
+        d.addErrback(log.error)
+        #d._time_start = default_timer()            
     
-    def handle_response(self, response, target):
+    def handle_response(self, response):
         """Result Handler (generate report)"""
         time_end = default_timer()
-        print(target['url'])
+        print(self.url)
         print(str(response.code) + ' ' + response.phrase)
-        print("Response time: %fs" % (time_end - target['time_start']))        
+        print("Response time: %fs" % (time_end - self.time_start))        
         print(response.headers)
         if response.code == 200:
-            if target['pattern'] is not None:
-                response.deliverBody(ContentExaminer(target['url'], 
-                                                     target['pattern']))
-        target['done'] = True
+            if self.pattern is not None:
+                response.deliverBody(ContentExaminer(self.url, 
+                                                     self.pattern))
+        self._done = True
         
-    def check_targets_done(self):
-        flag = False
-        while not flag:
-            flag = True
-            for target in self.targets:
-                if not target['done']:
-                    flag = False
-            time.sleep(1)
-        reactor.stop()        
-        
+    def isDone(self):
+        return self._done
+    
 class ContentExaminer(Protocol):
     def __init__(self, url, pattern):
         """Constructor"""
@@ -140,17 +129,42 @@ class ServiceTest(Test):
     #----------------------------------------------------------------------
     def __init__(self):
         """Constructor"""
-        pass
+        self.service = None
+        self._done = False
+    
+    def prepare(self, param):
+        self.service = param['service']
         
     def execute(self):
-        pass    
-    
+        log.info("Testing service: %s" % self.service)
+
+test_by_id = {
+    0: Test,
+    1: WebsiteTest,
+    2: ServiceTest
+}
+
+test_name_by_id = {
+    0: 'Test',
+    1: 'WebsiteTest',
+    2: 'ServiceTest'
+}
+
+def check_tests_done(tests):
+    for each in tests:
+        if each.isDone():
+            print(each.url + "...done")
+    reactor.stop()
+
 
 if __name__ == "__main__":
-    test = WebsiteTest()
-    test.add_target('http://www.baidu.com', 'baidu')
-    test.add_target('https://www.alipay.com')
-    test.execute()
-    reactor.callInThread(test.check_targets_done)
+    test1 = WebsiteTest()
+    test1.prepare({'url': 'http://www.baidu.com', 'pattern': 'baidu'})
+    test1.execute()
+    test2 = WebsiteTest()
+    test2.prepare({'url': 'https://www.alipay.com', 'pattern': 'baidu'})
+    test2.execute()
+                 
+    reactor.callLater(5, check_tests_done, [test1, test2])
     reactor.run()
     log.info("finished")

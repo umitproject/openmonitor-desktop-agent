@@ -24,6 +24,8 @@ This will create a thread for sending test reports
 import threading
 import time
 
+from umit.icm.agent.Logging import log
+
 ########################################################################
 class ReportThread(threading.Thread):
     """"""
@@ -34,10 +36,10 @@ class ReportThread(threading.Thread):
         threading.Thread.__init__(self, name=name)
         
     def run(self):        
-        pass
+        log.info("Report thread started.")
     
     def stop(self):
-        pass
+        log.info("Report thread stoped.")
     
 if __name__ == "__main__":
     rt = ReportThread()

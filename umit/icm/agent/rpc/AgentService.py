@@ -26,6 +26,7 @@ import sys
 from umit.icm.agent.Config import config
 from umit.icm.agent.Logging import log
 from umit.icm.agent.rpc.aggregator import *
+from umit.icm.agent.core.TestManager import g_test_manager
 from umit.icm.agent.rpc.message import RawMessage, MessageFactory, \
      MalformedMessageError
 from umit.icm.agent.rpc.MessageType import *
@@ -37,7 +38,7 @@ class AgentProtocol(Protocol):
     #----------------------------------------------------------------------
     def __init__(self):
         """Constructor"""        
-        self.rawMessage = RawMessage()
+        self.rawMessage = RawMessage()        
         
     def connectionMade(self):
         self.factory.connectionNum = self.factory.connectionNum + 1
@@ -68,19 +69,15 @@ class AgentProtocol(Protocol):
                 self.handleMessage(self.rawMessage)
                 self.rawMessage = RawMessage()
         
-    def handleMessage(self, message):
-        message.decode()
+    def handleMessage(self, raw_msg):
+        message = msg_factory.decode(raw_msg)
         if message.type_ == "handshake":
             # handshake
             pass
         else:
             # rpc call
-            if message.encrypted:
-                message.decrypt()
-            
-            if message.type_ == ASSIGN_TASK:
-                at = AssignTaskResponser(message)
-                at.execute()
+            if type(message) == AssignTask:                
+                g_test_manager.add_test()
             else:
                 pass
             
