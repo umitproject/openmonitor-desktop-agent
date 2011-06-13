@@ -18,10 +18,12 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
+import base64
+import cPickle
 import os
 import sqlite3
 
-from umit.icm.agent.Logging import log
+from umit.icm.agent.Global import g_logger
 
 ########################################################################
 class SQLiteHelper(object):
@@ -36,30 +38,49 @@ class SQLiteHelper(object):
     def connect(self, db_path, timeout=3000):
         """Connect to the database"""
         if not os.path.exists(db_path):
-            log.error("Cannot find database at '%s'." % db_path)
+            g_logger.error("Cannot find database at '%s'." % db_path)
             return        
         self.conn = sqlite3.connect(db_path, timeout)
-        log.debug("Attached to database '%s'." % db_path)
+        g_logger.debug("Attached to database '%s'." % db_path)
         self.cur = self.conn.cursor()
     
     def use(self, db_name):
         """Do nothing""" 
     
-    def select(self, statement):
+    def select(self, statement, parameters=None):
         """Select statement execution, return a result set"""
         if self.conn is None:
-            log.error("There's no connection to database.")
-            return        
-        self.cur.execute(statement)
+            g_logger.error("There's no connection to database.")
+            return
+        if parameters is None:
+            self.cur.execute(statement)
+        else:
+            self.cur.execute(statement, parameters)
         result = self.cur.fetchall()
-        log.debug("%d rows selected." % len(result))
+        g_logger.debug("%d rows selected." % len(result))
         return result
     
-    def execute(self):
+    def execute(self, statement, parameters=None):
         """Non-select statement execution"""
         if self.conn is None:
-            log.error("There's no connection to database.")
-            return   
-        self.cur.execute(statement) 
+            g_logger.error("There's no connection to database.")
+            return
+        if parameters is None:
+            self.cur.execute(statement) 
+        else:
+            self.cur.execute(statement, parameters) 
+        g_logger.debug("%d rows affected." % self.cur.rowcount)
+        
+    def commit(self):
+        self.conn.commit()
+        
+    def close(self):
+        self.cur.close()
+        self.conn.close()
+        
+    def pack(self, val):
+        return sqlite3.Binary(cPickle.dumps(val, 2))
     
+    def unpack(self, data):
+        return cPickle.loads(str(data))
     

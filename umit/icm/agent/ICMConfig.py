@@ -20,15 +20,13 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
-__all__ = ['config']
-
 import os
-from ConfigParser import ConfigParser, DEFAULTSECT, NoOptionError, NoSectionError
+from ConfigParser import ConfigParser, DEFAULTSECT, NoOptionError, \
+     NoSectionError
 
-from umit.icm.agent.Basic import CONFIG_DIR
-from umit.icm.agent.Logging import log
+from umit.icm.agent.Global import g_logger
 
-class Config(ConfigParser):
+class ICMConfig(ConfigParser):
     filenames = None
     fp = None
     
@@ -53,7 +51,7 @@ class Config(ConfigParser):
         self.save_changes()
 
     def read(self, filename):
-        log.debug(">>> Trying to parse: %s" % filename)
+        g_logger.debug(">>> Trying to parse: %s" % filename)
         self.filenames = ConfigParser.read(self, filename)
         return self.filenames
 
@@ -97,8 +95,6 @@ class Config(ConfigParser):
                     fp.write("%s = %s\n" %
                              (key, str(value).replace('\n', '\n\t')))
             fp.write("\n")
-
-config = Config(os.path.join(CONFIG_DIR, "agent_config.txt"))            
             
 if __name__ == "__main__":
-    print(config.get("network", "listen_port"))
+    print(g_config.get("network", "listen_port"))

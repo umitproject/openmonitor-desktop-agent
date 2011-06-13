@@ -30,7 +30,7 @@ from twisted.web.http_headers import Headers
 from twisted.web._newclient import ResponseDone
 
 from umit.icm.agent.tests.BaseTest import BaseTest
-from umit.icm.agent.Logging import log
+from umit.icm.agent.Global import g_logger
 
 if sys.platform == "win32":
     # On Windows, the best timer is time.clock()
@@ -63,7 +63,7 @@ class WebsiteTest(BaseTest):
     def execute(self):
         """Run the test"""        
         for target in self.targets:
-            log.info("Testing website: %s" % target['url'])
+            g_logger.info("Testing website: %s" % target['url'])
             d = self._agent.request('GET', 
                                     target['url'], 
                                     Headers({'User-Agent': 
@@ -111,11 +111,11 @@ class ContentExaminer(Protocol):
         if reason.check(ResponseDone):            
             match = self.pattern.search(self.content)
             if (match is not None):
-                log.info("Content unchanged.")
+                g_logger.info("Content unchanged.")
             else:
-                log.info("Content changed.")
+                g_logger.info("Content changed.")
         else:
-            log.error("The connection was broken. [%s]" % self.url)
+            g_logger.error("The connection was broken. [%s]" % self.url)
         
 
 if __name__ == "__main__":
@@ -125,6 +125,6 @@ if __name__ == "__main__":
     test.execute()
     reactor.callInThread(test.check_targets_done)
     reactor.run()
-    log.info("finished")
+    g_logger.info("finished")
     
     

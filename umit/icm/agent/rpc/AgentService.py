@@ -17,18 +17,27 @@
 # You should have received a copy of the GNU General Public License
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
+"""
+The agent will bind on a static port and serve the other peers.
+We use port multiplexing to handle different packets from the aggregator,
+super agents, desktop agents, and mobile agents.
+"""
+
+try:
+    execfile('F:\\workspace\\PyWork\\icm-agent\\umit\\icm\\agent\\UmitImporter.py')
+except:
+    pass
 
 from twisted.application import service
 from twisted.internet import reactor
 from twisted.internet.protocol import Factory, Protocol, ServerFactory
 
 import sys
-from umit.icm.agent.Config import config
-from umit.icm.agent.Logging import log
+from umit.icm.agent.Global import g_logger
+from umit.icm.agent.Application import theApp
 from umit.icm.agent.rpc.aggregator import *
-from umit.icm.agent.core.TestManager import g_test_manager
-from umit.icm.agent.rpc.message import RawMessage, MessageFactory, \
-     MalformedMessageError
+from umit.icm.agent.rpc.message import RawMessage, MalformedMessageError
+from umit.icm.agent.rpc.MessageFactory import MessageFactory
 from umit.icm.agent.rpc.MessageType import *
 
 ########################################################################
@@ -37,40 +46,55 @@ class AgentProtocol(Protocol):
 
     #----------------------------------------------------------------------
     def __init__(self):
-        """Constructor"""        
-        self.rawMessage = RawMessage()        
+        """Constructor"""
+        self.remote_ip = None
+        self._rawMessage = RawMessage()
+        self._handler = CommonHandler()
         
     def connectionMade(self):
         self.factory.connectionNum = self.factory.connectionNum + 1
-        log.info("New connection established.")
-        log.info(self.factory.connectionNum)
-        maxConnectionNum = config.getint('network', 'max_connections_num')
+        g_logger.info("New connection established. From %s" % 
+                      self.transport.getPeer())
+        g_logger.info(self.factory.connectionNum)
+        maxConnectionNum = g_config.getint('network', 'max_connections_num')
         if self.factory.connectionNum > maxConnectionNum:
             self.transport.write("Too many connections, try later") 
             self.transport.loseConnection()
+        self.remote_ip = self.transport.getPeer().host        
 
     def connectionLost(self, reason):
         self.factory.connectionNum = self.factory.connectionNum - 1
-        log.info("Connection closed.")
-        log.info(self.factory.connectionNum)
+        g_logger.info("Connection closed.")
+        g_logger.info(self.factory.connectionNum)
 
     def dataReceived(self, data):
-        print(data)        
+        print(data)
         while len(data) != 0:
             try:
                 data = self.rawMessage.fill(data)
             except MalformedMessageError:
-                self.transport.write("Malformed message received. Connection tear down.") 
-                log.warning("Malformed message received. Connection tear down. %s\n%s" % (self.transport.getHost(), data))
+                self.transport.write("Malformed message received. "\
+                                     "Connection tear down.") 
+                theApp.log.warning("Malformed message received. "\
+                                   "Connection tear down. %s\n%s" % \
+                                   (self.transport.getPeer(), data))
                 self.transport.loseConnection()
                 return
                 
             if self.rawMessage.completed:
-                self.handleMessage(self.rawMessage)
+                self._handler.process(self.rawMessage)
                 self.rawMessage = RawMessage()
+                
+########################################################################
+class CommonHandler(object):
+    """"""
+
+    #----------------------------------------------------------------------
+    def __init__(self):
+        """Constructor"""
         
-    def handleMessage(self, raw_msg):
-        message = msg_factory.decode(raw_msg)
+    def process(self, raw_message):
+        message = MessageFactory.decode(raw_message)
         if message.type_ == "handshake":
             # handshake
             pass
@@ -80,7 +104,50 @@ class AgentProtocol(Protocol):
                 g_test_manager.add_test()
             else:
                 pass
-            
+
+########################################################################
+class AggregatorHandler(object):
+    """"""
+
+    #----------------------------------------------------------------------
+    def __init__(self):
+        """Constructor"""
+        
+    def process(self, raw_message):
+        pass
+    
+########################################################################
+class SuperAgentHandler(object):
+    """"""
+
+    #----------------------------------------------------------------------
+    def __init__(self):
+        """Constructor"""
+        
+    def process(self, raw_message):
+        pass
+    
+########################################################################
+class DesktopAgentHandler(object):
+    """"""
+
+    #----------------------------------------------------------------------
+    def __init__(self):
+        """Constructor"""
+        
+    def process(self, raw_message):
+        pass
+    
+########################################################################
+class MobileAgentHandler(object):
+    """"""
+
+    #----------------------------------------------------------------------
+    def __init__(self):
+        """Constructor"""
+        
+    def process(self, raw_message):
+        pass
         
 ########################################################################
 class AgentFactory(ServerFactory):
@@ -115,7 +182,7 @@ class AgentService(service.Service):
         
         
 if __name__ == "__main__":
-    port = config.getint('network', 'listen_port')
+    port = theApp.config.getint('network', 'listen_port')
     reactor.listenTCP(port, AgentFactory())
     
     reactor.run()

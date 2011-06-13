@@ -18,33 +18,24 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
-__all__ = ['log', 'file_log']
+__all__ = ['g_logger', 'g_db_helper']
 
 import os
-import sys
 
+from umit.icm.agent.BasePaths import *
+
+#----------------------------------------------------------------------
 from umit.common.UmitLogging import Log
-from umit.icm.agent.Basic import LOG_DIR
-
 LOGLEVEL = 0
 if not os.path.exists(LOG_DIR):
     os.mkdir(LOG_DIR)
 log_filename = os.path.join(LOG_DIR, 'icm-desktop.log')
 
-log = Log("ICM Desktop Agent", LOGLEVEL)
-open(log_filename, 'a')
-file_log = Log("ICM Desktop Agent File Log", LOGLEVEL, log_filename)
+g_logger = Log("ICM Desktop Agent", LOGLEVEL)
+#open(log_filename, 'a')
+#g_logger = Log("ICM Desktop Agent File Log", LOGLEVEL, log_filename)
 
-if __name__ == "__main__":
-    log.debug("Debug Message")
-    log.info("Info Message")
-    log.warning("Warning Message")
-    log.error("Error Message")
-    log.critical("Critical Message")
-
-    file_log.debug("Debug Message")
-    file_log.info("Info Message")
-    file_log.warning("Warning Message")
-    file_log.error("Error Message")
-    file_log.critical("Critical Message")
-
+#----------------------------------------------------------------------
+from umit.icm.agent.utils.DBHelper import DBHelper
+g_db_helper = DBHelper('sqlite')
+g_db_helper.connect(os.path.join(DB_DIR, 'storage.db3'))

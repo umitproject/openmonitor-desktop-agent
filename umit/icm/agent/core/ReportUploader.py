@@ -18,3 +18,60 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
+import time
+
+from umit.icm.agent.Global import g_logger
+from umit.icm.agent.rpc.aggregator import AggregatorAPI
+from umit.icm.agent.rpc.desktop import DesktopAgentRPC, DesktopSuperAgentRPC
+from umit.icm.agent.rpc.mobile import MobileAgentRPC
+from umit.icm.agent.rpc.MessageFactory import MessageFactory
+
+########################################################################
+class ReportUploader(object):
+    """"""
+
+    #----------------------------------------------------------------------
+    def __init__(self, report_manager):
+        """Constructor"""
+        self.report_manager = report_manager
+        self._failed_list = []
+        self._stop_flag = False
+        
+    def fetch_one_report(self):
+        report_list = self.report_manager.get_report_list()
+        if len(report_list) > 0:
+            return report_list.remove(0)
+        else:
+            return None
+        
+    def send_report(self, report):
+        #if AggregatorAPI.sendReport(report):
+            #report.status = ReportStatus.SENT_TO_AGGREGATOR
+            #return True
+        #elif DesktopSuperAgentRPC.sendReport(report):
+            #report.status = ReportStatus.SENT_TO_SUPER_AGENT
+            #return True
+        #elif DesktopAgentRPC.sendReport(report):
+            #report.status = ReportStatus.SENT_TO_AGENT
+            #return True
+        #else MobileAgentRPC.sendReport(report):
+            #report.status = ReportStatus.SENT_TO_AGGREGATOR
+            #return True
+        #_retry_list.append
+        pass
+        
+    #----------------------------------------------------------------------
+    def run(self):
+        """"""
+        while not self._stop_flag:  # run until the stop method is called
+            report_entry = self.fetch_one_report()
+            
+            if report_entry is None:
+                time.sleep(1)
+            else:
+                self.send_report(report_entry)
+                
+    def stop(self):
+        self._stop_flag = True
+    
+    

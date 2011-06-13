@@ -17,31 +17,43 @@
 # You should have received a copy of the GNU General Public License
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
-"""
-This will create a thread for sending test reports
-"""
-
-import threading
-import time
-
-from umit.icm.agent.Logging import log
 
 ########################################################################
-class ReportThread(threading.Thread):
+class KeyManager(object):
     """"""
 
     #----------------------------------------------------------------------
-    def __init__(self, name='ReportThread'):
+    def __init__(self):
         """Constructor"""
-        threading.Thread.__init__(self, name=name)
+        self.public_keys = {}
+        self.private_keys = {}
         
-    def run(self):        
-        log.info("Report thread started.")
+    def add_key_pair(self, name, public_key, private_key):
+        self.public_keys[name] = public_key
+        self.private_keys[name] = private_key
     
-    def stop(self):
-        log.info("Report thread stoped.")
+    def remove_key_pair(self, name):
+        del self.public_keys[name]
+        del self.private_keys[name]
     
-if __name__ == "__main__":
-    rt = ReportThread()
-    rt.start()
-    print('hello')
+    def set_public_key(self, name, public_key):
+        self.public_keys[name] = public_key
+        
+    def set_private_key(self, name, private_key):
+        self.private_key[name] = private_key
+    
+    def get_public_key(self, name):
+        if name in self.public_keys:
+            return self.public_keys[name]
+        else:
+            g_logger.warn("Public key for '%s' not found." % name)
+            return None
+    
+    def get_private_key(self, name):
+        if name in self.private_key:
+            return self.private_key[name]
+        else:
+            g_logger.warn("Private key for '%s' not found." % name)
+            return None
+    
+    

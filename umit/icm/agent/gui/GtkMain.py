@@ -24,7 +24,9 @@ import os
 
 from higwidgets import HIGWindow
 
-#from umit.common.I18N import _
+from umit.icm.agent.I18N import _
+
+from umit.icm.agent.Application import theApp
 from umit.icm.agent.Basic import ICONS_DIR
 
 class GtkMain(object):
@@ -64,7 +66,7 @@ class GtkMain(object):
         tray_menu.append(gtk.SeparatorMenuItem())
         
         menu_item = gtk.ImageMenuItem(gtk.STOCK_CLOSE)
-        menu_item.connect("activate", lambda w: gtk.main_quit())
+        menu_item.connect("activate", lambda w: theApp.quit())
         tray_menu.append(menu_item)
         tray_menu.show_all()
         

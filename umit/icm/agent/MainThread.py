@@ -18,22 +18,31 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
-import os
-import sys
+import threading
 
-ROOT_DIR = os.path.abspath(
-    os.path.join(os.path.dirname(__file__), os.path.pardir))
+from umit.icm.agent.Application import theApp
+from umit.icm.agent.gui.RegistrationDialog import RegistrationDialog
+from umit.icm.agent.rpc.aggregator import AggregatorAPI
 
-execfile(os.path.join(ROOT_DIR, 'deps', 'umit-common', 'utils', 'importer.py'))
-sys.path.insert(0, os.path.join(ROOT_DIR, 'deps'))
-sys.path.insert(0, os.path.join(ROOT_DIR, 'deps', 'icm-common'))
-sys.path.insert(0, os.path.join(ROOT_DIR, 'deps', 'umit-common'))
+########################################################################
+class MainThread(threading.Thread):
+    """"""
 
-from umit.icm.agent.Main import Main
-
-def main(args):
-    main = Main()
-    main.start()
-
-if __name__ == "__main__":
-    main(sys.argv)
+    #----------------------------------------------------------------------
+    def __init__(self):
+        """Constructor"""
+        
+    def start(self):
+        if not theApp.peer_info.props['login_saved']:
+            # The first time running
+            # Register a new account
+            dlg = RegistrationDialog()
+            dlg.show_all()
+            
+        # Connect to the Aggregator and Authenticate
+        
+            
+        
+            
+    
+    

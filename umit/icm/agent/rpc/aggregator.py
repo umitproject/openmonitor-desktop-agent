@@ -18,8 +18,7 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
-__all__ = ['AssignTaskResponser']
-
+import base64
 import os
 import sys
 
@@ -27,46 +26,70 @@ from twisted.web import client
 
 from umit.icm.agent.rpc.messages_pb2 import *
 
+from umit.icm.agent.Application import theApp
+
 ########################################################################
-class AggregatorAPI(object):
-    """"""
+class AggregatorAPI(object):    
+    """"""    
 
     #----------------------------------------------------------------------
-    def __init__(self):
+    def __init__(self, url):
         """Constructor"""
-        pass
+        self.base_url = url
     
     """ Peer """
     #----------------------------------------------------------------------
-    def sendRegistration(self):
-        pass
+    def register(self):
+        url = self.base_url + "/registeragent"
+        self._send_request('POST', url, data)
     
-    def sendPeerInfo(self):
-        pass
+    def report_peer_info(self):
+        url = self.base_url + "/reportpeerinfo"
+        self._send_request('POST', url, data)
     
-    def getSuperPeerList(self):
-        pass
+    def get_super_peer_list(self):
+        url = self.base_url + "/getsuperpeerlist"
+        self._send_request('POST', url, data)
     
-    def getPeerList(self):
-        pass
+    def get_peer_list(self):
+        url = self.base_url + "/getpeerlist"
+        self._send_request('POST', url, data)
     
-    def getEvents(self):
-        pass
+    def get_events(self):
+        url = self.base_url + "/getevents"
+        self._send_request('POST', url, data)
     
     """ Report """
     #----------------------------------------------------------------------
-    def sendReport(self):
-        pass
+    def send_report(self):
+        url = self.base_url + "/report"
+        self._send_request('POST', url, data)
     
     """ Suggestion """
     #----------------------------------------------------------------------
-    def sendWebsiteSuggestion(self):
-        pass
+    def send_website_suggestion(self, website_url):
+        url = self.base_url + "/websitesuggestion"
+        message = WebsiteSuggestion()
+        message.header.token = theApp.peer_info.AuthToken
+        message.header.agentID = theApp.peer_info.ID
+        message.websiteURL = website_url
+        message.emailAddress = theApp.peer_info.Email
+        data = base64.b64encode(message.SerializeToString())
+        self._send_request('POST', url, data)
     
-    def sendServiceSuggestion(self):
-        pass
+    def send_service_suggestion(self, service_name, host_name, ip):
+        url = self.base_url + "/servicesuggestion"
+        message = ServiceSuggestion()
+        message.header.token = theApp.peer_info.AuthToken
+        message.header.agentID = theApp.peer_info.ID
+        message.serviceName = service_name
+        message.emailAddress = theApp.peer_info.Email
+        message.hostName = host_name
+        message.ip = ip
+        data = base64.b64encode(message.SerializeToString())
+        self._send_request('POST', url, data)
     
-    def _sendRequest(self, method, uri, data="", mimeType=None):
+    def _send_request(self, method, uri, data="", mimeType=None):
         headers = {}
         if mimeType:
             headers['Content-Type'] = mimeType
@@ -76,35 +99,7 @@ class AggregatorAPI(object):
                               headers=headers)
     
 
-########################################################################
-class AggregatorResponser(object):
-    """"""
-
-    def __init__(self, message):
-        """Constructor"""
-        pass
-        
-    def execute(self):
-        pass
-        
-########################################################################
-class AssignTaskResponser(AggregatorResponser):
-    """"""
-    #from umit.icm.rpc.messages_pb2 import AssignTask
-    from umit.icm.agent.core.TestManager import TestManager
-    
-    def __init__(self, message):
-        """Constructor"""
-        self.message = message
-        
-    def execute(self):
-        assignTaskMsg = messages_pb2.AssignTask()
-        print(assignTaskMsg)
-    
-
 if __name__ == "__main__":
-    print(sys.modules)
-    assignTaskMsg = AssignTask()    
     pass
     
         

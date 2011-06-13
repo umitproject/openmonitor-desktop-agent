@@ -24,8 +24,7 @@ for the agent.
 
 import os
 
-from umit.icm.agent.Basic import DB_DIR
-from umit.icm.agent.Logging import log
+from umit.icm.agent.Global import g_logger
 from umit.icm.agent.utils.SQLiteHelper import SQLiteHelper
 
 ########################################################################
@@ -40,7 +39,7 @@ class DBHelper(object):
         try:
             self.db_helper = self.db_types[db_type]()
         except KeyError:
-            log.error("'%s' is not a valid db type." % db_type)
+            g_logger.error("'%s' is not a valid db type." % db_type)
         
     def connect(self, conn_str):
         """Connect to the database"""
@@ -50,17 +49,29 @@ class DBHelper(object):
         """Set a database into use"""
         self.db_helper.use(db_name)
     
-    def select(self, statement):
+    def select(self, statement, parameters=None):
         """Select statement execution, return a result set"""
-        return self.db_helper.select(statement)
+        return self.db_helper.select(statement, parameters)
     
-    def execute(self, statement):
+    def execute(self, statement, parameters=None):
         """Non-select statement execution"""
-        self.db_helper.execute(statement)
+        self.db_helper.execute(statement, parameters)
+        
+    def commit(self):
+        self.db_helper.commit()
+        
+    def close(self):
+        self.db_helper.close()
+        
+    def pack(self, val):
+        return self.db_helper.pack(val)
     
+    def unpack(self, data):
+        return self.db_helper.unpack(data)
+        
+  
 if __name__ == "__main__":
     helper = DBHelper('sqlite')
     helper.connect(os.path.join(DB_DIR, 'World.db3'))
-    helper.use('main')
     print(helper.select('select * from City'))
     

@@ -21,7 +21,6 @@
 import struct
 
 from umit.icm.agent.rpc.messages_pb2 import *
-from umit.icm.agent.utils.StringBinaryHelper import BinaryReader, BinaryWriter
 
 MAX_MESSAGE_LENGTH = 1024 * 1024   # max message length is 1M
 
@@ -73,40 +72,7 @@ class RawMessage(object):
         
         return data
 
-class MessageFactory(object):
-    """"""
-
-    #----------------------------------------------------------------------
-    def __init__(self):
-        """Constructor"""
-        self.reader = BinaryReader()
-        self.writer = BinaryWriter()
-        self.creator = {'AssignTask': AssignTask}
-        
-    def create(self, msg_type):
-        return self.creator[msg_type]()
-            
-    def encode(self, message):
-        self.writer.reset()
-        self.writer.writeString(message.DESCRIPTOR.name)
-        self.writer.writeString(message.SerializeToString())
-        return self.writer.getString()
-    
-    def decode(self, str_):
-        self.reader.setString(str_)
-        msg_type = self.reader.readString()
-        message = self.create(msg_type)
-        msg_str = self.reader.readString()
-        message.ParseFromString(msg_str)
-        return message
-    
-    def encrypt(self):
-        pass
-    
-    def decrypt(self):
-        pass
-        
-        
+       
 if __name__ == "__main__":
     s = AssignTask()
     #s.header = RequestHeader()

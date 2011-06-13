@@ -18,8 +18,6 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
-execfile('F:\\workspace\\PyWork\\icm-agent\\umit\\icm\\agent\\UmitImporter.py')
-
 __all__ = ['test_by_id', 'WebsiteTest', 'ServiceTest']
 
 TEST_PACKAGE_VERSION = '0.0'
@@ -35,7 +33,8 @@ from twisted.web.client import Agent, HTTPDownloader
 from twisted.web.http_headers import Headers
 from twisted.web._newclient import ResponseDone
 
-from umit.icm.agent.Logging import log
+from umit.icm.agent.Global import g_logger
+from umit.icm.agent.rpc.messages_pb2 import *
 
 if sys.platform == "win32":
     # On Windows, the best timer is time.clock()
@@ -63,6 +62,7 @@ class WebsiteTest(Test):
     def __init__(self):
         """Constructor"""
         self.url = None
+        self.status_code = 0
         self.pattern = None
         self._done = False
         self._agent = Agent(reactor)
@@ -75,7 +75,7 @@ class WebsiteTest(Test):
            
     def execute(self):
         """Run the test"""        
-        log.info("Testing website: %s" % self.url)
+        g_logger.info("Testing website: %s" % self.url)
         d = self._agent.request('GET', 
                                 self.url, 
                                 Headers({'User-Agent': 
@@ -83,16 +83,19 @@ class WebsiteTest(Test):
                                 None)
         self.time_start = default_timer()
         d.addCallback(self.handle_response)
-        d.addErrback(log.error)
+        d.addErrback(g_logger.error)
         #d._time_start = default_timer()            
     
     def handle_response(self, response):
         """Result Handler (generate report)"""
         time_end = default_timer()
+        self.status_code = response.code
+        self.response_time = time_end - self.time_start
         print(self.url)
-        print(str(response.code) + ' ' + response.phrase)
-        print("Response time: %fs" % (time_end - self.time_start))        
+        print(str(self.status_code) + ' ' + response.phrase)
+        print("Response time: %fs" % (self.response_time))        
         print(response.headers)
+        
         if response.code == 200:
             if self.pattern is not None:
                 response.deliverBody(ContentExaminer(self.url, 
@@ -101,6 +104,13 @@ class WebsiteTest(Test):
         
     def isDone(self):
         return self._done
+    
+    def generate_report(self):
+        report = WebsiteReportDetail()        
+        report.websiteURL = self.url
+        report.statusCode = self.status_code
+        report.responseTime = (int)(self.response_time * 1000)
+        return report
     
 class ContentExaminer(Protocol):
     def __init__(self, url, pattern):
@@ -116,11 +126,11 @@ class ContentExaminer(Protocol):
         if reason.check(ResponseDone):            
             match = self.pattern.search(self.content)
             if (match is not None):
-                log.info("Content unchanged.")
+                g_logger.info("Content unchanged.")
             else:
-                log.info("Content changed.")
+                g_logger.info("Content changed.")
         else:
-            log.error("The connection was broken. [%s]" % self.url)
+            g_logger.error("The connection was broken. [%s]" % self.url)
                 
 ########################################################################
 class ServiceTest(Test):
@@ -136,7 +146,7 @@ class ServiceTest(Test):
         self.service = param['service']
         
     def execute(self):
-        log.info("Testing service: %s" % self.service)
+        g_logger.info("Testing service: %s" % self.service)
 
 test_by_id = {
     0: Test,
@@ -154,6 +164,7 @@ def check_tests_done(tests):
     for each in tests:
         if each.isDone():
             print(each.url + "...done")
+            print(each.generate_report())
     reactor.stop()
 
 
@@ -167,4 +178,4 @@ if __name__ == "__main__":
                  
     reactor.callLater(5, check_tests_done, [test1, test2])
     reactor.run()
-    log.info("finished")
+    g_logger.info("finished")
