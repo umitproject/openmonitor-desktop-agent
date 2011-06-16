@@ -27,7 +27,7 @@ import time
 from umit.icm.agent import test
 from umit.icm.agent.Application import theApp
 from umit.icm.agent.core.TestScheduler import TestScheduler
-from umit.icm.agent.Global import g_logger
+from umit.icm.agent.Global import *
 
 ########################################################################
 class TestThread(threading.Thread):
@@ -37,13 +37,14 @@ class TestThread(threading.Thread):
     def __init__(self, name='TestThread'):
         """Constructor"""
         threading.Thread.__init__(self, name=name)
-        self.manager = theApp.test_manager
-        self.scheduler = TestScheduler(self.manager)
         
     def run(self):
         g_logger.info("Test thread started. Current version: %s" % 
                  test.TEST_PACKAGE_VERSION)
-
+        
+        self.manager = theApp.test_manager
+        self.scheduler = TestScheduler(self.manager)
+        
         self.manager.add_test({'test_id':1, 'run_time':'*/2 * * * *', 
                  'args': {'url':'http://www.baidu.com'}, 'priority':3})
         self.manager.add_test({'test_id':2, 'run_time':'*/3 * * * *', 
@@ -53,9 +54,10 @@ class TestThread(threading.Thread):
         
         self.scheduler.run()
         
+        g_logger.info("Test thread exited.")
     
     def stop(self):
-        g_logger.info("Test thread is stopping.")
+        g_logger.debug("Stopping main thread...")
         self.scheduler.stop()
         
     

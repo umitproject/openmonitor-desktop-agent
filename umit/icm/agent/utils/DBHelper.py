@@ -24,7 +24,7 @@ for the agent.
 
 import os
 
-from umit.icm.agent.Global import g_logger
+from umit.icm.agent.Global import *
 from umit.icm.agent.utils.SQLiteHelper import SQLiteHelper
 
 ########################################################################

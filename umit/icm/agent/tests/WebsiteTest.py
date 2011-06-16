@@ -30,7 +30,7 @@ from twisted.web.http_headers import Headers
 from twisted.web._newclient import ResponseDone
 
 from umit.icm.agent.tests.BaseTest import BaseTest
-from umit.icm.agent.Global import g_logger
+from umit.icm.agent.Global import *
 
 if sys.platform == "win32":
     # On Windows, the best timer is time.clock()

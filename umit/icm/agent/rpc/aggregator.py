@@ -26,6 +26,7 @@ from twisted.web import client
 
 from umit.icm.agent.rpc.messages_pb2 import *
 
+from umit.icm.agent.Global import *
 from umit.icm.agent.Application import theApp
 
 ########################################################################
@@ -36,58 +37,69 @@ class AggregatorAPI(object):
     def __init__(self, url):
         """Constructor"""
         self.base_url = url
+        self.available = False
     
     """ Peer """
     #----------------------------------------------------------------------
-    def register(self):
+    def register(self, username, password, email):
         url = self.base_url + "/registeragent"
+        request_msg = RegisterAgent()
+        request_msg.ip = theApp.peer_info
+        data = base64.b64encode(request_msg.SerializeToString())
+        result = self._send_request('POST', url, data)
+        
+    def authenticate(self):
+        url = self.base_url + "/authenticate"
+        #request_msg = RegisterAgent()
+        data = '' #base64.b64encode(request_msg.SerializeToString())
         self._send_request('POST', url, data)
+        return RET_SUCCESS
     
     def report_peer_info(self):
         url = self.base_url + "/reportpeerinfo"
-        self._send_request('POST', url, data)
+        result = self._send_request('POST', url, data)
     
     def get_super_peer_list(self):
         url = self.base_url + "/getsuperpeerlist"
-        self._send_request('POST', url, data)
+        result = self._send_request('POST', url, data)
     
     def get_peer_list(self):
         url = self.base_url + "/getpeerlist"
-        self._send_request('POST', url, data)
+        result = self._send_request('POST', url, data)
     
     def get_events(self):
         url = self.base_url + "/getevents"
-        self._send_request('POST', url, data)
+        result = self._send_request('POST', url, data)
     
     """ Report """
     #----------------------------------------------------------------------
     def send_report(self):
         url = self.base_url + "/report"
-        self._send_request('POST', url, data)
+        result = self._send_request('POST', url, data)
     
     """ Suggestion """
     #----------------------------------------------------------------------
     def send_website_suggestion(self, website_url):
         url = self.base_url + "/websitesuggestion"
-        message = WebsiteSuggestion()
-        message.header.token = theApp.peer_info.AuthToken
-        message.header.agentID = theApp.peer_info.ID
-        message.websiteURL = website_url
-        message.emailAddress = theApp.peer_info.Email
-        data = base64.b64encode(message.SerializeToString())
-        self._send_request('POST', url, data)
+        request_msg = WebsiteSuggestion()
+        request_msg.header.token = theApp.peer_info.AuthToken
+        request_msg.header.agentID = theApp.peer_info.ID
+        request_msg.websiteURL = website_url
+        request_msg.emailAddress = theApp.peer_info.Email
+        data = base64.b64encode(request_msg.SerializeToString())
+        result = self._send_request('POST', url, data)        
     
     def send_service_suggestion(self, service_name, host_name, ip):
         url = self.base_url + "/servicesuggestion"
-        message = ServiceSuggestion()
-        message.header.token = theApp.peer_info.AuthToken
-        message.header.agentID = theApp.peer_info.ID
-        message.serviceName = service_name
-        message.emailAddress = theApp.peer_info.Email
-        message.hostName = host_name
-        message.ip = ip
-        data = base64.b64encode(message.SerializeToString())
-        self._send_request('POST', url, data)
+        request_msg = ServiceSuggestion()
+        request_msg.header.token = theApp.peer_info.AuthToken
+        request_msg.header.agentID = theApp.peer_info.ID
+        request_msg.serviceName = service_name
+        request_msg.emailAddress = theApp.peer_info.Email
+        request_msg.hostName = host_name
+        request_msg.ip = ip
+        data = base64.b64encode(request_msg.SerializeToString())
+        result = self._send_request('POST', url, data)
     
     def _send_request(self, method, uri, data="", mimeType=None):
         headers = {}

@@ -33,7 +33,13 @@ sys.path.insert(0, os.path.join(ROOT_DIR, 'deps', 'umit-common'))
 from umit.icm.agent.Application import theApp
 
 def main(args):
-    theApp.start()
+    try:
+        theApp.start()
+    except Exception, e:
+        import traceback
+        traceback.print_exc(e)
+        theApp.quit()
+        
 
 if __name__ == "__main__":
     main(sys.argv)

@@ -21,7 +21,8 @@
 import hashlib
 import time
 
-from umit.icm.agent.Global import g_logger, g_db_helper
+from umit.icm.agent.Global import *
+from umit.icm.agent.Application import theApp
 
 ########################################################################
 class ReportEntry(object):
@@ -64,22 +65,23 @@ class ReportManager(object):
         report_entry.TimeGen = param.get('time_gen', int(time.time()))
         # get report ID or generate one
         report_entry.ID = param.get('report_id', 
-                                    generate_report_id([report_entry.SourceID, 
-                                                        report_entry.Type,
-                                                        report_entry.TimeGen]))
+                                    self._generate_report_id(
+                                        [report_entry.SourceID, 
+                                         report_entry.Type,
+                                         report_entry.TimeGen]))
         self._report_list.append(report_entry)
         
     def get_report_list(self):
         return self._report_list
         
-    def generate_report_id(self, list_):
+    def _generate_report_id(self, list_):
         m = hashlib.md5()
         for item in list_:
             m.update(item)
         report_id = m.hexdigest()
         return report_id
     
-    def insert_into_db(self, report):
+    def _insert_into_db(self, report):
         sql_stmt = "insert into reports (report_id, \
                                          report_type, \
                                          time_gen, \
@@ -96,8 +98,9 @@ class ReportManager(object):
                     report.SourceIP, \
                     report.Status
         
-        helper.execute(sql_stmt)
+        theApp.db_engine.exec_nonselect(sql_stmt)
  
+        
 if __name__ == "__main__":
     m = ReportManager()
     m.generate_report_id(['Nobody inspects',' the spammish repetition'])

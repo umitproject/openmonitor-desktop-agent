@@ -21,7 +21,7 @@
 import time
 
 from umit.common.CronParser import CronParser
-from umit.icm.agent.Global import g_logger
+from umit.icm.agent.Global import *
 from umit.icm.agent.test import test_name_by_id, test_by_id
 
 ########################################################################

@@ -20,7 +20,7 @@
 
 import gtk
 
-class Preference(object):
+class PreferenceWindow(object):
     def __init__(self):
         self.window = gtk.Window()
         self.window.set_border_width(10)
@@ -33,6 +33,6 @@ class Preference(object):
                 
         
 if __name__ == "__main__":
-    pref = Preference()
+    pref = PreferenceWindow()
     pref.show()
     gtk.main()

@@ -33,7 +33,7 @@ from twisted.internet import reactor
 from twisted.internet.protocol import Factory, Protocol, ServerFactory
 
 import sys
-from umit.icm.agent.Global import g_logger
+from umit.icm.agent.Global import *
 from umit.icm.agent.Application import theApp
 from umit.icm.agent.rpc.aggregator import *
 from umit.icm.agent.rpc.message import RawMessage, MalformedMessageError

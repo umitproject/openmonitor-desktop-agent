@@ -28,7 +28,7 @@ from higwidgets.higboxes import HIGHBox, HIGVBox, hig_box_space_holder
 from higwidgets.higbuttons import HIGStockButton
 
 from umit.icm.agent.I18N import _
-from umit.icm.agent.rpc.aggregator import AggregatorAPI
+from umit.icm.agent.Application import theApp
 from umit.icm.agent.gui.RegistrationDialog import RegistrationDialog
 
 ########################################################################
@@ -115,15 +115,12 @@ class LoginDialog(HIGDialog):
             self.login()
         elif response_id in (gtk.RESPONSE_DELETE_EVENT, gtk.RESPONSE_CANCEL,
                 gtk.RESPONSE_NONE):
-            # there are tree possibilities to being here:
-            # 1) user clicked on 'x' button
-            # 2) user clicked on 'cancel' button
-            # 3) report was sent successfully and now we can destroy this
             self.destroy()
             
     def login(self):
-        AggregatorAPI.sendLoginInfo()
-            
+        username = self.username_entry.get_text()
+        password = self.password_entry.get_text()
+        theApp.aggregator.authenticate(username, password)            
         
 if __name__ == "__main__":
     dialog = LoginDialog()

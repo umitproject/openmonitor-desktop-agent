@@ -18,7 +18,7 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
-__all__ = ['g_logger', 'g_db_helper']
+__all__ = ['g_logger', 'RET_SUCCESS', 'RET_FAILURE']
 
 import os
 
@@ -36,6 +36,9 @@ g_logger = Log("ICM Desktop Agent", LOGLEVEL)
 #g_logger = Log("ICM Desktop Agent File Log", LOGLEVEL, log_filename)
 
 #----------------------------------------------------------------------
-from umit.icm.agent.utils.DBHelper import DBHelper
-g_db_helper = DBHelper('sqlite')
-g_db_helper.connect(os.path.join(DB_DIR, 'storage.db3'))
+#from umit.icm.agent.utils.DBHelper import DBHelper
+#g_db_helper = DBHelper('sqlite')
+#g_db_helper.connect(os.path.join(DB_DIR, 'storage.db3'))
+
+RET_SUCCESS = 0
+RET_FAILURE = -1

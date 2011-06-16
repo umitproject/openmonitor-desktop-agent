@@ -26,7 +26,7 @@ import time
 
 from umit.icm.agent.Application import theApp
 from umit.icm.agent.core.ReportUploader import ReportUploader
-from umit.icm.agent.Global import g_logger
+from umit.icm.agent.Global import *
 
 ########################################################################
 class ReportThread(threading.Thread):
@@ -36,15 +36,19 @@ class ReportThread(threading.Thread):
     def __init__(self, name='ReportThread'):
         """Constructor"""
         threading.Thread.__init__(self, name=name)
-        self.manager = theApp.report_manager
-        self.uploader = ReportUploader(self.manager)
         
     def run(self):        
         g_logger.info("Report thread started.")
+        
+        self.manager = theApp.report_manager
+        self.uploader = ReportUploader(self.manager)
+        
         self.uploader.run()
+        
+        g_logger.info("Report thread exited.")
     
     def stop(self):
-        g_logger.info("Report thread is stopping.")
+        g_logger.debug("Stopping main thread...")
         self.uploader.stop()
     
 if __name__ == "__main__":

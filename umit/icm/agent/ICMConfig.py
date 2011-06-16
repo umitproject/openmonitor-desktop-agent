@@ -24,7 +24,7 @@ import os
 from ConfigParser import ConfigParser, DEFAULTSECT, NoOptionError, \
      NoSectionError
 
-from umit.icm.agent.Global import g_logger
+from umit.icm.agent.Global import *
 
 class ICMConfig(ConfigParser):
     filenames = None

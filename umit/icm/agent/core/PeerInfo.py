@@ -20,7 +20,8 @@
 
 import cPickle
 
-from umit.icm.agent.Global import g_logger, g_db_helper
+from umit.icm.agent.Global import *
+from umit.icm.agent.Application import theApp
 from umit.icm.agent.utils.Network import get_local_ip, get_public_ip
 
 ########################################################################
@@ -39,11 +40,11 @@ class PeerInfo(object):
     def __init__(self):
         """Constructor"""
         self.load()
-        self.props['ip'] = get_local_ip()
-        self.props['public_ip'] = get_public_ip()
+        #self.props['ip'] = get_local_ip()
+        #self.props['public_ip'] = get_public_ip()
         
     def load(self):
-        rs = g_db_helper.select('select * from user_info')
+        rs = theApp.db_engine.exec_select('select * from user_info')
         if len(rs) > 0:
             if len(rs) > 1:            
                 g_logger.warning("There're more than one record in user_info. "
@@ -56,21 +57,25 @@ class PeerInfo(object):
             self.Email = rs[0][3]
             self.PublicKey = rs[0][4]
             self.PrivateKey = rs[0][5]
-        rs = g_db_helper.select('select * from kvp')
+        rs = theApp.db_engine.exec_select('select * from peer_info')
         for entry in rs:
-            self.props[entry[0]] = g_db_helper.unpack(entry[1])
+            self.props[entry[0]] = theApp.db_engine.unpack(entry[1])
             
     def save(self):
-        g_db_helper.execute("delete from user_info")
-        g_db_helper.execute("insert into user_info values (" + str(self.ID) + 
-                            ",'" + self.Username + "','" + self.AuthToken + 
-                            "','" + self.Email + "','" + self.PublicKey + 
-                            "','" + self.PrivateKey + "')")
-        g_db_helper.execute("delete from kvp")
-        sql = "insert into kvp values (?, ?)"
+        theApp.db_engine.exec_nonselect("delete from user_info")
+        theApp.db_engine.exec_nonselect(
+            "insert into user_info values (" + str(self.ID) + ",'" + 
+                                               self.Username + "','" + 
+                                               self.AuthToken + "','" + 
+                                               self.Email + "','" + 
+                                               self.PublicKey + "','" + 
+                                               self.PrivateKey + "')")
+        theApp.db_engine.exec_nonselect("delete from peer_info")
+        sql = "insert into peer_info values (?, ?)"
         for key in self.props:
-            g_db_helper.execute(sql, (key, g_db_helper.pack(self.props[key])))
-        g_db_helper.commit()
+            theApp.db_engine.exec_nonselect(sql, 
+                                (key, theApp.db_engine.pack(self.props[key])))
+        theApp.db_engine.commit()
 
     def getPublicKey(self):
         return self._public_key

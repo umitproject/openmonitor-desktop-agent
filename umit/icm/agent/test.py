@@ -33,7 +33,7 @@ from twisted.web.client import Agent, HTTPDownloader
 from twisted.web.http_headers import Headers
 from twisted.web._newclient import ResponseDone
 
-from umit.icm.agent.Global import g_logger
+from umit.icm.agent.Global import *
 from umit.icm.agent.rpc.messages_pb2 import *
 
 if sys.platform == "win32":

@@ -21,7 +21,7 @@
 import time
 
 from umit.icm.agent.test import test_by_id
-from umit.icm.agent.Global import g_logger
+from umit.icm.agent.Global import *
 
 ########################################################################
 class TestScheduler(object):

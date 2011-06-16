@@ -20,7 +20,7 @@
 
 import time
 
-from umit.icm.agent.Global import g_logger
+from umit.icm.agent.Global import *
 from umit.icm.agent.rpc.aggregator import AggregatorAPI
 from umit.icm.agent.rpc.desktop import DesktopAgentRPC, DesktopSuperAgentRPC
 from umit.icm.agent.rpc.mobile import MobileAgentRPC

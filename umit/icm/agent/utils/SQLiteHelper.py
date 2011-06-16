@@ -23,7 +23,7 @@ import cPickle
 import os
 import sqlite3
 
-from umit.icm.agent.Global import g_logger
+from umit.icm.agent.Global import *
 
 ########################################################################
 class SQLiteHelper(object):
