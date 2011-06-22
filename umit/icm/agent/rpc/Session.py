@@ -17,41 +17,20 @@
 # You should have received a copy of the GNU General Public License
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
-"""
-This will create a thread for sending test reports
-"""
 
-import threading
 import time
 
-from umit.icm.agent.Application import theApp
-from umit.icm.agent.core.ReportUploader import ReportUploader
-from umit.icm.agent.Global import *
-
 ########################################################################
-class ReportThread(threading.Thread):
+class Session(object):
     """"""
 
     #----------------------------------------------------------------------
-    def __init__(self, name='ReportThread'):
+    def __init__(self, id_, transport):
         """Constructor"""
-        threading.Thread.__init__(self, name=name)
+        self.ID = id_
+        self._transport = transport
+        self.remote_ip = self._transport.getPeer().host
+        self.remote_port = self._transport.getPeer().port
+        self.begin_time = int(time.time())
 
-    def run(self):
-        g_logger.info("Report thread started.")
 
-        self.manager = theApp.report_manager
-        self.uploader = ReportUploader(self.manager)
-
-        self.uploader.run()
-
-        g_logger.info("Report thread exited.")
-
-    def stop(self):
-        g_logger.debug("Stopping report thread...")
-        self.uploader.stop()
-
-if __name__ == "__main__":
-    rt = ReportThread()
-    rt.start()
-    print('hello')

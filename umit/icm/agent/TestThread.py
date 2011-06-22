@@ -37,32 +37,31 @@ class TestThread(threading.Thread):
     def __init__(self, name='TestThread'):
         """Constructor"""
         threading.Thread.__init__(self, name=name)
-        
+
     def run(self):
-        g_logger.info("Test thread started. Current version: %s" % 
+        g_logger.info("Test thread started. Current version: %s" %
                  test.TEST_PACKAGE_VERSION)
-        
+
         self.manager = theApp.test_manager
         self.scheduler = TestScheduler(self.manager)
-        
-        self.manager.add_test({'test_id':1, 'run_time':'*/2 * * * *', 
-                 'args': {'url':'http://www.baidu.com'}, 'priority':3})
-        self.manager.add_test({'test_id':2, 'run_time':'*/3 * * * *', 
-                 'args': {'service':'ftp'}})
-        self.manager.add_test({'test_id':1, 'run_time':'* * * * *', 
-                 'args': {'url':'http://www.sina.com'}, 'priority':2})
-        
+
+        #self.manager.add_test({'test_id':1, 'run_time':'*/2 * * * *',
+                 #'args': {'url':'http://www.baidu.com'}, 'priority':3})
+        #self.manager.add_test({'test_id':2, 'run_time':'*/3 * * * *',
+                 #'args': {'service':'ftp'}})
+        #self.manager.add_test({'test_id':1, 'run_time':'* * * * *',
+                 #'args': {'url':'http://www.sina.com'}, 'priority':2})
+
         self.scheduler.run()
-        
+
         g_logger.info("Test thread exited.")
-    
+
     def stop(self):
-        g_logger.debug("Stopping main thread...")
+        g_logger.debug("Stopping test thread...")
         self.scheduler.stop()
-        
-    
+
+
 if __name__ == "__main__":
     rt = TestThread()
     rt.start()
     print('hello')
-    

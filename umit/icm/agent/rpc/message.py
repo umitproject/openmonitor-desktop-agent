@@ -21,15 +21,16 @@
 import struct
 
 from umit.icm.agent.rpc.messages_pb2 import *
+from umit.icm.agent.rpc.messages_ext_pb2 import *
 
 MAX_MESSAGE_LENGTH = 1024 * 1024   # max message length is 1M
 
 class MalformedMessageError(Exception):
     """ Received a malformed message """
-    
+
 class RawMessage(object):
     """"""
-    
+
     def __init__(self):
         """Constructor"""
         self.length = 0
@@ -38,14 +39,14 @@ class RawMessage(object):
         self.remaining = 0
         self.completed = False
         self.content = None
-        
+
     def fill(self, data):
-        if self.completed: 
+        if self.completed:
             return data
-        
+
         offset = 0
         if self.length == 0:
-            # fill the length field first             
+            # fill the length field first
             if len(data) >= 4-len(self.lengthBuffer):
                 offset += 4-len(self.lengthBuffer)
                 self.lengthBuffer += data[:offset]
@@ -53,11 +54,11 @@ class RawMessage(object):
                 if self.length > MAX_MESSAGE_LENGTH:
                     raise MalformedMessageError
                 self.content = bytearray(self.length)
-                self.remaining = self.length 
+                self.remaining = self.length
             else:
-                self.lengthBuffer += data 
+                self.lengthBuffer += data
                 return ''
-        
+
         dataLen = len(data)-offset
         if dataLen >= self.remaining:
             self.content[self.offset:self.length] = data[offset:offset+self.remaining]
@@ -69,10 +70,10 @@ class RawMessage(object):
             self.offset += dataLen
             self.remaining -= dataLen
             return ''
-        
+
         return data
 
-       
+
 if __name__ == "__main__":
     s = AssignTask()
     #s.header = RequestHeader()
@@ -84,7 +85,7 @@ if __name__ == "__main__":
     print(str_)
     msg = f.decode(str_)
     print(s.SerializeToString())
-            
+
     #data = '\x03\x00\x00\x00'
     #msg = RawMessage()
     #data = msg.fill('\x05\x00')

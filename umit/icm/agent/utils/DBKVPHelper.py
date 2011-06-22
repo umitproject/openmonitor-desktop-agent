@@ -28,40 +28,39 @@ class DBKVPHelper(DBHelper):
     #----------------------------------------------------------------------
     def __init__(self, table_name, db_file_name=None):
         """Constructor"""
-        if db_file_name is not None:            
+        if db_file_name is not None:
             self.db_helper = DBHelper('sqlite')
             self.db_helper.connect(db_file_name)
-            
-        self.table_name = table_name            
+
+        self.table_name = table_name
         self.sql_select = "select * from " + table_name + " where key=?"
         self.sql_update = "update " + table_name + " set value=? where key=?"
         self.sql_insert = "insert into " + table_name + " values(?, ?)"
         self.sql_delete = "delete from " + table_name + " where key=?"
-        
+
     def attach(self, db_helper):
-        self.db_helper = db_helper        
-        
+        self.db_helper = db_helper
+
     def read(self, key, default=None):
         if self.db_helper is None:
             raise Exception('db_helper is None.')
-        result = self.db_helper.select(self.sql_select, (key,))        
+        result = self.db_helper.select(self.sql_select, (key,))
         try:
             return self.unpack(result[0][1])
         except:
-            g_logger.warning("No value found for key '%s' in db config." % key)            
+            g_logger.warning("No value found for key '%s' in db config." % key)
             return default
-        
+
     def write(self, key, value):
         if self.db_helper is None:
             raise Exception('db_helper is None.')
         self.db_helper.execute(self.sql_delete, (key,))
         self.db_helper.execute(self.sql_insert, (key, self.pack(value)))
         self.commit()
-        
+
     def delete(self, key):
         if self.db_helper is None:
             raise Exception('db_helper is None.')
         self.db_helper.execute(self.sql_delete, (key,))
         self.commit()
-    
-    
+

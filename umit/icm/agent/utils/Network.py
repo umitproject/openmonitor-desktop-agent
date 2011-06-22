@@ -30,8 +30,8 @@ def get_local_ip():
      s.connect((local_ip_url, 0))
      ip = s.getsockname()[0]
      return ip
-    
+
 def get_public_ip():
-    content = urllib2.urlopen(public_ip_url).read()
-    ip = re.search('\d+\.\d+\.\d+\.\d+', content).group(0)
-    return ip
+     content = urllib2.urlopen(public_ip_url).read()
+     ip = re.search('\d+\.\d+\.\d+\.\d+', content).group(0)
+     return ip

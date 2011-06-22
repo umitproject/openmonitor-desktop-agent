@@ -27,7 +27,7 @@ from umit.icm.agent.Application import theApp
 ########################################################################
 class ReportEntry(object):
     """"""
-    
+
     #----------------------------------------------------------------------
     def __init__(self):
         """Constructor"""
@@ -38,13 +38,13 @@ class ReportEntry(object):
         self.SourceID = None
         self.SourceIP = None
         self.Status = ReportStatus.UNSENT
-        
+
 class ReportStatus:
     UNSENT = 0
     SENT_TO_AGGREGATOR = 1
     SENT_TO_SUPER_AGENT = 2
-    SENT_TO_AGENT = 3    
-        
+    SENT_TO_AGENT = 3
+
 ########################################################################
 class ReportManager(object):
     """"""
@@ -52,9 +52,9 @@ class ReportManager(object):
     #----------------------------------------------------------------------
     def __init__(self):
         """Constructor"""
-        self._report_list = []        
-        
-    def add_report(self, param):        
+        self._report_list = []
+
+    def add_report(self, param):
         report_entry = ReportEntry()
         # required fields
         report_entry.Type = param['type']
@@ -64,23 +64,23 @@ class ReportManager(object):
         report_entry.SourceIP = param.get('source_ip', '')
         report_entry.TimeGen = param.get('time_gen', int(time.time()))
         # get report ID or generate one
-        report_entry.ID = param.get('report_id', 
+        report_entry.ID = param.get('report_id',
                                     self._generate_report_id(
-                                        [report_entry.SourceID, 
+                                        [report_entry.SourceID,
                                          report_entry.Type,
                                          report_entry.TimeGen]))
         self._report_list.append(report_entry)
-        
+
     def get_report_list(self):
         return self._report_list
-        
+
     def _generate_report_id(self, list_):
         m = hashlib.md5()
         for item in list_:
             m.update(item)
         report_id = m.hexdigest()
         return report_id
-    
+
     def _insert_into_db(self, report):
         sql_stmt = "insert into reports (report_id, \
                                          report_type, \
@@ -97,10 +97,10 @@ class ReportManager(object):
                     report.SourceID, \
                     report.SourceIP, \
                     report.Status
-        
-        theApp.db_engine.exec_nonselect(sql_stmt)
- 
-        
+
+        g_db_helper.execute(sql_stmt)
+
+
 if __name__ == "__main__":
     m = ReportManager()
     m.generate_report_id(['Nobody inspects',' the spammish repetition'])

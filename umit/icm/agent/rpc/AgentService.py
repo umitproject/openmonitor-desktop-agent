@@ -28,17 +28,23 @@ try:
 except:
     pass
 
+import random
+import struct
+import time
+
 from twisted.application import service
 from twisted.internet import reactor
-from twisted.internet.protocol import Factory, Protocol, ServerFactory
+from twisted.internet.protocol import Factory, Protocol, ServerFactory, \
+     ClientFactory
 
-import sys
 from umit.icm.agent.Global import *
 from umit.icm.agent.Application import theApp
-from umit.icm.agent.rpc.aggregator import *
-from umit.icm.agent.rpc.message import RawMessage, MalformedMessageError
+from umit.icm.agent.rpc.message import *
 from umit.icm.agent.rpc.MessageFactory import MessageFactory
-from umit.icm.agent.rpc.MessageType import *
+from umit.icm.agent.rpc.aggregator import AggregagorSession
+from umit.icm.agent.rpc.desktop import DesktopAgentSession, \
+     DesktopSuperAgentSession
+from umit.icm.agent.rpc.mobile import MobileAgentSession
 
 ########################################################################
 class AgentProtocol(Protocol):
@@ -47,110 +53,178 @@ class AgentProtocol(Protocol):
     #----------------------------------------------------------------------
     def __init__(self):
         """Constructor"""
+        self.local_ip = None
+        self.local_port = None
+
         self.remote_ip = None
+        self.remote_port = 0
+
+        self.remote_id = 0
+        self.remote_type = 0
+
+        self._session = None
         self._rawMessage = RawMessage()
-        self._handler = CommonHandler()
-        
+        self._nonce = int(random.getrandbits(31))
+
     def connectionMade(self):
         self.factory.connectionNum = self.factory.connectionNum + 1
-        g_logger.info("New connection established. From %s" % 
+        g_logger.info("New connection established. with Peer: %s" %
                       self.transport.getPeer())
-        g_logger.info(self.factory.connectionNum)
+        g_logger.info("Connection num: %d" % self.factory.connectionNum)
         maxConnectionNum = g_config.getint('network', 'max_connections_num')
         if self.factory.connectionNum > maxConnectionNum:
-            self.transport.write("Too many connections, try later") 
+            self.transport.write("Too many connections, try later")
             self.transport.loseConnection()
-        self.remote_ip = self.transport.getPeer().host        
+
+        self.local_ip = self.transport.getHost().host
+        self.local_port = self.transport.getHost().port
+        self.remote_ip = self.transport.getPeer().host
+        self.remote_port = self.transport.getPeer().port
+
+        # initiator send handshake1
+        if self.local_port != theApp.listen_port:
+            self._session = self._send_handshake()
 
     def connectionLost(self, reason):
         self.factory.connectionNum = self.factory.connectionNum - 1
         g_logger.info("Connection closed.")
-        g_logger.info(self.factory.connectionNum)
+        g_logger.info("Current connection num: %d" % self.factory.connectionNum)
+
+        if self._session is not None:
+            theApp.peer_manager.sessions[self.remote_id].close()
+            del theApp.peer_manager.sessions[self.remote_id]
 
     def dataReceived(self, data):
-        print(data)
+        #print(data)
         while len(data) != 0:
             try:
-                data = self.rawMessage.fill(data)
+                data = self._rawMessage.fill(data)
             except MalformedMessageError:
                 self.transport.write("Malformed message received. "\
-                                     "Connection tear down.") 
-                theApp.log.warning("Malformed message received. "\
-                                   "Connection tear down. %s\n%s" % \
-                                   (self.transport.getPeer(), data))
+                                     "Connection tear down.")
+                g_logger.warning("Malformed message received. " \
+                                 "Connection tear down. %s\n%s" % \
+                                 (self.transport.getPeer(), data))
                 self.transport.loseConnection()
                 return
-                
-            if self.rawMessage.completed:
-                self._handler.process(self.rawMessage)
-                self.rawMessage = RawMessage()
-                
-########################################################################
-class CommonHandler(object):
-    """"""
 
-    #----------------------------------------------------------------------
-    def __init__(self):
-        """Constructor"""
-        
-    def process(self, raw_message):
-        message = MessageFactory.decode(raw_message)
-        if message.type_ == "handshake":
-            # handshake
-            pass
-        else:
-            # rpc call
-            if type(message) == AssignTask:                
-                g_test_manager.add_test()
-            else:
-                pass
+            if self._rawMessage.completed:
+                g_logger.debug("recv message length: %d" % self._rawMessage.length)
+                #g_logger.debug(self._rawMessage.content)
+                message = MessageFactory.decode(str(self._rawMessage.content))
+                g_logger.debug("Received a %s message from %s.\n%s" % \
+                               (message.DESCRIPTOR.name,
+                                self.transport.getPeer(),
+                                message))
+                if isinstance(message, Handshake1):
+                    self.remote_id = message.peerID
+                    self.remote_type = message.peerType
+                    print(message.servePort)
+                    if message.peerType == 0:  # aggregator
+                        self._session = AggregatorSession(message.peerID,
+                                                          self.transport)
+                    elif message.peerType == 1:  # super agent
+                        param = { 'id': self.remote_id,
+                                  'ip': self.remote_ip,
+                                  'port': message.servePort,
+                                  'status': 'Connected' }
+                        theApp.peer_manager.add_super_peer(param)
+                        self._session = DesktopSuperAgentSession(message.peerID,
+                                                                 self.transport)
+                    elif message.peerType == 2:  # desktop agent
+                        param = { 'id': self.remote_id,
+                                  'ip': self.remote_ip,
+                                  'port': message.servePort,
+                                  'status': 'Connected' }
+                        theApp.peer_manager.add_normal_peer(param)
+                        self._session = DesktopAgentSession(message.peerID,
+                                                            self.transport)
+                    elif message.peerType == 3:  # mobile agent
+                        param = { 'id': self.remote_id,
+                                  'ip': self.remote_ip,
+                                  'port': message.servePort,
+                                  'status': 'Connected' }
+                        theApp.peer_manager.add_mobile_peer(param)
+                        self._session = MobileAgentSession(message.peerID,
+                                                           self.transport)
+                    else:  # wrong type
+                        pass
+                    self._nonce = message.nonce + 1
+                    theApp.peer_manager.\
+                          sessions[message.peerID] = self._session
+                    # reply handshake
+                    self._reply_handshake()
+                elif isinstance(message, Handshake2):
+                    if message.nonce == self._nonce + 1:
+                        self.remote_id = message.peerID
+                        self.remote_type = message.peerType
+                        if message.peerType == 0:  # aggregator
+                            self._session = AggregatorSession(message.peerID,
+                                                              self.transport)
+                        elif message.peerType == 1:  # super agent
+                            param = { 'id': self.remote_id,
+                                      'ip': self.remote_ip,
+                                      'port': self.remote_port,
+                                      'status': 'Connected' }
+                            theApp.peer_manager.add_super_peer(param)
+                            self._session = DesktopSuperAgentSession(message.peerID,
+                                                                     self.transport)
+                        elif message.peerType == 2:  # desktop agent
+                            param = { 'id': self.remote_id,
+                                      'ip': self.remote_ip,
+                                      'port': self.remote_port,
+                                      'status': 'Connected' }
+                            theApp.peer_manager.add_normal_peer(param)
+                            self._session = DesktopAgentSession(message.peerID,
+                                                                self.transport)
+                        elif message.peerType == 3:  # mobile agent
+                            param = { 'id': self.remote_id,
+                                      'ip': self.remote_ip,
+                                      'port': self.remote_port,
+                                      'status': 'Connected' }
+                            theApp.peer_manager.add_mobile_peer(param)
+                            self._session = MobileAgentSession(message.peerID,
+                                                               self.transport)
+                        else:  # wrong type
+                            pass
+                        theApp.peer_manager.\
+                              sessions[message.peerID] = self._session
+                elif isinstance(message, Diagnose):
+                    self.transport.write("\x00\x00\x00\x03\x00\x00\x00\x00")
+                elif self._session is not None:
+                    self._session.handle_message(message)
+                else:
+                    g_logger.warning("Unexpected message. %s" % message)
+                self._rawMessage = RawMessage()
+
+    def _send_handshake(self):
+        request_msg = Handshake1()
+        request_msg.peerID = theApp.peer_info.ID
+        request_msg.peerType = theApp.peer_info.Type
+        request_msg.servePort = theApp.listen_port
+        request_msg.nonce = self._nonce
+        g_logger.debug("Sending handshake1 message:\n%s" % request_msg)
+        data = MessageFactory.encode(request_msg)
+        self.transport.write(data)
+
+    def _reply_handshake(self):
+        response_msg = Handshake2()
+        response_msg.peerID = theApp.peer_info.ID
+        response_msg.peerType = theApp.peer_info.Type
+        response_msg.nonce = self._nonce
+        g_logger.debug("Sending handshake2 message:\n%s" % response_msg)
+        data = MessageFactory.encode(response_msg)
+        self.transport.write(data)
+
+    def _send_diagnose_result(self, command):
+        response_msg = DiagnoseResponse()
+        response_msg.execTime = int(time.time())
+        response_msg.result = command
+        data = MessageFactory.encode(response_msg)
+        self.transport.write(data)
 
 ########################################################################
-class AggregatorHandler(object):
-    """"""
-
-    #----------------------------------------------------------------------
-    def __init__(self):
-        """Constructor"""
-        
-    def process(self, raw_message):
-        pass
-    
-########################################################################
-class SuperAgentHandler(object):
-    """"""
-
-    #----------------------------------------------------------------------
-    def __init__(self):
-        """Constructor"""
-        
-    def process(self, raw_message):
-        pass
-    
-########################################################################
-class DesktopAgentHandler(object):
-    """"""
-
-    #----------------------------------------------------------------------
-    def __init__(self):
-        """Constructor"""
-        
-    def process(self, raw_message):
-        pass
-    
-########################################################################
-class MobileAgentHandler(object):
-    """"""
-
-    #----------------------------------------------------------------------
-    def __init__(self):
-        """Constructor"""
-        
-    def process(self, raw_message):
-        pass
-        
-########################################################################
-class AgentFactory(ServerFactory):
+class AgentFactory(ServerFactory, ClientFactory):
     """"""
 
     #----------------------------------------------------------------------
@@ -159,7 +233,7 @@ class AgentFactory(ServerFactory):
         self.protocol = AgentProtocol
         self.connectionNum = 0;
         self.peers = []
-    
+
 ########################################################################
 class AgentService(service.Service):
     """"""
@@ -167,28 +241,27 @@ class AgentService(service.Service):
     #----------------------------------------------------------------------
     def __init__(self):
         """Constructor"""
-        
+
     def getAgentFactory(self):
         f = ServerFactory()
         f.protocol = AgentProtocol
         return f
-        
+
     def startService(self):
-        service.Service.startService(self) 
-    
+        service.Service.startService(self)
+
     def stopService(self):
         service.Service.stopService(self)
         self.call.cancel()
-        
-        
+
+
 if __name__ == "__main__":
-    port = theApp.config.getint('network', 'listen_port')
+    port = 5895 #theApp.config.getint('network', 'listen_port')
     reactor.listenTCP(port, AgentFactory())
-    
+
     reactor.run()
-        
-    
-        
-        
-    
-    
+
+
+
+
+

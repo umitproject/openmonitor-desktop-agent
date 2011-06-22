@@ -22,9 +22,15 @@ DBHelper is a class used to store/retrieve data from a relational SQL database
 for the agent.
 """
 
+try:
+    execfile('F:\\workspace\\PyWork\\icm-agent\\umit\\icm\\agent\\UmitImporter.py')
+except:
+    pass
+
 import os
 
-from umit.icm.agent.Global import *
+from umit.icm.agent.BasePaths import *
+from umit.icm.agent.Global import g_logger
 from umit.icm.agent.utils.SQLiteHelper import SQLiteHelper
 
 ########################################################################
@@ -40,38 +46,58 @@ class DBHelper(object):
             self.db_helper = self.db_types[db_type]()
         except KeyError:
             g_logger.error("'%s' is not a valid db type." % db_type)
-        
+
     def connect(self, conn_str):
         """Connect to the database"""
         self.db_helper.connect(conn_str)
-    
+
     def use(self, db_name):
         """Set a database into use"""
         self.db_helper.use(db_name)
-    
+
     def select(self, statement, parameters=None):
         """Select statement execution, return a result set"""
         return self.db_helper.select(statement, parameters)
-    
+
     def execute(self, statement, parameters=None):
         """Non-select statement execution"""
         self.db_helper.execute(statement, parameters)
-        
+
     def commit(self):
         self.db_helper.commit()
-        
+
     def close(self):
         self.db_helper.close()
-        
+
     def pack(self, val):
         return self.db_helper.pack(val)
-    
+
     def unpack(self, data):
         return self.db_helper.unpack(data)
-        
-  
+
+    def get_config(self, key, default=None):
+        result = self.db_helper.select(
+            "select * from config where key=?", (key,))
+        try:
+            return self.unpack(result[0][1])
+        except:
+            g_logger.warning("No value found for key '%s' in db config." % key)
+            return default
+
+    def set_config(self, key, value):
+        self.db_helper.execute(
+            "insert or replace into config values(?, ?)",
+            (key, self.pack(value)))
+        self.commit()
+
+    def del_config(self, key):
+        self.db_helper.execute(
+            "delete from config where key=?", (key,))
+        self.commit()
+
+
 if __name__ == "__main__":
     helper = DBHelper('sqlite')
-    helper.connect(os.path.join(DB_DIR, 'World.db3'))
-    print(helper.select('select * from City'))
-    
+    helper.connect(os.path.join(DB_DIR, 'storage.db3'))
+    helper.set_config('aggregator_url', 'http://icm-dev.appspot.com/api')
+    print(helper.get_config('aggregator_url'))

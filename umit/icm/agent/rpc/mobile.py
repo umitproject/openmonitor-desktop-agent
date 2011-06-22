@@ -18,14 +18,23 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
+from umit.icm.agent.Application import theApp
+from umit.icm.agent.rpc.Session import Session
+
 ########################################################################
-class MobileAgentRPC:
+class MobileAgentSession(Session):
     """"""
 
     #----------------------------------------------------------------------
-    def __init__(self):
+    def __init__(self, id_, transport):
         """Constructor"""
-        
-        
-    
-    
+        Session.__init__(self, id_, transport)
+
+    def handle_message(self, message):
+        if isinstance(message, P2PGetSuperPeerList):
+            pass
+
+    def close(self):
+        if self.ID in theApp.peer_manager.mobile_peers:
+            theApp.peer_manager.mobile_peers[self.ID].Status = 'Disconnected'
+

@@ -18,15 +18,19 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
-__all__ = ['g_logger', 'RET_SUCCESS', 'RET_FAILURE']
+__all__ = ['g_config', 'g_logger', 'g_db_helper', 'RET_SUCCESS', 'RET_FAILURE']
 
 import os
 
 from umit.icm.agent.BasePaths import *
 
 #----------------------------------------------------------------------
+from umit.icm.agent.ICMConfig import ICMConfig
+g_config = ICMConfig(os.path.join(CONFIG_DIR, 'agent_config.txt'))
+
+#----------------------------------------------------------------------
 from umit.common.UmitLogging import Log
-LOGLEVEL = 0
+LOGLEVEL = g_config.get('logging', 'log_level')
 if not os.path.exists(LOG_DIR):
     os.mkdir(LOG_DIR)
 log_filename = os.path.join(LOG_DIR, 'icm-desktop.log')
@@ -36,9 +40,9 @@ g_logger = Log("ICM Desktop Agent", LOGLEVEL)
 #g_logger = Log("ICM Desktop Agent File Log", LOGLEVEL, log_filename)
 
 #----------------------------------------------------------------------
-#from umit.icm.agent.utils.DBHelper import DBHelper
-#g_db_helper = DBHelper('sqlite')
-#g_db_helper.connect(os.path.join(DB_DIR, 'storage.db3'))
+from umit.icm.agent.utils.DBHelper import DBHelper
+g_db_helper = DBHelper('sqlite')
+g_db_helper.connect(os.path.join(DB_DIR, 'storage.db3'))
 
 RET_SUCCESS = 0
 RET_FAILURE = -1

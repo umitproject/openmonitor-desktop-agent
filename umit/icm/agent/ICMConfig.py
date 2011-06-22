@@ -24,12 +24,10 @@ import os
 from ConfigParser import ConfigParser, DEFAULTSECT, NoOptionError, \
      NoSectionError
 
-from umit.icm.agent.Global import *
-
 class ICMConfig(ConfigParser):
     filenames = None
     fp = None
-    
+
     def __init__(self, filename):
         ConfigParser.__init__(self)
         filename = self.read(filename)
@@ -42,16 +40,15 @@ class ICMConfig(ConfigParser):
             #return None
         #except NoSectionError:
             #return None
-        
+
     def set(self, section, option, value):
         if not self.has_section(section):
             self.add_section(section)
-        
+
         ConfigParser.set(self, section, option, value)
         self.save_changes()
 
     def read(self, filename):
-        g_logger.debug(">>> Trying to parse: %s" % filename)
         self.filenames = ConfigParser.read(self, filename)
         return self.filenames
 
@@ -72,22 +69,22 @@ class ICMConfig(ConfigParser):
             self.write(open(filename, 'w'))
         elif self.fp:
             self.write(self.fp)
-            
+
     def write(self, fp):
         '''Write alphabetically sorted config files'''
         if self._defaults:
             fp.write("[%s]\n" % DEFAULTSECT)
-            
+
             items = self._defaults.items()
             items.sort()
-            
+
             for (key, value) in items:
                 fp.write("%s = %s\n" % (key, str(value).replace('\n', '\n\t')))
             fp.write("\n")
 
         sects = self._sections.keys()
         sects.sort()
-        
+
         for section in sects:
             fp.write("[%s]\n" % section)
             for (key, value) in self._sections[section].items():
@@ -95,6 +92,3 @@ class ICMConfig(ConfigParser):
                     fp.write("%s = %s\n" %
                              (key, str(value).replace('\n', '\n\t')))
             fp.write("\n")
-            
-if __name__ == "__main__":
-    print(g_config.get("network", "listen_port"))

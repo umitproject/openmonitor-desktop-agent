@@ -34,7 +34,7 @@ from twisted.web.http_headers import Headers
 from twisted.web._newclient import ResponseDone
 
 from umit.icm.agent.Global import *
-from umit.icm.agent.rpc.messages_pb2 import *
+from umit.icm.agent.rpc.message import *
 
 if sys.platform == "win32":
     # On Windows, the best timer is time.clock()
@@ -42,7 +42,7 @@ if sys.platform == "win32":
 else:
     # On most other platforms the best timer is time.time()
     default_timer = time.time
-    
+
 ########################################################################
 class Test(object):
     """"""
@@ -50,13 +50,13 @@ class Test(object):
     #----------------------------------------------------------------------
     def __init__(self):
         """Constructor"""
-        
+
     def prepare(self, param):
         """Setup parameters and prepare for running"""
-        
+
     def execute(self):
         """Need to be implemented"""
-        
+
 ########################################################################
 class WebsiteTest(Test):
     def __init__(self):
@@ -66,26 +66,26 @@ class WebsiteTest(Test):
         self.pattern = None
         self._done = False
         self._agent = Agent(reactor)
-        
+
     def prepare(self, param):
         """Prepare for the test"""
         self.url = param['url']
         if 'pattern' in param:
             self.pattern = re.compile(param['pattern'])
-           
+
     def execute(self):
-        """Run the test"""        
+        """Run the test"""
         g_logger.info("Testing website: %s" % self.url)
-        d = self._agent.request('GET', 
-                                self.url, 
-                                Headers({'User-Agent': 
-                                         ['ICM Website Test']}), 
+        d = self._agent.request('GET',
+                                self.url,
+                                Headers({'User-Agent':
+                                         ['ICM Website Test']}),
                                 None)
         self.time_start = default_timer()
         d.addCallback(self.handle_response)
         d.addErrback(g_logger.error)
-        #d._time_start = default_timer()            
-    
+        #d._time_start = default_timer()
+
     def handle_response(self, response):
         """Result Handler (generate report)"""
         time_end = default_timer()
@@ -93,37 +93,37 @@ class WebsiteTest(Test):
         self.response_time = time_end - self.time_start
         print(self.url)
         print(str(self.status_code) + ' ' + response.phrase)
-        print("Response time: %fs" % (self.response_time))        
+        print("Response time: %fs" % (self.response_time))
         print(response.headers)
-        
+
         if response.code == 200:
             if self.pattern is not None:
-                response.deliverBody(ContentExaminer(self.url, 
+                response.deliverBody(ContentExaminer(self.url,
                                                      self.pattern))
         self._done = True
-        
+
     def isDone(self):
         return self._done
-    
+
     def generate_report(self):
-        report = WebsiteReportDetail()        
+        report = WebsiteReportDetail()
         report.websiteURL = self.url
         report.statusCode = self.status_code
         report.responseTime = (int)(self.response_time * 1000)
         return report
-    
+
 class ContentExaminer(Protocol):
     def __init__(self, url, pattern):
         """Constructor"""
         self.url = url
         self.content = ""
         self.pattern = pattern
-        
+
     def dataReceived(self, bytes):
         self.content = ''.join((self.content, bytes))
-        
-    def connectionLost(self, reason):        
-        if reason.check(ResponseDone):            
+
+    def connectionLost(self, reason):
+        if reason.check(ResponseDone):
             match = self.pattern.search(self.content)
             if (match is not None):
                 g_logger.info("Content unchanged.")
@@ -131,7 +131,7 @@ class ContentExaminer(Protocol):
                 g_logger.info("Content changed.")
         else:
             g_logger.error("The connection was broken. [%s]" % self.url)
-                
+
 ########################################################################
 class ServiceTest(Test):
     """"""
@@ -141,10 +141,10 @@ class ServiceTest(Test):
         """Constructor"""
         self.service = None
         self._done = False
-    
+
     def prepare(self, param):
         self.service = param['service']
-        
+
     def execute(self):
         g_logger.info("Testing service: %s" % self.service)
 
@@ -175,7 +175,7 @@ if __name__ == "__main__":
     test2 = WebsiteTest()
     test2.prepare({'url': 'https://www.alipay.com', 'pattern': 'baidu'})
     test2.execute()
-                 
+
     reactor.callLater(5, check_tests_done, [test1, test2])
     reactor.run()
     g_logger.info("finished")

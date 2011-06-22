@@ -18,49 +18,55 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
-from umit.icm.agent.rpc.messages_pb2 import *
+from umit.icm.agent.rpc.message import *
 from umit.icm.agent.utils.StringBinaryHelper import BinaryReader, BinaryWriter
 
 class MessageFactory(object):
     """"""
     _reader = BinaryReader()
     _writer = BinaryWriter()
-    _creator = {'AssignTask': AssignTask}
+    _creator = {'AssignTask': AssignTask,
+                'Handshake1': Handshake1,
+                'Handshake2': Handshake2,
+                'P2PGetPeerList': P2PGetPeerList,
+                'P2PGetPeerListResponse': P2PGetPeerListResponse,
+                'P2PGetSuperPeerList': P2PGetSuperPeerList,
+                'P2PGetSuperPeerListResponse': P2PGetSuperPeerListResponse,
+                'Diagnose': Diagnose,
+                'DiagnoseResponse': DiagnoseResponse}
 
     #----------------------------------------------------------------------
     #def __init__(self):
         #"""Constructor"""
-        
+
     @classmethod
-    def create(cls, msg_type):        
-        return cls.creator[msg_type]()
-    
+    def create(cls, msg_type):
+        return cls._creator[msg_type]()
+
     @classmethod
     def encode(cls, message):
-        cls.writer.reset()
-        cls.writer.writeString(message.DESCRIPTOR.name)
-        cls.writer.writeString(message.SerializeToString())        
-        return cls.writer.getString()
-    
+        cls._writer.reset()
+        name = message.DESCRIPTOR.name
+        body = message.SerializeToString()
+        total_length = 2 + len(name) + 2 + len(body)
+        cls._writer.writeInt32(total_length)
+        cls._writer.writeString(message.DESCRIPTOR.name)
+        cls._writer.writeString(message.SerializeToString())
+        return cls._writer.getString()
+
     @classmethod
     def decode(cls, str_):
-        cls.reader.setString(str_)
-        msg_type = cls.reader.readString()
+        cls._reader.setString(str_)
+        msg_type = cls._reader.readString()
         message = cls.create(msg_type)
-        msg_str = cls.reader.readString()
+        msg_str = cls._reader.readString()
         message.ParseFromString(msg_str)
         return message
-    
+
     @classmethod
     def encrypt(cls, str_):
         pass
-    
+
     @classmethod
     def decrypt(cls, str_):
         pass
-    
-if __name__ == "__main__":
-    MessageFactory.create('AssignTask')
-    MessageFactory.encode()
-    
-    pass

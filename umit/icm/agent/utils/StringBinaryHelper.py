@@ -22,18 +22,18 @@ from struct import *
 
 class ExceedLengthError(Exception):
     "The reading operation exceeds the str length."
-    
+
 class BinaryReader(object):
     def __init__(self, str_=''):
         self.str_ = str_
         self.length = len(str_)
         self.offset = 0
         self.remaining = self.length
-        
+
     def reset(self):
         self.offset = 0
         self.remaining = self.length
-        
+
     def setString(self, str_):
         self.str_ = str_
         self.length = len(str_)
@@ -54,7 +54,7 @@ class BinaryReader(object):
             raise ExceedLengthError
         else:
             bytes = self.str_[self.offset:self.offset+length]
-            self.offset = self.offset + length 
+            self.offset = self.offset + length
             self.remaining = self.remaining - length
             return bytes
 
@@ -94,8 +94,8 @@ class BinaryReader(object):
     def readString(self):
         length = self.readUInt16()
         return self.unpack(str(length) + 's', length)
-    
-    def readSzString(self):        
+
+    def readSzString(self):
         endPos = self.str_.find('\x00', self.offset)
         if endPos == -1:
             raise ExceedLengthError
@@ -107,14 +107,14 @@ class BinaryReader(object):
 
     def unpack(self, fmt, length = 1):
         return unpack(fmt, self.readBytes(length))[0]
-    
+
 class BinaryWriter(object):
     def __init__(self, str_=''):
         self.str_ = str_
-    
+
     def reset(self):
         self.str_ = ''
-        
+
     def getString(self):
         return self.str_
 
@@ -160,29 +160,28 @@ class BinaryWriter(object):
     def writeString(self, str_):
         self.writeUInt16(len(str_))
         self.pack(str(len(str_)) + 's', str_)
-    
+
     def writeSzString(self, str_):
         self.pack(str(len(str_)) + 's', str_)
         self.writeChar(0)
 
     def pack(self, fmt, param):
         self.writeBytes(pack(fmt, param))
-    
-    
+
+
 if __name__ == "__main__":
     br = BinaryReader("\x01\x00\x00\x00\x03\x00ABCDEF\x00GHI\x00")
-    print(br.readInt32())
+    print(br.readUInt16())
     print(br.readString())
     print(br.readSzString())
-    print(br.readSzString())    
+    print(br.readSzString())
     bw = BinaryWriter()
     bw.writeBool(False)
     bw.writeString('h')
     bw.writeSzString('good')
     bw.writeInt32(65)
     print(bw.getString())
-    
-    
-    
-    
-    
+
+
+
+
