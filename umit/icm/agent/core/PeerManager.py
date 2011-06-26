@@ -18,6 +18,8 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
+import random
+
 from umit.icm.agent.Application import theApp
 from umit.icm.agent.Global import *
 from twisted.internet import reactor
@@ -104,16 +106,22 @@ class PeerManager:
             if peer_entry.ID not in self.sessions:
                 reactor.connectTCP(peer_entry.IP, peer_entry.Port,
                                    theApp.factory)
+                g_logger.debug("Connecting to %s:%d..." %
+                               (peer_entry.IP, peer_entry.Port))
 
         for peer_entry in self.normal_peers.values():
             if peer_entry.ID not in self.sessions:
                 reactor.connectTCP(peer_entry.IP, peer_entry.Port,
                                    theApp.factory)
+                g_logger.debug("Connecting to %s:%d..." %
+                               (peer_entry.IP, peer_entry.Port))
 
         for peer_entry in self.mobile_peers.values():
             if peer_entry.ID not in self.sessions:
                 reactor.connectTCP(peer_entry.IP, peer_entry.Port,
                                    theApp.factory)
+                g_logger.debug("Connecting to %s:%d..." %
+                               (peer_entry.IP, peer_entry.Port))
 
     def add_super_peer(self, param):
         peer_entry = PeerEntry()
@@ -145,7 +153,7 @@ class PeerManager:
             peer_entry.Status = param['status']
         if peer_entry.ID not in self.normal_peers:
             self.normal_peers[peer_entry.ID] = peer_entry
-            self.super_peer_num = self.super_peer_num + 1
+            self.super_peer_num = self.normal_peer_num + 1
 
     def add_mobile_peer(self, param):
         peer_entry = PeerEntry()
@@ -161,7 +169,7 @@ class PeerManager:
             peer_entry.Status = param['status']
         if peer_entry.ID not in self.mobile_peers:
             self.mobile_peers[peer_entry.ID] = peer_entry
-            self.super_peer_num = self.super_peer_num + 1
+            self.super_peer_num = self.mobile_peer_num + 1
 
     def remove_super_peer(self, peer_id):
         if peer_id in self.super_peers:
@@ -184,3 +192,38 @@ class PeerManager:
             del self.mobile_peers[peer_id]
             self.mobile_peer_num = self.mobile_peer_num - 1
 
+    def select_super_peers(self, count):
+        all_peers = self.super_peers.values()
+        if len(all_peers) <= count:
+            chosen_peers = all_peers
+            return chosen_peers
+        else:
+            chosen_peers = []
+            while len(chosen_peers) < count:
+                peer = all_peers[random.randint(0, count)]
+                if peer not in chosen_peers:
+                    chosen_peers.append(peer)
+
+    def select_normal_peers(self, count):
+        all_peers = self.normal_peers.values()
+        if len(all_peers) <= count:
+            chosen_peers = all_peers
+            return chosen_peers
+        else:
+            chosen_peers = []
+            while len(chosen_peers) < count:
+                peer = all_peers[random.randint(0, count)]
+                if peer not in chosen_peers:
+                    chosen_peers.append(peer)
+
+    def select_mobile_peers(self, count):
+        all_peers = self.mobile_peers.values()
+        if len(all_peers) <= count:
+            chosen_peers = all_peers
+            return chosen_peers
+        else:
+            chosen_peers = []
+            while len(chosen_peers) < count:
+                peer = all_peers[random.randint(0, count)]
+                if peer not in chosen_peers:
+                    chosen_peers.append(peer)

@@ -18,7 +18,7 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
-__all__ = ['test_by_id', 'WebsiteTest', 'ServiceTest']
+__all__ = ['test_by_id', 'test_name_by_id', 'WebsiteTest', 'ServiceTest']
 
 TEST_PACKAGE_VERSION = '0.0'
 
@@ -148,24 +148,26 @@ class ServiceTest(Test):
     def execute(self):
         g_logger.info("Testing service: %s" % self.service)
 
-test_by_id = {
-    0: Test,
-    1: WebsiteTest,
-    2: ServiceTest
-}
-
-test_name_by_id = {
-    0: 'Test',
-    1: 'WebsiteTest',
-    2: 'ServiceTest'
-}
-
 def check_tests_done(tests):
     for each in tests:
         if each.isDone():
             print(each.url + "...done")
             print(each.generate_report())
     reactor.stop()
+
+test_by_id = {
+    0: Test,
+    1: WebsiteTest,
+    2: ServiceTest,
+    3: Diagnose
+}
+
+test_name_by_id = {
+    0: 'Test',
+    1: 'WebsiteTest',
+    2: 'ServiceTest',
+    3: 'Diagnose'
+}
 
 
 if __name__ == "__main__":

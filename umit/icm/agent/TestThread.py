@@ -24,7 +24,7 @@ This will create a thread for doing all sort of testing jobs
 import threading
 import time
 
-from umit.icm.agent import test
+from umit.icm.agent.test import TEST_PACKAGE_VERSION
 from umit.icm.agent.Application import theApp
 from umit.icm.agent.core.TestScheduler import TestScheduler
 from umit.icm.agent.Global import *
@@ -40,7 +40,7 @@ class TestThread(threading.Thread):
 
     def run(self):
         g_logger.info("Test thread started. Current version: %s" %
-                 test.TEST_PACKAGE_VERSION)
+                      TEST_PACKAGE_VERSION)
 
         self.manager = theApp.test_manager
         self.scheduler = TestScheduler(self.manager)

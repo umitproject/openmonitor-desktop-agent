@@ -45,7 +45,13 @@ class AggregagorSession(Session):
         Session.__init__(self, 0, transport)
 
     def handle_message(self, message):
+        g_logger.debug("AggregatorSession - Handling %s message." %
+                       message.DESCRIPTOR.name)
         if isinstance(message, AssignTask):
+            pass
+        elif isinstance(message, AgentUpdate):
+            pass
+        elif isinstance(message, TestModuleUpdate):
             pass
 
     def close(self):

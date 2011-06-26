@@ -32,6 +32,8 @@ class MessageFactory(object):
                 'P2PGetPeerListResponse': P2PGetPeerListResponse,
                 'P2PGetSuperPeerList': P2PGetSuperPeerList,
                 'P2PGetSuperPeerListResponse': P2PGetSuperPeerListResponse,
+                'AgentUpdate': AgentUpdate,
+                'TestModuleUpdate': TestModuleUpdate,
                 'Diagnose': Diagnose,
                 'DiagnoseResponse': DiagnoseResponse}
 

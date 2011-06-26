@@ -89,10 +89,11 @@ class MainThread(threading.Thread):
                         #for each in peer_list:
                             #peer_manager.add_normal_peer(each)
                     else:
-                        for peer_id in peer_manager.super_peers:
-                            if peer_id in peer_manager.sessions:
-                                peer_manager.sessions[peer_id].\
-                                            get_peer_list(required_num)
+                        #for peer_id in peer_manager.super_peers:
+                            #if peer_id in peer_manager.sessions:
+                                #peer_manager.sessions[peer_id].\
+                                            #get_peer_list(required_num)
+                        pass
 
                 peer_manager.connect_all()
             except BaseException, e:

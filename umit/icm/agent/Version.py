@@ -19,3 +19,14 @@
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
 VERSION = '0.0'
+
+def compare_version(ver1, ver2):
+    array1 = ver1.split('.')
+    array2 = ver2.split('.')
+    i = 0
+    for i in range(min(len(array1), len(array2))):
+        if array1[i] > array2[i]:
+            return 1
+        elif array1[i] < array2[i]:
+            return -1
+    return 0

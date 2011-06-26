@@ -71,6 +71,7 @@ class AgentProtocol(Protocol):
         g_logger.info("New connection established. with Peer: %s" %
                       self.transport.getPeer())
         g_logger.info("Connection num: %d" % self.factory.connectionNum)
+
         maxConnectionNum = g_config.getint('network', 'max_connections_num')
         if self.factory.connectionNum > maxConnectionNum:
             self.transport.write("Too many connections, try later")
@@ -91,8 +92,8 @@ class AgentProtocol(Protocol):
         g_logger.info("Current connection num: %d" % self.factory.connectionNum)
 
         if self._session is not None:
-            theApp.peer_manager.sessions[self.remote_id].close()
-            del theApp.peer_manager.sessions[self.remote_id]
+            self._session.close()
+        del theApp.peer_manager.sessions[self.remote_id]
 
     def dataReceived(self, data):
         #print(data)
@@ -119,7 +120,6 @@ class AgentProtocol(Protocol):
                 if isinstance(message, Handshake1):
                     self.remote_id = message.peerID
                     self.remote_type = message.peerType
-                    print(message.servePort)
                     if message.peerType == 0:  # aggregator
                         self._session = AggregatorSession(message.peerID,
                                                           self.transport)
@@ -190,11 +190,12 @@ class AgentProtocol(Protocol):
                         theApp.peer_manager.\
                               sessions[message.peerID] = self._session
                 elif isinstance(message, Diagnose):
-                    self.transport.write("\x00\x00\x00\x03\x00\x00\x00\x00")
+                    self._handle_diagnose(message)
                 elif self._session is not None:
                     self._session.handle_message(message)
                 else:
-                    g_logger.warning("Unexpected message. %s" % message)
+                    g_logger.warning("Unexpected message. %s" %
+                                     message.DESCRIPTOR.name)
                 self._rawMessage = RawMessage()
 
     def _send_handshake(self):
@@ -216,12 +217,18 @@ class AgentProtocol(Protocol):
         data = MessageFactory.encode(response_msg)
         self.transport.write(data)
 
-    def _send_diagnose_result(self, command):
-        response_msg = DiagnoseResponse()
-        response_msg.execTime = int(time.time())
-        response_msg.result = command
-        data = MessageFactory.encode(response_msg)
-        self.transport.write(data)
+    def _handle_diagnose(self, message):
+        if message.execType == 0:
+            response_msg = DiagnoseResponse()
+            response_msg.execTime = int(time.time())
+            try:
+                response_msg.result = str(eval(message.command))
+            except Exception, e:
+                response_msg.result = str(e)
+            data = MessageFactory.encode(response_msg)
+            self.transport.write(data)
+        elif message.execType == 1:
+            pass
 
 ########################################################################
 class AgentFactory(ServerFactory, ClientFactory):

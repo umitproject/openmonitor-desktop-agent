@@ -27,7 +27,7 @@ class Session(object):
     #----------------------------------------------------------------------
     def __init__(self, id_, transport):
         """Constructor"""
-        self.ID = id_
+        self.remote_id = id_
         self._transport = transport
         self.remote_ip = self._transport.getPeer().host
         self.remote_port = self._transport.getPeer().port

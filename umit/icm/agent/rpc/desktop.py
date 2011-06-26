@@ -22,9 +22,13 @@ import random
 
 from umit.icm.agent.Application import theApp
 from umit.icm.agent.Global import *
+from umit.icm.agent.Version import *
+from umit.icm.agent.test import TEST_PACKAGE_VERSION
 from umit.icm.agent.rpc.message import *
 from umit.icm.agent.rpc.MessageFactory import MessageFactory
 from umit.icm.agent.rpc.Session import Session
+from umit.icm.agent.utils.FileDownloader import FileDownloader
+from umit.icm.agent.Update import *
 
 ########################################################################
 class DesktopAgentSession(Session):
@@ -40,75 +44,92 @@ class DesktopAgentSession(Session):
         request_msg = P2PGetSuperPeerList()
         request_msg.count = count
         data = MessageFactory.encode(request_msg)
-        self._send_request(protocol.transport, data)
+        self._transport.write(data)
 
     def get_peer_list(self, count):
         g_logger.info("Send P2PGetPeerList message to %s", self.remote_ip)
         request_msg = P2PGetPeerList()
         request_msg.count = count
         data = MessageFactory.encode(request_msg)
-        self._send_request(protocol.transport, data)
+        self._transport.write(data)
 
-    def _send_request(self, data=""):
-        self.transport.write(data)
+    def require_agent_update(self, version, download_url, check_code=0):
+        g_logger.info("Send AgentUpdate message to %s", self.remote_ip)
+        request_msg = AgentUpdate()
+        request_msg.version = version
+        request_msg.downloadURL = download_url
+        if check_code != 0:
+            request_msg.checkCode = check_code
+        data = MessageFactory.encode(request_msg)
+        self._transport.write(data)
+
+    def require_test_mod_update(self, version, download_url, check_code=0):
+        g_logger.info("Send TestModuleUpdate message to %s", self.remote_ip)
+        request_msg = TestModuleUpdate()
+        request_msg.version = version
+        request_msg.downloadURL = download_url
+        if check_code != 0:
+            request_msg.checkCode = check_code
+        data = MessageFactory.encode(request_msg)
+        self._transport.write(data)
 
     def handle_message(self, message):
         if isinstance(message, P2PGetSuperPeerList):
-            count = message.getSuperPeerListRequest.count
-            chosen_peers = theApp.peer_manager.super_peers[0:count]
+            chosen_peers = theApp.peer_manager.select_super_peers(message.count)
             response_msg = P2PGetSuperPeerListResponse()
             for speer in chosen_peers:
-                agent_data = AgentData()
+                agent_data = response_msg.peers.add()
                 agent_data.id = speer.ID
                 agent_data.token = speer.Token
                 agent_data.publicKey = speer.PublicKey
                 agent_data.peerStatus = speer.Status
                 agent_data.agentIP = speer.IP
                 agent_data.agentPort = speer.Port
-                response_msg.peers.append(agent_data)
             data = MessageFactory.encode(response_msg)
-            self.transport.write(data)
+            self._transport.write(data)
         elif isinstance(message, P2PGetSuperPeerListResponse):
             for agent_data in message.peers:
-                peer_entry = PeerEntry()
-                peer_entry.Type = 0
-                peer_entry.ID = agent_data.id
-                peer_entry.IP = agent_data.agentIP
-                peer_entry.Port = agent_data.agentPort
-                peer_entry.Token = agent_data.token
-                peer_entry.PublicKey = agent_data.publicKey
-                peer_entry.Status = agent_data.peerStatus
-                theApp.peer_manager.add_super_peer(peer_entry)
+                if self.remote_id != agent_data.id:
+                    entry = { 'id': agent_data.id,
+                              'ip': agent_data.agentIP,
+                              'port': agent_data.agentPort,
+                              'token': agent_data.token,
+                              'public_key': agent_data.publicKey,
+                              'status': 'Connected' }
+                    theApp.peer_manager.add_super_peer(entry)
         elif isinstance(message, P2PGetPeerList):
-            count = message.getPeerListRequest.count
-            chosen_peers = theApp.peer_manager.normal_peers[0:count]
+            chosen_peers = theApp.peer_manager.select_normal_peers(message.count)
             response_msg = P2PGetPeerListResponse()
             for peer in chosen_peers:
-                agent_data = AgentData()
+                agent_data = response_msg.peers.add()
                 agent_data.id = peer.ID
                 agent_data.token = peer.Token
                 agent_data.publicKey = peer.PublicKey
                 agent_data.peerStatus = peer.Status
                 agent_data.agentIP = peer.IP
                 agent_data.agentPort = peer.Port
-                response_msg.peers.append(agent_data)
             data = MessageFactory.encode(response_msg)
-            self.transport.write(data)
+            self._transport.write(data)
         elif isinstance(message, P2PGetPeerListResponse):
             for agent_data in message.peers:
-                peer_entry = PeerEntry()
-                peer_entry.Type = 1
-                peer_entry.ID = agent_data.id
-                peer_entry.IP = agent_data.agentIP
-                peer_entry.Port = agent_data.agentPort
-                peer_entry.Token = agent_data.token
-                peer_entry.PublicKey = agent_data.publicKey
-                peer_entry.Status = agent_data.peerStatus
-                theApp.peer_manager.add_normal_peer(peer_entry)
+                if self.remote_id != agent_data.id:
+                    entry = { 'id': agent_data.id,
+                              'ip': agent_data.agentIP,
+                              'port': agent_data.agentPort,
+                              'token': agent_data.token,
+                              'public_key': agent_data.publicKey,
+                              'status': 'Connected' }
+                    theApp.peer_manager.add_normal_peer(entry)
+        elif isinstance(message, AgentUpdateResponse):
+            g_logger.info("Peer %s update agent to version %s: %S" %
+                          (self.remote_id, message.version, message.result))
+        elif isinstance(message, TestModuleUpdateResponse):
+            g_logger.info("Peer %s update test mod to version %s: %S" %
+                          (self.remote_id, message.version, message.result))
 
     def close(self):
-        if self.ID in theApp.peer_manager.normal_peers:
-            theApp.peer_manager.normal_peers[self.ID].Status = 'Disconnected'
+        if self.remote_id in theApp.peer_manager.normal_peers:
+            theApp.peer_manager.normal_peers[self.remote_id].Status = 'Disconnected'
 
 ########################################################################
 class DesktopSuperAgentSession(Session):
@@ -124,72 +145,92 @@ class DesktopSuperAgentSession(Session):
         request_msg = P2PGetSuperPeerList()
         request_msg.count = count
         data = MessageFactory.encode(request_msg)
-        self._send_request(protocol.transport, data)
+        self._transport.write(data)
 
     def get_peer_list(self, count):
         g_logger.info("Send P2PGetPeerList message to %s", self.remote_ip)
         request_msg = P2PGetPeerList()
         request_msg.count = count
         data = MessageFactory.encode(request_msg)
-        self._send_request(protocol.transport, data)
-
-    def _send_request(self, data=""):
-        self.transport.write(data)
+        self._transport.write(data)
 
     def handle_message(self, message):
         if isinstance(message, P2PGetSuperPeerList):
-            count = message.getSuperPeerListRequest.count
-            chosen_peers = theApp.peer_manager.super_peers[0:count]
+            chosen_peers = theApp.peer_manager.select_super_peers(message.count)
             response_msg = P2PGetSuperPeerListResponse()
             for speer in chosen_peers:
-                agent_data = AgentData()
+                agent_data = response_msg.peers.add()
                 agent_data.id = speer.ID
                 agent_data.token = speer.Token
                 agent_data.publicKey = speer.PublicKey
                 agent_data.peerStatus = speer.Status
                 agent_data.agentIP = speer.IP
                 agent_data.agentPort = speer.Port
-                response_msg.peers.append(agent_data)
             data = MessageFactory.encode(response_msg)
-            self.transport.write(data)
+            self._transport.write(data)
         elif isinstance(message, P2PGetSuperPeerListResponse):
             for agent_data in message.peers:
-                peer_entry = PeerEntry()
-                peer_entry.Type = 0
-                peer_entry.ID = agent_data.id
-                peer_entry.IP = agent_data.agentIP
-                peer_entry.Port = agent_data.agentPort
-                peer_entry.Token = agent_data.token
-                peer_entry.PublicKey = agent_data.publicKey
-                peer_entry.Status = agent_data.peerStatus
-                theApp.peer_manager.add_super_peer(peer_entry)
+                if self.remote_id != agent_data.id:
+                    entry = { 'id': agent_data.id,
+                              'ip': agent_data.agentIP,
+                              'port': agent_data.agentPort,
+                              'token': agent_data.token,
+                              'public_key': agent_data.publicKey,
+                              'status': 'Connected' }
+                    theApp.peer_manager.add_super_peer(entry)
         elif isinstance(message, P2PGetPeerList):
-            count = message.getPeerListRequest.count
-            chosen_peers = theApp.peer_manager.normal_peers[0:count]
+            chosen_peers = theApp.peer_manager.select_normal_peers(message.count)
             response_msg = P2PGetPeerListResponse()
             for peer in chosen_peers:
-                agent_data = AgentData()
+                agent_data = response_msg.peers.add()
                 agent_data.id = peer.ID
                 agent_data.token = peer.Token
                 agent_data.publicKey = peer.PublicKey
                 agent_data.peerStatus = peer.Status
                 agent_data.agentIP = peer.IP
                 agent_data.agentPort = peer.Port
-                response_msg.peers.append(agent_data)
             data = MessageFactory.encode(response_msg)
-            self.transport.write(data)
+            self._transport.write(data)
         elif isinstance(message, P2PGetPeerListResponse):
             for agent_data in message.peers:
-                peer_entry = PeerEntry()
-                peer_entry.Type = 1
-                peer_entry.ID = agent_data.id
-                peer_entry.IP = agent_data.agentIP
-                peer_entry.Port = agent_data.agentPort
-                peer_entry.Token = agent_data.token
-                peer_entry.PublicKey = agent_data.publicKey
-                peer_entry.Status = agent_data.peerStatus
-                theApp.peer_manager.add_normal_peer(peer_entry)
+                if self.remote_id != agent_data.id:
+                    entry = { 'id': agent_data.id,
+                              'ip': agent_data.agentIP,
+                              'port': agent_data.agentPort,
+                              'token': agent_data.token,
+                              'public_key': agent_data.publicKey,
+                              'status': 'Connected' }
+                    theApp.peer_manager.add_normal_peer(entry)
+        elif isinstance(message, AgentUpdate):
+            if compare_version(message.version, VERSION) > 0:
+                if not os.path.exists(TMP_DIR):
+                    os.mkdir(TMP_DIR)
+                FileDownloader(
+                    message.downloadURL,
+                    os.path.join(TMP_DIR,
+                                 'icm-agent_' + message.version + '.zip')
+                    )
+                if message.HasField('checkCode'):
+                    downloader.addCallback(update_agent, message.version,
+                                           message.checkCode)
+                else:
+                    downloader.addCallback(update_agent, message.version)
+                downloader.start()
+        elif isinstance(message, TestModuleUpdate):
+            if compare_version(message.version, TEST_PACKAGE_VERSION) > 0:
+                if not os.path.exists(TMP_DIR):
+                    os.mkdir(TMP_DIR)
+                downloader = FileDownloader(
+                    message.downloadURL,
+                    os.path.join(TMP_DIR, 'test_' + message.version + '.py')
+                    )
+                if message.HasField('checkCode'):
+                    downloader.addCallback(update_test_mod, message.version,
+                                           message.checkCode)
+                else:
+                    downloader.addCallback(update_test_mod, message.version)
+                downloader.start()
 
     def close(self):
-        if self.ID in theApp.peer_manager.super_peers:
-            theApp.peer_manager.super_peers[self.ID].Status = 'Disconnected'
+        if self.remote_id in theApp.peer_manager.super_peers:
+            theApp.peer_manager.super_peers[self.remote_id].Status = 'Disconnected'

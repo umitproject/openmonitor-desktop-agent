@@ -75,16 +75,21 @@ class RawMessage(object):
 
 
 if __name__ == "__main__":
-    s = AssignTask()
-    #s.header = RequestHeader()
-    s.header.token = "xxx"
-    s.header.agentID = 123123
-    print(s.SerializeToString())
-    f = MessageFactory()
-    str_ = f.encode(s)
+    msg_send = AgentUpdate()
+    #msg_send.header = RequestHeader()
+    msg_send.version = "1.1"
+    msg_send.downloadURL = "http://www.baidu.com"
+    msg_send.checkCode = 1111
+    print(msg_send)
+    str_ = msg_send.SerializeToString()
     print(str_)
-    msg = f.decode(str_)
-    print(s.SerializeToString())
+    msg_recv = AgentUpdate()
+    msg_recv.ParseFromString(str_)
+    print(msg_recv)
+    if msg_recv.HasField("checkCode"):
+        print("Has check code")
+    else:
+        print("Doesn't have check code")
 
     #data = '\x03\x00\x00\x00'
     #msg = RawMessage()

@@ -22,7 +22,7 @@ import os
 import sys
 
 __all__ = ['ROOT_DIR', 'CONFIG_DIR', 'LOG_DIR', 'LOCALES_DIR', 'IMAGES_DIR',
-           'ICONS_DIR', 'DB_DIR']
+           'ICONS_DIR', 'DB_DIR', 'TMP_DIR']
 
 ROOT_DIR = os.path.abspath(os.path.dirname(sys.argv[0]))
 while not os.path.exists(os.path.join(ROOT_DIR, 'umit')):
@@ -30,12 +30,13 @@ while not os.path.exists(os.path.join(ROOT_DIR, 'umit')):
     if ROOT_DIR == new_dir:
         raise Exception("Can't find root dir.")
     ROOT_DIR = new_dir
-    
+
 #ROOT_DIR = "F:\\workspace\\PyWork\\icm-agent\\"
-        
+
 CONFIG_DIR = os.path.join(ROOT_DIR, 'conf')
 LOG_DIR = os.path.join(ROOT_DIR, 'log')
 LOCALES_DIR = os.path.join(ROOT_DIR, 'share', 'locales')
 IMAGES_DIR = os.path.join(ROOT_DIR, 'share', 'images')
 ICONS_DIR = os.path.join(ROOT_DIR, 'share', 'icons')
 DB_DIR = os.path.join(ROOT_DIR, 'share', 'db')
+TMP_DIR = os.path.join(ROOT_DIR, 'tmp')

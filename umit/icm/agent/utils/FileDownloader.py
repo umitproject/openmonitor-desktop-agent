@@ -18,45 +18,47 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
-import webbrowser
-
 from twisted.internet import reactor
 from twisted.web.client import HTTPDownloader
-from twisted.python import log
 
-from umit.icm.agent.tests.BaseTest import BaseTest
+from umit.icm.agent.Global import *
 
 ########################################################################
-class HTTPFetcher(BaseTest):
-    """Fetch a certain URL"""    
+class FileDownloader(object):
+    """Download file from HTTP server"""
 
     #----------------------------------------------------------------------
-    def __init__(self, url, savePath):
+    def __init__(self, url, local_path):
         """Constructor"""
         if not url.startswith("http://"):
             raise Exception("URL must start with 'http://'")
-        self.url = url
-        self.path = savePath
-        pass
-        
+        self._url = str(url)
+        self._local_path = local_path
+
     #----------------------------------------------------------------------
-    def prepare(self, params):
-        """Prepare for the test"""
-        
-    #----------------------------------------------------------------------
-    def execute(self):
-        """"""
-        factory = HTTPDownloader(self.url, self.path)
-        factory.deferred.addCallback(self.downloadComplete).addErrback(log.err)
+    def start(self):
+        g_logger.info("URL: %s" % self._url)
+        g_logger.info("Local Path: %s" % self._local_path)
+        g_logger.info("Download started.")
+        factory = HTTPDownloader(self._url, self._local_path)
+        factory.deferred.addErrback(g_logger.error)
+        factory.deferred.addCallback(self._downloadComplete)
+        if hasattr(self, '_callback'):
+            factory.deferred.addCallback(self._callback, self._callback_args,
+                                         self._callback_kw)
         reactor.connectTCP(factory.host, factory.port, factory)
-        reactor.run()
-        
-    def downloadComplete(self, result):
-        print("download Complete")
-        reactor.stop()
-        webbrowser.open(self.path)
-                                    
-        
-        
-    
-    
+
+    #----------------------------------------------------------------------
+    def addCallback(self, callback, *args, **kw):
+        self._callback = callback
+        self._callback_args = args
+        self._callback_kw = kw
+
+    #----------------------------------------------------------------------
+    def _downloadComplete(self, result):
+        g_logger.info("Download Completed.")
+
+
+
+
+
