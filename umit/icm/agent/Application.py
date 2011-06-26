@@ -73,6 +73,9 @@ class Application(object):
         """
         The Main function
         """
+        open(os.path.join(ROOT_DIR, 'umit', 'icm', 'agent', 'running'), \
+             'w').close()
+
         # Initialize members
         self._initialize()
 
@@ -123,6 +126,11 @@ class Application(object):
               #self.test_thread.is_alive() or \
               #self.report_thread.is_alive():
             #time.sleep(0.1)
+        self.main_thread.join()
+        self.test_thread.join()
+        self.report_thread.join()
+
+        os.remove(os.path.join(ROOT_DIR, 'umit', 'icm', 'agent', 'running'))
         #self.db_engine.stop()
 
 theApp = Application()

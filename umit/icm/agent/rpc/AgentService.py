@@ -93,7 +93,7 @@ class AgentProtocol(Protocol):
 
         if self._session is not None:
             self._session.close()
-        del theApp.peer_manager.sessions[self.remote_id]
+            del theApp.peer_manager.sessions[self.remote_id]
 
     def dataReceived(self, data):
         #print(data)

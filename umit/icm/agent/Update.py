@@ -21,6 +21,7 @@
 import os
 import shutil
 import sys
+import time
 import zlib
 
 from umit.icm.agent.Global import *
@@ -28,13 +29,13 @@ from umit.icm.agent.Global import *
 def update_agent(result, *args, **kw):
     g_logger.info("Updating Desktop Agent...")
     # args = ((version, check_code=0), {})
-    version = args[0][0]
-    if len(args[0]) == 2:
-        check_code = args[0][1]
+    version = args[0]
+    if len(args) == 2:
+        check_code = args[1]
     else:
         check_code = 0
 
-    filename = 'icm-agent_' + version + '.zip'
+    filename = 'icm-agent_' + version + '.tar.gz'
     path = os.path.join(TMP_DIR, filename)
     if not os.path.exists(path):
         g_logger.error("Package %s can't be found under '/tmp' folder." %
@@ -49,14 +50,29 @@ def update_agent(result, *args, **kw):
             g_logger.error("Package %s is corrupt. Try to download it again." %
                            filename)
             return
+    # Stop current agent
+    from twisted.internet import reactor
+    reactor.stop()
+    while os.path.exists(
+        os.path.join(ROOT_DIR, 'umit', 'icm', 'agent', 'running')):
+        time.sleep(0.1)
+    # Remove files
+    shutil.rmtree(os.path.join(ROOT_DIR, 'umit'))
+    # Extract tarfile
+    import tarfile
+    t = tarfile.open(path)
+    t.extractall(ROOT_DIR)
+    # Restart
+    g_logger.info("Restarting Desktop Agent.")
+    os.execv(os.path.join(ROOT_DIR, 'bin', 'icm-agent.py'), sys.argv)
     g_logger.info("Desktop Agent Updated.")
 
 def update_test_mod(result, *args, **kw):
     g_logger.info("Updating Test Module...")
     # args = ((version, check_code=0), {})
-    version = args[0][0]
-    if len(args[0]) == 2:
-        check_code = args[0][1]
+    version = args[0]
+    if len(args) == 2:
+        check_code = args[1]
     else:
         check_code = 0
 
@@ -87,9 +103,4 @@ def update_test_mod(result, *args, **kw):
 
 
 if __name__ == "__main__":
-    fd = open("./test.py", "rb")
-    content = fd.read()
-    crc = zlib.crc32(content) & 0xffffffff
-    prev = prev & 0xffffffff
-    print(crc)
-    print(prev)
+    pass

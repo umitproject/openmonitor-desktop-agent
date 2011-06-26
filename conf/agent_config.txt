@@ -1,5 +1,5 @@
 [network]
-listen_port=5895
+listen_port=5905
 max_connections_num=100
 max_speer_num=10
 max_peer_num=100

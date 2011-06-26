@@ -44,8 +44,8 @@ class FileDownloader(object):
         factory.deferred.addErrback(g_logger.error)
         factory.deferred.addCallback(self._downloadComplete)
         if hasattr(self, '_callback'):
-            factory.deferred.addCallback(self._callback, self._callback_args,
-                                         self._callback_kw)
+            factory.deferred.addCallback(self._callback, *self._callback_args,
+                                         **self._callback_kw)
         reactor.connectTCP(factory.host, factory.port, factory)
 
     #----------------------------------------------------------------------

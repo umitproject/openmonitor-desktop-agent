@@ -205,10 +205,10 @@ class DesktopSuperAgentSession(Session):
             if compare_version(message.version, VERSION) > 0:
                 if not os.path.exists(TMP_DIR):
                     os.mkdir(TMP_DIR)
-                FileDownloader(
+                downloader = FileDownloader(
                     message.downloadURL,
                     os.path.join(TMP_DIR,
-                                 'icm-agent_' + message.version + '.zip')
+                                 'icm-agent_' + message.version + '.tar.gz')
                     )
                 if message.HasField('checkCode'):
                     downloader.addCallback(update_agent, message.version,
