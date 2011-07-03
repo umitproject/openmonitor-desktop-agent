@@ -57,7 +57,7 @@ class SQLiteHelper(object):
         else:
             self.cur.execute(statement, parameters)
         result = self.cur.fetchall()
-        g_logger.debug("%d rows selected." % len(result))
+        #g_logger.debug("%d rows selected." % len(result))
         return result
 
     def execute(self, statement, parameters=None):
@@ -69,7 +69,7 @@ class SQLiteHelper(object):
             self.cur.execute(statement)
         else:
             self.cur.execute(statement, parameters)
-        g_logger.debug("%d rows affected." % self.cur.rowcount)
+        #g_logger.debug("%d rows affected." % self.cur.rowcount)
 
     def commit(self):
         self.conn.commit()

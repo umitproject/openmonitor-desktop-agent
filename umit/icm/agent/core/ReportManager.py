@@ -21,8 +21,15 @@
 import hashlib
 import time
 
-from umit.icm.agent.Global import *
 from umit.icm.agent.Application import theApp
+from umit.icm.agent.Global import *
+from umit.icm.agent.rpc.MessageFactory import MessageFactory
+
+class ReportStatus:
+    UNSENT = 'Unsent'
+    SENT_TO_AGGREGATOR = 'SentToAggregator'
+    SENT_TO_SUPER_AGENT = 'SentToSuperAgent'
+    SENT_TO_AGENT = 'SentToAgent'
 
 ########################################################################
 class ReportEntry(object):
@@ -31,19 +38,24 @@ class ReportEntry(object):
     #----------------------------------------------------------------------
     def __init__(self):
         """Constructor"""
-        self.ID = 0
-        self.Type = None
-        self.TimeGen = None
+        self.ID = None
+        self.SourceID = 0
+        self.TimeGen = 0
+        self.TestID = 0
         self.Detail = None
-        self.SourceID = None
         self.SourceIP = None
         self.Status = ReportStatus.UNSENT
 
-class ReportStatus:
-    UNSENT = 0
-    SENT_TO_AGGREGATOR = 1
-    SENT_TO_SUPER_AGENT = 2
-    SENT_TO_AGENT = 3
+    def __str__(self):
+        return "(id=%s, source_id=%d, time_gen='%s', test_id=%d, "\
+               "detail='%s', source_ip=%s, status=%s)" % \
+               (self.ID,
+                self.SourceID,
+                time.ctime(self.TimeGen),
+                self.TestID,
+                self.Detail,
+                self.SourceIP,
+                self.Status)
 
 ########################################################################
 class ReportManager(object):
@@ -52,38 +64,25 @@ class ReportManager(object):
     #----------------------------------------------------------------------
     def __init__(self):
         """Constructor"""
-        self._report_list = []
+        self.report_list = []
 
-    def add_report(self, param):
+    def add_report(self, report):
         report_entry = ReportEntry()
         # required fields
-        report_entry.Type = param['type']
         report_entry.SourceID = param['source_id']
-        report_entry.Detail = param['detail']
+        report_entry.TimeGen = int(time.time())
+        report_entry.TestID = param['test_id']
+        report_entry.ID = param.get('report_id', self._generate_report_id(\
+            [report_entry.SourceID, report_entry.TimeGen, report_entry.TestID]))
+        report_entry.Content = param['content']
         # optional fields
-        report_entry.SourceIP = param.get('source_ip', '')
-        report_entry.TimeGen = param.get('time_gen', int(time.time()))
-        # get report ID or generate one
-        report_entry.ID = param.get('report_id',
-                                    self._generate_report_id(
-                                        [report_entry.SourceID,
-                                         report_entry.Type,
-                                         report_entry.TimeGen]))
-        self._report_list.append(report_entry)
+        report_entry.SourceIP = param['internet_ip']
 
-    def get_report_list(self):
-        return self._report_list
-
-    def _generate_report_id(self, list_):
-        m = hashlib.md5()
-        for item in list_:
-            m.update(item)
-        report_id = m.hexdigest()
-        return report_id
+        self.report_list.append(report_entry)
 
     def _insert_into_db(self, report):
         sql_stmt = "insert into reports (report_id, \
-                                         report_type, \
+                                         test_id, \
                                          time_gen, \
                                          content, \
                                          source_id, \
@@ -91,16 +90,20 @@ class ReportManager(object):
                                          status) \
                     values (%s, %s, )" % \
                     report.ID, \
-                    report.Type, \
+                    report.TestID, \
                     report.TimeGen, \
-                    g_message_factory.encode(report.detail), \
+                    MessageFactory.encode(report.Detail), \
                     report.SourceID, \
                     report.SourceIP, \
                     report.Status
 
         g_db_helper.execute(sql_stmt)
 
+    def list_reports(self):
+        for i in range(len(self.report_list)):
+            print(str(i+1) + '. ' + str(self.report_list[i]))
+
 
 if __name__ == "__main__":
     m = ReportManager()
-    m.generate_report_id(['Nobody inspects',' the spammish repetition'])
+    m._generate_report_id(['Nobody inspects',' the spammish repetition'])

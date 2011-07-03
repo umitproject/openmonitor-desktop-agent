@@ -20,18 +20,23 @@
 
 import time
 
+from zope.interface import implements
+from twisted.internet.interfaces import IConsumer
+
+from umit.icm.agent.Application import theApp
 from umit.icm.agent.Global import *
 
 ########################################################################
 class ReportUploader(object):
     """"""
 
+    implements(IConsumer)
+
     #----------------------------------------------------------------------
     def __init__(self, report_manager):
         """Constructor"""
         self.report_manager = report_manager
         self._failed_list = []
-        self._stop_flag = False
 
     def fetch_one_report(self):
         report_list = self.report_manager.get_report_list()
@@ -56,17 +61,20 @@ class ReportUploader(object):
         #_retry_list.append
         pass
 
-    #----------------------------------------------------------------------
-    def run(self):
-        """"""
-        while not self._stop_flag:  # run until the stop method is called
-            report_entry = self.fetch_one_report()
-
-            if report_entry is None:
-                time.sleep(1)
+    def process(self):
+        for report_entry in self.report_manager.report_list:
+            self.wrap_up_report(report_entry)
+            # Upload Report
+            if theApp.aggregator.available:
+                theApp.aggregator.send_report(report_entry.detail)
             else:
-                self.send_report(report_entry)
+                # Choose a random super peer to upload
+                speer_entry = theApp.peer_manager.get_random_speer_connected()
+                if speer_entry is not None:
+                    theApp.peer_manager.sessions[speer_entry.ID].send_report(report)
 
-    def stop(self):
-        self._stop_flag = True
+
+            #self.send_report(report_entry)
+            # Store Report locally
+
 

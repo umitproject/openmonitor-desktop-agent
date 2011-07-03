@@ -53,6 +53,12 @@ class DesktopAgentSession(Session):
         data = MessageFactory.encode(request_msg)
         self._transport.write(data)
 
+    def send_report(self, report):
+        g_logger.info("Send %s message to %s", (report.DESCRIPTOR.name,
+                                                self.remote_ip))
+        data = MessageFactory.encode(report)
+        self._transport.write(data)
+
     def require_agent_update(self, version, download_url, check_code=0):
         g_logger.info("Send AgentUpdate message to %s", self.remote_ip)
         request_msg = AgentUpdate()
@@ -120,6 +126,10 @@ class DesktopAgentSession(Session):
                               'public_key': agent_data.publicKey,
                               'status': 'Connected' }
                     theApp.peer_manager.add_normal_peer(entry)
+        elif isinstance(message, WebsiteReport):
+            theApp.report_manager.add_report(message)
+        elif isinstance(message, ServiceReport):
+            theApp.report_manager.add_report(message)
         elif isinstance(message, AgentUpdateResponse):
             g_logger.info("Peer %s update agent to version %s: %S" %
                           (self.remote_id, message.version, message.result))
@@ -152,6 +162,12 @@ class DesktopSuperAgentSession(Session):
         request_msg = P2PGetPeerList()
         request_msg.count = count
         data = MessageFactory.encode(request_msg)
+        self._transport.write(data)
+
+    def send_report(self, report):
+        g_logger.info("Send %s message to %s", (report.DESCRIPTOR.name,
+                                                self.remote_ip))
+        data = MessageFactory.encode(report)
         self._transport.write(data)
 
     def handle_message(self, message):
@@ -201,6 +217,10 @@ class DesktopSuperAgentSession(Session):
                               'public_key': agent_data.publicKey,
                               'status': 'Connected' }
                     theApp.peer_manager.add_normal_peer(entry)
+        elif isinstance(message, WebsiteReport):
+            theApp.report_manager.add_report(message)
+        elif isinstance(message, ServiceReport):
+            theApp.report_manager.add_report(message)
         elif isinstance(message, AgentUpdate):
             if compare_version(message.version, VERSION) > 0:
                 if not os.path.exists(TMP_DIR):

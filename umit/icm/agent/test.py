@@ -18,6 +18,11 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
+try:
+    execfile('E:\\workspace\\PyWork\\icm-agent\\umit\\icm\\agent\\UmitImporter.py')
+except:
+    pass
+
 __all__ = ['test_by_id', 'test_name_by_id', 'WebsiteTest', 'ServiceTest']
 
 TEST_PACKAGE_VERSION = '0.0'
@@ -26,13 +31,13 @@ import re
 import sys
 import time
 
-from twisted.internet import reactor
-from twisted.internet.defer import Deferred
+from twisted.internet import reactor, defer
 from twisted.internet.protocol import Protocol
 from twisted.web.client import Agent, HTTPDownloader
 from twisted.web.http_headers import Headers
 from twisted.web._newclient import ResponseDone
 
+from umit.icm.agent.Application import theApp
 from umit.icm.agent.Global import *
 from umit.icm.agent.rpc.message import *
 
@@ -53,9 +58,11 @@ class Test(object):
 
     def prepare(self, param):
         """Setup parameters and prepare for running"""
+        raise NotImplementedError
 
     def execute(self):
         """Need to be implemented"""
+        raise NotImplementedError
 
 ########################################################################
 class WebsiteTest(Test):
@@ -64,7 +71,6 @@ class WebsiteTest(Test):
         self.url = None
         self.status_code = 0
         self.pattern = None
-        self._done = False
         self._agent = Agent(reactor)
 
     def prepare(self, param):
@@ -76,17 +82,18 @@ class WebsiteTest(Test):
     def execute(self):
         """Run the test"""
         g_logger.info("Testing website: %s" % self.url)
+        self.deferred = defer.Deferred()
         d = self._agent.request('GET',
                                 self.url,
                                 Headers({'User-Agent':
                                          ['ICM Website Test']}),
                                 None)
         self.time_start = default_timer()
-        d.addCallback(self.handle_response)
+        d.addCallback(self._handle_response)
         d.addErrback(g_logger.error)
-        #d._time_start = default_timer()
+        return self.deferred
 
-    def handle_response(self, response):
+    def _handle_response(self, response):
         """Result Handler (generate report)"""
         time_end = default_timer()
         self.status_code = response.code
@@ -94,23 +101,36 @@ class WebsiteTest(Test):
         print(self.url)
         print(str(self.status_code) + ' ' + response.phrase)
         print("Response time: %fs" % (self.response_time))
-        print(response.headers)
+        #print(response.headers)
+        self._generate_report()
 
         if response.code == 200:
             if self.pattern is not None:
                 response.deliverBody(ContentExaminer(self.url,
                                                      self.pattern))
-        self._done = True
 
-    def isDone(self):
-        return self._done
+    def _generate_report_id(self, list_):
+        m = hashlib.md5()
+        for item in list_:
+            m.update(str(item))
+        report_id = m.hexdigest()
+        return report_id
 
-    def generate_report(self):
-        report = WebsiteReportDetail()
-        report.websiteURL = self.url
-        report.statusCode = self.status_code
-        report.responseTime = (int)(self.response_time * 1000)
-        return report
+    def _generate_report(self):
+        report = WebsiteReport()
+        report.header.agentID = theApp.peer_info.ID
+        report.header.timeUTC = int(time.time())
+        report.header.testID = 1
+        report.header.reportID = self._generate_report_id(\
+            [report.header.agentID,
+             report.header.timeUTC,
+             report.header.testID])
+        report_detail = WebsiteReportDetail()
+        report_detail.websiteURL = self.url
+        report_detail.statusCode = self.status_code
+        report_detail.responseTime = (int)(self.response_time * 1000)
+        param = {'test_id': 1, 'content': report_detail}
+        self.deferred.callback(param)
 
 class ContentExaminer(Protocol):
     def __init__(self, url, pattern):
@@ -147,26 +167,19 @@ class ServiceTest(Test):
 
     def execute(self):
         g_logger.info("Testing service: %s" % self.service)
-
-def check_tests_done(tests):
-    for each in tests:
-        if each.isDone():
-            print(each.url + "...done")
-            print(each.generate_report())
-    reactor.stop()
+        self.deferred = defer.Deferred()
+        return self.deferred
 
 test_by_id = {
     0: Test,
     1: WebsiteTest,
     2: ServiceTest,
-    3: Diagnose
 }
 
 test_name_by_id = {
     0: 'Test',
     1: 'WebsiteTest',
     2: 'ServiceTest',
-    3: 'Diagnose'
 }
 
 
@@ -178,6 +191,6 @@ if __name__ == "__main__":
     test2.prepare({'url': 'https://www.alipay.com', 'pattern': 'baidu'})
     test2.execute()
 
-    reactor.callLater(5, check_tests_done, [test1, test2])
+    reactor.callLater(5, reactor.stop)
     reactor.run()
     g_logger.info("finished")

@@ -1,5 +1,14 @@
 Internet Connectivity Moniter Desktop Agent README
 -------------------------------------------------------------------------------
+Requirements:
+  This software is written and tested under Windows XP & Python 2.7
+
+Dependencies:
+* Twisted 11.0.0
+  - Zope.Interface 3.6.3
+* PyGTK 2.24.0
+* pyOpenSSL 0.12
+* Google Protocol Buffers 2.4.1 
 
 Running ICM Desktop Agent:
   Execute bin/icm-agent.py. It will start the agent and read configuration from

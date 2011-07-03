@@ -19,7 +19,7 @@
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
 try:
-    execfile('F:\\workspace\\PyWork\\icm-agent\\umit\\icm\\agent\\UmitImporter.py')
+    execfile('E:\\workspace\\PyWork\\icm-agent\\umit\\icm\\agent\\UmitImporter.py')
 except:
     pass
 
@@ -31,7 +31,9 @@ from twisted.web import client
 from twisted.internet.defer import waitForDeferred
 
 from umit.icm.agent.rpc.message import *
+from umit.icm.agent.rpc.MessageFactory import MessageFactory
 
+from umit.icm.agent.Application import theApp
 from umit.icm.agent.Global import *
 from umit.icm.agent.rpc.Session import Session
 
@@ -65,11 +67,25 @@ class AggregatorAPI(object):
     def __init__(self, url):
         """Constructor"""
         self.base_url = url
-        self.available = False
+        self.available = True
 
     def _make_request_header(self, header):
         header.token = 'null' #theApp.peer_info.AuthToken
         header.agentID = 999999 #theApp.peer_info.ID
+
+    def check_availability(self):
+        url = self.base_url
+        d = self._send_request('GET', url)
+        d.addCallback(self._handle_check_availability)
+
+    def _handle_check_availability(self, d):
+        if d is not None:
+            #if self.available == False:
+            self.available = True
+            g_logger.info("Aggregator is available.")
+        else:
+            self.available = False
+            g_logger.info("Aggregator is not available.")
 
     """ Peer """
     #----------------------------------------------------------------------
@@ -107,11 +123,11 @@ class AggregatorAPI(object):
         d.addCallback(self._handle_get_super_peer_list)
         return d
 
-    def _handle_get_super_peer_list(self, d):
-        print(d)
-        response_msg = GetSuperPeerListResponse()
-        response_msg.ParseFromString(base64.b64decode(d))
-        return response_msg.knownSuperPeers
+    def _handle_get_super_peer_list(self, result):
+        if result is not None:
+            response_msg = GetSuperPeerListResponse()
+            response_msg.ParseFromString(base64.b64decode(d))
+            return response_msg.knownSuperPeers
 
     def get_peer_list(self, count):
         g_logger.info("Sending GetPeerList message to aggregator")
@@ -123,11 +139,11 @@ class AggregatorAPI(object):
         d.addCallback(self._handle_get_peer_list)
         return d
 
-    def _handle_get_peer_list(self, d):
-        print(d)
-        response_msg = GetPeerListResponse()
-        response_msg.ParseFromString(base64.b64decode(d))
-        return response_msg.knownPeers
+    def _handle_get_peer_list(self, result):
+        if result is not None:
+            response_msg = GetPeerListResponse()
+            response_msg.ParseFromString(base64.b64decode(d))
+            return response_msg.knownPeers
 
     """ Event """
     #----------------------------------------------------------------------
@@ -141,21 +157,33 @@ class AggregatorAPI(object):
 
     """ Report """
     #----------------------------------------------------------------------
-    def send_website_report(self):
+    def send_report(self, report):
+        if isinstance(report, WebsiteReport):
+            self.send_website_report(report)
+        elif isinstance(report, ServiceReport):
+            self.send_service_report(report)
+        else:
+            g_logger.debug("Log has been dropped.")
+
+    def send_website_report(self, report):
         g_logger.debug("Sending WebsiteReport to aggregator")
         url = self.base_url + "/sendwebsitereport/"
+        data = base64.b64encode(report.SerializeToString())
         d = self._send_request('POST', url, data)
+        d.addCallback(self._handle_send_website_report)
 
     def _handle_send_website_report(self, d):
-        print(d)
+        print(type(d))
 
-    def send_service_report(self):
+    def send_service_report(self, report):
         g_logger.debug("Sending ServiceReport to aggregator")
         url = self.base_url + "/sendservicereport/"
+        data = base64.b64encode(report.SerializeToString())
         d = self._send_request('POST', url, data)
+        d.addCallback(self._handle_send_service_report)
 
     def _handle_send_service_report(self, d):
-        print(d)
+        print(type(d))
 
     """ Suggestion """
     #----------------------------------------------------------------------
@@ -169,7 +197,7 @@ class AggregatorAPI(object):
         data = base64.b64encode(request_msg.SerializeToString())
         d = self._send_request('POST', url, data)
         d.addCallback(self._handle_send_website_suggestion)
-        d.addErrback(g_logger.error)
+        #d.addErrback(g_logger.error)
 
     def _handle_send_website_suggestion(self, d):
         response_msg = TestSuggestionResponse()
@@ -214,19 +242,42 @@ class AggregatorAPI(object):
 
     #----------------------------------------------------------------------
     def _send_request(self, method, uri, data="", mimeType=None):
-        data = 'msg=' + data
         headers = {}
         if mimeType:
             headers['Content-Type'] = mimeType
+        if data != "":
+            data = 'msg=' + data
         if data:
             headers['Content-Length'] = str(len(data))
-        return client.getPage(uri, method=method, postdata=data,
-                              headers=headers).addErrback(g_logger.error)
+        d = client.getPage(uri, method=method, postdata=data,
+                           headers=headers)
+        d.addErrback(self._handle_error)
+        return d
+
+    def _handle_error(self, failure):
+        from twisted.internet import error
+        if isinstance(failure.value, error.ConnectError):
+            g_logger.error("Connecting to the aggregator failed.")
+            self.available = False
+        else:
+            g_logger.error(failure)
 
 
 if __name__ == "__main__":
     api = AggregatorAPI('http://icm-dev.appspot.com/api')
-    d = api.send_website_suggestion('http://www.baidu.com')
+    #api = AggregatorAPI('http://www.baidu.com')
+    #d = api.send_website_suggestion('http://www.baidu.com')
+    report = WebsiteReport()
+    report.header.token = theApp.peer_info.AuthToken
+    report.header.agentID = theApp.peer_info.ID
+    report.report.reportID = 'xw384kkre'
+    report.report.agentID = 10000
+    report.report.testID = 1
+    report.report.timeZone = 8
+    report.report.timeUTC = int(time.time())
+    report.report.passedNode = theApp.peer_info.getLocalIP()
+
+    api.send_report(report)
 
     from twisted.internet import reactor
     reactor.callLater(10, reactor.stop)

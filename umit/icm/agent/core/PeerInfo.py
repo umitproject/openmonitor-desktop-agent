@@ -22,7 +22,7 @@ import cPickle
 
 from umit.icm.agent.Global import *
 from umit.icm.agent.Application import theApp
-from umit.icm.agent.utils.Network import get_local_ip, get_public_ip
+from umit.icm.agent.utils.Network import get_local_ip, get_internet_ip
 
 ########################################################################
 class PeerInfo(object):
@@ -39,11 +39,11 @@ class PeerInfo(object):
     #----------------------------------------------------------------------
     def __init__(self):
         """Constructor"""
-        self.load()
-        #self.props['ip'] = get_local_ip()
-        #self.props['public_ip'] = get_public_ip()
+        self.load_from_db()
+        self.props['local_ip'] = get_local_ip()
+        self.props['internet_ip'] = get_internet_ip()
 
-    def load(self):
+    def load_from_db(self):
         rs = g_db_helper.select('select * from user_info')
         if len(rs) > 0:
             if len(rs) > 1:
@@ -62,7 +62,7 @@ class PeerInfo(object):
         for entry in rs:
             self.props[entry[0]] = g_db_helper.unpack(entry[1])
 
-    def save(self):
+    def save_to_db(self):
         g_db_helper.execute("insert or replace into user_info values " \
                             "(%d, '%s', '%s', '%s', '%s', '%s', %d)" % \
                             (self.ID, self.Username, self.Email, self.AuthToken,
@@ -73,11 +73,6 @@ class PeerInfo(object):
                 (key, g_db_helper.pack(self.props[key])))
         g_db_helper.commit()
 
-    def getLocalIP(self):
-        return self._ip
-
-    def getPublicIP(self):
-        return self._pub_ip
 
 if __name__ == "__main__":
     pi = PeerInfo()

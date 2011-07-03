@@ -24,7 +24,7 @@ super agents, desktop agents, and mobile agents.
 """
 
 try:
-    execfile('F:\\workspace\\PyWork\\icm-agent\\umit\\icm\\agent\\UmitImporter.py')
+    execfile('E:\\workspace\\PyWork\\icm-agent\\umit\\icm\\agent\\UmitImporter.py')
 except:
     pass
 
@@ -63,8 +63,9 @@ class AgentProtocol(Protocol):
         self.remote_type = 0
 
         self._session = None
+        self._auth_sent = False
         self._rawMessage = RawMessage()
-        self._nonce = int(random.getrandbits(31))
+        #self._nonce = int(random.getrandbits(31))
 
     def connectionMade(self):
         self.factory.connectionNum = self.factory.connectionNum + 1
@@ -82,9 +83,9 @@ class AgentProtocol(Protocol):
         self.remote_ip = self.transport.getPeer().host
         self.remote_port = self.transport.getPeer().port
 
-        # initiator send handshake1
+        # initiator send AuthenticatePeer message
         if self.local_port != theApp.listen_port:
-            self._session = self._send_handshake()
+            self._session = self._send_auth_message()
 
     def connectionLost(self, reason):
         self.factory.connectionNum = self.factory.connectionNum - 1
@@ -117,7 +118,7 @@ class AgentProtocol(Protocol):
                                (message.DESCRIPTOR.name,
                                 self.transport.getPeer(),
                                 message))
-                if isinstance(message, Handshake1):
+                if isinstance(message, AuthenticatePeer):
                     self.remote_id = message.peerID
                     self.remote_type = message.peerType
                     if message.peerType == 0:  # aggregator
@@ -149,46 +150,12 @@ class AgentProtocol(Protocol):
                                                            self.transport)
                     else:  # wrong type
                         pass
-                    self._nonce = message.nonce + 1
                     theApp.peer_manager.\
                           sessions[message.peerID] = self._session
-                    # reply handshake
-                    self._reply_handshake()
-                elif isinstance(message, Handshake2):
-                    if message.nonce == self._nonce + 1:
-                        self.remote_id = message.peerID
-                        self.remote_type = message.peerType
-                        if message.peerType == 0:  # aggregator
-                            self._session = AggregatorSession(message.peerID,
-                                                              self.transport)
-                        elif message.peerType == 1:  # super agent
-                            param = { 'id': self.remote_id,
-                                      'ip': self.remote_ip,
-                                      'port': self.remote_port,
-                                      'status': 'Connected' }
-                            theApp.peer_manager.add_super_peer(param)
-                            self._session = DesktopSuperAgentSession(message.peerID,
-                                                                     self.transport)
-                        elif message.peerType == 2:  # desktop agent
-                            param = { 'id': self.remote_id,
-                                      'ip': self.remote_ip,
-                                      'port': self.remote_port,
-                                      'status': 'Connected' }
-                            theApp.peer_manager.add_normal_peer(param)
-                            self._session = DesktopAgentSession(message.peerID,
-                                                                self.transport)
-                        elif message.peerType == 3:  # mobile agent
-                            param = { 'id': self.remote_id,
-                                      'ip': self.remote_ip,
-                                      'port': self.remote_port,
-                                      'status': 'Connected' }
-                            theApp.peer_manager.add_mobile_peer(param)
-                            self._session = MobileAgentSession(message.peerID,
-                                                               self.transport)
-                        else:  # wrong type
-                            pass
-                        theApp.peer_manager.\
-                              sessions[message.peerID] = self._session
+                    g_logger.info("Session %d created." % message.peerID)
+                    # send auth message if didn't
+                    if not self._auth_sent:
+                        self._send_auth_message()
                 elif isinstance(message, Diagnose):
                     self._handle_diagnose(message)
                 elif self._session is not None:
@@ -198,24 +165,16 @@ class AgentProtocol(Protocol):
                                      message.DESCRIPTOR.name)
                 self._rawMessage = RawMessage()
 
-    def _send_handshake(self):
-        request_msg = Handshake1()
+    def _send_auth_message(self):
+        request_msg = AuthenticatePeer()
         request_msg.peerID = theApp.peer_info.ID
         request_msg.peerType = theApp.peer_info.Type
         request_msg.servePort = theApp.listen_port
-        request_msg.nonce = self._nonce
-        g_logger.debug("Sending handshake1 message:\n%s" % request_msg)
+        #request_msg.cipheredKey = theApp.peer_info.cipheredKey
+        g_logger.debug("Sending AuthenticatePeer message:\n%s" % request_msg)
         data = MessageFactory.encode(request_msg)
         self.transport.write(data)
-
-    def _reply_handshake(self):
-        response_msg = Handshake2()
-        response_msg.peerID = theApp.peer_info.ID
-        response_msg.peerType = theApp.peer_info.Type
-        response_msg.nonce = self._nonce
-        g_logger.debug("Sending handshake2 message:\n%s" % response_msg)
-        data = MessageFactory.encode(response_msg)
-        self.transport.write(data)
+        self._auth_sent = True
 
     def _handle_diagnose(self, message):
         if message.execType == 0:

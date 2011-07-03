@@ -23,7 +23,7 @@ for the agent.
 """
 
 try:
-    execfile('F:\\workspace\\PyWork\\icm-agent\\umit\\icm\\agent\\UmitImporter.py')
+    execfile('E:\\workspace\\PyWork\\icm-agent\\umit\\icm\\agent\\UmitImporter.py')
 except:
     pass
 
