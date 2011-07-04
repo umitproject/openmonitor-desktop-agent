@@ -114,7 +114,7 @@ class Application(object):
         g_logger.info("ICM Agent quit.")
 
         if hasattr(self, 'peer_info'):
-            self.peer_info.save()
+            self.peer_info.save_to_db()
 
         if hasattr(self, 'peer_manager'):
             self.peer_manager.save_to_db()

@@ -67,7 +67,7 @@ class AggregatorAPI(object):
     def __init__(self, url):
         """Constructor"""
         self.base_url = url
-        self.available = True
+        self.available = False
 
     def _make_request_header(self, header):
         header.token = 'null' #theApp.peer_info.AuthToken

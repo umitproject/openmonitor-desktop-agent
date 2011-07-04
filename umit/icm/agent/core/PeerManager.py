@@ -212,7 +212,7 @@ class PeerManager:
 
     def get_random_speer_connected(self):
         id_list = ()
-        for peer_entry in self.super_peers.values:
+        for peer_entry in self.super_peers.values():
             if peer_entry.status == 'Connected' and \
                peer_entry.ID in self.sessions:
                 id_list.append(peer_entry.ID)

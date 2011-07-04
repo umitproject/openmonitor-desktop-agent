@@ -63,16 +63,17 @@ class ReportUploader(object):
 
     def process(self):
         for report_entry in self.report_manager.report_list:
-            self.wrap_up_report(report_entry)
             # Upload Report
             if theApp.aggregator.available:
-                theApp.aggregator.send_report(report_entry.detail)
+                theApp.aggregator.send_report(report_entry.report)
             else:
                 # Choose a random super peer to upload
                 speer_entry = theApp.peer_manager.get_random_speer_connected()
                 if speer_entry is not None:
-                    theApp.peer_manager.sessions[speer_entry.ID].send_report(report)
-
+                    theApp.peer_manager.sessions[speer_entry.ID].\
+                          send_report(report_entry.report)
+                else:
+                    g_logger.debug("There's no connected super peer.")
 
             #self.send_report(report_entry)
             # Store Report locally

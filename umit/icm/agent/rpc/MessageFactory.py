@@ -26,8 +26,7 @@ class MessageFactory(object):
     _reader = BinaryReader()
     _writer = BinaryWriter()
     _creator = {'AssignTask': AssignTask,
-                'Handshake1': Handshake1,
-                'Handshake2': Handshake2,
+                'AuthenticatePeer': AuthenticatePeer,
                 'P2PGetPeerList': P2PGetPeerList,
                 'P2PGetPeerListResponse': P2PGetPeerListResponse,
                 'P2PGetSuperPeerList': P2PGetSuperPeerList,

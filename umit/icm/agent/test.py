@@ -27,6 +27,7 @@ __all__ = ['test_by_id', 'test_name_by_id', 'WebsiteTest', 'ServiceTest']
 
 TEST_PACKAGE_VERSION = '0.0'
 
+import hashlib
 import re
 import sys
 import time
@@ -125,12 +126,13 @@ class WebsiteTest(Test):
             [report.header.agentID,
              report.header.timeUTC,
              report.header.testID])
-        report_detail = WebsiteReportDetail()
-        report_detail.websiteURL = self.url
-        report_detail.statusCode = self.status_code
-        report_detail.responseTime = (int)(self.response_time * 1000)
-        param = {'test_id': 1, 'content': report_detail}
-        self.deferred.callback(param)
+        report.header.passedNode.append(theApp.peer_info.props['internet_ip'])
+        #report.header.traceroute
+        report.report.websiteURL = self.url
+        report.report.statusCode = self.status_code
+        report.report.responseTime = (int)(self.response_time * 1000)
+        #...
+        self.deferred.callback(report)
 
 class ContentExaminer(Protocol):
     def __init__(self, url, pattern):

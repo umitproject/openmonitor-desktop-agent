@@ -18,7 +18,6 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
-import hashlib
 import time
 
 from umit.icm.agent.Application import theApp
@@ -42,18 +41,18 @@ class ReportEntry(object):
         self.SourceID = 0
         self.TimeGen = 0
         self.TestID = 0
-        self.Detail = None
+        self.Report = None
         self.SourceIP = None
         self.Status = ReportStatus.UNSENT
 
     def __str__(self):
         return "(id=%s, source_id=%d, time_gen='%s', test_id=%d, "\
-               "detail='%s', source_ip=%s, status=%s)" % \
+               "report='%s', source_ip=%s, status=%s)" % \
                (self.ID,
                 self.SourceID,
                 time.ctime(self.TimeGen),
                 self.TestID,
-                self.Detail,
+                self.Report,
                 self.SourceIP,
                 self.Status)
 
@@ -69,18 +68,17 @@ class ReportManager(object):
     def add_report(self, report):
         report_entry = ReportEntry()
         # required fields
-        report_entry.SourceID = param['source_id']
-        report_entry.TimeGen = int(time.time())
-        report_entry.TestID = param['test_id']
-        report_entry.ID = param.get('report_id', self._generate_report_id(\
-            [report_entry.SourceID, report_entry.TimeGen, report_entry.TestID]))
-        report_entry.Content = param['content']
+        report_entry.SourceID = report.header.agentID
+        report_entry.TimeGen = report.header.timeUTC
+        report_entry.TestID = report.header.testID
+        report_entry.ID = report.header.reportID
+        report_entry.Report = report
         # optional fields
-        report_entry.SourceIP = param['internet_ip']
+        report_entry.SourceIP = report.header.passedNode[0]
 
         self.report_list.append(report_entry)
 
-    def _insert_into_db(self, report):
+    def _insert_into_db(self, report_entry):
         sql_stmt = "insert into reports (report_id, \
                                          test_id, \
                                          time_gen, \
