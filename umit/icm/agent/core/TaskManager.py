@@ -94,27 +94,23 @@ class TaskManager(object):
         """Constructor"""
         self.task_list = []  # a list of TestEntry
 
-    def add_test(self, param):
+    def add_test(self, test_id, exec_time, args, priority=0):
         """"""
         test_entry = TestEntry()
-        test_entry.ID = param['test_id']
+        test_entry.ID = test_id
         test_entry.Name = test_name_by_id[test_entry.ID]
-        test_entry.set_run_time(param['run_time'])
-        test_entry.Args = param['args']
-        if 'priority' in param:
-            test_entry.Priority = param['priority']
+        test_entry.set_run_time(exec_time)
+        test_entry.Args = args
+        test_entry.Priority = priority
         self.task_list.append(test_entry)
         g_logger.info("Test has been added. %s" % test_entry)
         self.sort_by_priority()
 
-    def remove_test(self, param):
+    def remove_test(self, test_id, args):
         """"""
-        id_ = param['test_id']
-        args = param['args']
-
         for i in range(len(self.task_list)):
             entry = self.task_list[i]
-            if entry.ID == id_:
+            if entry.ID == test_id:
                 flag = True
                 for arg in args:
                     if arg in entry.Args and args[arg] != entry.Args[arg]:
@@ -142,12 +138,9 @@ class TaskManager(object):
 
 if __name__ == "__main__":
     task_manager = TaskManager()
-    task_manager.add_test({'test_id':1, 'run_time':'*/2 * * * *',
-                 'args': {'url':'http://www.baidu.com'}, 'priority':3})
-    task_manager.add_test({'test_id':2, 'run_time':'*/3 * * * *',
-                 'args': {'service':'ftp'}})
-    task_manager.add_test({'test_id':1, 'run_time':'*/5 * * * *',
-                 'args': {'url':'http://www.sina.com'}, 'priority':2})
+    task_manager.add_test(1, '*/2 * * * *', {'url':'http://www.baidu.com'}, 3)
+    task_manager.add_test(2, '*/3 * * * *', {'service':'ftp'})
+    task_manager.add_test(1, '*/5 * * * *', {'url':'http://www.sina.com'}, 2)
     task_manager.list_tests()
     #task_manager.toggle_test_by_pos(1)
     task_manager.sort_by_priority()

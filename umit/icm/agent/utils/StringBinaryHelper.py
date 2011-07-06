@@ -92,7 +92,7 @@ class BinaryReader(object):
         return self.unpack('d', 8)
 
     def readString(self):
-        length = self.readUInt16()
+        length = self.readUInt32()
         return self.unpack(str(length) + 's', length)
 
     def readSzString(self):
@@ -104,6 +104,9 @@ class BinaryReader(object):
             self.offset = endPos + 1
             self.remaining = self.length - self.offset
             return szStr
+
+    def readFixedLengthString(self, length):
+        return self.unpack(str(length) + 's', length)
 
     def unpack(self, fmt, length = 1):
         return unpack(fmt, self.readBytes(length))[0]
@@ -158,12 +161,15 @@ class BinaryWriter(object):
         self.pack('d', d)
 
     def writeString(self, str_):
-        self.writeUInt16(len(str_))
+        self.writeUInt32(len(str_))
         self.pack(str(len(str_)) + 's', str_)
 
     def writeSzString(self, str_):
         self.pack(str(len(str_)) + 's', str_)
         self.writeChar(0)
+
+    def writeFixedLengthString(self, str_, length):
+        self.pack(str(length) + 's', str_)
 
     def pack(self, fmt, param):
         self.writeBytes(pack(fmt, param))

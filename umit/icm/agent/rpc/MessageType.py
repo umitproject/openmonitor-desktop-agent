@@ -19,3 +19,14 @@
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
 ASSIGN_TASK = 'assign_task'
+
+_creator = {'AssignTask': AssignTask,
+                'AuthenticatePeer': AuthenticatePeer,
+                'P2PGetPeerList': P2PGetPeerList,
+                'P2PGetPeerListResponse': P2PGetPeerListResponse,
+                'P2PGetSuperPeerList': P2PGetSuperPeerList,
+                'P2PGetSuperPeerListResponse': P2PGetSuperPeerListResponse,
+                'AgentUpdate': AgentUpdate,
+                'TestModuleUpdate': TestModuleUpdate,
+                'Diagnose': Diagnose,
+                'DiagnoseResponse': DiagnoseResponse}

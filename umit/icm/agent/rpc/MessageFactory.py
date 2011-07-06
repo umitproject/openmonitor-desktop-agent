@@ -18,23 +18,14 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
-from umit.icm.agent.rpc.message import *
+from umit.icm.agent.rpc.message import message_creator, message_type_to_id, \
+     message_id_to_type
 from umit.icm.agent.utils.StringBinaryHelper import BinaryReader, BinaryWriter
 
 class MessageFactory(object):
     """"""
     _reader = BinaryReader()
     _writer = BinaryWriter()
-    _creator = {'AssignTask': AssignTask,
-                'AuthenticatePeer': AuthenticatePeer,
-                'P2PGetPeerList': P2PGetPeerList,
-                'P2PGetPeerListResponse': P2PGetPeerListResponse,
-                'P2PGetSuperPeerList': P2PGetSuperPeerList,
-                'P2PGetSuperPeerListResponse': P2PGetSuperPeerListResponse,
-                'AgentUpdate': AgentUpdate,
-                'TestModuleUpdate': TestModuleUpdate,
-                'Diagnose': Diagnose,
-                'DiagnoseResponse': DiagnoseResponse}
 
     #----------------------------------------------------------------------
     #def __init__(self):
@@ -42,25 +33,27 @@ class MessageFactory(object):
 
     @classmethod
     def create(cls, msg_type):
-        return cls._creator[msg_type]()
+        return message_creator[msg_type]()
 
     @classmethod
     def encode(cls, message):
         cls._writer.reset()
-        name = message.DESCRIPTOR.name
-        body = message.SerializeToString()
-        total_length = 2 + len(name) + 2 + len(body)
+        msg_type = message.DESCRIPTOR.name
+        msg_type_id = message_type_to_id[msg_type]
+        msg_str = message.SerializeToString()
+        total_length = 4 + len(msg_str)
         cls._writer.writeInt32(total_length)
-        cls._writer.writeString(message.DESCRIPTOR.name)
-        cls._writer.writeString(message.SerializeToString())
+        cls._writer.writeInt32(msg_type_id)
+        cls._writer.writeFixedLengthString(msg_str, len(msg_str))
         return cls._writer.getString()
 
     @classmethod
     def decode(cls, str_):
         cls._reader.setString(str_)
-        msg_type = cls._reader.readString()
+        msg_type_id = cls._reader.readInt32()
+        msg_type = message_id_to_type[msg_type_id]
         message = cls.create(msg_type)
-        msg_str = cls._reader.readString()
+        msg_str = cls._reader.readFixedLengthString(len(str_)-4)
         message.ParseFromString(msg_str)
         return message
 

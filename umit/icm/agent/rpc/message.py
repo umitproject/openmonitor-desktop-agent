@@ -25,6 +25,54 @@ from umit.icm.agent.rpc.messages_ext_pb2 import *
 
 MAX_MESSAGE_LENGTH = 1024 * 1024   # max message length is 1M
 
+message_id_to_type = {
+    1001: 'AssignTask',
+    2001: 'AuthenticatePeer',
+    2002: 'AuthenticatePeerResponse',
+    2003: 'P2PGetPeerList',
+    2004: 'P2PGetPeerListResponse',
+    2005: 'P2PGetSuperPeerList',
+    2006: 'P2PGetSuperPeerListResponse',
+    2007: 'AgentUpdate',
+    2008: 'AgentUpdateResponse',
+    2009: 'TestModuleUpdate',
+    2010: 'TestModuleUpdateResponse',
+    2011: 'Diagnose',
+    2012: 'DiagnoseResponse'
+}
+
+message_type_to_id = {
+    'AssignTask': 1001,
+    'AuthenticatePeer': 2001,
+    'AuthenticatePeerResponse': 2002,
+    'P2PGetPeerList': 2003,
+    'P2PGetPeerListResponse': 2004,
+    'P2PGetSuperPeerList': 2005,
+    'P2PGetSuperPeerListResponse': 2006,
+    'AgentUpdate': 2007,
+    'AgentUpdateResponse': 2008,
+    'TestModuleUpdate': 2009,
+    'TestModuleUpdateResponse': 2010,
+    'Diagnose': 2011,
+    'DiagnoseResponse': 2012
+}
+
+message_creator = {
+    'AssignTask': AssignTask,
+    'AuthenticatePeer': AuthenticatePeer,
+    'AuthenticatePeerResponse': AuthenticatePeerResponse,
+    'P2PGetPeerList': P2PGetPeerList,
+    'P2PGetPeerListResponse': P2PGetPeerListResponse,
+    'P2PGetSuperPeerList': P2PGetSuperPeerList,
+    'P2PGetSuperPeerListResponse': P2PGetSuperPeerListResponse,
+    'AgentUpdate': AgentUpdate,
+    'AgentUpdateResponse': AgentUpdateResponse,
+    'TestModuleUpdate': TestModuleUpdate,
+    'TestModuleUpdateResponse': TestModuleUpdateResponse,
+    'Diagnose': Diagnose,
+    'DiagnoseResponse': DiagnoseResponse
+}
+
 class MalformedMessageError(Exception):
     """ Received a malformed message """
 

@@ -91,12 +91,11 @@ class Application(object):
             self.gtk_main = GtkMain()
 
         # for test
-        self.task_manager.add_test({'test_id':1, 'run_time':'*/2 * * * *',
-                     'args': {'url':'http://www.baidu.com'}, 'priority':3})
-        self.task_manager.add_test({'test_id':2, 'run_time':'*/3 * * * *',
-                     'args': {'service':'ftp'}})
-        self.task_manager.add_test({'test_id':1, 'run_time':'*/5 * * * *',
-                     'args': {'url':'http://www.sina.com'}, 'priority':2})
+        self.task_manager.add_test(1, '*/2 * * * *',
+                                   {'url':'http://www.baidu.com'}, 3)
+        self.task_manager.add_test(2, '*/3 * * * *', {'service':'ftp'})
+        self.task_manager.add_test(1, '*/5 * * * *',
+                                   {'url':'http://www.sina.com'}, 2)
 
         self.peer_maintain_lc = task.LoopingCall(self.peer_manager.maintain)
         self.peer_maintain_lc.start(30)

@@ -125,27 +125,24 @@ class AgentProtocol(Protocol):
                         self._session = AggregatorSession(message.peerID,
                                                           self.transport)
                     elif message.peerType == 1:  # super agent
-                        param = { 'id': self.remote_id,
-                                  'ip': self.remote_ip,
-                                  'port': message.servePort,
-                                  'status': 'Connected' }
-                        theApp.peer_manager.add_super_peer(param)
+                        theApp.peer_manager.add_super_peer(self.remote_id,
+                                                           self.remote_ip,
+                                                           message.servePort,
+                                                           'Connected')
                         self._session = DesktopSuperAgentSession(message.peerID,
                                                                  self.transport)
                     elif message.peerType == 2:  # desktop agent
-                        param = { 'id': self.remote_id,
-                                  'ip': self.remote_ip,
-                                  'port': message.servePort,
-                                  'status': 'Connected' }
-                        theApp.peer_manager.add_normal_peer(param)
+                        theApp.peer_manager.add_normal_peer(self.remote_id,
+                                                            self.remote_ip,
+                                                            message.servePort,
+                                                            'Connected')
                         self._session = DesktopAgentSession(message.peerID,
                                                             self.transport)
                     elif message.peerType == 3:  # mobile agent
-                        param = { 'id': self.remote_id,
-                                  'ip': self.remote_ip,
-                                  'port': message.servePort,
-                                  'status': 'Connected' }
-                        theApp.peer_manager.add_mobile_peer(param)
+                        theApp.peer_manager.add_mobile_peer(self.remote_id,
+                                                            self.remote_ip,
+                                                            message.servePort,
+                                                            'Connected')
                         self._session = MobileAgentSession(message.peerID,
                                                            self.transport)
                     else:  # wrong type

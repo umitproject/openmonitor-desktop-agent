@@ -105,50 +105,44 @@ class PeerManager:
             elif peer_entry.Type == 3:
                 self.mobile_peers[peer_entry.ID] = peer_entry
 
-    def add_super_peer(self, param):
+    def add_super_peer(self, peer_id, ip, port, token=None, public_key=None,
+                       status='Disconnected'):
         peer_entry = PeerEntry()
         peer_entry.Type = 1
-        peer_entry.ID = param['id']
-        peer_entry.IP = param['ip']
-        peer_entry.Port = param['port']
-        if 'token' in param:
-            peer_entry.Token = param['token']
-        if 'public_key' in param:
-            peer_entry.PublicKey = param['public_key']
-        if 'status' in param:
-            peer_entry.status = param['status']
+        peer_entry.ID = peer_id
+        peer_entry.IP = ip
+        peer_entry.Port = port
+        peer_entry.Token = token
+        peer_entry.PublicKey = public_key
+        peer_entry.status = status
         if peer_entry.ID not in self.super_peers:
             self.super_peers[peer_entry.ID] = peer_entry
             self.super_peer_num = self.super_peer_num + 1
 
-    def add_normal_peer(self, param):
+    def add_normal_peer(self, peer_id, ip, port, token=None, public_key=None,
+                        status='Disconnected'):
         peer_entry = PeerEntry()
         peer_entry.Type = 2
-        peer_entry.ID = param['id']
-        peer_entry.IP = param['ip']
-        peer_entry.Port = param['port']
-        if 'token' in param:
-            peer_entry.Token = param['token']
-        if 'public_key' in param:
-            peer_entry.PublicKey = param['public_key']
-        if 'status' in param:
-            peer_entry.status = param['status']
+        peer_entry.ID = peer_id
+        peer_entry.IP = ip
+        peer_entry.Port = port
+        peer_entry.Token = token
+        peer_entry.PublicKey = public_key
+        peer_entry.status = status
         if peer_entry.ID not in self.normal_peers:
             self.normal_peers[peer_entry.ID] = peer_entry
             self.super_peer_num = self.normal_peer_num + 1
 
-    def add_mobile_peer(self, param):
+    def add_mobile_peer(self, peer_id, ip, port, token=None, public_key=None,
+                        status='Disconnected'):
         peer_entry = PeerEntry()
         peer_entry.Type = 3
-        peer_entry.ID = param['id']
-        peer_entry.IP = param['ip']
-        peer_entry.Port = param['port']
-        if 'token' in param:
-            peer_entry.Token = param['token']
-        if 'public_key' in param:
-            peer_entry.PublicKey = param['public_key']
-        if 'status' in param:
-            peer_entry.status = param['status']
+        peer_entry.ID = peer_id
+        peer_entry.IP = ip
+        peer_entry.Port = port
+        peer_entry.Token = token
+        peer_entry.PublicKey = public_key
+        peer_entry.status = status
         if peer_entry.ID not in self.mobile_peers:
             self.mobile_peers[peer_entry.ID] = peer_entry
             self.super_peer_num = self.mobile_peer_num + 1
@@ -160,14 +154,14 @@ class PeerManager:
             del self.super_peers[peer_id]
             self.super_peer_num = self.super_peer_num - 1
 
-    def remove_normal_peer(self, id):
+    def remove_normal_peer(self, peer_id):
         if peer_id in self.normal_peers:
             if self.normal_peers[peer_id].transport:
                 print(self.normal_peers[peer_id].transport)
             del self.normal_peers[peer_id]
             self.normal_peer_num = self.normal_peer_num - 1
 
-    def remove_mobile_peer(self, id):
+    def remove_mobile_peer(self, peer_id):
         if peer_id in self.mobile_peers:
             if self.mobile_peers[peer_id].transport:
                 print(self.mobile_peers[peer_id].transport)
@@ -234,9 +228,9 @@ class PeerManager:
         if peers is not None:
             for peer in peers:
                 peer_entry = PeerEntry()
-                peer_entry.ID = param['id']
-                peer_entry.IP = param['ip']
-                peer_entry.Port = param['port']
+                peer_entry.ID = peer.agentID
+                peer_entry.IP = peer.agentIP
+                peer_entry.Port = peer.agentPort
                 # ...
                 self.connect_to_peer(peer_entry)
 
