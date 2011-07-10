@@ -38,7 +38,9 @@ message_id_to_type = {
     2009: 'TestModuleUpdate',
     2010: 'TestModuleUpdateResponse',
     2011: 'Diagnose',
-    2012: 'DiagnoseResponse'
+    2012: 'DiagnoseResponse',
+    3001: 'WebsiteReport',
+    3002: 'ServiceReport'
 }
 
 message_type_to_id = {
@@ -54,7 +56,9 @@ message_type_to_id = {
     'TestModuleUpdate': 2009,
     'TestModuleUpdateResponse': 2010,
     'Diagnose': 2011,
-    'DiagnoseResponse': 2012
+    'DiagnoseResponse': 2012,
+    'WebsiteReport': 3001,
+    'ServiceReport': 3002
 }
 
 message_creator = {
@@ -70,7 +74,9 @@ message_creator = {
     'TestModuleUpdate': TestModuleUpdate,
     'TestModuleUpdateResponse': TestModuleUpdateResponse,
     'Diagnose': Diagnose,
-    'DiagnoseResponse': DiagnoseResponse
+    'DiagnoseResponse': DiagnoseResponse,
+    'WebsiteReport': WebsiteReport,
+    'ServiceReport': ServiceReport
 }
 
 class MalformedMessageError(Exception):

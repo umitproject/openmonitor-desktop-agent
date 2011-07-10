@@ -139,7 +139,8 @@ class DesktopAgentSession(Session):
 
     def close(self):
         if self.remote_id in theApp.peer_manager.normal_peers:
-            theApp.peer_manager.normal_peers[self.remote_id].Status = 'Disconnected'
+            theApp.peer_manager.normal_peers[self.remote_id].Status = \
+                  'Disconnected'
 
 ########################################################################
 class DesktopSuperAgentSession(Session):
@@ -165,8 +166,8 @@ class DesktopSuperAgentSession(Session):
         self._transport.write(data)
 
     def send_report(self, report):
-        g_logger.info("Send %s message to %s", (report.DESCRIPTOR.name,
-                                                self.remote_ip))
+        g_logger.info("Send %s message to %s" % (report.DESCRIPTOR.name,
+                                                 self.remote_ip))
         data = MessageFactory.encode(report)
         self._transport.write(data)
 
@@ -253,4 +254,5 @@ class DesktopSuperAgentSession(Session):
 
     def close(self):
         if self.remote_id in theApp.peer_manager.super_peers:
-            theApp.peer_manager.super_peers[self.remote_id].Status = 'Disconnected'
+            theApp.peer_manager.super_peers[self.remote_id].Status = \
+                  'Disconnected'

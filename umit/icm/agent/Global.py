@@ -33,11 +33,21 @@ g_config = ICMConfig(os.path.join(CONFIG_DIR, 'agent_config.txt'))
 #----------------------------------------------------------------------
 from umit.common.UmitLogging import Log
 LOGLEVEL = g_config.get('logging', 'log_level')
+_levels = {
+    'CRITICAL' : 50,
+    'FATAL' : 50,
+    'ERROR' : 40,
+    'WARN' : 30,
+    'WARNING' : 30,
+    'INFO' : 20,
+    'DEBUG' : 10,
+    'NOTSET' : 0,
+}
 if not os.path.exists(LOG_DIR):
     os.mkdir(LOG_DIR)
 log_filename = os.path.join(LOG_DIR, 'icm-desktop.log')
 
-g_logger = Log("ICM Desktop Agent", LOGLEVEL)
+g_logger = Log("ICM Desktop Agent", _levels[LOGLEVEL])
 #open(log_filename, 'a')
 #g_logger = Log("ICM Desktop Agent File Log", LOGLEVEL, log_filename)
 

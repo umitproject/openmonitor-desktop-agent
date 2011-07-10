@@ -55,6 +55,8 @@ class AggregagorSession(Session):
             pass
         elif isinstance(message, TestModuleUpdate):
             pass
+        elif isinstance(message, Notification):
+            pass
 
     def close(self):
         pass
@@ -121,13 +123,18 @@ class AggregatorAPI(object):
         data = base64.b64encode(request_msg.SerializeToString())
         d = self._send_request('POST', url, data)
         d.addCallback(self._handle_get_super_peer_list)
-        return d
 
     def _handle_get_super_peer_list(self, result):
         if result is not None:
             response_msg = GetSuperPeerListResponse()
             response_msg.ParseFromString(base64.b64decode(d))
-            return response_msg.knownSuperPeers
+            for speer in response_msg.knownSuperPeers:
+                theApp.peer_manager.add_super_peer(speer.agentID,
+                                                   speer.agentIP,
+                                                   speer.agentPort,
+                                                   speer.token,
+                                                   speer.publicKey)
+                theApp.peer_manager.connect_to_peer(speer.agentID)
 
     def get_peer_list(self, count):
         g_logger.info("Sending GetPeerList message to aggregator")
@@ -137,13 +144,18 @@ class AggregatorAPI(object):
         data = base64.b64encode(request_msg.SerializeToString())
         d = self._send_request('POST', url, data)
         d.addCallback(self._handle_get_peer_list)
-        return d
 
     def _handle_get_peer_list(self, result):
         if result is not None:
             response_msg = GetPeerListResponse()
             response_msg.ParseFromString(base64.b64decode(d))
-            return response_msg.knownPeers
+            for peer in response_msg.knownPeers:
+                theApp.peer_manager.add_normal_peer(peer.agentID,
+                                                    peer.agentIP,
+                                                    peer.agentPort,
+                                                    peer.token,
+                                                    peer.publicKey)
+                theApp.peer_manager.connect_to_peer(peer.agentID)
 
     """ Event """
     #----------------------------------------------------------------------
@@ -173,6 +185,7 @@ class AggregatorAPI(object):
         d.addCallback(self._handle_send_website_report)
 
     def _handle_send_website_report(self, d):
+        if
         print(type(d))
 
     def send_service_report(self, report):

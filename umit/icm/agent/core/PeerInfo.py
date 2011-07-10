@@ -34,6 +34,7 @@ class PeerInfo(object):
     Email = ''
     PublicKey = ''
     PrivateKey = ''
+    CipheredKey = ''
     props = {}
 
     #----------------------------------------------------------------------
@@ -57,16 +58,18 @@ class PeerInfo(object):
             self.Email = rs[0][3]
             self.PublicKey = rs[0][4]
             self.PrivateKey = rs[0][5]
-            self.Type = rs[0][6]
+            self.CipheredKey = rs[0][6]
+            self.Type = rs[0][7]
         rs = g_db_helper.select('select * from peer_info')
         for entry in rs:
             self.props[entry[0]] = g_db_helper.unpack(entry[1])
 
     def save_to_db(self):
         g_db_helper.execute("insert or replace into user_info values " \
-                            "(%d, '%s', '%s', '%s', '%s', '%s', %d)" % \
+                            "(%d, '%s', '%s', '%s', '%s', '%s', '%s', %d)" % \
                             (self.ID, self.Username, self.Email, self.AuthToken,
-                             self.PublicKey, self.PrivateKey, self.Type))
+                             self.PublicKey, self.PrivateKey, self.CipheredKey,
+                             self.Type))
         for key in self.props:
             g_db_helper.execute(
                 "insert or replace into peer_info values (?, ?)",

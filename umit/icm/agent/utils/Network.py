@@ -23,15 +23,21 @@ import urllib2
 from socket import socket, SOCK_DGRAM, AF_INET
 
 local_ip_url = "www.google.com"
-internet_ip_url = "http://www.whereismyip.com"
+internet_ip_url = "http://www.whereismyip.org"
 
 def get_local_ip():
-     s = socket(AF_INET, SOCK_DGRAM)
-     s.connect((local_ip_url, 0))
-     ip = s.getsockname()[0]
-     return ip
+     try:
+          s = socket(AF_INET, SOCK_DGRAM)
+          s.connect((local_ip_url, 0))
+          ip = s.getsockname()[0]
+          return ip
+     except:
+          print("Failed to get local ip.")
 
 def get_internet_ip():
-     content = urllib2.urlopen(internet_ip_url).read()
-     ip = re.search('\d+\.\d+\.\d+\.\d+', content).group(0)
-     return ip
+     try:
+          content = urllib2.urlopen(internet_ip_url).read()
+          ip = re.search('\d+\.\d+\.\d+\.\d+', content).group(0)
+          return ip
+     except:
+          print("Failed to get internet ip.")

@@ -68,10 +68,11 @@ class ReportUploader(object):
                 theApp.aggregator.send_report(report_entry.report)
             else:
                 # Choose a random super peer to upload
-                speer_entry = theApp.peer_manager.get_random_speer_connected()
-                if speer_entry is not None:
-                    theApp.peer_manager.sessions[speer_entry.ID].\
-                          send_report(report_entry.report)
+                speer_id = theApp.peer_manager.get_random_speer_connected()
+                if speer_id is not None:
+                    theApp.peer_manager.sessions[speer_id].\
+                          send_report(report_entry.Report)
+                    # do further things in callback
                 else:
                     g_logger.debug("There's no connected super peer.")
 

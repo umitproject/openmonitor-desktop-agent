@@ -107,64 +107,73 @@ class PeerManager:
 
     def add_super_peer(self, peer_id, ip, port, token=None, public_key=None,
                        status='Disconnected'):
-        peer_entry = PeerEntry()
-        peer_entry.Type = 1
-        peer_entry.ID = peer_id
-        peer_entry.IP = ip
-        peer_entry.Port = port
-        peer_entry.Token = token
-        peer_entry.PublicKey = public_key
-        peer_entry.status = status
-        if peer_entry.ID not in self.super_peers:
+        if peer_id in self.super_peers:
+            g_logger.info("Peer id %d already exists in super peer list." %
+                          peer_id)
+        else:
+            peer_entry = PeerEntry()
+            peer_entry.Type = 1
+            peer_entry.ID = peer_id
+            peer_entry.IP = ip
+            peer_entry.Port = port
+            peer_entry.Token = token
+            peer_entry.PublicKey = public_key
+            peer_entry.status = status
             self.super_peers[peer_entry.ID] = peer_entry
             self.super_peer_num = self.super_peer_num + 1
 
     def add_normal_peer(self, peer_id, ip, port, token=None, public_key=None,
                         status='Disconnected'):
-        peer_entry = PeerEntry()
-        peer_entry.Type = 2
-        peer_entry.ID = peer_id
-        peer_entry.IP = ip
-        peer_entry.Port = port
-        peer_entry.Token = token
-        peer_entry.PublicKey = public_key
-        peer_entry.status = status
-        if peer_entry.ID not in self.normal_peers:
+        if peer_id in self.normal_peers:
+            g_logger.info("Peer id %d already exists in normal peer list." %
+                          peer_id)
+        else:
+            peer_entry = PeerEntry()
+            peer_entry.Type = 2
+            peer_entry.ID = peer_id
+            peer_entry.IP = ip
+            peer_entry.Port = port
+            peer_entry.Token = token
+            peer_entry.PublicKey = public_key
+            peer_entry.status = status
             self.normal_peers[peer_entry.ID] = peer_entry
-            self.super_peer_num = self.normal_peer_num + 1
+            self.normal_peer_num = self.normal_peer_num + 1
 
     def add_mobile_peer(self, peer_id, ip, port, token=None, public_key=None,
                         status='Disconnected'):
-        peer_entry = PeerEntry()
-        peer_entry.Type = 3
-        peer_entry.ID = peer_id
-        peer_entry.IP = ip
-        peer_entry.Port = port
-        peer_entry.Token = token
-        peer_entry.PublicKey = public_key
-        peer_entry.status = status
-        if peer_entry.ID not in self.mobile_peers:
+        if peer_id in self.mobile_peers:
+            g_logger.info("Peer id %d already exists in mobile peer list." %
+                          peer_id)
+        else:
+            peer_entry = PeerEntry()
+            peer_entry.Type = 3
+            peer_entry.ID = peer_id
+            peer_entry.IP = ip
+            peer_entry.Port = port
+            peer_entry.Token = token
+            peer_entry.PublicKey = public_key
+            peer_entry.status = status
             self.mobile_peers[peer_entry.ID] = peer_entry
-            self.super_peer_num = self.mobile_peer_num + 1
+            self.mobile_peer_num = self.mobile_peer_num + 1
 
     def remove_super_peer(self, peer_id):
         if peer_id in self.super_peers:
-            if self.super_peers[peer_id].transport:
-                print(self.super_peers[peer_id].transport)
+            if peer_id in self.sessions:
+                self.sessions[peer_id].transport.loseConnection()
             del self.super_peers[peer_id]
             self.super_peer_num = self.super_peer_num - 1
 
     def remove_normal_peer(self, peer_id):
         if peer_id in self.normal_peers:
-            if self.normal_peers[peer_id].transport:
-                print(self.normal_peers[peer_id].transport)
+            if peer_id in self.sessions:
+                self.sessions[peer_id].transport.loseConnection()
             del self.normal_peers[peer_id]
             self.normal_peer_num = self.normal_peer_num - 1
 
     def remove_mobile_peer(self, peer_id):
         if peer_id in self.mobile_peers:
-            if self.mobile_peers[peer_id].transport:
-                print(self.mobile_peers[peer_id].transport)
+            if peer_id in self.sessions:
+                self.sessions[peer_id].transport.loseConnection()
             del self.mobile_peers[peer_id]
             self.mobile_peer_num = self.mobile_peer_num - 1
 
@@ -205,7 +214,7 @@ class PeerManager:
                     chosen_peers.append(peer)
 
     def get_random_speer_connected(self):
-        id_list = ()
+        id_list = []
         for peer_entry in self.super_peers.values():
             if peer_entry.status == 'Connected' and \
                peer_entry.ID in self.sessions:
@@ -214,25 +223,28 @@ class PeerManager:
         if len(id_list) == 0:
             return None
         else:
-            chosen_speer_id = random.randint(0, len(id_list))
-            return self.super_peers[chosen_speer_id]
+            idx = random.randint(0, len(id_list)-1)
+            return id_list[idx]
 
-    def connect_to_peer(self, peer_entry):
-        if peer_entry.ID not in self.sessions:
+    def connect_to_peer(self, peer_id):
+        if peer_id != theApp.peer_info.ID and \
+           peer_id not in self.sessions:
+            peer_entry = None
+            if peer_id in self.super_peers:
+                peer_entry = self.super_peers[peer_id]
+            elif peer_id in self.normal_peers:
+                peer_entry = self.normal_peers[peer_id]
+            elif peer_id in self.mobile_peers:
+                peer_entry = self.mobile_peers[peer_id]
+            else:
+                g_logger.error("Peer id %d doesn't exist in all peer lists." %
+                               peer_id)
+                return
+
             reactor.connectTCP(peer_entry.IP, peer_entry.Port,
                                theApp.factory)
             g_logger.debug("Connecting to %s:%d..." %
                            (peer_entry.IP, peer_entry.Port))
-
-    def connect_to_peers(self, peers):
-        if peers is not None:
-            for peer in peers:
-                peer_entry = PeerEntry()
-                peer_entry.ID = peer.agentID
-                peer_entry.IP = peer.agentIP
-                peer_entry.Port = peer.agentPort
-                # ...
-                self.connect_to_peer(peer_entry)
 
     """
     Make the desktop agent connect to a certain number of super peers and \
@@ -248,8 +260,7 @@ class PeerManager:
             if theApp.aggregator.available:
                 g_logger.debug("Requiring %d super peers from the aggregator",
                                required_num)
-                d = theApp.aggregator.get_super_peer_list(required_num)
-                d.addCallback(self.connect_to_peers)
+                theApp.aggregator.get_super_peer_list(required_num)
             else:
                 for peer in self.super_peers.values():
                     if peer.status == 'Connected' and peer.ID in self.sessions:
@@ -258,22 +269,20 @@ class PeerManager:
                         peer_manager.sessions[peer.ID].\
                                     get_super_peer_list(required_num)
                     elif peer.status == 'Disconnected':
-                        self.connect_to_peer(peer)
+                        self.connect_to_peer(peer.ID)
 
         if self.normal_peer_num < self.max_peer_num:
             required_num = self.max_peer_num - self.normal_peer_num
             if theApp.aggregator.available:
                 g_logger.debug("Requiring %d peers from the aggregator",
                                required_num)
-                d = theApp.aggregator.get_peer_list(required_num)
-                d.addCallback(self.connect_to_peers)
+                theApp.aggregator.get_peer_list(required_num)
             else:
                 for peer in self.super_peers.values():
                     if peer.status == 'Connected' and peer.ID in self.sessions:
                         g_logger.debug("Requiring %d peers from "
                                        "super peer %d", (required_num, peer.ID))
-                        peer_manager.sessions[peer.ID].\
-                                    get_peer_list(required_num)
+                        self.sessions[peer.ID].get_peer_list(required_num)
                 for peer in self.normal_peers.values():
                     if peer.status == 'Disconnected':
-                        self.connect_to_peer(peer)
+                        self.connect_to_peer(peer.ID)
