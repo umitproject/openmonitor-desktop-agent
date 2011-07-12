@@ -65,18 +65,31 @@ class ReportUploader(object):
         for report_entry in self.report_manager.report_list:
             # Upload Report
             if theApp.aggregator.available:
+                g_logger.info("Send a report to the aggregator.")
                 theApp.aggregator.send_report(report_entry.report)
             else:
                 # Choose a random super peer to upload
                 speer_id = theApp.peer_manager.get_random_speer_connected()
                 if speer_id is not None:
+                    g_logger.info("Send a report to the super agent %d.",
+                                   speer_id)
                     theApp.peer_manager.sessions[speer_id].\
                           send_report(report_entry.Report)
                     # do further things in callback
                 else:
-                    g_logger.debug("There's no connected super peer.")
+                    cnt = 0
+                    for peer_id in theApp.peer_manager.normal_peers:
+                        if theApp.peer_manager.normal_peers[peer_id].status == \
+                           'Connected':
+                            theApp.peer_manager.sessions[peer_id].\
+                                  send_report(report_entry.Report)
+                            cnt = cnt + 1
+                    if cnt == 0:
+                        g_logger.info("Report has not been sent.")
+                    else:
+                        g_logger.info("Send a report to %d normal agents.", cnt)
 
-            #self.send_report(report_entry)
-            # Store Report locally
+            # Report will be removed from the report_list after sent successfully
+
 
 

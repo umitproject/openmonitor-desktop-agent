@@ -18,10 +18,10 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
-try:
-    execfile('E:\\workspace\\PyWork\\icm-agent\\umit\\icm\\agent\\UmitImporter.py')
-except:
-    pass
+#try:
+    #execfile("E:\\workspace\\PyWork\\icm-agent\\umit\\icm\\agent\\UmitImporter.py")
+#except:
+    #pass
 
 import base64
 import os
@@ -46,17 +46,29 @@ class AggregagorSession(Session):
         """Constructor"""
         Session.__init__(self, 0, transport)
 
+    def _handle_assign_task(self, message):
+        pass
+
+    def _handle_agent_update(self, message):
+        pass
+
+    def _handle_test_mod_update(self, message):
+        pass
+
+    def _handle_notification(self, message):
+        pass
+
     def handle_message(self, message):
         g_logger.debug("AggregatorSession - Handling %s message." %
                        message.DESCRIPTOR.name)
         if isinstance(message, AssignTask):
-            pass
+            self._handle_assign_task(message)
         elif isinstance(message, AgentUpdate):
-            pass
+            self._handle_assign_task(message)
         elif isinstance(message, TestModuleUpdate):
-            pass
+            self._handle_assign_task(message)
         elif isinstance(message, Notification):
-            pass
+            self._handle_notification(message)
 
     def close(self):
         pass
@@ -185,8 +197,7 @@ class AggregatorAPI(object):
         d.addCallback(self._handle_send_website_report)
 
     def _handle_send_website_report(self, d):
-        if
-        print(type(d))
+        print(d)
 
     def send_service_report(self, report):
         g_logger.debug("Sending ServiceReport to aggregator")
@@ -196,7 +207,7 @@ class AggregatorAPI(object):
         d.addCallback(self._handle_send_service_report)
 
     def _handle_send_service_report(self, d):
-        print(type(d))
+        print(d)
 
     """ Suggestion """
     #----------------------------------------------------------------------
@@ -277,18 +288,18 @@ class AggregatorAPI(object):
 
 
 if __name__ == "__main__":
+    import time
     api = AggregatorAPI('http://icm-dev.appspot.com/api')
     #api = AggregatorAPI('http://www.baidu.com')
     #d = api.send_website_suggestion('http://www.baidu.com')
     report = WebsiteReport()
-    report.header.token = theApp.peer_info.AuthToken
-    report.header.agentID = theApp.peer_info.ID
-    report.report.reportID = 'xw384kkre'
-    report.report.agentID = 10000
-    report.report.testID = 1
-    report.report.timeZone = 8
-    report.report.timeUTC = int(time.time())
-    report.report.passedNode = theApp.peer_info.getLocalIP()
+    report.header.reportID = 'xw384kkre'
+    report.header.agentID = 10000
+    report.header.testID = 1
+    report.header.timeZone = 8
+    report.header.timeUTC = int(time.time())
+    report.report.websiteURL = 'http://www.baidu.com'
+    report.report.statusCode = 200
 
     api.send_report(report)
 

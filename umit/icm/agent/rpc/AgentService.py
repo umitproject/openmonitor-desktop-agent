@@ -23,11 +23,6 @@ We use port multiplexing to handle different packets from the aggregator,
 super agents, desktop agents, and mobile agents.
 """
 
-try:
-    execfile('E:\\workspace\\PyWork\\icm-agent\\umit\\icm\\agent\\UmitImporter.py')
-except:
-    pass
-
 import random
 import struct
 import time

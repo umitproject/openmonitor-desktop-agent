@@ -21,11 +21,6 @@
 Entrance of ICM Desktop Agent
 """
 
-try:
-    execfile('E:\\workspace\\PyWork\\icm-agent\\umit\\icm\\agent\\UmitImporter.py')
-except:
-    pass
-
 import os
 import signal
 import sys
@@ -104,7 +99,7 @@ class Application(object):
         self.task_run_lc.start(30)
 
         self.report_proc_lc = task.LoopingCall(self.report_uploader.process)
-        self.report_proc_lc.start(5)
+        self.report_proc_lc.start(10)
 
         reactor.addSystemEventTrigger('before', 'shutdown', self.quit)
         reactor.run()
