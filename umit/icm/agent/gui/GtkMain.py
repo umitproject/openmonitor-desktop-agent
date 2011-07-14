@@ -30,12 +30,14 @@ from umit.icm.agent.I18N import _
 from umit.icm.agent.BasePaths import *
 from umit.icm.agent.Application import theApp
 from umit.icm.agent.gui.LoginDialog import LoginDialog
+from umit.icm.agent.gui.PreferenceWindow import PreferenceWindow
 
 class GtkMain(object):
     def __init__(self, *args, **kwargs):
         super(GtkMain, self).__init__(*args, **kwargs)
         self._create_widgets()
         self.is_login = False
+        self.set_login_status(True)
 
     def _create_widgets(self):
         self.tray_icon = gtk.StatusIcon()
@@ -117,7 +119,12 @@ class GtkMain(object):
         menu.popup(None, None, None, button, activate_time, status_icon)
 
     def show_preference(self):
-        pass
+        s = PreferenceWindow(None)
+        w = gtk.Window()
+        w.set_title(_("Preference"))
+        w.set_size_request(520, 440)
+        w.add(s)
+        w.show_all()
 
     def show_login(self):
         login_dlg = LoginDialog()

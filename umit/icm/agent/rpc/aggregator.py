@@ -88,7 +88,7 @@ class AggregatorAPI(object):
         header.agentID = 999999 #theApp.peer_info.ID
 
     def check_availability(self):
-        url = self.base_url
+        url = self.base_url # temporarily
         d = self._send_request('GET', url)
         d.addCallback(self._handle_check_availability)
 
