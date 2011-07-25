@@ -100,6 +100,13 @@ class WebsiteTest(Test):
         #print(response.headers)
         self._generate_report()
 
+        theApp.statistics.tests_done = theApp.statistics.tests_done + 1
+        if 1 in theApp.statistics.tests_done_by_type:
+            theApp.statistics.tests_done_by_type[1] = \
+                  theApp.statistics.tests_done_by_type[1] + 1
+        else:
+            theApp.statistics.tests_done_by_type[1] = 0
+
         if response.code == 200:
             if self.pattern is not None:
                 response.deliverBody(ContentExaminer(self.url,
@@ -116,6 +123,7 @@ class WebsiteTest(Test):
         report = WebsiteReport()
         report.header.agentID = theApp.peer_info.ID
         report.header.timeUTC = int(time.time())
+        report.header.timeZone = 8
         report.header.testID = 1
         report.header.reportID = self._generate_report_id(\
             [report.header.agentID,
@@ -127,6 +135,8 @@ class WebsiteTest(Test):
         report.report.statusCode = self.status_code
         report.report.responseTime = (int)(self.response_time * 1000)
         #...
+        theApp.statistics.reports_generated = \
+              theApp.statistics.reports_generated + 1
         self.deferred.callback(report)
 
 class ContentExaminer(Protocol):

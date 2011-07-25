@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 # Copyright (C) 2011 Adriano Monteiro Marques
 #
-# Author:  Paul Pei <@gmail.com>
+# Author:  Paul Pei <paul.kdash@gmail.com>
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -20,7 +20,6 @@
 
 import gtk
 import sys
-import tests
 
 from higwidgets.higwindows import HIGWindow
 from higwidgets.higboxes import HIGVBox
@@ -33,23 +32,20 @@ from higwidgets.higdialogs import HIGAlertDialog
 
 from umit.icm.agent.I18N import _
 
-class PreferenceWindow(gtk.HPaned, object):
-    def __init__(self, notebook):
-        gtk.HPaned.__init__(self)
+class PreferenceWindow(HIGWindow):
+    """
+    User Preference
+    """
+    def __init__(self):
+        HIGWindow.__init__(self, type=gtk.WINDOW_TOPLEVEL)
+        self.set_title(_('Preference'))
+        self.__create_widgets()
+        self.__pack_widgets()
 
-        self._create_widgets()
-        self._pack_widgets()
-        #self._connect_events()
-
-        self.parsed_results = {}
-        #self._set_result_view()
-        self.scan_num = 1
-        self.id = 0
-        self.notebook = notebook
-
-    def _create_widgets(self):
+    def __create_widgets(self):
         # Main widgets
         self.hpaned = gtk.HPaned()
+        self.add(self.hpaned)
         self.main_vbox = HIGVBox()
         self.btn_box = gtk.HButtonBox()
         self.ok_button = gtk.Button(stock=gtk.STOCK_OK)
@@ -140,7 +136,7 @@ class PreferenceWindow(gtk.HPaned, object):
         self.feedback_report_sendbtn = HIGButton('Send')
         self.feedback_report_subhbox3 = HIGHBox()
 
-    def _pack_widgets(self):
+    def __pack_widgets(self):
         # Search Notebook
         self.preference_vbox._pack_expand_fill(self.preference_notebook)
 
@@ -240,7 +236,21 @@ class PreferenceWindow(gtk.HPaned, object):
         self.preference_notebook.append_page(self.feedback_vbox,
                                          gtk.Label("Feedback"))
 
-        self.pack1(self.preference_vbox, True, False)
+        self.hpaned.pack1(self.preference_vbox, True, False)
+
+class PreferenceWindowA(gtk.HPaned, object):
+    def __init__(self, notebook):
+        gtk.HPaned.__init__(self)
+
+        self._create_widgets()
+        self._pack_widgets()
+        #self._connect_events()
+
+        self.parsed_results = {}
+        #self._set_result_view()
+        self.scan_num = 1
+        self.id = 0
+        self.notebook = notebook
 
     #def _connect_events(self):
         #self.os_osclass_combo.connect("changed", self.update_osmatch)
@@ -249,14 +259,6 @@ class PreferenceWindow(gtk.HPaned, object):
         #self.pref_update_check.connect("toggled", self.update_search_check)
         ##1self.pref_path_entry.connect_entry_change(self.update_path_entry)
         #self.pref_savetime_entry.connect_entry_change(self.update_savetime_entry)
-
-    def check_response(self, widget, response_id):
-        print(response_id)
-        if response_id == gtk.RESPONSE_ACCEPT: # clicked on Ok btn
-            self.login()
-        elif response_id in (gtk.RESPONSE_DELETE_EVENT, gtk.RESPONSE_CANCEL,
-                gtk.RESPONSE_NONE):
-            self.destroy()
 
 class Tests(gtk.VBox):
     def __init__(self):
@@ -339,11 +341,8 @@ if __name__ == "__main__":
     def quit(x, y):
         gtk.main_quit()
 
-    s = PreferenceWindow(None)
-    w = gtk.Window()
-    w.set_title(_("Preference"))
-    w.set_size_request(520, 440)
-    w.connect("delete-event", quit)
-    w.add(s)
-    w.show_all()
+    wnd = PreferenceWindow()
+    #wnd.set_size_request(520, 440)
+    wnd.connect("delete-event", quit)
+    wnd.show_all()
     gtk.main()

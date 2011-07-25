@@ -198,6 +198,8 @@ class AggregatorAPI(object):
 
     def _handle_send_website_report(self, d):
         print(d)
+        theApp.statistics.reports_sent_to_aggregator = \
+              theApp.statistics.reports_sent_to_aggregator + 1
 
     def send_service_report(self, report):
         g_logger.debug("Sending ServiceReport to aggregator")
@@ -208,6 +210,8 @@ class AggregatorAPI(object):
 
     def _handle_send_service_report(self, d):
         print(d)
+        theApp.statistics.reports_sent_to_aggregator = \
+              theApp.statistics.reports_sent_to_aggregator + 1
 
     """ Suggestion """
     #----------------------------------------------------------------------
@@ -283,6 +287,8 @@ class AggregatorAPI(object):
         if isinstance(failure.value, error.ConnectError):
             g_logger.error("Connecting to the aggregator failed.")
             self.available = False
+            theApp.statistics.aggregator_fail_num = \
+                  theApp.statistics.aggregator_fail_num + 1
         else:
             g_logger.error(failure)
 

@@ -104,7 +104,7 @@ class RawMessage(object):
             if len(data) >= 4-len(self.lengthBuffer):
                 offset += 4-len(self.lengthBuffer)
                 self.lengthBuffer += data[:offset]
-                self.length = struct.unpack('I', self.lengthBuffer)[0]
+                self.length = struct.unpack('!I', self.lengthBuffer)[0]
                 if self.length > MAX_MESSAGE_LENGTH:
                     raise MalformedMessageError
                 self.content = bytearray(self.length)

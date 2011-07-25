@@ -53,6 +53,7 @@ def update_agent(result, *args, **kw):
     # Stop current agent
     from twisted.internet import reactor
     reactor.stop()
+    g_logger.debug("reactor stopped.")
     while os.path.exists(
         os.path.join(ROOT_DIR, 'umit', 'icm', 'agent', 'running')):
         time.sleep(0.1)

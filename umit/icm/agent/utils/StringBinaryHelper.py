@@ -68,28 +68,28 @@ class BinaryReader(object):
         return self.unpack('?')
 
     def readInt16(self):
-        return self.unpack('h', 2)
+        return self.unpack('!h', 2)
 
     def readUInt16(self):
-        return self.unpack('H', 2)
+        return self.unpack('!H', 2)
 
     def readInt32(self):
-        return self.unpack('i', 4)
+        return self.unpack('!i', 4)
 
     def readUInt32(self):
-        return self.unpack('I', 4)
+        return self.unpack('!I', 4)
 
     def readInt64(self):
-        return self.unpack('q', 8)
+        return self.unpack('!q', 8)
 
     def readUInt64(self):
-        return self.unpack('Q', 8)
+        return self.unpack('!Q', 8)
 
     def readFloat(self):
-        return self.unpack('f', 4)
+        return self.unpack('!f', 4)
 
     def readDouble(self):
-        return self.unpack('d', 8)
+        return self.unpack('!d', 8)
 
     def readString(self):
         length = self.readUInt32()
@@ -137,28 +137,28 @@ class BinaryWriter(object):
         self.pack('?', b)
 
     def writeInt16(self, s):
-        self.pack('h', s)
+        self.pack('!h', s)
 
     def writeUInt16(self, us):
-        self.pack('H', us)
+        self.pack('!H', us)
 
     def writeInt32(self, i):
-        self.pack('i', i)
+        self.pack('!i', i)
 
     def writeUInt32(self, ui):
-        self.pack('I', ui)
+        self.pack('!I', ui)
 
     def writeInt64(self, l):
-        self.pack('q', l)
+        self.pack('!q', l)
 
     def writeUInt64(self, ul):
-        self.pack('Q', ul)
+        self.pack('!Q', ul)
 
     def writeFloat(self, f):
-        self.pack('f', f)
+        self.pack('!f', f)
 
     def writeDouble(self, d):
-        self.pack('d', d)
+        self.pack('!d', d)
 
     def writeString(self, str_):
         self.writeUInt32(len(str_))

@@ -77,6 +77,17 @@ class ReportManager(object):
         report_entry.SourceIP = report.header.passedNode[0]
 
         self.report_list.append(report_entry)
+        theApp.statistics.reports_total = theApp.statistics.reports_total + 1
+        theApp.statistics.reports_in_queue = \
+              theApp.statistics.reports_in_queue + 1
+
+    def remove_report(self, report_id):
+        for report_entry in self.report_list:
+            if report_entry.ID == report_id:
+                self.report_list.remove(report_entry)
+                theApp.statistics.reports_in_queue = \
+                      theApp.statistics.reports_in_queue - 1
+                break
 
     def _insert_into_db(self, report_entry):
         sql_stmt = "insert into reports (report_id, \

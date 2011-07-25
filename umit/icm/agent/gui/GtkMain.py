@@ -119,12 +119,10 @@ class GtkMain(object):
         menu.popup(None, None, None, button, activate_time, status_icon)
 
     def show_preference(self):
-        s = PreferenceWindow(None)
-        w = gtk.Window()
-        w.set_title(_("Preference"))
-        w.set_size_request(520, 440)
-        w.add(s)
-        w.show_all()
+        wnd = PreferenceWindow()
+        wnd.show_all()
+        #w.set_size_request(520, 440)
+        #w.show_all()
 
     def show_login(self):
         login_dlg = LoginDialog()

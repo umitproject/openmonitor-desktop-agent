@@ -61,6 +61,9 @@ class Application(object):
         self.aggregator = AggregatorAPI(
             g_db_helper.get_config('aggregator_url'))
 
+        from umit.icm.agent.core.Statistics import Statistics
+        self.statistics = Statistics()
+
     def start(self):
         """
         The Main function
@@ -99,7 +102,7 @@ class Application(object):
         self.task_run_lc.start(30)
 
         self.report_proc_lc = task.LoopingCall(self.report_uploader.process)
-        self.report_proc_lc.start(10)
+        self.report_proc_lc.start(15)
 
         reactor.addSystemEventTrigger('before', 'shutdown', self.quit)
         reactor.run()

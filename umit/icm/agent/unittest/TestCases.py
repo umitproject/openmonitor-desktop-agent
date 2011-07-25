@@ -62,7 +62,7 @@ class AgentServiceTestCase(unittest.TestCase):
         request_msg.cipheredPublicKey = 'null'
         data = MessageFactory.encode(request_msg)
         s.send(data)
-        length = struct.unpack('i', s.recv(4))[0]
+        length = struct.unpack('!i', s.recv(4))[0]
         data = s.recv(length)
         response_msg = MessageFactory.decode(data)
         s.close()
@@ -77,7 +77,7 @@ class AgentServiceTestCase(unittest.TestCase):
         request_msg.cipheredPublicKey = 'null'
         data = MessageFactory.encode(request_msg)
         s.send(data)
-        length = struct.unpack('i', s.recv(4))[0]
+        length = struct.unpack('!i', s.recv(4))[0]
         data = s.recv(length)
         response_msg = MessageFactory.decode(data)
         s.close()
@@ -92,7 +92,16 @@ class AgentServiceTestCase(unittest.TestCase):
         request_msg.cipheredPublicKey = 'null'
         data = MessageFactory.encode(request_msg)
         s.send(data)
-        length = struct.unpack('i', s.recv(4))[0]
+        length = struct.unpack('!i', s.recv(4))[0]
         data = s.recv(length)
         response_msg = MessageFactory.decode(data)
         s.close()
+
+if __name__ == "__main__":
+    msg = AgentUpdate()
+    msg.version = "1.0"
+    msg.downloadURL = "http://202.206.64.11/icm-agent.temp.tar.gz"
+    msg.checkCode = 0
+    data = MessageFactory.encode(msg)
+    print(len(data))
+    print(data)

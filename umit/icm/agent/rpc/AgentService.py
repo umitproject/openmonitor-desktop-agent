@@ -90,6 +90,22 @@ class AgentProtocol(Protocol):
         if self._session is not None:
             self._session.close()
             del theApp.peer_manager.sessions[self.remote_id]
+            g_logger.info("Session %d ended." % self.remote_id)
+            if self.remote_type == 1:
+                theApp.peer_manager.super_peers[self.remote_id].status = \
+                      'Disconnected'
+                theApp.statistics.super_agents_num = \
+                      theApp.statistics.super_agents_num - 1
+            elif self.remote_type == 2:
+                theApp.peer_manager.normal_peers[self.remote_id].status = \
+                      'Disconnected'
+                theApp.statistics.normal_agents_num = \
+                      theApp.statistics.normal_agents_num - 1
+            elif self.remote_type == 3:
+                theApp.peer_manager.mobile_peers[self.remote_id].status = \
+                      'Disconnected'
+                theApp.statistics.mobile_agents_num = \
+                      theApp.statistics.mobile_agents_num - 1
 
     def dataReceived(self, data):
         #print(data)
@@ -127,9 +143,11 @@ class AgentProtocol(Protocol):
                         else:
                             theApp.peer_manager.add_super_peer(\
                                 self.remote_id, self.remote_ip,
-                                message.agentPort, status='Connected')
+                                message.agentPort)
                         self._session = DesktopSuperAgentSession(\
                             message.agentID, self.transport)
+                        theApp.statistics.super_agents_num = \
+                              theApp.statistics.super_agents_num + 1
                     elif self.remote_type == 2:  # desktop agent
                         if self.remote_id in theApp.peer_manager.normal_peers:
                             theApp.peer_manager.normal_peers[self.remote_id]\
@@ -137,9 +155,11 @@ class AgentProtocol(Protocol):
                         else:
                             theApp.peer_manager.add_normal_peer(\
                                 self.remote_id, self.remote_ip,
-                                message.agentPort, status='Connected')
+                                message.agentPort)
                         self._session = DesktopAgentSession(\
                             message.agentID, self.transport)
+                        theApp.statistics.normal_agents_num = \
+                              theApp.statistics.super_agents_num + 1
                     elif self.remote_type == 3:  # mobile agent
                         if self.remote_id in theApp.peer_manager.mobile_peers:
                             theApp.peer_manager.mobile_peers[self.remote_id]\
@@ -147,18 +167,25 @@ class AgentProtocol(Protocol):
                         else:
                             theApp.peer_manager.add_mobile_peer(\
                                 self.remote_id, self.remote_ip,
-                                message.agentPort, status='Connected')
+                                message.agentPort)
                         self._session = MobileAgentSession(\
                             message.agentID, self.transport)
+                        theApp.statistics.mobile_agents_num = \
+                              theApp.statistics.super_agents_num + 1
                     else:  # wrong type
                         g_logger.warning("Incoming peer type invalid: %d." %
                                          self.remote_type)
-                    theApp.peer_manager.\
-                          sessions[message.agentID] = self._session
+
+                    theApp.peer_manager.sessions[message.agentID] = \
+                          self._session
                     g_logger.info("Session %d created." % message.agentID)
+
+                    self._send_auth_response_message()
                     # send auth message if didn't
                     if not self._auth_sent:
                         self._send_auth_message()
+                elif isinstance(message, AuthenticatePeerResponse):
+                    pass
                 elif isinstance(message, Diagnose):
                     self._handle_diagnose(message)
                 elif self._session is not None:
@@ -178,6 +205,14 @@ class AgentProtocol(Protocol):
         data = MessageFactory.encode(request_msg)
         self.transport.write(data)
         self._auth_sent = True
+
+    def _send_auth_response_message(self):
+        response_msg = AuthenticatePeerResponse()
+        response_msg.secretKey = "SecretKey"
+        g_logger.debug("Sending AuthenticatePeerResponse message:\n%s" % \
+                       response_msg)
+        data = MessageFactory.encode(response_msg)
+        self.transport.write(data)
 
     def _handle_diagnose(self, message):
         if message.execType == 0:

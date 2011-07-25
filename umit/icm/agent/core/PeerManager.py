@@ -44,6 +44,7 @@ class PeerEntry:
     Token = None       # integer
     PublicKey = None   # bytes
     Geo = None         # string
+    Status = ''
 
 ########################################################################
 class PeerManager:
@@ -265,9 +266,8 @@ class PeerManager:
                 for peer in self.super_peers.values():
                     if peer.status == 'Connected' and peer.ID in self.sessions:
                         g_logger.debug("Requiring %d super peers from "
-                                       "super peer %d", (required_num, peer.ID))
-                        peer_manager.sessions[peer.ID].\
-                                    get_super_peer_list(required_num)
+                                       "super peer %d" % (required_num, peer.ID))
+                        self.sessions[peer.ID].get_super_peer_list(required_num)
                     elif peer.status == 'Disconnected':
                         self.connect_to_peer(peer.ID)
 
@@ -281,7 +281,7 @@ class PeerManager:
                 for peer in self.super_peers.values():
                     if peer.status == 'Connected' and peer.ID in self.sessions:
                         g_logger.debug("Requiring %d peers from "
-                                       "super peer %d", (required_num, peer.ID))
+                                       "super peer %d" % (required_num, peer.ID))
                         self.sessions[peer.ID].get_peer_list(required_num)
                 for peer in self.normal_peers.values():
                     if peer.status == 'Disconnected':

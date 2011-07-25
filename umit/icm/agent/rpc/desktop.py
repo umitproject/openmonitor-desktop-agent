@@ -40,7 +40,7 @@ class DesktopAgentSession(Session):
         Session.__init__(self, id_, transport)
 
     def get_super_peer_list(self, count):
-        g_logger.info("Send P2PGetSuperPeerList message to %s", self.remote_ip)
+        g_logger.info("Send P2PGetSuperPeerList message to %s" % self.remote_ip)
         request_msg = P2PGetSuperPeerList()
         request_msg.count = count
         data = MessageFactory.encode(request_msg)
@@ -72,7 +72,7 @@ class DesktopAgentSession(Session):
                 theApp.peer_manager.add_super_peer(entry)
 
     def get_peer_list(self, count):
-        g_logger.info("Send P2PGetPeerList message to %s", self.remote_ip)
+        g_logger.info("Send P2PGetPeerList message to %s" % self.remote_ip)
         request_msg = P2PGetPeerList()
         request_msg.count = count
         data = MessageFactory.encode(request_msg)
@@ -83,12 +83,12 @@ class DesktopAgentSession(Session):
         response_msg = P2PGetPeerListResponse()
         for peer in chosen_peers:
             agent_data = response_msg.peers.add()
-            agent_data.id = peer.ID
+            agent_data.agentID = peer.ID
+            agent_data.agentIP = peer.IP
+            agent_data.agentPort = peer.Port
             agent_data.token = peer.Token
             agent_data.publicKey = peer.PublicKey
             agent_data.peerStatus = peer.Status
-            agent_data.agentIP = peer.IP
-            agent_data.agentPort = peer.Port
         data = MessageFactory.encode(response_msg)
         self._transport.write(data)
 
@@ -104,13 +104,17 @@ class DesktopAgentSession(Session):
                 theApp.peer_manager.add_normal_peer(entry)
 
     def send_report(self, report):
-        g_logger.info("Send %s message to %s", (report.DESCRIPTOR.name,
-                                                self.remote_ip))
+        g_logger.info("Send %s message to %s" % (report.DESCRIPTOR.name,
+                                                 self.remote_ip))
         data = MessageFactory.encode(report)
         self._transport.write(data)
 
+    def _handle_send_report_response(self, data):
+        theApp.statistics.reports_sent_to_normal_agent = \
+              theApp.statistics.reports_sent_to_normal_agent + 1
+
     def require_agent_update(self, version, download_url, check_code=0):
-        g_logger.info("Send AgentUpdate message to %s", self.remote_ip)
+        g_logger.info("Send AgentUpdate message to %s" % self.remote_ip)
         request_msg = AgentUpdate()
         request_msg.version = version
         request_msg.downloadURL = download_url
@@ -120,7 +124,7 @@ class DesktopAgentSession(Session):
         self._transport.write(data)
 
     def require_test_mod_update(self, version, download_url, check_code=0):
-        g_logger.info("Send TestModuleUpdate message to %s", self.remote_ip)
+        g_logger.info("Send TestModuleUpdate message to %s" % self.remote_ip)
         request_msg = TestModuleUpdate()
         request_msg.version = version
         request_msg.downloadURL = download_url
@@ -139,9 +143,15 @@ class DesktopAgentSession(Session):
         elif isinstance(message, P2PGetPeerListResponse):
             self._handle_get_peer_list_response(message)
         elif isinstance(message, WebsiteReport):
+            theApp.statistics.reports_received = \
+                  theApp.statistics.reports_received + 1
             theApp.report_manager.add_report(message)
         elif isinstance(message, ServiceReport):
+            theApp.statistics.reports_received = \
+                  theApp.statistics.reports_received + 1
             theApp.report_manager.add_report(message)
+        elif isinstance(message, SendReportResponse):
+            self._handle_send_report_response(message)
         elif isinstance(message, AgentUpdateResponse):
             g_logger.info("Peer %s update agent to version %s: %S" %
                           (self.remote_id, message.version, message.result))
@@ -164,7 +174,7 @@ class DesktopSuperAgentSession(Session):
         Session.__init__(self, id_, transport)
 
     def get_super_peer_list(self, count):
-        g_logger.info("Send P2PGetSuperPeerList message to %s", self.remote_ip)
+        g_logger.info("Send P2PGetSuperPeerList message to %s" % self.remote_ip)
         request_msg = P2PGetSuperPeerList()
         request_msg.count = count
         data = MessageFactory.encode(request_msg)
@@ -196,7 +206,7 @@ class DesktopSuperAgentSession(Session):
                 theApp.peer_manager.add_super_peer(entry)
 
     def get_peer_list(self, count):
-        g_logger.info("Send P2PGetPeerList message to %s", self.remote_ip)
+        g_logger.info("Send P2PGetPeerList message to %s" % self.remote_ip)
         request_msg = P2PGetPeerList()
         request_msg.count = count
         data = MessageFactory.encode(request_msg)
@@ -232,6 +242,10 @@ class DesktopSuperAgentSession(Session):
                                                  self.remote_ip))
         data = MessageFactory.encode(report)
         self._transport.write(data)
+
+    def _handle_send_report_response(self, data):
+        theApp.statistics.reports_sent_to_super_agent = \
+              theApp.statistics.reports_sent_to_super_agent + 1
 
     def _handle_agent_update(self, message):
         if compare_version(message.version, VERSION) > 0:
@@ -274,9 +288,15 @@ class DesktopSuperAgentSession(Session):
         elif isinstance(message, P2PGetPeerListResponse):
             self._handle_get_peer_list_response(message)
         elif isinstance(message, WebsiteReport):
+            theApp.statistics.reports_received = \
+                  theApp.statistics.reports_received + 1
             theApp.report_manager.add_report(message)
         elif isinstance(message, ServiceReport):
+            theApp.statistics.reports_received = \
+                  theApp.statistics.reports_received + 1
             theApp.report_manager.add_report(message)
+        elif isinstance(message, SendReportResponse):
+            self._handle_send_report_response(message)
         elif isinstance(message, AgentUpdate):
             self._handle_agent_update(message)
         elif isinstance(message, TestModuleUpdate):
