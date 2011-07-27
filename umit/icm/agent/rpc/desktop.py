@@ -51,25 +51,23 @@ class DesktopAgentSession(Session):
         response_msg = P2PGetSuperPeerListResponse()
         for speer in chosen_peers:
             agent_data = response_msg.peers.add()
-            agent_data.id = speer.ID
+            agent_data.agentID = speer.ID
+            agent_data.agentIP = speer.IP
+            agent_data.agentPort = speer.Port
             agent_data.token = speer.Token
             agent_data.publicKey = speer.PublicKey
             agent_data.peerStatus = speer.Status
-            agent_data.agentIP = speer.IP
-            agent_data.agentPort = speer.Port
         data = MessageFactory.encode(response_msg)
         self._transport.write(data)
 
     def _handle_get_super_peer_list_response(self, message):
         for agent_data in message.peers:
-            if self.remote_id != agent_data.id:
-                entry = { 'id': agent_data.id,
-                          'ip': agent_data.agentIP,
-                          'port': agent_data.agentPort,
-                          'token': agent_data.token,
-                          'public_key': agent_data.publicKey,
-                          'status': 'Connected' }
-                theApp.peer_manager.add_super_peer(entry)
+            if self.remote_id != agent_data.agentID:
+                theApp.peer_manager.add_super_peer(agent_data.agentID,
+                                                   agent_data.agentIP,
+                                                   agent_data.agentPort,
+                                                   agent_data.token,
+                                                   agent_data.publicKey)
 
     def get_peer_list(self, count):
         g_logger.info("Send P2PGetPeerList message to %s" % self.remote_ip)
@@ -94,14 +92,12 @@ class DesktopAgentSession(Session):
 
     def _handle_get_peer_list_response(self, message):
         for agent_data in message.peers:
-            if self.remote_id != agent_data.id:
-                entry = { 'id': agent_data.id,
-                          'ip': agent_data.agentIP,
-                          'port': agent_data.agentPort,
-                          'token': agent_data.token,
-                          'public_key': agent_data.publicKey,
-                          'status': 'Connected' }
-                theApp.peer_manager.add_normal_peer(entry)
+            if self.remote_id != agent_data.agentID:
+                theApp.peer_manager.add_normal_peer(agent_data.agentID,
+                                                    agent_data.agentIP,
+                                                    agent_data.agentPort,
+                                                    agent_data.token,
+                                                    agent_data.publicKey)
 
     def send_report(self, report):
         g_logger.info("Send %s message to %s" % (report.DESCRIPTOR.name,
@@ -185,25 +181,23 @@ class DesktopSuperAgentSession(Session):
         response_msg = P2PGetSuperPeerListResponse()
         for speer in chosen_peers:
             agent_data = response_msg.peers.add()
-            agent_data.id = speer.ID
+            agent_data.agentID = speer.ID
+            agent_data.agentIP = speer.IP
+            agent_data.agentPort = speer.Port
             agent_data.token = speer.Token
             agent_data.publicKey = speer.PublicKey
             agent_data.peerStatus = speer.Status
-            agent_data.agentIP = speer.IP
-            agent_data.agentPort = speer.Port
         data = MessageFactory.encode(response_msg)
         self._transport.write(data)
 
     def _handle_get_super_peer_list_response(self, message):
         for agent_data in message.peers:
-            if self.remote_id != agent_data.id:
-                entry = { 'id': agent_data.id,
-                          'ip': agent_data.agentIP,
-                          'port': agent_data.agentPort,
-                          'token': agent_data.token,
-                          'public_key': agent_data.publicKey,
-                          'status': 'Connected' }
-                theApp.peer_manager.add_super_peer(entry)
+            if self.remote_id != agent_data.agentID:
+                theApp.peer_manager.add_super_peer(agent_data.agentID,
+                                                   agent_data.agentIP,
+                                                   agent_data.agentPort,
+                                                   agent_data.token,
+                                                   agent_data.publicKey)
 
     def get_peer_list(self, count):
         g_logger.info("Send P2PGetPeerList message to %s" % self.remote_ip)
@@ -217,25 +211,23 @@ class DesktopSuperAgentSession(Session):
         response_msg = P2PGetPeerListResponse()
         for peer in chosen_peers:
             agent_data = response_msg.peers.add()
-            agent_data.id = peer.ID
+            agent_data.agentID = peer.ID
+            agent_data.agentIP = peer.IP
+            agent_data.agentPort = peer.Port
             agent_data.token = peer.Token
             agent_data.publicKey = peer.PublicKey
             agent_data.peerStatus = peer.Status
-            agent_data.agentIP = peer.IP
-            agent_data.agentPort = peer.Port
         data = MessageFactory.encode(response_msg)
         self._transport.write(data)
 
     def _handle_get_peer_list_response(self, message):
         for agent_data in message.peers:
-            if self.remote_id != agent_data.id:
-                entry = { 'id': agent_data.id,
-                          'ip': agent_data.agentIP,
-                          'port': agent_data.agentPort,
-                          'token': agent_data.token,
-                          'public_key': agent_data.publicKey,
-                          'status': 'Connected' }
-                theApp.peer_manager.add_normal_peer(entry)
+            if self.remote_id != agent_data.agentID:
+                theApp.peer_manager.add_normal_peer(agent_data.agentID,
+                                                    agent_data.agentIP,
+                                                    agent_data.agentPort,
+                                                    agent_data.token,
+                                                    agent_data.publicKey)
 
     def send_report(self, report):
         g_logger.info("Send %s message to %s" % (report.DESCRIPTOR.name,
@@ -257,10 +249,11 @@ class DesktopSuperAgentSession(Session):
                              'icm-agent_' + message.version + '.tar.gz')
                 )
             if message.HasField('checkCode'):
-                downloader.addCallback(update_agent, message.version,
-                                       message.checkCode)
+                check_code = message.checkCode
             else:
-                downloader.addCallback(update_agent, message.version)
+                check_code = 0
+            downloader.addCallback(update_agent, message.version,
+                                   message.checkCode)
             downloader.start()
 
     def _handle_test_mod_update(self, message):

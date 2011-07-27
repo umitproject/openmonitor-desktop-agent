@@ -52,8 +52,10 @@ def update_agent(result, *args, **kw):
             return
     # Stop current agent
     from twisted.internet import reactor
+    reactor.callInThread(restart_agent, path)
     reactor.stop()
-    g_logger.debug("reactor stopped.")
+
+def restart_agent(path):
     while os.path.exists(
         os.path.join(ROOT_DIR, 'umit', 'icm', 'agent', 'running')):
         time.sleep(0.1)
@@ -65,7 +67,9 @@ def update_agent(result, *args, **kw):
     t.extractall(ROOT_DIR)
     # Restart
     g_logger.info("Restarting Desktop Agent.")
-    os.execv(os.path.join(ROOT_DIR, 'bin', 'icm-agent.py'), sys.argv)
+    bin_path = os.path.join(ROOT_DIR, 'bin', 'icm-agent.py')
+    print(sys.argv)
+    os.execvp("python", sys.argv)
     g_logger.info("Desktop Agent Updated.")
 
 def update_test_mod(result, *args, **kw):

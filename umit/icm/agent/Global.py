@@ -49,7 +49,7 @@ log_filename = os.path.join(LOG_DIR, 'icm-desktop.log')
 
 g_logger = Log("ICM Desktop Agent", _levels[LOGLEVEL])
 #open(log_filename, 'a')
-#g_logger = Log("ICM Desktop Agent File Log", LOGLEVEL, log_filename)
+#g_logger = Log("ICM Desktop Agent File Log", _levels[LOGLEVEL], log_filename)
 
 #----------------------------------------------------------------------
 from umit.icm.agent.utils.DBHelper import DBHelper

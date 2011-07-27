@@ -62,32 +62,38 @@ class ReportUploader(object):
         pass
 
     def process(self):
-        for report_entry in self.report_manager.report_list:
-            # Upload Report
-            if theApp.aggregator.available:
-                g_logger.info("Send a report to the aggregator.")
+        # Upload Report
+        if theApp.aggregator.available:
+            g_logger.info("Sending %d reports to the aggregator." % \
+                          len(self.report_manager.report_list))
+            for report_entry in self.report_manager.report_list:
                 theApp.aggregator.send_report(report_entry.report)
-            else:
-                # Choose a random super peer to upload
-                speer_id = theApp.peer_manager.get_random_speer_connected()
-                if speer_id is not None:
-                    g_logger.info("Send a report to the super agent %d.",
-                                   speer_id)
+        else:
+            # Choose a random super peer to upload
+            speer_id = theApp.peer_manager.get_random_speer_connected()
+            if speer_id is not None:
+                g_logger.info("Sending %s reports to the super agent %d." % \
+                              (len(self.report_manager.report_list), speer_id))
+                for report_entry in self.report_manager.report_list:
                     theApp.peer_manager.sessions[speer_id].\
                           send_report(report_entry.Report)
-                    # do further things in callback
+                # do further things in callback
+            elif theApp.peer_info.Type == 2:
+                cnt = 0
+                sessions = []
+                for peer_id in theApp.peer_manager.normal_peers:
+                    if theApp.peer_manager.normal_peers[peer_id].status == \
+                       'Connected':
+                        cnt = cnt + 1
+                        sessions.append(theApp.peer_manager.sessions[peer_id])
+                if cnt != 0:
+                    g_logger.info("Sending %d reports to %d normal agents." % \
+                                  (len(self.report_manager.report_list), cnt))
+                    for report_entry in self.report_manager.report_list:
+                        for session in sessions:
+                            session.send_report(report_entry.Report)
                 else:
-                    cnt = 0
-                    for peer_id in theApp.peer_manager.normal_peers:
-                        if theApp.peer_manager.normal_peers[peer_id].status == \
-                           'Connected':
-                            theApp.peer_manager.sessions[peer_id].\
-                                  send_report(report_entry.Report)
-                            cnt = cnt + 1
-                    if cnt == 0:
-                        g_logger.info("Report has not been sent.")
-                    else:
-                        g_logger.info("Send a report to %d normal agents.", cnt)
+                    g_logger.info("No available peers.")
 
             # Report will be removed from the report_list after sent successfully
 
