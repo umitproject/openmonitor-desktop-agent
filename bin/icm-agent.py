@@ -21,8 +21,13 @@
 import os
 import sys
 
-ROOT_DIR = os.path.abspath(
-    os.path.join(os.path.dirname(__file__), os.path.pardir))
+# find root directory
+ROOT_DIR = os.path.abspath(os.path.dirname(__file__))
+while not os.path.exists(os.path.join(ROOT_DIR, 'umit')):
+    new_dir = os.path.abspath(os.path.join(ROOT_DIR, os.path.pardir))
+    if ROOT_DIR == new_dir:
+        raise Exception("Can't find root dir.")
+    ROOT_DIR = new_dir
 
 execfile(os.path.join(ROOT_DIR, 'deps', 'umit-common', 'utils', 'importer.py'))
 sys.path.insert(0, ROOT_DIR)
@@ -33,6 +38,8 @@ sys.path.insert(0, os.path.join(ROOT_DIR, 'deps', 'umit-common'))
 # check if there's GTK environment
 useGTK = True
 if useGTK:
+    if 'twisted.internet.reactor' in sys.modules:
+        del sys.modules['twisted.internet.reactor']
     from twisted.internet import gtk2reactor # for gtk-2.0
     gtk2reactor.install()
 
@@ -48,7 +55,6 @@ def main(args):
         #import traceback
         #traceback.print_exc(e)
         #theApp.quit()
-
 
 if __name__ == "__main__":
     main(sys.argv)
