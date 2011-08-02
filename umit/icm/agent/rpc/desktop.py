@@ -28,7 +28,7 @@ from umit.icm.agent.rpc.message import *
 from umit.icm.agent.rpc.MessageFactory import MessageFactory
 from umit.icm.agent.rpc.Session import Session
 from umit.icm.agent.utils.FileDownloader import FileDownloader
-from umit.icm.agent.Update import *
+from umit.icm.agent.Upgrade import *
 
 ########################################################################
 class DesktopAgentSession(Session):

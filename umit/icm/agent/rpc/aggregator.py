@@ -18,10 +18,10 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
-#try:
-    #execfile("E:\\workspace\\PyWork\\icm-agent\\umit\\icm\\agent\\UmitImporter.py")
-#except:
-    #pass
+try:
+    execfile("F:\\workspace\\PyWork\\icm-agent\\umit\\icm\\agent\\UmitImporter.py")
+except:
+    pass
 
 import base64
 import os
@@ -88,7 +88,7 @@ class AggregatorAPI(object):
         header.agentID = 999999 #theApp.peer_info.ID
 
     def check_availability(self):
-        url = self.base_url # temporarily
+        url = 'http://icm-dev.appspot.com/' # temporarily hardcoded
         d = self._send_request('GET', url)
         d.addCallback(self._handle_check_availability)
 
@@ -108,6 +108,7 @@ class AggregatorAPI(object):
         url = self.base_url + "/registeragent/"
         request_msg = RegisterAgent()
         request_msg.ip = theApp.peer_info
+        request_msg.versionNo = 10
         data = base64.b64encode(request_msg.SerializeToString())
         d = self._send_request('POST', url, data)
 
@@ -139,7 +140,7 @@ class AggregatorAPI(object):
     def _handle_get_super_peer_list(self, result):
         if result is not None:
             response_msg = GetSuperPeerListResponse()
-            response_msg.ParseFromString(base64.b64decode(d))
+            response_msg.ParseFromString(base64.b64decode(result))
             for speer in response_msg.knownSuperPeers:
                 theApp.peer_manager.add_super_peer(speer.agentID,
                                                    speer.agentIP,
@@ -160,7 +161,7 @@ class AggregatorAPI(object):
     def _handle_get_peer_list(self, result):
         if result is not None:
             response_msg = GetPeerListResponse()
-            response_msg.ParseFromString(base64.b64decode(d))
+            response_msg.ParseFromString(base64.b64decode(result))
             for peer in response_msg.knownPeers:
                 theApp.peer_manager.add_normal_peer(peer.agentID,
                                                     peer.agentIP,
@@ -192,7 +193,11 @@ class AggregatorAPI(object):
     def send_website_report(self, report):
         g_logger.debug("Sending WebsiteReport to aggregator")
         url = self.base_url + "/sendwebsitereport/"
-        data = base64.b64encode(report.SerializeToString())
+        request_msg = SendWebsiteReport()
+        request_msg.header.token = theApp.peer_info.AuthToken
+        request_msg.header.agentID = theApp.peer_info.ID
+        request_msg.report = report
+        data = base64.b64encode(request_msg.SerializeToString())
         d = self._send_request('POST', url, data)
         d.addCallback(self._handle_send_website_report)
 
@@ -204,7 +209,11 @@ class AggregatorAPI(object):
     def send_service_report(self, report):
         g_logger.debug("Sending ServiceReport to aggregator")
         url = self.base_url + "/sendservicereport/"
-        data = base64.b64encode(report.SerializeToString())
+        request_msg = SendServiceReport()
+        request_msg.header.token = theApp.peer_info.AuthToken
+        request_msg.header.agentID = theApp.peer_info.ID
+        request_msg.report = report
+        data = base64.b64encode(request_msg.SerializeToString())
         d = self._send_request('POST', url, data)
         d.addCallback(self._handle_send_service_report)
 
@@ -295,9 +304,9 @@ class AggregatorAPI(object):
 
 if __name__ == "__main__":
     import time
-    api = AggregatorAPI('http://icm-dev.appspot.com/api')
+    api = AggregatorAPI('http://5.icm-dev.appspot.com/api')
     #api = AggregatorAPI('http://www.baidu.com')
-    #d = api.send_website_suggestion('http://www.baidu.com')
+    api.send_website_suggestion('http://www.baidu.com')
     report = WebsiteReport()
     report.header.reportID = 'xw384kkre'
     report.header.agentID = 10000
@@ -307,7 +316,9 @@ if __name__ == "__main__":
     report.report.websiteURL = 'http://www.baidu.com'
     report.report.statusCode = 200
 
-    api.send_report(report)
+    #api.send_report(report)
+    
+    #api.register("test1", "test", "test@hotmail.com")
 
     from twisted.internet import reactor
     reactor.callLater(10, reactor.stop)

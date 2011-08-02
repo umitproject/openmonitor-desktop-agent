@@ -65,16 +65,16 @@ class ReportUploader(object):
         # Upload Report
         if theApp.aggregator.available:
             g_logger.info("Sending %d reports to the aggregator." % \
-                          len(self.report_manager.report_list))
-            for report_entry in self.report_manager.report_list:
+                          len(self.report_manager.cached_reports))
+            for report_entry in self.report_manager.cached_reports.values():
                 theApp.aggregator.send_report(report_entry.report)
         else:
             # Choose a random super peer to upload
             speer_id = theApp.peer_manager.get_random_speer_connected()
             if speer_id is not None:
                 g_logger.info("Sending %s reports to the super agent %d." % \
-                              (len(self.report_manager.report_list), speer_id))
-                for report_entry in self.report_manager.report_list:
+                              (len(self.report_manager.cached_reports), speer_id))
+                for report_entry in self.report_manager.cached_reports.values():
                     theApp.peer_manager.sessions[speer_id].\
                           send_report(report_entry.Report)
                 # do further things in callback
@@ -88,14 +88,14 @@ class ReportUploader(object):
                         sessions.append(theApp.peer_manager.sessions[peer_id])
                 if cnt != 0:
                     g_logger.info("Sending %d reports to %d normal agents." % \
-                                  (len(self.report_manager.report_list), cnt))
-                    for report_entry in self.report_manager.report_list:
+                                  (len(self.report_manager.cached_reports), cnt))
+                    for report_entry in self.report_manager.cached_reports.values():
                         for session in sessions:
                             session.send_report(report_entry.Report)
                 else:
                     g_logger.info("No available peers.")
 
-            # Report will be removed from the report_list after sent successfully
+            # Report will be removed from the cached_reports after sent successfully
 
 
 

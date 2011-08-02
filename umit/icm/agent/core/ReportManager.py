@@ -63,9 +63,13 @@ class ReportManager(object):
     #----------------------------------------------------------------------
     def __init__(self):
         """Constructor"""
-        self.report_list = []
+        self.cached_reports = {}
 
     def add_report(self, report):
+        if report.header.reportID in self.cached_reports:
+            return
+        #theApp.g_db_helper.select("select 
+        
         report_entry = ReportEntry()
         # required fields
         report_entry.SourceID = report.header.agentID
@@ -76,15 +80,15 @@ class ReportManager(object):
         # optional fields
         report_entry.SourceIP = report.header.passedNode[0]
 
-        self.report_list.append(report_entry)
+        self.cached_reports[report_entry.ID] = report_entry
         theApp.statistics.reports_total = theApp.statistics.reports_total + 1
         theApp.statistics.reports_in_queue = \
               theApp.statistics.reports_in_queue + 1
 
     def remove_report(self, report_id):
-        for report_entry in self.report_list:
+        for report_entry in self.cached_reports:
             if report_entry.ID == report_id:
-                self.report_list.remove(report_entry)
+                self.cached_reports.remove(report_entry)
                 theApp.statistics.reports_in_queue = \
                       theApp.statistics.reports_in_queue - 1
                 break
@@ -109,8 +113,8 @@ class ReportManager(object):
         g_db_helper.execute(sql_stmt)
 
     def list_reports(self):
-        for i in range(len(self.report_list)):
-            print(str(i+1) + '. ' + str(self.report_list[i]))
+        for i in range(len(self.cached_reports)):
+            print(str(i+1) + '. ' + str(self.cached_reports[i]))
 
 
 if __name__ == "__main__":
