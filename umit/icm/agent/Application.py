@@ -64,6 +64,10 @@ class Application(object):
         from umit.icm.agent.core.Statistics import Statistics
         self.statistics = Statistics()
 
+    def _load_from_db(self):
+        # restore unsent reports
+        self.report_manager.load_unsent_reports()
+
     def start(self):
         """
         The Main function
@@ -72,9 +76,10 @@ class Application(object):
 
         # Initialize components
         self._initialize()
+        self._load_from_db()
 
-        open(os.path.join(ROOT_DIR, 'umit', 'icm', 'agent', 'running'), \
-             'w').close()
+        open(os.path.join(ROOT_DIR, 'umit', 'icm', 'agent', 'running'), 'w')\
+            .close()
 
         # Start backend service
         self.listen_port = g_config.getint('network', 'listen_port')
@@ -96,13 +101,13 @@ class Application(object):
                                    {'url':'http://www.sina.com'}, 2)
 
         self.peer_maintain_lc = task.LoopingCall(self.peer_manager.maintain)
-        self.peer_maintain_lc.start(30)
+        self.peer_maintain_lc.start(60)
 
         self.task_run_lc = task.LoopingCall(self.task_scheduler.schedule)
         self.task_run_lc.start(30)
 
         self.report_proc_lc = task.LoopingCall(self.report_uploader.process)
-        self.report_proc_lc.start(15)
+        self.report_proc_lc.start(30)
 
         reactor.addSystemEventTrigger('before', 'shutdown', self.quit)
         reactor.run()

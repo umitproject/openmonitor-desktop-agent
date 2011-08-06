@@ -61,6 +61,8 @@ class AgentServiceTestCase(unittest.TestCase):
         request_msg.agentPort = random.randint(5900, 6000)
         request_msg.cipheredPublicKey = 'null'
         data = MessageFactory.encode(request_msg)
+        length = struct.pack('!I', len(data))
+        s.send(length)
         s.send(data)
         length = struct.unpack('!i', s.recv(4))[0]
         data = s.recv(length)
@@ -76,6 +78,8 @@ class AgentServiceTestCase(unittest.TestCase):
         request_msg.agentPort = random.randint(5900, 6000)
         request_msg.cipheredPublicKey = 'null'
         data = MessageFactory.encode(request_msg)
+        length = struct.pack('!I', len(data))
+        s.send(length)
         s.send(data)
         length = struct.unpack('!i', s.recv(4))[0]
         data = s.recv(length)
@@ -91,6 +95,8 @@ class AgentServiceTestCase(unittest.TestCase):
         request_msg.agentPort = random.randint(5900, 6000)
         request_msg.cipheredPublicKey = 'null'
         data = MessageFactory.encode(request_msg)
+        length = struct.pack('!I', len(data))
+        s.send(length)
         s.send(data)
         length = struct.unpack('!i', s.recv(4))[0]
         data = s.recv(length)

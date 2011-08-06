@@ -78,16 +78,15 @@ class WebsiteTest(Test):
     def execute(self):
         """Run the test"""
         g_logger.info("Testing website: %s" % self.url)
-        self.deferred = defer.Deferred()
-        d = self._agent.request('GET',
-                                self.url,
-                                Headers({'User-Agent':
-                                         ['ICM Website Test']}),
-                                None)
+        defer_ = self._agent.request('GET',
+                                    self.url,
+                                    Headers({'User-Agent':
+                                             ['ICM Website Test']}),
+                                    None)
         self.time_start = default_timer()
-        d.addCallback(self._handle_response)
-        d.addErrback(g_logger.error)
-        return self.deferred
+        defer_.addCallback(self._handle_response)
+        defer_.addErrback(g_logger.error)
+        return defer_
 
     def _handle_response(self, response):
         """Result Handler (generate report)"""
@@ -98,7 +97,7 @@ class WebsiteTest(Test):
         print(str(self.status_code) + ' ' + response.phrase)
         print("Response time: %fs" % (self.response_time))
         #print(response.headers)
-        self._generate_report()
+        report = self._generate_report()
 
         theApp.statistics.tests_done = theApp.statistics.tests_done + 1
         if 1 in theApp.statistics.tests_done_by_type:
@@ -111,6 +110,7 @@ class WebsiteTest(Test):
             if self.pattern is not None:
                 response.deliverBody(ContentExaminer(self.url,
                                                      self.pattern))
+        return report
 
     def _generate_report_id(self, list_):
         m = hashlib.md5()
@@ -137,7 +137,7 @@ class WebsiteTest(Test):
         #...
         theApp.statistics.reports_generated = \
               theApp.statistics.reports_generated + 1
-        self.deferred.callback(report)
+        return report
 
 class ContentExaminer(Protocol):
     def __init__(self, url, pattern):
@@ -174,8 +174,8 @@ class ServiceTest(Test):
 
     def execute(self):
         g_logger.info("Testing service: %s" % self.service)
-        self.deferred = defer.Deferred()
-        return self.deferred
+        self.defer_ = defer.Deferred()
+        return self.defer_
 
 test_by_id = {
     0: Test,

@@ -69,7 +69,6 @@ def restart_agent(path):
     t.extractall(ROOT_DIR)
     # Restart
     g_logger.info("Restarting Desktop Agent.")
-    print(sys.argv)
     bin_path = os.path.join(ROOT_DIR, 'bin', 'icm-agent.py')
     subprocess.Popen([sys.executable, bin_path] + sys.argv[1:])
     g_logger.info("Desktop Agent Updated.")

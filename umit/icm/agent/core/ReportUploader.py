@@ -61,23 +61,28 @@ class ReportUploader(object):
         #_retry_list.append
         pass
 
+    """
+    Upload reports
+    """
     def process(self):
         # Upload Report
         if theApp.aggregator.available:
             g_logger.info("Sending %d reports to the aggregator." % \
                           len(self.report_manager.cached_reports))
             for report_entry in self.report_manager.cached_reports.values():
-                theApp.aggregator.send_report(report_entry.report)
+                defer_ = theApp.aggregator.send_report(report_entry.Report)
+                defer_.addCallback(self.report_manager.remove_report)
         else:
             # Choose a random super peer to upload
             speer_id = theApp.peer_manager.get_random_speer_connected()
             if speer_id is not None:
                 g_logger.info("Sending %s reports to the super agent %d." % \
-                              (len(self.report_manager.cached_reports), speer_id))
+                              (len(self.report_manager.cached_reports),
+                               speer_id))
                 for report_entry in self.report_manager.cached_reports.values():
-                    theApp.peer_manager.sessions[speer_id].\
+                    defer_ = theApp.peer_manager.sessions[speer_id].\
                           send_report(report_entry.Report)
-                # do further things in callback
+                    defer_.addCallback(self.report_manager.remove_report)
             elif theApp.peer_info.Type == 2:
                 cnt = 0
                 sessions = []

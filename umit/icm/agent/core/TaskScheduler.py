@@ -78,9 +78,9 @@ class TaskScheduler(object):
                 entry.RunFlag = False
                 test = test_by_id[entry.ID]()
                 test.prepare(entry.Args)
-                d = test.execute()
-                if d is not None:
-                    d.addCallback(self.report_manager.add_report)
+                defer_ = test.execute()
+                if defer_ is not None:
+                    defer_.addCallback(self.report_manager.add_report)
 
         #test_entry = self.fetch_one_test()
 

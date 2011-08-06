@@ -46,8 +46,7 @@ class MobileAgentSession(Session):
             agent_data.peerStatus = speer.Status
             agent_data.agentIP = speer.IP
             agent_data.agentPort = speer.Port
-        data = MessageFactory.encode(response_msg)
-        self._transport.write(data)
+        self._send_message(response_msg)
 
     def _handle_get_super_peer_list_response(self, message):
         for agent_data in message.peers:
@@ -71,8 +70,7 @@ class MobileAgentSession(Session):
             agent_data.peerStatus = peer.Status
             agent_data.agentIP = peer.IP
             agent_data.agentPort = peer.Port
-        data = MessageFactory.encode(response_msg)
-        self._transport.write(data)
+        self._send_message(response_msg)
 
     def _handle_get_peer_list_response(self, message):
         for agent_data in message.peers:
@@ -88,6 +86,12 @@ class MobileAgentSession(Session):
     def _handle_send_report_response(self, message):
         theApp.statistics.reports_sent_to_mobile_agent = \
               theApp.statistics.reports_sent_to_mobile_agent + 1
+
+    def _send_message(self, message):
+        data = MessageFactory.encode(request_msg)
+        length = struct.pack('!I', len(data))
+        self.transport.write(length)
+        self.transport.write(data)
 
     def handle_message(self, message):
         if isinstance(message, P2PGetSuperPeerList):

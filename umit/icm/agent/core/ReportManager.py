@@ -18,6 +18,7 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
+import base64
 import time
 
 from umit.icm.agent.Application import theApp
@@ -66,10 +67,13 @@ class ReportManager(object):
         self.cached_reports = {}
 
     def add_report(self, report):
+        # check if in the cache
         if report.header.reportID in self.cached_reports:
             return
-        #theApp.g_db_helper.select("select 
-        
+        # check if in the db
+        if g_db_helper.select("select * from reports where report_id='%s'" % \
+                              report.header.reportID):
+            return
         report_entry = ReportEntry()
         # required fields
         report_entry.SourceID = report.header.agentID
@@ -81,36 +85,55 @@ class ReportManager(object):
         report_entry.SourceIP = report.header.passedNode[0]
 
         self.cached_reports[report_entry.ID] = report_entry
+        self.save_report_to_db('unsent_reports', report_entry)
         theApp.statistics.reports_total = theApp.statistics.reports_total + 1
         theApp.statistics.reports_in_queue = \
               theApp.statistics.reports_in_queue + 1
 
-    def remove_report(self, report_id):
-        for report_entry in self.cached_reports:
-            if report_entry.ID == report_id:
-                self.cached_reports.remove(report_entry)
-                theApp.statistics.reports_in_queue = \
-                      theApp.statistics.reports_in_queue - 1
-                break
+    def remove_report(self, report_id, new_stat=ReportStatus.UNSENT):
+        if report_id in self.cached_reports:
+            report_entry = self.cached_reports[report_id]
+            report_entry.Status = new_stat
+            self.save_report_to_db('reports', report_entry)
+            g_db_helper.execute(\
+                "delete from unsent_reports where report_id=%d" % report_id)
+            del self.cached_reports[report_id]
+            theApp.statistics.reports_in_queue = \
+                  theApp.statistics.reports_in_queue - 1
 
-    def _insert_into_db(self, report_entry):
-        sql_stmt = "insert into reports (report_id, \
-                                         test_id, \
-                                         time_gen, \
-                                         content, \
-                                         source_id, \
-                                         source_ip, \
-                                         status) \
-                    values (%s, %s, )" % \
-                    report.ID, \
-                    report.TestID, \
-                    report.TimeGen, \
-                    MessageFactory.encode(report.Detail), \
-                    report.SourceID, \
-                    report.SourceIP, \
-                    report.Status
+    def load_unsent_reports(self):
+        rs = g_db_helper.select("select * from unsent_reports")
+        for record in rs:
+            report_entry = ReportEntry()
+            report_entry.ID = record[0]
+            report_entry.TestID = record[1]
+            report_entry.TimeGen = record[2]
+            report_entry.Report = MessageFactory.decode(base64.b64decode(record[3]))
+            report_entry.SourceID = record[4]
+            report_entry.SourceIP = record[5]
+            report_entry.Status = record[6]
+            self.cached_reports[report_entry.ID] = report_entry
+        g_logger.info("Loaded %d unsent reports from DB." % len(rs))
 
+    def load_reports_from_db(self, table_name):
+        rs = g_db_helper.select("select * from %s" % table_name)
+
+    def save_report_to_db(self, table_name, report_entry):
+        sql_stmt = "insert into %s (report_id, test_id, time_gen, content, "\
+                   "source_id, source_ip, status) values "\
+                   "('%s', %d, %d, '%s', %d, '%s', '%s')" % \
+                   (table_name,
+                    report_entry.ID,
+                    report_entry.TestID,
+                    report_entry.TimeGen,
+                    base64.b64encode(MessageFactory.encode(report_entry.Report)),
+                    report_entry.SourceID,
+                    report_entry.SourceIP,
+                    report_entry.Status)
+
+        print(sql_stmt)
         g_db_helper.execute(sql_stmt)
+        g_db_helper.commit()
 
     def list_reports(self):
         for i in range(len(self.cached_reports)):

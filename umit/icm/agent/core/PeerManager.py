@@ -41,9 +41,9 @@ class PeerEntry:
     Type = 0           # integer
     IP = None          # string
     Port = 0           # integer
-    Token = None       # integer
-    PublicKey = None   # bytes
-    Geo = None         # string
+    Token = ''         # string
+    PublicKey = ''     # bytes
+    Geo = ''           # string
     Status = ''
 
 ########################################################################
@@ -253,7 +253,8 @@ class PeerManager:
     """
     def maintain(self):
         # check the availability of the aggregator
-        theApp.aggregator.check_availability()
+        if not theApp.aggregator.available:
+            theApp.aggregator.check_availability()
 
         # examine the number of connected super peers
         if self.super_peer_num < self.max_speer_num:

@@ -28,7 +28,6 @@ import os
 import sys
 
 from twisted.web import client
-from twisted.internet.defer import waitForDeferred
 
 from umit.icm.agent.rpc.message import *
 from umit.icm.agent.rpc.MessageFactory import MessageFactory
@@ -36,6 +35,7 @@ from umit.icm.agent.rpc.MessageFactory import MessageFactory
 from umit.icm.agent.Application import theApp
 from umit.icm.agent.Global import *
 from umit.icm.agent.rpc.Session import Session
+from umit.icm.agent.core.ReportManager import ReportStatus
 
 ########################################################################
 class AggregagorSession(Session):
@@ -82,24 +82,33 @@ class AggregatorAPI(object):
         """Constructor"""
         self.base_url = url
         self.available = False
+        self.report_id_list = []
 
     def _make_request_header(self, header):
-        header.token = 'null' #theApp.peer_info.AuthToken
-        header.agentID = 999999 #theApp.peer_info.ID
+        header.token = theApp.peer_info.AuthToken
+        header.agentID = theApp.peer_info.ID
 
     def check_availability(self):
-        url = 'http://icm-dev.appspot.com/' # temporarily hardcoded
-        d = self._send_request('GET', url)
-        d.addCallback(self._handle_check_availability)
+        g_logger.info("Sending CheckAggregator message to aggregator")
+        url = self.base_url + '/checkaggregator/' # temporarily hardcoded
+        request_msg = CheckAggregator()
+        self._make_request_header(request_msg.header)
+        data = base64.b64encode(request_msg.SerializeToString())
+        defer_ = self._send_request('POST', url, data)
+        defer_.addCallback(self._handle_check_availability)
+        return defer_
 
-    def _handle_check_availability(self, d):
-        if d is not None:
-            #if self.available == False:
-            self.available = True
-            g_logger.info("Aggregator is available.")
-        else:
-            self.available = False
-            g_logger.info("Aggregator is not available.")
+    def _handle_check_availability(self, data):
+        if data is not None:
+            response_msg = CheckAggregatorResponse()
+            response_msg.ParseFromString(base64.b64decode(data))
+            if response_msg.status == "ON":
+                self.available = True
+                g_logger.info("Aggregator is available.")
+                return
+
+        self.available = False
+        g_logger.info("Aggregator is not available.")
 
     """ Peer """
     #----------------------------------------------------------------------
@@ -110,23 +119,17 @@ class AggregatorAPI(object):
         request_msg.ip = theApp.peer_info
         request_msg.versionNo = 10
         data = base64.b64encode(request_msg.SerializeToString())
-        d = self._send_request('POST', url, data)
+        defer_ = self._send_request('POST', url, data)
+        defer_.addCallback(self._handle_register)
+        return defer_
 
-    def _handle_register(self, d):
-        print(d)
+    def _handle_register(self, data):
+        print(data)
 
-    def authenticate(self):
-        g_logger.info("Sending Authenticate message to aggregator")
-        url = self.base_url + "/authenticate/"
-        #request_msg = RegisterAgent()
-        #data = base64.b64encode(request_msg.SerializeToString())
-        #self._send_request('POST', url, data)
-        return 'Succeeded'
-
-    def report_peer_info(self):
-        g_logger.info("Sending ReportPeerInfo message to aggregator")
-        url = self.base_url + "/reportpeerinfo/"
-        result = self._send_request('POST', url, data)
+    #def report_peer_info(self):
+        #g_logger.info("Sending ReportPeerInfo message to aggregator")
+        #url = self.base_url + "/reportpeerinfo/"
+        #result = self._send_request('POST', url, data)
 
     def get_super_peer_list(self, count):
         g_logger.info("Sending GetSuperPeerList message to aggregator")
@@ -134,13 +137,14 @@ class AggregatorAPI(object):
         request_msg = GetSuperPeerList()
         self._make_request_header(request_msg.header)
         data = base64.b64encode(request_msg.SerializeToString())
-        d = self._send_request('POST', url, data)
-        d.addCallback(self._handle_get_super_peer_list)
+        defer_ = self._send_request('POST', url, data)
+        defer_.addCallback(self._handle_get_super_peer_list)
+        return defer_
 
-    def _handle_get_super_peer_list(self, result):
-        if result is not None:
+    def _handle_get_super_peer_list(self, data):
+        if data is not None:
             response_msg = GetSuperPeerListResponse()
-            response_msg.ParseFromString(base64.b64decode(result))
+            response_msg.ParseFromString(base64.b64decode(data))
             for speer in response_msg.knownSuperPeers:
                 theApp.peer_manager.add_super_peer(speer.agentID,
                                                    speer.agentIP,
@@ -155,13 +159,14 @@ class AggregatorAPI(object):
         request_msg = GetPeerList()
         self._make_request_header(request_msg.header)
         data = base64.b64encode(request_msg.SerializeToString())
-        d = self._send_request('POST', url, data)
-        d.addCallback(self._handle_get_peer_list)
+        defer_ = self._send_request('POST', url, data)
+        defer_.addCallback(self._handle_get_peer_list)
+        return defer_
 
-    def _handle_get_peer_list(self, result):
-        if result is not None:
+    def _handle_get_peer_list(self, data):
+        if data is not None:
             response_msg = GetPeerListResponse()
-            response_msg.ParseFromString(base64.b64decode(result))
+            response_msg.ParseFromString(base64.b64decode(data))
             for peer in response_msg.knownPeers:
                 theApp.peer_manager.add_normal_peer(peer.agentID,
                                                     peer.agentIP,
@@ -175,52 +180,68 @@ class AggregatorAPI(object):
     def get_events(self):
         g_logger.info("Sending GetEvents message to aggregator")
         url = self.base_url + "/getevents/"
-        d = self._send_request('POST', url, data)
+        request_msg = GetEvents()
+        data = base64.b64encode(request_msg.SerializeToString())
+        defer_ = self._send_request('POST', url, data)
+        defer_.addCallback(self._handle_get_events)
+        return defer_
 
-    def _handle_get_events(self, d):
-        print(d)
+    def _handle_get_events(self, data):
+        print(data)
 
     """ Report """
     #----------------------------------------------------------------------
     def send_report(self, report):
         if isinstance(report, WebsiteReport):
+            self.report_id_list.append(report.header.reportID)
             self.send_website_report(report)
         elif isinstance(report, ServiceReport):
+            self.report_id_list.append(report.header.reportID)
             self.send_service_report(report)
         else:
-            g_logger.debug("Log has been dropped.")
+            g_logger.debug("Unable to recognize the report type.")
 
     def send_website_report(self, report):
         g_logger.debug("Sending WebsiteReport to aggregator")
         url = self.base_url + "/sendwebsitereport/"
         request_msg = SendWebsiteReport()
-        request_msg.header.token = theApp.peer_info.AuthToken
-        request_msg.header.agentID = theApp.peer_info.ID
-        request_msg.report = report
+        self._make_request_header(request_msg.header)
+        request_msg.report.CopyFrom(report)
         data = base64.b64encode(request_msg.SerializeToString())
-        d = self._send_request('POST', url, data)
-        d.addCallback(self._handle_send_website_report)
+        defer_ = self._send_request('POST', url, data)
+        defer_.addCallback(self._handle_send_website_report)
+        return defer_
 
-    def _handle_send_website_report(self, d):
-        print(d)
-        theApp.statistics.reports_sent_to_aggregator = \
-              theApp.statistics.reports_sent_to_aggregator + 1
+    def _handle_send_website_report(self, data):
+        if data is not None:
+            response_msg = SendReportResponse()
+            response_msg.ParseFromString(base64.b64decode(data))
+            g_logger.info("WebsiteReport has been sent to aggregator")
+            theApp.statistics.reports_sent_to_aggregator = \
+                  theApp.statistics.reports_sent_to_aggregator + 1
+            report_id = self.report_id_list.pop(0) # assume FIFO
+            return report_id, ReportStatus.SENT_TO_AGGREGATOR
 
     def send_service_report(self, report):
         g_logger.debug("Sending ServiceReport to aggregator")
         url = self.base_url + "/sendservicereport/"
         request_msg = SendServiceReport()
-        request_msg.header.token = theApp.peer_info.AuthToken
-        request_msg.header.agentID = theApp.peer_info.ID
-        request_msg.report = report
+        self._make_request_header(request_msg.header)
+        request_msg.report.CopyFrom(report)
         data = base64.b64encode(request_msg.SerializeToString())
-        d = self._send_request('POST', url, data)
-        d.addCallback(self._handle_send_service_report)
+        defer_ = self._send_request('POST', url, data)
+        defer_.addCallback(self._handle_send_service_report)
+        return defer_
 
-    def _handle_send_service_report(self, d):
-        print(d)
-        theApp.statistics.reports_sent_to_aggregator = \
-              theApp.statistics.reports_sent_to_aggregator + 1
+    def _handle_send_service_report(self, data):
+        if data is not None:
+            response_msg = SendReportResponse()
+            response_msg.ParseFromString(base64.b64decode(data))
+            g_logger.info("ServiceReport has been sent to aggregator")
+            theApp.statistics.reports_sent_to_aggregator = \
+                  theApp.statistics.reports_sent_to_aggregator + 1
+            report_id = self.report_id_list.pop(0) # assume FIFO
+            return report_id, ReportStatus.SENT_TO_AGGREGATOR
 
     """ Suggestion """
     #----------------------------------------------------------------------
@@ -232,15 +253,15 @@ class AggregatorAPI(object):
         request_msg.websiteURL = website_url
         request_msg.emailAddress = 'mrbean@yahoo.com' #theApp.peer_info.Email
         data = base64.b64encode(request_msg.SerializeToString())
-        d = self._send_request('POST', url, data)
-        d.addCallback(self._handle_send_website_suggestion)
-        #d.addErrback(g_logger.error)
+        defer_ = self._send_request('POST', url, data)
+        defer_.addCallback(self._handle_send_website_suggestion)
+        return defer_
 
-    def _handle_send_website_suggestion(self, d):
-        response_msg = TestSuggestionResponse()
-        response_msg.ParseFromString(base64.b64decode(d))
-        g_logger.info("Got a reply from aggregator for WebsiteSuggestion")
-        g_logger.debug(response_msg)
+    def _handle_send_website_suggestion(self, data):
+        if data is not None:
+            response_msg = TestSuggestionResponse()
+            response_msg.ParseFromString(base64.b64decode(data))
+            g_logger.info("WebsiteSuggestion has been sent to aggregator")
 
     def send_service_suggestion(self, service_name, host_name, ip):
         g_logger.info("Sending ServiceSuggestion message to aggregator")
@@ -252,30 +273,41 @@ class AggregatorAPI(object):
         request_msg.hostName = host_name
         request_msg.ip = ip
         data = base64.b64encode(request_msg.SerializeToString())
-        d = self._send_request('POST', url, data)
-        d.addCallback(self._handle_send_service_suggestion)
+        defer_ = self._send_request('POST', url, data)
+        defer_.addCallback(self._handle_send_service_suggestion)
+        return defer_
 
-    def _handle_send_service_suggestion(self, d):
-        response_msg = TestSuggestionResponse()
-        response_msg.ParseFromString(base64.b64decode(d))
-        g_logger.info("Got a reply from aggregator for ServiceSuggestion")
-        g_logger.debug(response_msg)
+    def _handle_send_service_suggestion(self, data):
+        if data is not None:
+            response_msg = TestSuggestionResponse()
+            response_msg.ParseFromString(base64.b64decode(data))
+            g_logger.info("ServiceSuggestion has been sent to aggregator")
 
     """ Version """
     #----------------------------------------------------------------------
     def check_version(self):
-        #g_logger.info("Sending CheckVersion message to aggregator")
+        g_logger.info("Sending NewVersion message to aggregator")
         url = self.base_url + "/checkversion/"
+        request_msg = NewVersion()
+        data = base64.b64encode(request_msg.SerializeToString())
+        defer_ = self._send_request('POST', url, data)
+        defer_.addCallback(self._handle_check_version)
+        return defer_
 
-    def _handle_check_version(self, d):
-        print(d)
+    def _handle_check_version(self, data):
+        print(data)
 
     def check_tests(self):
-        #g_logger.info("Sending CheckTests message to aggregator")
+        g_logger.info("Sending NewTests message to aggregator")
         url = self.base_url + "/checktests/"
+        request_msg = NewTests()
+        data = base64.b64encode(request_msg.SerializeToString())
+        defer_ = self._send_request('POST', url, data)
+        defer_.addCallback(self._handle_check_tests)
+        return defer_
 
-    def _handle_check_tests(self, d):
-        print(d)
+    def _handle_check_tests(self, data):
+        print(data)
 
     #----------------------------------------------------------------------
     def _send_request(self, method, uri, data="", mimeType=None):
@@ -301,12 +333,15 @@ class AggregatorAPI(object):
         else:
             g_logger.error(failure)
 
+def out(data):
+    print(data)
 
 if __name__ == "__main__":
     import time
-    api = AggregatorAPI('http://5.icm-dev.appspot.com/api')
+    api = AggregatorAPI('http://icm-dev.appspot.com/api')
     #api = AggregatorAPI('http://www.baidu.com')
-    api.send_website_suggestion('http://www.baidu.com')
+    d = api.send_website_suggestion('http://www.baidu.com')
+    d.addCallback(out)
     report = WebsiteReport()
     report.header.reportID = 'xw384kkre'
     report.header.agentID = 10000
@@ -317,7 +352,7 @@ if __name__ == "__main__":
     report.report.statusCode = 200
 
     #api.send_report(report)
-    
+
     #api.register("test1", "test", "test@hotmail.com")
 
     from twisted.internet import reactor

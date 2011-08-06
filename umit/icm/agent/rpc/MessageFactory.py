@@ -41,8 +41,6 @@ class MessageFactory(object):
         msg_type = message.DESCRIPTOR.name
         msg_type_id = message_type_to_id[msg_type]
         msg_str = message.SerializeToString()
-        total_length = 4 + len(msg_str)
-        cls._writer.writeInt32(total_length)
         cls._writer.writeInt32(msg_type_id)
         cls._writer.writeFixedLengthString(msg_str, len(msg_str))
         return cls._writer.getString()

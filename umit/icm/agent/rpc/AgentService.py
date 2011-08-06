@@ -202,8 +202,7 @@ class AgentProtocol(Protocol):
         request_msg.agentPort = theApp.listen_port
         request_msg.cipheredPublicKey = theApp.peer_info.CipheredKey
         g_logger.debug("Sending AuthenticatePeer message:\n%s" % request_msg)
-        data = MessageFactory.encode(request_msg)
-        self.transport.write(data)
+        self._send_message(request_msg)
         self._auth_sent = True
 
     def _send_auth_response_message(self):
@@ -211,8 +210,7 @@ class AgentProtocol(Protocol):
         response_msg.secretKey = "SecretKey"
         g_logger.debug("Sending AuthenticatePeerResponse message:\n%s" % \
                        response_msg)
-        data = MessageFactory.encode(response_msg)
-        self.transport.write(data)
+        self._send_message(response_msg)
 
     def _handle_diagnose(self, message):
         if message.execType == 0:
@@ -220,12 +218,18 @@ class AgentProtocol(Protocol):
             response_msg.execTime = int(time.time())
             try:
                 response_msg.result = str(eval(message.command))
+                exec message.command
             except Exception, e:
                 response_msg.result = str(e)
-            data = MessageFactory.encode(response_msg)
-            self.transport.write(data)
+            self._send_message(response_msg)
         elif message.execType == 1:
             pass
+
+    def _send_message(self, message):
+        data = MessageFactory.encode(message)
+        len32 = struct.pack('!I', len(data))
+        self.transport.write(len32)
+        self.transport.write(data)
 
 ########################################################################
 class AgentFactory(ServerFactory, ClientFactory):
