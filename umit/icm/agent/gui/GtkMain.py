@@ -34,14 +34,12 @@ from umit.icm.agent.gui.PreferenceWindow import PreferenceWindow
 
 class GtkMain(object):
     def __init__(self, *args, **kwargs):
-        super(GtkMain, self).__init__(*args, **kwargs)
-        self._create_widgets()
         self.is_login = False
-        self.set_login_status(True)
+        self._create_widgets()
 
     def _create_widgets(self):
         self.tray_icon = gtk.StatusIcon()
-        ###
+        #
         self.tray_menu_logged_in = gtk.Menu()
         menu_item = gtk.MenuItem(_("ICM Webpage"))
         #menu_item.connect("activate", lambda w: gtk.main_quit())

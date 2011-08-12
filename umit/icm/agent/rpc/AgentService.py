@@ -200,7 +200,7 @@ class AgentProtocol(Protocol):
         request_msg.agentID = theApp.peer_info.ID
         request_msg.agentType = theApp.peer_info.Type
         request_msg.agentPort = theApp.listen_port
-        request_msg.cipheredPublicKey = theApp.peer_info.CipheredKey
+        request_msg.cipheredPublicKey = theApp.peer_info.CipheredPublicKey
         g_logger.debug("Sending AuthenticatePeer message:\n%s" % request_msg)
         self._send_message(request_msg)
         self._auth_sent = True

@@ -93,9 +93,9 @@ class WebsiteTest(Test):
         time_end = default_timer()
         self.status_code = response.code
         self.response_time = time_end - self.time_start
-        print(self.url)
-        print(str(self.status_code) + ' ' + response.phrase)
-        print("Response time: %fs" % (self.response_time))
+        #print(self.url)
+        #print(str(self.status_code) + ' ' + response.phrase)
+        #print("Response time: %fs" % (self.response_time))
         #print(response.headers)
         report = self._generate_report()
 
@@ -129,7 +129,6 @@ class WebsiteTest(Test):
             [report.header.agentID,
              report.header.timeUTC,
              report.header.testID])
-        report.header.passedNode.append(theApp.peer_info.props['internet_ip'])
         #report.header.traceroute
         report.report.websiteURL = self.url
         report.report.statusCode = self.status_code

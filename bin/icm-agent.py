@@ -51,10 +51,6 @@ def main(args):
     else:
         theApp.use_gui = False
     theApp.start()
-    #except BaseException, e:
-        #import traceback
-        #traceback.print_exc(e)
-        #theApp.quit()
 
 if __name__ == "__main__":
     main(sys.argv)

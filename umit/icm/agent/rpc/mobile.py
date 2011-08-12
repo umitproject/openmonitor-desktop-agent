@@ -83,9 +83,50 @@ class MobileAgentSession(Session):
                           'status': 'Connected' }
                 theApp.peer_manager.add_normal_peer(entry)
 
+    def _handle_send_website_report(self, message):
+        theApp.statistics.reports_received = \
+              theApp.statistics.reports_received + 1
+        message.report.header.passedNode.append(message.header.agentID)
+        theApp.report_manager.add_report(message)
+        # send response
+        response_msg = SendReportResponse()
+        response_msg.header.token = theApp.peer_info.AuthToken
+        response_msg.header.agentID = theApp.peer_info.ID
+        self._send_message(response_msg)
+
+    def _handle_send_service_report(self, message):
+        theApp.statistics.reports_received = \
+              theApp.statistics.reports_received + 1
+        message.report.header.passedNode.append(message.header.agentID)
+        theApp.report_manager.add_report(message)
+        # send response
+        response_msg = SendReportResponse()
+        response_msg.header.token = theApp.peer_info.AuthToken
+        response_msg.header.agentID = theApp.peer_info.ID
+        self._send_message(response_msg)
+
     def _handle_send_report_response(self, message):
         theApp.statistics.reports_sent_to_mobile_agent = \
               theApp.statistics.reports_sent_to_mobile_agent + 1
+
+    def _handle_forward_message(self, message):
+        if theApp.peer_info.Type != 1:
+            return
+        forward_message = MessageFactory.decode(\
+            base64.b64decode(message.encodedMessage))
+        if message.destination == 0:
+            defer_ = theApp.aggregator.safe_send(forward_message)
+            defer_.addCallback(self.send_forward_message_response,
+                               message.identifier)
+        else:
+            pass
+
+    def send_forward_message_response(self, message, identifier):
+        response_msg = ForwardingMessageResponse()
+        response_msg.identifier = identifier
+        response_msg.encodedMessage = \
+                    base64.b64encode(MessageFactory.encode(message))
+        self._send_message(response_msg)
 
     def _send_message(self, message):
         data = MessageFactory.encode(request_msg)
@@ -102,14 +143,10 @@ class MobileAgentSession(Session):
             self._handle_get_peer_list(message)
         elif isinstance(message, P2PGetPeerListResponse):
             self._handle_get_peer_list_response(message)
-        elif isinstance(message, WebsiteReport):
-            theApp.statistics.reports_received = \
-                  theApp.statistics.reports_received + 1
-            theApp.report_manager.add_report(message)
-        elif isinstance(message, ServiceReport):
-            theApp.statistics.reports_received = \
-                  theApp.statistics.reports_received + 1
-            theApp.report_manager.add_report(message)
+        elif isinstance(message, SendWebsiteReport):
+            self._handle_send_website_report(message)
+        elif isinstance(message, SendServiceReport):
+            self._handle_send_service_report(message)
         elif isinstance(message, SendReportResponse):
             self._handle_send_report_response(message)
         elif isinstance(message, AgentUpdateResponse):
@@ -118,8 +155,11 @@ class MobileAgentSession(Session):
         elif isinstance(message, TestModuleUpdateResponse):
             g_logger.info("Peer %s update test mod to version %s: %S" %
                           (self.remote_id, message.version, message.result))
+        elif isinstance(message, ForwardingMessage):
+            self._handle_forward_message(message)
 
     def close(self):
-        if self.ID in theApp.peer_manager.mobile_peers:
-            theApp.peer_manager.mobile_peers[self.ID].Status = 'Disconnected'
+        if self.remote_id in theApp.peer_manager.mobile_peers:
+            theApp.peer_manager.mobile_peers[self.remote_id].Status = \
+                  'Disconnected'
 

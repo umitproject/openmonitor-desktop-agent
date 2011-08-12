@@ -38,12 +38,12 @@ class ReportEntry(object):
     #----------------------------------------------------------------------
     def __init__(self):
         """Constructor"""
-        self.ID = None
+        self.ID = ''
         self.SourceID = 0
         self.TimeGen = 0
         self.TestID = 0
-        self.Report = None
-        self.SourceIP = None
+        self.Report = ''
+        self.SourceIP = ''
         self.Status = ReportStatus.UNSENT
 
     def __str__(self):
@@ -82,7 +82,7 @@ class ReportManager(object):
         report_entry.ID = report.header.reportID
         report_entry.Report = report
         # optional fields
-        report_entry.SourceIP = report.header.passedNode[0]
+        #report_entry.SourceIP = report.header.passedNode[0]
 
         self.cached_reports[report_entry.ID] = report_entry
         self.save_report_to_db('unsent_reports', report_entry)
@@ -96,7 +96,9 @@ class ReportManager(object):
             report_entry.Status = new_stat
             self.save_report_to_db('reports', report_entry)
             g_db_helper.execute(\
-                "delete from unsent_reports where report_id=%d" % report_id)
+                "delete from unsent_reports where report_id='%s'" % report_id)
+            g_db_helper.commit()
+            #print("%s deleted from cache" % report_id)
             del self.cached_reports[report_id]
             theApp.statistics.reports_in_queue = \
                   theApp.statistics.reports_in_queue - 1
@@ -131,9 +133,10 @@ class ReportManager(object):
                     report_entry.SourceIP,
                     report_entry.Status)
 
-        print(sql_stmt)
         g_db_helper.execute(sql_stmt)
         g_db_helper.commit()
+        g_logger.debug("Save report '%s' to table '%s'." % (report_entry.ID,
+                                                            table_name))
 
     def list_reports(self):
         for i in range(len(self.cached_reports)):

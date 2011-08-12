@@ -70,8 +70,7 @@ class ReportUploader(object):
             g_logger.info("Sending %d reports to the aggregator." % \
                           len(self.report_manager.cached_reports))
             for report_entry in self.report_manager.cached_reports.values():
-                defer_ = theApp.aggregator.send_report(report_entry.Report)
-                defer_.addCallback(self.report_manager.remove_report)
+                theApp.aggregator.send_report(report_entry.Report)
         else:
             # Choose a random super peer to upload
             speer_id = theApp.peer_manager.get_random_speer_connected()
@@ -80,9 +79,8 @@ class ReportUploader(object):
                               (len(self.report_manager.cached_reports),
                                speer_id))
                 for report_entry in self.report_manager.cached_reports.values():
-                    defer_ = theApp.peer_manager.sessions[speer_id].\
+                    theApp.peer_manager.sessions[speer_id].\
                           send_report(report_entry.Report)
-                    defer_.addCallback(self.report_manager.remove_report)
             elif theApp.peer_info.Type == 2:
                 cnt = 0
                 sessions = []

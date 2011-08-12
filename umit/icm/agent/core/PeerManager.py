@@ -39,7 +39,7 @@ class PeerEntry:
 
     ID = 0             # integer
     Type = 0           # integer
-    IP = None          # string
+    IP = ''            # string
     Port = 0           # integer
     Token = ''         # string
     PublicKey = ''     # bytes
@@ -60,7 +60,6 @@ class PeerManager:
         self.normal_peer_num = 0
         self.mobile_peer_num = 0
         self.sessions = {}
-        self.load_from_db()
         self.max_speer_num = g_config.getint('network', 'max_speer_num')
         self.max_peer_num = g_config.getint('network', 'max_peer_num')
 
@@ -222,6 +221,7 @@ class PeerManager:
                 id_list.append(peer_entry.ID)
 
         if len(id_list) == 0:
+            g_logger.warning("No available speer.")
             return None
         else:
             idx = random.randint(0, len(id_list)-1)
@@ -256,6 +256,13 @@ class PeerManager:
         if not theApp.aggregator.available:
             theApp.aggregator.check_availability()
 
+        for peer in self.super_peers.values():
+            if peer.status == 'Disconnected':
+                self.connect_to_peer(peer.ID)
+        for peer in self.normal_peers.values():
+            if peer.status == 'Disconnected':
+                self.connect_to_peer(peer.ID)
+
         # examine the number of connected super peers
         if self.super_peer_num < self.max_speer_num:
             required_num = self.max_speer_num - self.super_peer_num
@@ -269,8 +276,7 @@ class PeerManager:
                         g_logger.debug("Requiring %d super peers from "
                                        "super peer %d" % (required_num, peer.ID))
                         self.sessions[peer.ID].get_super_peer_list(required_num)
-                    elif peer.status == 'Disconnected':
-                        self.connect_to_peer(peer.ID)
+
 
         if self.normal_peer_num < self.max_peer_num:
             required_num = self.max_peer_num - self.normal_peer_num
@@ -284,6 +290,3 @@ class PeerManager:
                         g_logger.debug("Requiring %d peers from "
                                        "super peer %d" % (required_num, peer.ID))
                         self.sessions[peer.ID].get_peer_list(required_num)
-                for peer in self.normal_peers.values():
-                    if peer.status == 'Disconnected':
-                        self.connect_to_peer(peer.ID)

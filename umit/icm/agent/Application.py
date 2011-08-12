@@ -33,11 +33,21 @@ from umit.icm.agent.BasePaths import *
 from umit.icm.agent.Global import *
 from umit.icm.agent.Version import VERSION
 
+from umit.icm.agent.gui.Splash import Splash
+
+
 class Application(object):
     def __init__(self):
         self._auth = False
 
     def _initialize(self):
+        aggregator_url = g_db_helper.get_config('aggregator_url')
+        from umit.icm.agent.rpc.aggregator import AggregatorAPI
+        self.aggregator = AggregatorAPI(aggregator_url)
+
+        from umit.icm.agent.rpc.AggregatorProxy import AggregatorProxy
+        self.aggregator_proxy = AggregatorProxy(aggregator_url)
+
         from umit.icm.agent.core.TaskManager import TaskManager
         self.task_manager = TaskManager()
 
@@ -57,14 +67,12 @@ class Application(object):
         from umit.icm.agent.core.PeerInfo import PeerInfo
         self.peer_info = PeerInfo()
 
-        from umit.icm.agent.rpc.aggregator import AggregatorAPI
-        self.aggregator = AggregatorAPI(
-            g_db_helper.get_config('aggregator_url'))
-
         from umit.icm.agent.core.Statistics import Statistics
         self.statistics = Statistics()
 
     def _load_from_db(self):
+        self.peer_info.load_from_db()
+        self.peer_manager.load_from_db()
         # restore unsent reports
         self.report_manager.load_unsent_reports()
 
@@ -74,9 +82,15 @@ class Application(object):
         """
         g_logger.info("Starting ICM agent. Version: %s", VERSION)
 
+        # show splash window
+        splash = Splash(os.path.join(IMAGES_DIR, 'splash.png'))
+
         # Initialize components
         self._initialize()
         self._load_from_db()
+
+        while not self.login:
+            self.aggregator.
 
         open(os.path.join(ROOT_DIR, 'umit', 'icm', 'agent', 'running'), 'w')\
             .close()
@@ -101,7 +115,7 @@ class Application(object):
                                    {'url':'http://www.sina.com'}, 2)
 
         self.peer_maintain_lc = task.LoopingCall(self.peer_manager.maintain)
-        self.peer_maintain_lc.start(60)
+        self.peer_maintain_lc.start(30)
 
         self.task_run_lc = task.LoopingCall(self.task_scheduler.schedule)
         self.task_run_lc.start(30)
