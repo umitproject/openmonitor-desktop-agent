@@ -25,7 +25,7 @@ from higwidgets.higboxes import hig_box_space_holder
 from umit.icm.agent.Version import VERSION
 
 class Splash(gtk.Window):
-    def __init__(self, image):
+    def __init__(self, image, time=1700):
         gtk.Window.__init__(self, gtk.WINDOW_POPUP)
         self.set_position(gtk.WIN_POS_CENTER)
 
@@ -40,7 +40,7 @@ class Splash(gtk.Window):
         self.realize()
 
         self.vbox = gtk.VBox()
-        self.label = gtk.Label("Initializing...")
+        self.label = gtk.Label()
         #self.label.set_use_markup(True)
         #self.label.set_markup("<span size='10000'>%s</span>" % "Initializing...")
 
@@ -62,8 +62,9 @@ class Splash(gtk.Window):
         self.shape_combine_mask(mask, 0, 0)
         self.show_all()
 
-        while gtk.events_pending():
-            gtk.main_iteration()
+        #while gtk.events_pending():
+            #gtk.main_iteration()
+        gobject.timeout_add(time, self.destroy)
 
     def destroy(self):
         gtk.Window.destroy(self)

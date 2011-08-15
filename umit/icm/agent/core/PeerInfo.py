@@ -42,6 +42,8 @@ class PeerInfo(object):
         """Constructor"""
         self.props['local_ip'] = get_local_ip()
         self.props['internet_ip'] = get_internet_ip()
+        self.registered = False
+        self.login = False
 
     def _handle_register_response(self, data):
         if data is not None:
@@ -56,30 +58,29 @@ class PeerInfo(object):
     def load_from_db(self):
         rs = g_db_helper.select('select * from user_info')
         if not rs:
-            # register peer
-            defer_ = theApp.aggregator.register(self.props['local_ip'])
-            defer_.addCallback(self._handle_register_response)
-            return
-
-        if len(rs) > 1:
-            g_logger.warning("There're more than one record in user_info. "
-                                 "We use the first one.")
-        g_logger.debug(rs[0])
-        self.ID = rs[0][0]
-        self.Email = rs[0][1]
-        self.AuthToken = rs[0][2]
-        self.PublicKey = rs[0][3]
-        self.PrivateKey = rs[0][4]
-        self.CipheredPublicKey = rs[0][5]
-        self.AggregatorPublicKey = rs[0][6]
-        self.Type = rs[0][7]
+            g_logger.info("No peer info in db.")
+        else:
+            if len(rs) > 1:
+                g_logger.warning("More than one record in user_info. " \
+                                 "Use the first one.")
+            g_logger.debug(rs[0])
+            self.ID = rs[0][0]
+            self.Email = rs[0][1]
+            self.AuthToken = rs[0][2]
+            self.PublicKey = rs[0][3]
+            self.PrivateKey = rs[0][4]
+            self.CipheredPublicKey = rs[0][5]
+            self.AggregatorPublicKey = rs[0][6]
+            self.Type = rs[0][7]
+            self.registered = True
         # load properties
         rs = g_db_helper.select('select * from peer_info')
         for entry in rs:
             self.props[entry[0]] = g_db_helper.unpack(entry[1])
 
     def save_to_db(self):
-        g_db_helper.execute("insert or replace into user_info values " \
+        if self.registered:
+            g_db_helper.execute("insert or replace into user_info values " \
                             "(%d, '%s', '%s', '%s', '%s', '%s', '%s', %d)" % \
                             (self.ID, self.Email, self.AuthToken,
                              self.PublicKey, self.PrivateKey,

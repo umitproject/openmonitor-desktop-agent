@@ -100,6 +100,13 @@ class DesktopAgentSession(Session):
                                                     agent_data.agentPort,
                                                     agent_data.token,
                                                     agent_data.publicKey)
+    def send_report(self, report):
+        if isinstance(report, WebsiteReport):
+            self.send_website_report(report)
+        elif isinstance(report, ServiceReport):
+            self.send_service_report(report)
+        else:
+            g_logger.debug("Unable to recognize the report type.")
 
     def send_website_report(self, report):
         g_logger.info("Send %s message to %s" % (report.DESCRIPTOR.name,
@@ -289,6 +296,14 @@ class DesktopSuperAgentSession(Session):
                                                     agent_data.token,
                                                     agent_data.publicKey)
 
+    def send_report(self, report):
+        if isinstance(report, WebsiteReport):
+            self.send_website_report(report)
+        elif isinstance(report, ServiceReport):
+            self.send_service_report(report)
+        else:
+            g_logger.debug("Unable to recognize the report type.")
+
     def send_website_report(self, report):
         g_logger.info("Send %s message to %s" % (report.DESCRIPTOR.name,
                                                  self.remote_ip))
@@ -390,25 +405,6 @@ class DesktopSuperAgentSession(Session):
         response_msg = MessageFactory.decode(\
             base64.b64decode(message.encodedMessage))
         defer_.callback(response_msg)
-
-    def _handle_forward_message(self, message):
-        if theApp.peer_info.Type != 1:
-            return
-        forward_message = MessageFactory.decode(\
-            base64.b64decode(message.encodedMessage))
-        if message.destination == 0:
-            defer_ = theApp.aggregator.safe_send(forward_message)
-            defer_.addCallback(self.send_forward_message_response,
-                               message.identifier)
-        else:
-            pass
-
-    def send_forward_message_response(self, message, identifier):
-        response_msg = ForwardingMessageResponse()
-        response_msg.identifier = identifier
-        response_msg.encodedMessage = \
-                    base64.b64encode(MessageFactory.encode(message))
-        self._send_message(response_msg)
 
     def _send_message(self, message):
         data = MessageFactory.encode(message)

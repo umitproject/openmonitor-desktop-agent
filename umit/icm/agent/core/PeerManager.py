@@ -37,13 +37,13 @@ class PeerEntry:
         self.transport = None
         self.status = 'Disconnected'
 
-    ID = 0             # integer
-    Type = 0           # integer
-    IP = ''            # string
-    Port = 0           # integer
-    Token = ''         # string
-    PublicKey = ''     # bytes
-    Geo = ''           # string
+    ID = 0          # integer
+    Type = 0        # integer
+    IP = ''         # string
+    Port = 0        # integer
+    Token = ''      # string
+    CipheredPublicKey = ''  # bytes
+    Geo = ''        # string
     Status = ''
 
 ########################################################################
@@ -69,22 +69,22 @@ class PeerManager:
                 "insert or replace into peers values" \
                 "(%d, %d, '%s', %d, '%s', '%s', '%s')" % \
                 (peer_entry.ID, peer_entry.Type, peer_entry.IP,
-                 peer_entry.Port, peer_entry.Token, peer_entry.PublicKey,
-                 peer_entry.Geo))
+                 peer_entry.Port, peer_entry.Token,
+                 peer_entry.CipheredPublicKey, peer_entry.Geo))
         for peer_entry in self.normal_peers.values():
             g_db_helper.execute(
                 "insert or replace into peers values" \
                 "(%d, %d, '%s', %d, '%s', '%s', '%s')" % \
                 (peer_entry.ID, peer_entry.Type, peer_entry.IP,
-                 peer_entry.Port, peer_entry.Token, peer_entry.PublicKey,
-                 peer_entry.Geo))
+                 peer_entry.Port, peer_entry.Token,
+                 peer_entry.CipheredPublicKey, peer_entry.Geo))
         for peer_entry in self.mobile_peers.values():
             g_db_helper.execute(
                 "insert or replace into peers values" \
                 "(%d, %d, '%s', %d, '%s', '%s', '%s')" % \
                 (peer_entry.ID, peer_entry.Type, peer_entry.IP,
-                 peer_entry.Port, peer_entry.Token, peer_entry.PublicKey,
-                 peer_entry.Geo))
+                 peer_entry.Port, peer_entry.Token,
+                 peer_entry.CipheredPublicKey, peer_entry.Geo))
         g_db_helper.commit()
 
     def load_from_db(self):
@@ -105,7 +105,7 @@ class PeerManager:
             elif peer_entry.Type == 3:
                 self.mobile_peers[peer_entry.ID] = peer_entry
 
-    def add_super_peer(self, peer_id, ip, port, token=None, public_key=None,
+    def add_super_peer(self, peer_id, ip, port, ciphered_public_key=None,
                        status='Disconnected'):
         if peer_id in self.super_peers:
             g_logger.info("Peer id %d already exists in super peer list." %
@@ -116,13 +116,12 @@ class PeerManager:
             peer_entry.ID = peer_id
             peer_entry.IP = ip
             peer_entry.Port = port
-            peer_entry.Token = token
-            peer_entry.PublicKey = public_key
+            peer_entry.CipheredPublicKey = ciphered_public_key
             peer_entry.status = status
             self.super_peers[peer_entry.ID] = peer_entry
             self.super_peer_num = self.super_peer_num + 1
 
-    def add_normal_peer(self, peer_id, ip, port, token=None, public_key=None,
+    def add_normal_peer(self, peer_id, ip, port, ciphered_public_key=None,
                         status='Disconnected'):
         if peer_id in self.normal_peers:
             g_logger.info("Peer id %d already exists in normal peer list." %
@@ -133,13 +132,12 @@ class PeerManager:
             peer_entry.ID = peer_id
             peer_entry.IP = ip
             peer_entry.Port = port
-            peer_entry.Token = token
-            peer_entry.PublicKey = public_key
+            peer_entry.CipheredPublicKey = ciphered_public_key
             peer_entry.status = status
             self.normal_peers[peer_entry.ID] = peer_entry
             self.normal_peer_num = self.normal_peer_num + 1
 
-    def add_mobile_peer(self, peer_id, ip, port, token=None, public_key=None,
+    def add_mobile_peer(self, peer_id, ip, port, ciphered_public_key=None,
                         status='Disconnected'):
         if peer_id in self.mobile_peers:
             g_logger.info("Peer id %d already exists in mobile peer list." %
@@ -150,8 +148,7 @@ class PeerManager:
             peer_entry.ID = peer_id
             peer_entry.IP = ip
             peer_entry.Port = port
-            peer_entry.Token = token
-            peer_entry.PublicKey = public_key
+            peer_entry.CipheredPublicKey = ciphered_public_key
             peer_entry.status = status
             self.mobile_peers[peer_entry.ID] = peer_entry
             self.mobile_peer_num = self.mobile_peer_num + 1
@@ -227,6 +224,10 @@ class PeerManager:
             idx = random.randint(0, len(id_list)-1)
             return id_list[idx]
 
+    def connect_all_super_peers(self):
+        for peer_id in self.super_peers:
+            self.connect_to_peer(peer_id)
+
     def connect_to_peer(self, peer_id):
         if peer_id != theApp.peer_info.ID and \
            peer_id not in self.sessions:
@@ -247,6 +248,30 @@ class PeerManager:
             g_logger.debug("Connecting to %s:%d..." %
                            (peer_entry.IP, peer_entry.Port))
 
+    def _connected_to_aggregator(self, data):
+        if theApp.aggregator.available:
+            if not theApp.peer_info.registered:
+                d = theApp.aggregator.register()
+                d.addCallback(self._after_registration)
+            elif not theApp.peer_info.login:
+                #d = theApp.aggregator.login()
+                #d.addCallback(self._after_login)
+                theApp.peer_info.login = True
+                self._after_login(None)
+
+    def _after_registration(self, data):
+        theApp.aggregator.login()
+
+        theApp.task_manager.add_test(1, '*/2 * * * *', {'url':'http://www.baidu.com'}, 3)
+        #theApp.task_manager.add_test(2, '*/3 * * * *', {'service':'ftp'})
+        #theApp.task_manager.add_test(1, '*/5 * * * *', {'url':'http://www.sina.com'}, 2)
+
+    def _after_login(self, data):
+        if theApp.peer_info.login:
+            theApp.gtk_main.set_login_status(True)
+        else:
+            theApp.gtk_main.set_login_status(False)
+
     """
     Make the desktop agent connect to a certain number of super peers and \
     normal peers, also check the availability of the aggregator
@@ -254,11 +279,13 @@ class PeerManager:
     def maintain(self):
         # check the availability of the aggregator
         if not theApp.aggregator.available:
-            theApp.aggregator.check_availability()
+            d = theApp.aggregator.check_availability()
+            d.addCallback(self._connected_to_aggregator)
 
         for peer in self.super_peers.values():
             if peer.status == 'Disconnected':
                 self.connect_to_peer(peer.ID)
+
         for peer in self.normal_peers.values():
             if peer.status == 'Disconnected':
                 self.connect_to_peer(peer.ID)

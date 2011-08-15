@@ -29,8 +29,11 @@ from higwidgets import HIGWindow
 from umit.icm.agent.I18N import _
 from umit.icm.agent.BasePaths import *
 from umit.icm.agent.Application import theApp
-from umit.icm.agent.gui.LoginDialog import LoginDialog
-from umit.icm.agent.gui.PreferenceWindow import PreferenceWindow
+from umit.icm.agent.gui.About import About
+from umit.icm.agent.gui.Login import LoginDialog
+from umit.icm.agent.gui.Preference import PreferenceWindow
+from umit.icm.agent.gui.Splash import Splash
+
 
 class GtkMain(object):
     def __init__(self, *args, **kwargs):
@@ -41,6 +44,7 @@ class GtkMain(object):
         self.tray_icon = gtk.StatusIcon()
         #
         self.tray_menu_logged_in = gtk.Menu()
+
         menu_item = gtk.MenuItem(_("ICM Webpage"))
         #menu_item.connect("activate", lambda w: gtk.main_quit())
         self.tray_menu_logged_in.append(menu_item)
@@ -64,14 +68,14 @@ class GtkMain(object):
         self.tray_menu_logged_in.append(menu_item)
 
         menu_item = gtk.MenuItem(_("About"))
-        #menu_item.connect("activate", lambda w: gtk.main_quit())
+        menu_item.connect("activate", lambda w: self.show_about())
         self.tray_menu_logged_in.append(menu_item)
 
         self.tray_menu_logged_in.append(gtk.SeparatorMenuItem())
 
-        menu_item = gtk.MenuItem(_("Logout"))
-        menu_item.connect("activate", lambda w: self.logout())
-        self.tray_menu_logged_in.append(menu_item)
+        #menu_item = gtk.MenuItem(_("Logout"))
+        #menu_item.connect("activate", lambda w: self.logout())
+        #self.tray_menu_logged_in.append(menu_item)
 
         menu_item = gtk.ImageMenuItem(_("Exit"))
         menu_item.connect("activate", lambda w: reactor.stop())
@@ -79,11 +83,12 @@ class GtkMain(object):
         self.tray_menu_logged_in.show_all()
         ###
         self.tray_menu_logged_out = gtk.Menu()
-        menu_item = gtk.MenuItem(_("Login"))
-        menu_item.connect("activate", lambda w: self.login())
-        self.tray_menu_logged_out.append(menu_item)
 
-        self.tray_menu_logged_out.append(gtk.SeparatorMenuItem())
+        #menu_item = gtk.MenuItem(_("Login"))
+        #menu_item.connect("activate", lambda w: self.login())
+        #self.tray_menu_logged_out.append(menu_item)
+
+        #self.tray_menu_logged_out.append(gtk.SeparatorMenuItem())
 
         menu_item = gtk.MenuItem(_("Exit"))
         menu_item.connect("activate", lambda w: reactor.stop())
@@ -91,10 +96,14 @@ class GtkMain(object):
         self.tray_menu_logged_out.show_all()
 
         self.tray_menu = self.tray_menu_logged_out
-        self.tray_icon.connect('popup-menu', self.show_menu, self.tray_menu)
+        self.tray_icon.connect('popup-menu', self.show_menu)
+        self.tray_icon.set_tooltip("Logging in...")
 
         self.tray_icon.set_from_file(
                 os.path.join(ICONS_DIR, "tray_icon_gray_32.ico"))
+
+        # Show splash window
+        splash = Splash(os.path.join(IMAGES_DIR, 'splash.png'))
 
     def set_login_status(self, is_login):
         if self.is_login == is_login:
@@ -103,24 +112,34 @@ class GtkMain(object):
         if is_login:
             self.tray_menu.popdown()
             self.tray_menu = self.tray_menu_logged_in
-            self.tray_icon.connect('popup-menu', self.show_menu, self.tray_menu)
+            #self.tray_icon.connect('popup-menu', self.show_menu)
             self.tray_icon.set_from_file(
                 os.path.join(ICONS_DIR, "tray_icon_32.ico"))
+            self.tray_icon.set_tooltip("ICM Desktop Agent")
         else:
             self.tray_menu.popdown()
             self.tray_menu = self.tray_menu_logged_out
-            self.tray_icon.connect('popup-menu', self.show_menu, self.tray_menu)
+            #self.tray_icon.connect('popup-menu', self.show_menu)
             self.tray_icon.set_from_file(
                 os.path.join(ICONS_DIR, "tray_icon_gray_32.ico"))
+            self.tray_icon.set_tooltip("ICM Desktop Agent")
 
-    def show_menu(self, status_icon, button, activate_time, menu):
-        menu.popup(None, None, None, button, activate_time, status_icon)
+    def show_menu(self, status_icon, button, activate_time):
+        self.tray_menu.popup(None, None, None, button, activate_time,
+                             status_icon)
+
+    def hide_menu(self, *args, **kwargs):
+        self.tray_menu.popdown()
 
     def show_preference(self):
         wnd = PreferenceWindow()
         wnd.show_all()
         #w.set_size_request(520, 440)
         #w.show_all()
+
+    def show_about(self):
+        about = About()
+        about.show_all()
 
     def show_login(self):
         login_dlg = LoginDialog()

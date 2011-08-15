@@ -95,9 +95,9 @@ class AggregatorAPI(object):
     """"""
 
     #----------------------------------------------------------------------
-    def __init__(self, url):
+    def __init__(self):
         """Constructor"""
-        self.base_url = url
+        self.base_url = g_db_helper.get_config('aggregator_url')
         self.available = False
         self.pending_report_ids = []
 
@@ -121,46 +121,57 @@ class AggregatorAPI(object):
             self.available = False
         g_logger.info("Aggregator status: %s" % message.status)
 
-    def login(self):
-        g_logger.info("Sending Login message to aggregator")
-        request_msg = Login()
-        self._make_request_header(request_msg.header)
-        defer_ = self._send_message(request_msg)
-        defer_.addCallback(self._handle_check_availability)
-        defer_.addErrback(self._handle_error)
-        return defer_
-
-    def logout(self):
-        g_logger.info("Sending Logout message to aggregator")
-        request_msg = Logout()
-        self._make_request_header(request_msg.header)
-        defer_ = self._send_message(request_msg)
-        defer_.addCallback(self._handle_check_availability)
-        defer_.addErrback(self._handle_error)
-        return defer_
-
     """ Peer """
     #----------------------------------------------------------------------
-    def register(self, ip=None):
+    def register(self):
         g_logger.info("Sending RegisterAgent message to aggregator")
-        url = self.base_url + "/registeragent/"
         request_msg = RegisterAgent()
         from umit.icm.agent.Version import VERSION_INT
         request_msg.versionNo = VERSION_INT
         request_msg.agentType = 'DESKTOP'
-        if ip:
-            request_msg.ip = ip
+        if theApp.peer_info.props['internet_ip']:
+            request_msg.ip = theApp.peer_info.props['internet_ip']
         defer_ = self._send_message(request_msg, True)
         defer_.addCallback(self._handle_register)
         defer_.addErrback(self._handle_error)
         return defer_
 
     def _handle_register(self, message):
-        reg_data = [message.agentID, message.token,
-                    message.publicKey, message.privateKey,
-                    message.cipheredPublicKey,
-                    message.aggregatorPublicKey]
-        return reg_data
+        g_logger.info("RegisterAgent response: (%d, %s, %s, %s, %s, %s)" %
+                      (message.agentID, message.token, message.publicKey,
+                       message.privateKey, message.cipheredPublicKey,
+                       message.aggregatorPublicKey))
+        theApp.peer_info.ID = message.agentID
+        theApp.peer_info.AuthToken = message.token
+        theApp.peer_info.PublicKey = message.publicKey
+        theApp.peer_info.PrivateKey = message.privateKey
+        theApp.peer_info.CipheredPublicKey = message.cipheredPublicKey
+        theApp.peer_info.AggregatorPublicKey = message.aggregatorPublicKey
+        theApp.peer_info.registered = True
+
+    def login(self):
+        g_logger.info("Sending Login message to aggregator")
+        request_msg = Login()
+        self._make_request_header(request_msg.header)
+        if theApp.peer_info.props['internet_ip']:
+            request_msg.ip = theApp.peer_info.props['internet_ip']
+        defer_ = self._send_message(request_msg, True)
+        defer_.addCallback(self._handle_login)
+        defer_.addErrback(self._handle_error)
+        return defer_
+
+    def _handle_login(self, message):
+        g_logger.info("Received LoginResponse from aggregator.")
+        theApp.peer_info.login = True
+
+    def logout(self):
+        g_logger.info("Sending Logout message to aggregator")
+        request_msg = Logout()
+        self._make_request_header(request_msg.header)
+        defer_ = self._send_message(request_msg, True)
+        defer_.addCallback(self._handle_check_availability)
+        defer_.addErrback(self._handle_error)
+        return defer_
 
     #def report_peer_info(self):
         #g_logger.info("Sending ReportPeerInfo message to aggregator")
@@ -309,7 +320,6 @@ class AggregatorAPI(object):
     #----------------------------------------------------------------------
     def check_version(self):
         g_logger.info("Sending NewVersion message to aggregator")
-        url = self.base_url + "/checkversion/"
         request_msg = NewVersion()
         defer_ = self._send_message(request_msg)
         defer_.addCallback(self._handle_check_version)
@@ -321,7 +331,6 @@ class AggregatorAPI(object):
 
     def check_tests(self):
         g_logger.info("Sending NewTests message to aggregator")
-        url = self.base_url + "/checktests/"
         request_msg = NewTests()
         defer_ = self._send_message(request_msg)
         defer_.addCallback(self._handle_check_tests)

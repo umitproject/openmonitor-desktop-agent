@@ -29,7 +29,7 @@ from higwidgets.higbuttons import HIGStockButton
 
 from umit.icm.agent.I18N import _
 from umit.icm.agent.Application import theApp
-from umit.icm.agent.gui.RegistrationDialog import RegistrationDialog
+from umit.icm.agent.gui.Registration import RegistrationDialog
 
 ########################################################################
 class LoginDialog(HIGDialog):

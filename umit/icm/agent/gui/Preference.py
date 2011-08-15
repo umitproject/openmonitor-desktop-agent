@@ -32,6 +32,7 @@ from higwidgets.higdialogs import HIGAlertDialog
 
 from umit.icm.agent.I18N import _
 
+
 class PreferenceWindow(HIGWindow):
     """
     User Preference

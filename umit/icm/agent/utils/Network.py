@@ -23,7 +23,7 @@ import urllib2
 from socket import socket, SOCK_DGRAM, AF_INET
 
 local_ip_url = "www.google.com"
-internet_ip_url = "http://www.whereismyip.org"
+internet_ip_url = "http://myip.eu/"
 
 def get_local_ip():
      try:

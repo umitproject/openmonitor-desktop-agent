@@ -77,15 +77,14 @@ class RawMessage(object):
 
 
 if __name__ == "__main__":
-    msg_send = AgentUpdate()
-    #msg_send.header = RequestHeader()
-    msg_send.version = "1.1"
-    msg_send.downloadURL = "http://www.baidu.com"
-    msg_send.checkCode = 1111
+    msg_send = AuthenticatePeer()
+    msg_send.agentType = 2
+    msg_send.agentID = 11111
+    msg_send.agentPort = 8000
     print(msg_send)
     str_ = msg_send.SerializeToString()
     print(str_)
-    msg_recv = AgentUpdate()
+    msg_recv = AuthenticatePeer()
     msg_recv.ParseFromString(str_)
     print(msg_recv)
     if msg_recv.HasField("checkCode"):
