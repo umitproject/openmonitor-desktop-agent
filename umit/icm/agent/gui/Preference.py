@@ -3,6 +3,7 @@
 # Copyright (C) 2011 Adriano Monteiro Marques
 #
 # Author:  Paul Pei <paul.kdash@gmail.com>
+#          Alan Wang <wzj401@gmail.com>
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -31,6 +32,9 @@ from higwidgets.higtables import HIGTable
 from higwidgets.higdialogs import HIGAlertDialog
 
 from umit.icm.agent.I18N import _
+from umit.icm.agent.Application import theApp
+from umit.icm.agent.Global import *
+from umit.icm.agent.test import test_name_by_id
 
 
 class PreferenceWindow(HIGWindow):
@@ -42,6 +46,7 @@ class PreferenceWindow(HIGWindow):
         self.set_title(_('Preference'))
         self.__create_widgets()
         self.__pack_widgets()
+        self.load_preference()
 
     def __create_widgets(self):
         # Main widgets
@@ -50,8 +55,11 @@ class PreferenceWindow(HIGWindow):
         self.main_vbox = HIGVBox()
         self.btn_box = gtk.HButtonBox()
         self.ok_button = gtk.Button(stock=gtk.STOCK_OK)
+        self.ok_button.connect('clicked', lambda x: self.clicked_ok())
         self.apply_button = gtk.Button(stock=gtk.STOCK_APPLY)
+        self.apply_button.connect('clicked', lambda x: self.save_preference())
         self.cancel_button = gtk.Button(stock=gtk.STOCK_CANCEL)
+        self.cancel_button.connect('clicked', lambda x: self.destroy())
 
         # notebook
         self.preference_vbox = HIGVBox()
@@ -78,16 +86,19 @@ class PreferenceWindow(HIGWindow):
         self.pref_startup_check = gtk.CheckButton("Startup on the boot")
         self.pref_update_check = gtk.CheckButton("Automatically update plugins")
 
-        self.pref_cloudagg_label = HIGEntryLabel("this is test")
-        self.pref_cloudagg_button = HIGButton("change")
+        self.pref_cloudagg_entry = gtk.Entry()
+        self.pref_cloudagg_button = HIGButton("Reset")
+        self.pref_cloudagg_button.connect('clicked', lambda w:
+                                          self.pref_cloudagg_entry.set_text(
+                                              'http://icm-dev.appspot.com/api'))
         self.pref_cloudagg_button.set_size_request(80, 28)
 
         self.pref_superpeers_entry = gtk.Entry()
-        self.pref_superpeers_entry.set_size_request(200, 26)
+        self.pref_superpeers_entry.set_size_request(300, 26)
         self.pref_superpeers_subhbox = HIGHBox()
         self.pref_btn_box = gtk.HButtonBox()
-        self.pref_superpeers_button1 = HIGButton("add")
-        self.pref_superpeers_button2 = HIGButton("show all")
+        self.pref_superpeers_button1 = HIGButton("Add")
+        self.pref_superpeers_button2 = HIGButton("Show all")
 
         # Tests page
         self.tests_vbox = HIGVBox()
@@ -109,14 +120,18 @@ class PreferenceWindow(HIGWindow):
 
         self.feedback_suggestion_radiobtn1 = gtk.RadioButton(None, 'Website')
         self.feedback_suggestion_radiobtn1.set_active(True)
-        self.feedback_suggestion_radiobtn2 = gtk.RadioButton(self.feedback_suggestion_radiobtn1, 'Service')
+        self.feedback_suggestion_radiobtn2 = gtk.RadioButton(
+            self.feedback_suggestion_radiobtn1, 'Service')
         #put these two radio button on a boutton box
         self.feedback_suggestion_bbox = gtk.HButtonBox()
         self.feedback_suggestion_entry = gtk.Entry()
         self.feedback_suggestion_sendbtn = HIGButton('Send')
+        self.feedback_suggestion_sendbtn.connect('clicked',
+                                                 lambda x: self.send_suggestion())
 
         self.feedback_report_namelabel = HIGEntryLabel("Your Name:")
         self.feedback_report_nameentry = gtk.Entry()
+        #self.feedback_report_nameentry.set_has_frame(True)
         self.feedback_report_nameentry.set_size_request(100, 26)
         self.feedback_report_emaillabel = HIGEntryLabel("Email:")
         self.feedback_report_emailentry = gtk.Entry()
@@ -135,6 +150,8 @@ class PreferenceWindow(HIGWindow):
         self.feedback_report_textview.show()
         self.feedback_report_subhbox2 = HIGHBox()
         self.feedback_report_sendbtn = HIGButton('Send')
+        self.feedback_report_sendbtn.connect('clicked',
+                                             lambda x: self.send_bug_report())
         self.feedback_report_subhbox3 = HIGHBox()
 
     def __pack_widgets(self):
@@ -177,7 +194,7 @@ class PreferenceWindow(HIGWindow):
         self.pref_peerinfo_table.attach_label(self.pref_startup_check, 0, 2, 2, 3)
         self.pref_peerinfo_table.attach_label(self.pref_update_check, 0, 3, 3, 4)
 
-        self.pref_cloudagg_subhbox._pack_expand_fill(self.pref_cloudagg_label)
+        self.pref_cloudagg_subhbox._pack_expand_fill(self.pref_cloudagg_entry)
         self.pref_cloudagg_subhbox._pack_noexpand_nofill(self.pref_cloudagg_button)
         self.pref_cloudagg_table.attach_entry(self.pref_cloudagg_subhbox, 0, 1, 0, 1)
 
@@ -239,27 +256,54 @@ class PreferenceWindow(HIGWindow):
 
         self.hpaned.pack1(self.preference_vbox, True, False)
 
-class PreferenceWindowA(gtk.HPaned, object):
-    def __init__(self, notebook):
-        gtk.HPaned.__init__(self)
+    def send_suggestion(self):
+        if self.feedback_suggestion_radiobtn1.get_active():
+            website_url = self.feedback_suggestion_entry.get_text()
+            theApp.aggregator.send_website_suggestion(website_url)
+        elif self.feedback_suggestion_radiobtn2.get_active():
+            text = self.feedback_suggestion_entry.get_text()
+            service_name = text.split(':')[0]
+            host_name = text.split(':')[1]
+            ip = int(text.split(':')[2])
+            theApp.aggregator.send_service_suggestion(service_name, host_name, ip)
 
-        self._create_widgets()
-        self._pack_widgets()
-        #self._connect_events()
+    def send_bug_report(self):
+        pass
 
-        self.parsed_results = {}
-        #self._set_result_view()
-        self.scan_num = 1
-        self.id = 0
-        self.notebook = notebook
+    def clicked_ok(self):
+        self.save_preference()
+        self.destroy()
 
-    #def _connect_events(self):
-        #self.os_osclass_combo.connect("changed", self.update_osmatch)
-        #self.pref_email_entry.connect("focus-out-event",self.update_extension_entry)
-        #self.pref_startup_check.connect("toggled", self.update_save_check)
-        #self.pref_update_check.connect("toggled", self.update_search_check)
-        ##1self.pref_path_entry.connect_entry_change(self.update_path_entry)
-        #self.pref_savetime_entry.connect_entry_change(self.update_savetime_entry)
+    def save_preference(self):
+        user_email = self.pref_email_entry.get_text()
+        if user_email != '': # and is valid
+            theApp.peer_info.Email = user_email
+
+        startup_on_boot = self.pref_startup_check.get_active()
+        g_config.set('application', 'startup_on_boot', str(startup_on_boot))
+        auto_update = self.pref_update_check.get_active()
+        g_config.set('application', 'auto_update', str(auto_update))
+
+        aggregator_url = self.pref_cloudagg_entry.get_text()
+        theApp.aggregator.base_url = aggregator_url
+        g_db_helper.set_config('aggregator_url', aggregator_url)
+
+    def load_preference(self):
+        self.pref_peerid_label2.set_text(str(theApp.peer_info.ID))
+        self.pref_email_entry.set_text(theApp.peer_info.Email)
+
+        startup_on_boot = g_config.getboolean('application', 'startup_on_boot')
+        if startup_on_boot:
+            self.pref_startup_check.set_active(True)
+        else:
+            self.pref_startup_check.set_active(False)
+        auto_update = g_config.getboolean('application', 'auto_update')
+        if auto_update:
+            self.pref_update_check.set_active(True)
+        else:
+            self.pref_update_check.set_active(False)
+
+        self.pref_cloudagg_entry.set_text(theApp.aggregator.base_url)
 
 class Tests(gtk.VBox):
     def __init__(self):
@@ -336,6 +380,10 @@ class Tests(gtk.VBox):
         table.attach(sw, 4, 5, 1, 3)
         halign2 = gtk.Alignment(0, 1, 0, 0)
         self.add(table)
+
+class SuperPeerListWindow(HIGWindow):
+    def __init__(self):
+        super(SuperPeerListWindow, self).__init__()
 
 
 if __name__ == "__main__":

@@ -1,33 +1,53 @@
 #!/usr/bin/env python
+# -*- coding: utf-8 -*-
+# Copyright (C) 2011 Adriano Monteiro Marques
+#
+# Author:  Paul Pei <paul.kdash@gmail.com>
+#          Alan Wang <wzj401@gmail.com>
+#
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 2 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, write to the Free Software
+# Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
 import os, stat, time
 import pygtk
 pygtk.require('2.0')
 import gtk
 
-class EventWindow:
+from higwidgets.higwindows import HIGWindow
+
+from umit.icm.agent.I18N import _
+
+
+class EventWindow(HIGWindow):
     column_names = ['test type', 'event type', 'time', 'location', 'reports']
 
-    def delete_event(self, widget, event, data=None):
-        gtk.main_quit()
-        return False
- 
     def __init__(self, dname = None):
+        HIGWindow.__init__(self, type=gtk.WINDOW_TOPLEVEL)
+
         cell_data_funcs = (None, self.event_type, self.time,
                            self.location, self.report)
- 
+
         # Create a new window
-        self.window = gtk.Window(gtk.WINDOW_TOPLEVEL)
- 
-        self.window.set_size_request(400, 300)
- 
-        self.window.connect("delete_event", self.delete_event)
- 
-        listmodel = self.make_list(dname)
- 
+        #self.window = gtk.Window(gtk.WINDOW_TOPLEVEL)
+        self.set_title(_('Event List'))
+        self.set_size_request(400, 300)
+
+        listmodel = gtk.ListStore(None) #dname
+
         # create the TreeView
         self.treeview = gtk.TreeView()
- 
+
         # create the TreeViewColumns to display the data
         self.tvcolumn = [None] * len(self.column_names)
         cellpb = gtk.CellRendererPixbuf()
@@ -45,22 +65,11 @@ class EventWindow:
             self.treeview.append_column(self.tvcolumn[n])
 
         #self.treeview.connect('row-activated', self.open_file)
-        #上面这一行代码可以添加一个响应，比如双击某一行弹出一个对话框，显示event的详细信息
         self.scrolledwindow = gtk.ScrolledWindow()
         self.scrolledwindow.add(self.treeview)
-        self.window.add(self.scrolledwindow)
         self.treeview.set_model(listmodel)
- 
-        self.window.show_all()
-        return
+        self.add(self.scrolledwindow)
 
-    def make_list(self, dname=None):
-        #这个是得到第一列的函数，类似数据库主键的感觉
-        #listmodel = [[2],[2],[2],[2]]
-        listmodel = gtk.ListStore(object)
-        return listmodel
-
-    #往下几个函数都是分别得到每一列的信息，按照cell.set_property的格式添加即可
     def test_type(self, column, cell, model, iter):
         #cell.set_property('text', model.get_value(iter, 0))
         return
@@ -82,13 +91,11 @@ class EventWindow:
         #filestat = os.stat(filename)
         #cell.set_property('text', time.ctime(filestat.st_mtime))
         return
-    
+
     def report(self, column, cell, model, iter):
         return
-    
-def main():
-    gtk.main()
+
 
 if __name__ == "__main__":
     flcdexample = EventWindow()
-    main()
+    gtk.main()

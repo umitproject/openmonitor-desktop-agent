@@ -30,7 +30,9 @@ from umit.icm.agent.I18N import _
 from umit.icm.agent.BasePaths import *
 from umit.icm.agent.Application import theApp
 from umit.icm.agent.gui.About import About
+from umit.icm.agent.gui.Event import EventWindow
 from umit.icm.agent.gui.Login import LoginDialog
+from umit.icm.agent.gui.Logs import LogsWindow
 from umit.icm.agent.gui.Preference import PreferenceWindow
 from umit.icm.agent.gui.Splash import Splash
 
@@ -46,7 +48,7 @@ class GtkMain(object):
         self.tray_menu_logged_in = gtk.Menu()
 
         menu_item = gtk.MenuItem(_("ICM Webpage"))
-        #menu_item.connect("activate", lambda w: gtk.main_quit())
+        menu_item.connect("activate", lambda w: self.show_web_map())
         self.tray_menu_logged_in.append(menu_item)
 
         menu_item = gtk.ImageMenuItem(_("Dashboard"))
@@ -54,11 +56,11 @@ class GtkMain(object):
         self.tray_menu_logged_in.append(menu_item)
 
         menu_item = gtk.ImageMenuItem(_("Event List"))
-        #menu_item.connect("activate", lambda w: gtk.main_quit())
+        menu_item.connect("activate", lambda w: self.show_event_list())
         self.tray_menu_logged_in.append(menu_item)
 
         menu_item = gtk.ImageMenuItem(_("Logs"))
-        #menu_item.connect("activate", lambda w: gtk.main_quit())
+        menu_item.connect("activate", lambda w: self.show_logs())
         self.tray_menu_logged_in.append(menu_item)
 
         self.tray_menu_logged_in.append(gtk.SeparatorMenuItem())
@@ -131,11 +133,21 @@ class GtkMain(object):
     def hide_menu(self, *args, **kwargs):
         self.tray_menu.popdown()
 
+    def show_web_map(self):
+        # open the web map in browser
+        pass
+
+    def show_event_list(self):
+        wnd = EventWindow()
+        wnd.show_all()
+
+    def show_logs(self):
+        wnd = LogsWindow()
+        wnd.show_all()
+
     def show_preference(self):
         wnd = PreferenceWindow()
         wnd.show_all()
-        #w.set_size_request(520, 440)
-        #w.show_all()
 
     def show_about(self):
         about = About()
