@@ -77,7 +77,7 @@ class RawMessage(object):
 
 
 if __name__ == "__main__":
-    msg_send = AuthenticatePeer()
+    msg_send = WebsiteReport()
     msg_send.agentType = 2
     msg_send.agentID = 11111
     msg_send.agentPort = 8000

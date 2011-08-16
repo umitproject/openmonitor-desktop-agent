@@ -102,11 +102,15 @@ class LogsGUI(gtk.VBox):
         btnbox.set_border_width(5)
         btnbox.set_layout(gtk.BUTTONBOX_START)
         btnbox.set_spacing(5)
-        checkbtn1 = gtk.CheckButton("System logs")
-        checkbtn2 = gtk.CheckButton("User logs")
+        checkbtn1 = gtk.CheckButton("ERROR")
+        checkbtn2 = gtk.CheckButton("WARNING")
+        checkbtn3 = gtk.CheckButton("INFO")
+        checkbtn4 = gtk.CheckButton("DEBUG")
 
         vbox.add(checkbtn1)
         vbox.add(checkbtn2)
+        vbox.add(checkbtn3)
+        vbox.add(checkbtn4)
         table.attach(vbox, 3, 4, 1, 2, gtk.FILL, gtk.SHRINK, 1, 1)
 
         table.attach(halign, 4, 5, 0, 1, gtk.FILL,

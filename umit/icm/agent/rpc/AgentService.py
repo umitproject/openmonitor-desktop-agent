@@ -23,6 +23,7 @@ We use port multiplexing to handle different packets from the aggregator,
 super agents, desktop agents, and mobile agents.
 """
 
+import base64
 import random
 import struct
 import time
@@ -203,7 +204,7 @@ class AgentProtocol(Protocol):
                 forward_message = MessageFactory.decode(\
                     base64.b64decode(message.encodedMessage))
                 if message.destination == 0:
-                    defer_ = theApp.aggregator.safe_send(forward_message)
+                    defer_ = theApp.aggregator._send_message(forward_message, True)
                     defer_.addCallback(self.send_forward_message_response,
                                        message.identifier)
         elif isinstance(message, Diagnose):
@@ -220,7 +221,7 @@ class AgentProtocol(Protocol):
                 pass
         elif self.is_ma_message(message):
             if message.header.agentID in theApp.peer_manager.mobile_peers:
-                theApp.ma_service.handle_message(message)
+                theApp.ma_service.handle_message(message, self.transport)
             else:
                 g_logger.warning("Unauthenticated mobile agent. %d" %
                                  message.header.agentID)
@@ -233,7 +234,9 @@ class AgentProtocol(Protocol):
     def is_ma_message(self, message):
         if message.DESCRIPTOR.name in (
             'GetPeerList',
-            'GetSuperPeerList'
+            'GetSuperPeerList',
+            'SendWebsiteReport',
+            'SendServiceReport',
             ):
             return True
         return False

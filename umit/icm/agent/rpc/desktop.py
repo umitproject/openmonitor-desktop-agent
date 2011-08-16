@@ -121,12 +121,12 @@ class DesktopAgentSession(Session):
     def _handle_send_website_report(self, message):
         theApp.statistics.reports_received = \
               theApp.statistics.reports_received + 1
-        message.report.header.passedNode.append(message.header.agentID)
-        theApp.report_manager.add_report(message)
+        message.report.header.passedNode.append(str(message.header.agentID))
+        theApp.report_manager.add_report(message.report)
         # send response
         response_msg = SendReportResponse()
-        response_msg.header.token = theApp.peer_info.AuthToken
-        response_msg.header.agentID = theApp.peer_info.ID
+        response_msg.header.currentVersionNo = VERSION_INT
+        response_msg.header.currentTestVersionNo = TEST_PACKAGE_VERSION_INT
         self._send_message(response_msg)
 
     def send_service_report(self, report):
@@ -142,12 +142,12 @@ class DesktopAgentSession(Session):
     def _handle_send_service_report(self, message):
         theApp.statistics.reports_received = \
               theApp.statistics.reports_received + 1
-        message.report.header.passedNode.append(message.header.agentID)
-        theApp.report_manager.add_report(message)
+        message.report.header.passedNode.append(str(message.header.agentID))
+        theApp.report_manager.add_report(message.report)
         # send response
         response_msg = SendReportResponse()
-        response_msg.header.token = theApp.peer_info.AuthToken
-        response_msg.header.agentID = theApp.peer_info.ID
+        response_msg.header.currentVersionNo = VERSION_INT
+        response_msg.header.currentTestVersionNo = TEST_PACKAGE_VERSION_INT
         self._send_message(response_msg)
 
     def _handle_send_report_response(self, data):
@@ -174,25 +174,6 @@ class DesktopAgentSession(Session):
         if check_code != 0:
             request_msg.checkCode = check_code
         self._send_message(request_msg)
-
-    def _handle_forward_message(self, message):
-        if theApp.peer_info.Type != 1:
-            return
-        forward_message = MessageFactory.decode(\
-            base64.b64decode(message.encodedMessage))
-        if message.destination == 0:
-            defer_ = theApp.aggregator.safe_send(forward_message)
-            defer_.addCallback(self.send_forward_message_response,
-                               message.identifier)
-        else:
-            pass
-
-    def send_forward_message_response(self, message, identifier):
-        response_msg = ForwardingMessageResponse()
-        response_msg.identifier = identifier
-        response_msg.encodedMessage = \
-                    base64.b64encode(MessageFactory.encode(message))
-        self._send_message(response_msg)
 
     def _send_message(self, message):
         data = MessageFactory.encode(message)
@@ -221,8 +202,6 @@ class DesktopAgentSession(Session):
         elif isinstance(message, TestModuleUpdateResponse):
             g_logger.info("Peer %s update test mod to version %s: %S" %
                           (self.remote_id, message.version, message.result))
-        elif isinstance(message, ForwardingMessage):
-            self._handle_forward_message(message)
 
     def close(self):
         if self.remote_id in theApp.peer_manager.normal_peers:
@@ -317,12 +296,12 @@ class DesktopSuperAgentSession(Session):
     def _handle_send_website_report(self, message):
         theApp.statistics.reports_received = \
               theApp.statistics.reports_received + 1
-        message.report.header.passedNode.append(message.header.agentID)
-        theApp.report_manager.add_report(message)
+        message.report.header.passedNode.append(str(message.header.agentID))
+        theApp.report_manager.add_report(message.report)
         # send response
         response_msg = SendReportResponse()
-        response_msg.header.token = theApp.peer_info.AuthToken
-        response_msg.header.agentID = theApp.peer_info.ID
+        response_msg.header.currentVersionNo = VERSION_INT
+        response_msg.header.currentTestVersionNo = TEST_PACKAGE_VERSION_INT
         self._send_message(response_msg)
 
     def send_service_report(self, report):
@@ -338,12 +317,12 @@ class DesktopSuperAgentSession(Session):
     def _handle_send_service_report(self, message):
         theApp.statistics.reports_received = \
               theApp.statistics.reports_received + 1
-        message.report.header.passedNode.append(message.header.agentID)
-        theApp.report_manager.add_report(message)
+        message.report.header.passedNode.append(str(message.header.agentID))
+        theApp.report_manager.add_report(message.report)
         # send response
         response_msg = SendReportResponse()
-        response_msg.header.token = theApp.peer_info.AuthToken
-        response_msg.header.agentID = theApp.peer_info.ID
+        response_msg.header.currentVersionNo = VERSION_INT
+        response_msg.header.currentTestVersionNo = TEST_PACKAGE_VERSION_INT
         self._send_message(response_msg)
 
     def _handle_send_report_response(self, data):
@@ -431,8 +410,6 @@ class DesktopSuperAgentSession(Session):
             self._handle_agent_update(message)
         elif isinstance(message, TestModuleUpdate):
             self._handle_test_mod_update(message)
-        elif isinstance(message, ForwardingMessage):
-            self._handle_forward_message(message)
         elif isinstance(message, ForwardingMessageResponse):
             self._handle_forward_message_response(message)
 

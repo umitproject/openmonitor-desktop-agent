@@ -81,7 +81,7 @@ class PreferenceWindow(HIGWindow):
 
         self.pref_peerid_label = HIGEntryLabel("Peer ID:")
         self.pref_email_label = HIGEntryLabel("Email Address:")
-        self.pref_peerid_label2 = HIGEntryLabel("peer id")
+        self.pref_peerid_label2 = HIGEntryLabel()
         self.pref_email_entry = gtk.Entry()
         self.pref_startup_check = gtk.CheckButton("Startup on the boot")
         self.pref_update_check = gtk.CheckButton("Automatically update plugins")
@@ -98,7 +98,13 @@ class PreferenceWindow(HIGWindow):
         self.pref_superpeers_subhbox = HIGHBox()
         self.pref_btn_box = gtk.HButtonBox()
         self.pref_superpeers_button1 = HIGButton("Add")
+        self.pref_superpeers_button1.connect(
+            'clicked', lambda w: reactor.connectTCP(peer_entry.IP,
+                                                    peer_entry.Port,
+                                                    theApp.factory))
         self.pref_superpeers_button2 = HIGButton("Show all")
+        self.pref_superpeers_button2.connect('clicked', lambda w:
+                                             self.show_super_peer_list_window())
 
         # Tests page
         self.tests_vbox = HIGVBox()
@@ -207,7 +213,7 @@ class PreferenceWindow(HIGWindow):
         self.pref_superpeers_table.attach_label(self.pref_superpeers_subhbox, 0, 1, 0, 1)
 
         self.preference_notebook.append_page(self.pref_vbox,
-                                         gtk.Label("Preference"))
+                                             gtk.Label("Preference"))
 
         #Test page
         #self.tests_hbox.set_border_width(12)
@@ -217,7 +223,7 @@ class PreferenceWindow(HIGWindow):
         self.tests_checkbtn.set_border_width(8)
         self.tests_hbox2.add(self.tests_checkbtn)
         self.preference_notebook.append_page(self.tests_vbox,
-                                         gtk.Label("Tests"))
+                                             gtk.Label("Tests"))
 
         #Feedback page
         self.feedback_vbox.set_border_width(12)
@@ -239,7 +245,7 @@ class PreferenceWindow(HIGWindow):
         self.feedback_suggestion_table.attach_label(self.feedback_suggestion_bbox, 0, 1, 0, 1)
         self.feedback_suggestion_table.attach_entry(self.feedback_suggestion_entry, 0, 1, 1, 2)
         self.feedback_suggestion_table.attach(self.feedback_suggestion_sendbtn,
-                                                    0, 1, 2, 3, gtk.PACK_START)
+                                              0, 1, 2, 3, gtk.PACK_START)
 
         self.feedback_report_subhbox1.pack_start(self.feedback_report_namelabel, True, True, 0)
         self.feedback_report_subhbox1.pack_start(self.feedback_report_nameentry, True, True, 0)
@@ -252,7 +258,7 @@ class PreferenceWindow(HIGWindow):
         self.feedback_report_table.attach(self.feedback_report_subhbox3, 0, 1, 2, 3, gtk.PACK_START)
 
         self.preference_notebook.append_page(self.feedback_vbox,
-                                         gtk.Label("Feedback"))
+                                             gtk.Label("Feedback"))
 
         self.hpaned.pack1(self.preference_vbox, True, False)
 
@@ -269,6 +275,10 @@ class PreferenceWindow(HIGWindow):
 
     def send_bug_report(self):
         pass
+
+    def show_super_peer_list_window(self):
+        wnd = SuperPeerListWindow()
+        wnd.show_all()
 
     def clicked_ok(self):
         self.save_preference()
@@ -320,7 +330,7 @@ class Tests(gtk.VBox):
         halign.add(title)
 
         table.attach(halign, 0, 1, 0, 1, gtk.FILL,
-            gtk.FILL, 0, 0);
+                     gtk.FILL, 0, 0);
 
         sw = gtk.ScrolledWindow()
         sw.set_policy(gtk.POLICY_AUTOMATIC, gtk.POLICY_AUTOMATIC)
@@ -365,7 +375,7 @@ class Tests(gtk.VBox):
         halign.add(title)
 
         table.attach(halign, 4, 5, 0, 1, gtk.FILL,
-            gtk.FILL, 0, 0);
+                     gtk.FILL, 0, 0);
 
         sw = gtk.ScrolledWindow()
         sw.set_policy(gtk.POLICY_AUTOMATIC, gtk.POLICY_AUTOMATIC)
@@ -383,7 +393,81 @@ class Tests(gtk.VBox):
 
 class SuperPeerListWindow(HIGWindow):
     def __init__(self):
-        super(SuperPeerListWindow, self).__init__()
+        HIGWindow.__init__(self, type=gtk.WINDOW_TOPLEVEL)
+        self.set_title(_('Super Peers'))
+        self.__create_widgets()
+        self.__pack_widgets()
+        self.__load_super_peers()
+
+    def __create_widgets(self):
+        self.main_vbox = HIGVBox()
+        self.add(self.main_vbox)
+        self.btn_box = gtk.HButtonBox()
+        self.ok_button = gtk.Button(stock=gtk.STOCK_SAVE)
+        self.ok_button.connect('clicked', lambda x: self.__save_super_peers())
+        self.cancel_button = gtk.Button(stock=gtk.STOCK_CANCEL)
+        self.cancel_button.connect('clicked', lambda x: self.destroy())
+
+        self.SuperPeersBox_vbox = HIGVBox()
+        self.SuperPeersBox_hbox1 = HIGHBox()
+        self.SuperPeersBox_hbox2 = HIGHBox()
+        self.SuperPeersBox_subbox = SuperPeersBox()
+        self.SuperPeersBox_hbox1.add(self.SuperPeersBox_subbox)
+
+    def __pack_widgets(self):
+        self.main_vbox._pack_expand_fill(self.SuperPeersBox_hbox1)
+
+        self.btn_box.set_layout(gtk.BUTTONBOX_END)
+        self.btn_box.set_spacing(3)
+        self.btn_box.pack_start(self.ok_button)
+        self.btn_box.pack_start(self.cancel_button)
+        self.main_vbox.pack_start(self.btn_box)
+        self.main_vbox.set_border_width(12)
+
+        self.SuperPeersBox_vbox.pack_start(self.SuperPeersBox_hbox1, True, True, 5)
+        self.SuperPeersBox_vbox.pack_start(self.SuperPeersBox_hbox2, True, True, 5)
+
+    def __save_super_peers(self):
+        self.destroy()
+
+    def __load_super_peers(self):
+        text = ""
+        for peer_entry in theApp.peer_manager.super_peers.values():
+            text = text + "%s:%d\n" % (peer_entry.IP, peer_entry.Port)
+        self.SuperPeersBox_subbox.textbuffer.set_text(text)
+
+class SuperPeersBox(gtk.VBox):
+    def __init__(self):
+        super(SuperPeersBox, self).__init__()
+        self.set_size_request(400, 240)
+        self.set_border_width(8)
+
+        table = gtk.Table(8, 5, False)
+        table.set_col_spacings(3)
+
+        title = gtk.Label("""\
+<span size='12000'>Super Peer List: \n</span>""")
+
+        title.set_use_markup(True)
+
+        halign = gtk.Alignment(0, 0, 0, 0)
+        halign.add(title)
+
+        table.attach(halign, 0, 1, 0, 1, gtk.FILL,
+                     gtk.FILL, 0, 0);
+
+        sw = gtk.ScrolledWindow()
+        sw.set_policy(gtk.POLICY_AUTOMATIC, gtk.POLICY_AUTOMATIC)
+        wins = gtk.TextView()
+        self.textbuffer = wins.get_buffer()
+        wins.set_editable(True)
+        wins.modify_fg(gtk.STATE_NORMAL, gtk.gdk.Color(5140, 5140, 5140))
+        wins.set_cursor_visible(True)
+        wins.show()
+        sw.add(wins)
+        sw.show()
+        table.attach(sw, 0, 1, 1, 3)
+        self.add(table)
 
 
 if __name__ == "__main__":

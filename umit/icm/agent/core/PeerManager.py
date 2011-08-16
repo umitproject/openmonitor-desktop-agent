@@ -267,10 +267,10 @@ class PeerManager:
         #theApp.task_manager.add_test(1, '*/5 * * * *', {'url':'http://www.sina.com'}, 2)
 
     def _after_login(self, data):
-        if theApp.peer_info.login:
+        if theApp.peer_info.login and theApp.use_gui:
             theApp.gtk_main.set_login_status(True)
-        else:
-            theApp.gtk_main.set_login_status(False)
+        #else:
+            #theApp.gtk_main.set_login_status(False)
 
     """
     Make the desktop agent connect to a certain number of super peers and \

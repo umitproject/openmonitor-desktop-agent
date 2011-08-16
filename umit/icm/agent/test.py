@@ -21,6 +21,7 @@
 __all__ = ['test_by_id', 'test_name_by_id', 'WebsiteTest', 'ServiceTest']
 
 TEST_PACKAGE_VERSION = '0.0'
+TEST_PACKAGE_VERSION_INT = 1
 
 import hashlib
 import re

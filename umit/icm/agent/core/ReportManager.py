@@ -69,10 +69,14 @@ class ReportManager(object):
     def add_report(self, report):
         # check if in the cache
         if report.header.reportID in self.cached_reports:
+            g_logger.info("ReportID '%s' already in cache." %
+                          report.header.reportID)
             return
         # check if in the db
         if g_db_helper.select("select * from reports where report_id='%s'" % \
                               report.header.reportID):
+            g_logger.info("ReportID '%s' already in db." %
+                          report.header.reportID)
             return
         report_entry = ReportEntry()
         # required fields

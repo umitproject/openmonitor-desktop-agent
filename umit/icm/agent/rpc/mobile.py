@@ -21,7 +21,7 @@
 from umit.icm.agent.Application import theApp
 from umit.icm.agent.Global import *
 from umit.icm.agent.Version import *
-from umit.icm.agent.test import TEST_PACKAGE_VERSION
+from umit.icm.agent.test import TEST_PACKAGE_VERSION_INT
 from umit.icm.agent.rpc.message import *
 from umit.icm.agent.rpc.MessageFactory import MessageFactory
 from umit.icm.agent.rpc.Session import Session
@@ -40,12 +40,12 @@ class MobileAgentSession(Session):
         response_msg = P2PGetSuperPeerListResponse()
         for speer in chosen_peers:
             agent_data = response_msg.peers.add()
-            agent_data.id = speer.ID
+            agent_data.agentID = speer.ID
+            agent_data.agentIP = speer.IP
+            agent_data.agentPort = speer.Port
             agent_data.token = speer.Token
             agent_data.publicKey = speer.PublicKey
             agent_data.peerStatus = speer.Status
-            agent_data.agentIP = speer.IP
-            agent_data.agentPort = speer.Port
         self._send_message(response_msg)
 
     def _handle_get_super_peer_list_response(self, message):
@@ -64,12 +64,12 @@ class MobileAgentSession(Session):
         response_msg = P2PGetPeerListResponse()
         for peer in chosen_peers:
             agent_data = response_msg.peers.add()
-            agent_data.id = peer.ID
+            agent_data.agentID = peer.ID
+            agent_data.agentIP = peer.IP
+            agent_data.agentPort = peer.Port
             agent_data.token = peer.Token
             agent_data.publicKey = peer.PublicKey
             agent_data.peerStatus = peer.Status
-            agent_data.agentIP = peer.IP
-            agent_data.agentPort = peer.Port
         self._send_message(response_msg)
 
     def _handle_get_peer_list_response(self, message):
@@ -86,50 +86,31 @@ class MobileAgentSession(Session):
     def _handle_send_website_report(self, message):
         theApp.statistics.reports_received = \
               theApp.statistics.reports_received + 1
-        message.report.header.passedNode.append(message.header.agentID)
-        theApp.report_manager.add_report(message)
+        message.report.header.passedNode.append(str(message.header.agentID))
+        theApp.report_manager.add_report(message.report)
         # send response
         response_msg = SendReportResponse()
-        response_msg.header.token = theApp.peer_info.AuthToken
-        response_msg.header.agentID = theApp.peer_info.ID
+        response_msg.header.currentVersionNo = VERSION_INT
+        response_msg.header.currentTestVersionNo = TEST_PACKAGE_VERSION_INT
         self._send_message(response_msg)
 
     def _handle_send_service_report(self, message):
         theApp.statistics.reports_received = \
               theApp.statistics.reports_received + 1
-        message.report.header.passedNode.append(message.header.agentID)
-        theApp.report_manager.add_report(message)
+        message.report.header.passedNode.append(str(message.header.agentID))
+        theApp.report_manager.add_report(message.report)
         # send response
         response_msg = SendReportResponse()
-        response_msg.header.token = theApp.peer_info.AuthToken
-        response_msg.header.agentID = theApp.peer_info.ID
+        response_msg.header.currentVersionNo = VERSION_INT
+        response_msg.header.currentTestVersionNo = TEST_PACKAGE_VERSION_INT
         self._send_message(response_msg)
 
     def _handle_send_report_response(self, message):
         theApp.statistics.reports_sent_to_mobile_agent = \
               theApp.statistics.reports_sent_to_mobile_agent + 1
 
-    def _handle_forward_message(self, message):
-        if theApp.peer_info.Type != 1:
-            return
-        forward_message = MessageFactory.decode(\
-            base64.b64decode(message.encodedMessage))
-        if message.destination == 0:
-            defer_ = theApp.aggregator.safe_send(forward_message)
-            defer_.addCallback(self.send_forward_message_response,
-                               message.identifier)
-        else:
-            pass
-
-    def send_forward_message_response(self, message, identifier):
-        response_msg = ForwardingMessageResponse()
-        response_msg.identifier = identifier
-        response_msg.encodedMessage = \
-                    base64.b64encode(MessageFactory.encode(message))
-        self._send_message(response_msg)
-
     def _send_message(self, message):
-        data = MessageFactory.encode(request_msg)
+        data = MessageFactory.encode(message)
         length = struct.pack('!I', len(data))
         self.transport.write(length)
         self.transport.write(data)
@@ -155,8 +136,6 @@ class MobileAgentSession(Session):
         elif isinstance(message, TestModuleUpdateResponse):
             g_logger.info("Peer %s update test mod to version %s: %S" %
                           (self.remote_id, message.version, message.result))
-        elif isinstance(message, ForwardingMessage):
-            self._handle_forward_message(message)
 
     def close(self):
         if self.remote_id in theApp.peer_manager.mobile_peers:
@@ -171,101 +150,82 @@ class MobileAgentService(object):
     def __init__(self):
         """Constructor"""
 
-    def _handle_get_super_peer_list(self, message):
+    def _make_response_header(self, header):
+        header.currentVersionNo = VERSION_INT
+        header.currentTestVersionNo = TEST_PACKAGE_VERSION_INT
+
+    def _handle_get_super_peer_list(self, message, transport):
         agentID = message.header.agentID
-        secretKey = theApp.peer_manager
+        secretKey = theApp.peer_manager.mobile_peers[agentID].Token
         if message.HasField('count'):
             chosen_peers = theApp.peer_manager.select_super_peers(message.count)
         else:
             chosen_peers = theApp.peer_manager.super_peers
         response_msg = GetSuperPeerListResponse()
-        response_msg.header.currentVersionNo = VERSION_INT
-        response_msg.header.currentTestVersionNo = TEST_PACKAGE_VERSION
+        self._make_response_header(response_msg.header)
         for speer in chosen_peers:
             agent_data = response_msg.knownSuperPeers.add()
-            agent_data.id = speer.ID
+            agent_data.agentID = speer.ID
+            agent_data.agentIP = speer.IP
+            agent_data.agentPort = speer.Port
             agent_data.token = speer.Token
             agent_data.publicKey = speer.PublicKey
             agent_data.peerStatus = speer.Status
-            agent_data.agentIP = speer.IP
-            agent_data.agentPort = speer.Port
-        self._send_message(response_msg)
+        self._send_message(response_msg, transport)
 
-    def _handle_get_peer_list(self, message):
+    def _handle_get_peer_list(self, message, transport):
         agentID = message.header.agentID
-        secretKey = theApp.peer_manager
+        secretKey = theApp.peer_manager.mobile_peers[agentID].Token
         if message.HasField('count'):
             chosen_peers = theApp.peer_manager.select_normal_peers(message.count)
         else:
             chosen_peers = theApp.peer_manager.normal_peers
         response_msg = GetPeerListResponse()
-        response_msg.header.currentVersionNo = VERSION_INT
-        response_msg.header.currentTestVersionNo = TEST_PACKAGE_VERSION
+        self._make_response_header(response_msg.header)
         for peer in chosen_peers:
             agent_data = response_msg.knownPeers.add()
-            agent_data.id = peer.ID
+            agent_data.agentID = peer.ID
+            agent_data.agentIP = peer.IP
+            agent_data.agentPort = peer.Port
             agent_data.token = peer.Token
             agent_data.publicKey = peer.PublicKey
             agent_data.peerStatus = peer.Status
-            agent_data.agentIP = peer.IP
-            agent_data.agentPort = peer.Port
-        self._send_message(response_msg)
+        self._send_message(response_msg, transport)
 
-    def _handle_send_website_report(self, message):
+    def _handle_send_website_report(self, message, transport):
         theApp.statistics.reports_received = \
               theApp.statistics.reports_received + 1
-        message.report.header.passedNode.append(message.header.agentID)
-        theApp.report_manager.add_report(message)
+        message.report.header.passedNode.append(str(message.header.agentID))
+        theApp.report_manager.add_report(message.report)
         # send response
         response_msg = SendReportResponse()
-        response_msg.header.token = theApp.peer_info.AuthToken
-        response_msg.header.agentID = theApp.peer_info.ID
-        self._send_message(response_msg)
+        self._make_response_header(response_msg.header)
+        self._send_message(response_msg, transport)
 
-    def _handle_send_service_report(self, message):
+    def _handle_send_service_report(self, message, transport):
         theApp.statistics.reports_received = \
               theApp.statistics.reports_received + 1
-        message.report.header.passedNode.append(message.header.agentID)
-        theApp.report_manager.add_report(message)
+        message.report.header.passedNode.append(str(message.header.agentID))
+        theApp.report_manager.add_report(message.report)
         # send response
         response_msg = SendReportResponse()
-        response_msg.header.token = theApp.peer_info.AuthToken
-        response_msg.header.agentID = theApp.peer_info.ID
-        self._send_message(response_msg)
+        self._make_response_header(response_msg.header)
+        self._send_message(response_msg, transport)
 
-    def _handle_forward_message(self, message):
-        if theApp.peer_info.Type != 1:
-            return
-        forward_message = MessageFactory.decode(\
-            base64.b64decode(message.encodedMessage))
-        if message.destination == 0:
-            defer_ = theApp.aggregator.safe_send(forward_message)
-            defer_.addCallback(self.send_forward_message_response,
-                               message.identifier)
-        else:
-            pass
-
-    def send_forward_message_response(self, message, identifier):
-        response_msg = ForwardingMessageResponse()
-        response_msg.identifier = identifier
-        response_msg.encodedMessage = \
-                    base64.b64encode(MessageFactory.encode(message))
-        self._send_message(response_msg)
-
-    def _send_message(self, message):
-        data = MessageFactory.encode(request_msg)
+    def _send_message(self, message, transport):
+        g_logger.info("Sending a %s message to %s" % (message.DESCRIPTOR.name,
+                                                      transport.getPeer()))
+        data = MessageFactory.encode(message)
         length = struct.pack('!I', len(data))
-        self.transport.write(length)
-        self.transport.write(data)
+        transport.write(length)
+        transport.write(data)
 
-    def handle_message(self, message):
+    def handle_message(self, message, transport):
         if isinstance(message, GetSuperPeerList):
-            self._handle_get_super_peer_list(message)
+            self._handle_get_super_peer_list(message, transport)
         elif isinstance(message, GetPeerList):
-            self._handle_get_peer_list(message)
+            self._handle_get_peer_list(message, transport)
         elif isinstance(message, SendWebsiteReport):
-            self._handle_send_website_report(message)
+            self._handle_send_website_report(message, transport)
         elif isinstance(message, SendServiceReport):
-            self._handle_send_service_report(message)
-        elif isinstance(message, ForwardingMessage):
-            self._handle_forward_message(message)
+            self._handle_send_service_report(message, transport)

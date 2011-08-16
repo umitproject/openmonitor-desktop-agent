@@ -48,7 +48,7 @@ if not os.path.exists(LOG_DIR):
 log_filename = os.path.join(LOG_DIR, 'icm-desktop.log')
 
 g_logger = Log("ICM Desktop Agent", _levels[LOGLEVEL])
-#open(log_filename, 'a')
+#open(log_filename, 'w')
 #g_logger = Log("ICM Desktop Agent File Log", _levels[LOGLEVEL], log_filename)
 
 #----------------------------------------------------------------------
