@@ -46,10 +46,16 @@ class DBHelper(object):
             self.db_helper = self.db_types[db_type]()
         except KeyError:
             g_logger.error("'%s' is not a valid db type." % db_type)
+        
+        self.db_type = db_type
 
     def connect(self, conn_str):
         """Connect to the database"""
-        self.db_helper.connect(conn_str)
+        if self.db_type == "sqlite":
+            if not os.path.exists(conn_str):
+                from umit.icm.agent.utils import CreateDB
+                CreateDB.create(conn_str)
+            self.db_helper.connect(conn_str)
 
     def use(self, db_name):
         """Set a database into use"""

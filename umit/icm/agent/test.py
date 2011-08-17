@@ -50,7 +50,7 @@ else:
     # On most other platforms the best timer is time.time()
     default_timer = time.time
 
-def generate_report_id(self, list_):
+def generate_report_id(list_):
     m = hashlib.md5()
     for item in list_:
         m.update(str(item))
@@ -97,8 +97,14 @@ class WebsiteTest(Test):
                                     None)
         self.time_start = default_timer()
         defer_.addCallback(self._handle_response)
-        defer_.addErrback(g_logger.error)
+        defer_.addErrback(self._handle_err)
         return defer_
+    
+    def _handle_err(self, failure):
+        g_logger.critical('>>> %s' % failure)
+        self.status_code = response.code
+        g_logger.critical(self.status_code)
+        g_logger.critical(dir(response))
 
     def _handle_response(self, response):
         """Result Handler (generate report)"""

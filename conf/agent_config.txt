@@ -1,14 +1,14 @@
 [application]
-startup_on_boot = True
 auto_update = True
+startup_on_boot = True
 auto_update_test = False
 
 [logging]
 log_level = DEBUG
 
 [network]
-listen_port = 5895
-max_connections_num = 100
 max_speer_num = 10
+max_connections_num = 100
 max_peer_num = 100
+listen_port = 5895
 

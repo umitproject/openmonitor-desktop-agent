@@ -68,6 +68,10 @@ class ReportManager(object):
 
     def add_report(self, report):
         # check if in the cache
+        if report is None:
+            g_logger.critical("Received None as report. Please, investigate.")
+            return
+        
         if report.header.reportID in self.cached_reports:
             g_logger.info("ReportID '%s' already in cache." %
                           report.header.reportID)
