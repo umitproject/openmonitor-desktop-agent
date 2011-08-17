@@ -134,8 +134,9 @@ class GtkMain(object):
         self.tray_menu.popdown()
 
     def show_web_map(self):
-        # open the web map in browser
-        pass
+        import webbrowser, urlparse
+        url = urlparse.urljoin(theApp.aggregator.base_url, '/map/')
+        webbrowser.open(url)
 
     def show_event_list(self):
         wnd = EventWindow()

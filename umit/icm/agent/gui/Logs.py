@@ -19,6 +19,8 @@
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
 import gtk
+import gobject
+import os
 import sys
 
 from higwidgets.higwindows import HIGWindow
@@ -28,6 +30,8 @@ from higwidgets.higboxes import HIGVBox, HIGHBox
 from higwidgets.higlabels import HIGSectionLabel, HIGEntryLabel
 
 from umit.icm.agent.I18N import _
+from umit.icm.agent.Global import *
+
 
 class LogsWindow(HIGWindow):
     """
@@ -36,8 +40,10 @@ class LogsWindow(HIGWindow):
     def __init__(self):
         HIGWindow.__init__(self, type=gtk.WINDOW_TOPLEVEL)
         self.set_title(_('Logs'))
+        self.set_size_request(640, 400)
         self.__create_widgets()
         self.__pack_widgets()
+
 
     def __create_widgets(self):
         self.main_vbox = HIGVBox()
@@ -67,7 +73,9 @@ class LogsWindow(HIGWindow):
 class LogsGUI(gtk.VBox):
     def __init__(self):
         super(LogsGUI, self).__init__()
-        self.set_size_request(400, 240)
+        self.log_mask = ['DEBUG', 'INFO', 'WARNING', 'ERROR']
+
+        self.set_size_request(400, 300)
         self.set_border_width(8)
 
         table = gtk.Table(8, 5, False)
@@ -84,33 +92,41 @@ class LogsGUI(gtk.VBox):
         table.attach(halign, 0, 1, 0, 1, gtk.FILL,
                      gtk.FILL, 0, 0);
 
-        sw = gtk.ScrolledWindow()
-        sw.set_policy(gtk.POLICY_AUTOMATIC, gtk.POLICY_AUTOMATIC)
-        tv = gtk.TextView()
-        tv.set_border_window_size(gtk.TEXT_WINDOW_LEFT, 5)
-        textbuffer = tv.get_buffer()
-        tv.set_editable(True)
-        tv.modify_fg(gtk.STATE_NORMAL, gtk.gdk.Color(5140, 5140, 5140))
-        tv.set_cursor_visible(True)
-        tv.show()
-        sw.add(tv)
-        sw.show()
-        table.attach(sw, 0, 1, 1, 3)
+        self.sw = gtk.ScrolledWindow()
+        self.sw.set_policy(gtk.POLICY_AUTOMATIC, gtk.POLICY_AUTOMATIC)
+        self.textview = gtk.TextView()
+        self.textview.set_border_window_size(gtk.TEXT_WINDOW_LEFT, 5)
+        self.textbuffer = self.textview.get_buffer()
+        self.textview.set_editable(True)
+        self.textview.modify_fg(gtk.STATE_NORMAL, gtk.gdk.Color(5140, 5140, 5140))
+        self.textview.set_cursor_visible(True)
+        self.textview.show()
+        self.sw.add(self.textview)
+        self.sw.show()
+        table.attach(self.sw, 0, 1, 1, 3)
 
         vbox = gtk.VBox()
         btnbox = gtk.VButtonBox()
         btnbox.set_border_width(5)
         btnbox.set_layout(gtk.BUTTONBOX_START)
         btnbox.set_spacing(5)
-        checkbtn1 = gtk.CheckButton("ERROR")
-        checkbtn2 = gtk.CheckButton("WARNING")
-        checkbtn3 = gtk.CheckButton("INFO")
-        checkbtn4 = gtk.CheckButton("DEBUG")
+        self.checkbtn_error = gtk.CheckButton("ERROR")
+        self.checkbtn_warning = gtk.CheckButton("WARNING")
+        self.checkbtn_info = gtk.CheckButton("INFO")
+        self.checkbtn_debug = gtk.CheckButton("DEBUG")
+        self.checkbtn_error.set_active(True)
+        self.checkbtn_warning.set_active(True)
+        self.checkbtn_info.set_active(True)
+        self.checkbtn_debug.set_active(True)
+        self.checkbtn_error.connect('toggled', lambda x: self.change_mask())
+        self.checkbtn_warning.connect('toggled', lambda x: self.change_mask())
+        self.checkbtn_info.connect('toggled', lambda x: self.change_mask())
+        self.checkbtn_debug.connect('toggled', lambda x: self.change_mask())
 
-        vbox.add(checkbtn1)
-        vbox.add(checkbtn2)
-        vbox.add(checkbtn3)
-        vbox.add(checkbtn4)
+        vbox.add(self.checkbtn_error)
+        vbox.add(self.checkbtn_warning)
+        vbox.add(self.checkbtn_info)
+        vbox.add(self.checkbtn_debug)
         table.attach(vbox, 3, 4, 1, 2, gtk.FILL, gtk.SHRINK, 1, 1)
 
         table.attach(halign, 4, 5, 0, 1, gtk.FILL,
@@ -118,6 +134,35 @@ class LogsGUI(gtk.VBox):
 
         halign2 = gtk.Alignment(0, 1, 0, 0)
         self.add(table)
+        self.refresh()
+        gobject.timeout_add(5000, self.refresh)
+
+    def refresh(self):
+        #hadjustment = self.textview.get_hadjustment()
+        #vadjustment = self.textview.get_vadjustment()
+        text = ""
+        f = open(os.path.join(LOG_DIR, 'icm-desktop.log'))
+        for line in f:
+            log_type = line.split()[0][1:-1]
+            if log_type in self.log_mask:
+                text = text + line
+        f.close()
+        self.textbuffer.set_text(text)
+        #self.textview.set_scroll_adjustments(hadjustment, vadjustment)
+        self.textview.scroll_to_iter(self.textbuffer.get_end_iter(), 0.0)
+        return True
+
+    def change_mask(self):
+        self.log_mask = []
+        if self.checkbtn_error.get_active():
+            self.log_mask.append('ERROR')
+        if self.checkbtn_warning.get_active():
+            self.log_mask.append('WARNING')
+        if self.checkbtn_info.get_active():
+            self.log_mask.append('INFO')
+        if self.checkbtn_debug.get_active():
+            self.log_mask.append('DEBUG')
+        self.refresh()
 
 
 if __name__ == "__main__":
