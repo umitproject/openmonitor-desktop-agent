@@ -30,7 +30,8 @@ from umit.icm.agent.I18N import _
 
 
 class EventWindow(HIGWindow):
-    column_names = ['test type', 'event type', 'time', 'location', 'reports']
+    column_names = ['test type', 'event type', 'time',
+                    'location', 'reports']
 
     def __init__(self, dname = None):
         HIGWindow.__init__(self, type=gtk.WINDOW_TOPLEVEL)

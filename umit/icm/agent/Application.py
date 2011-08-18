@@ -75,6 +75,9 @@ class Application(object):
         from umit.icm.agent.core.PeerManager import PeerManager
         self.peer_manager = PeerManager()
 
+        from umit.icm.agent.core.EventManager import EventManager
+        self.event_manager = EventManager()
+
         from umit.icm.agent.core.TaskManager import TaskManager
         self.task_manager = TaskManager()
 

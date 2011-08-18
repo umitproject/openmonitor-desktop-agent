@@ -66,6 +66,8 @@ message_id_to_type = {
     6002: 'DiagnoseResponse',
     6003: 'WebsiteReport',
     6004: 'ServiceReport',
+    6005: 'WebsiteReportDetail',
+    6006: 'ServiceReportDetail',
 }
 
 message_type_to_id = {
@@ -104,6 +106,7 @@ message_type_to_id = {
     'SendServiceReport': 2017,
     'SendWebsiteReport': 2015,
     'ServiceReport': 6004,
+    'ServiceReportDetail': 6006,
     'ServiceSuggestion': 2029,
     'TestModuleUpdate': 4003,
     'TestModuleUpdateResponse': 4004,
@@ -111,6 +114,7 @@ message_type_to_id = {
     'UpgradeToSuper': 2023,
     'UpgradeToSuperResponse': 2024,
     'WebsiteReport': 6003,
+    'WebsiteReportDetail': 6005,
     'WebsiteSuggestion': 2027,
 }
 
@@ -150,6 +154,7 @@ message_creator = {
     'SendServiceReport': SendServiceReport,
     'SendWebsiteReport': SendWebsiteReport,
     'ServiceReport': ServiceReport,
+    'ServiceReportDetail': ServiceReportDetail,
     'ServiceSuggestion': ServiceSuggestion,
     'TestModuleUpdate': TestModuleUpdate,
     'TestModuleUpdateResponse': TestModuleUpdateResponse,
@@ -157,6 +162,7 @@ message_creator = {
     'UpgradeToSuper': UpgradeToSuper,
     'UpgradeToSuperResponse': UpgradeToSuperResponse,
     'WebsiteReport': WebsiteReport,
+    'WebsiteReportDetail': WebsiteReportDetail,
     'WebsiteSuggestion': WebsiteSuggestion,
 }
 

@@ -222,6 +222,7 @@ class AggregatorAPI(object):
         g_logger.info("Sending GetEvents message to aggregator")
         url = self.base_url + "/getevents/"
         request_msg = GetEvents()
+        self._make_request_header(request_msg.header)
         defer_ = self._send_message(request_msg)
         defer_.addCallback(self._handle_get_events)
         defer_.addErrback(self._handle_error)
@@ -229,6 +230,8 @@ class AggregatorAPI(object):
 
     def _handle_get_events(self, message):
         print(message)
+        for event in message.events:
+            theApp.event_manager.add_event(event)
 
     """ Report """
     #----------------------------------------------------------------------
@@ -321,6 +324,7 @@ class AggregatorAPI(object):
     def check_version(self):
         g_logger.info("Sending NewVersion message to aggregator")
         request_msg = NewVersion()
+        self._make_request_header(request_msg.header)
         defer_ = self._send_message(request_msg)
         defer_.addCallback(self._handle_check_version)
         defer_.addErrback(self._handle_error)
@@ -332,6 +336,7 @@ class AggregatorAPI(object):
     def check_tests(self):
         g_logger.info("Sending NewTests message to aggregator")
         request_msg = NewTests()
+        self._make_request_header(request_msg.header)
         defer_ = self._send_message(request_msg)
         defer_.addCallback(self._handle_check_tests)
         defer_.addErrback(self._handle_error)
@@ -387,9 +392,9 @@ def out(data):
 
 if __name__ == "__main__":
     import time
-    api = AggregatorAPI('http://icm-dev.appspot.com/api')
+    api = AggregatorAPI()
     #api = AggregatorAPI('http://www.baidu.com')
-    d = api.send_website_suggestion('http://www.baidu.com')
+    d = api.get_events()
     d.addCallback(out)
     report = WebsiteReport()
     report.header.reportID = 'xw384kkre'

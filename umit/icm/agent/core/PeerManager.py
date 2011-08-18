@@ -28,23 +28,24 @@ FAILURE_INCREASE_COUNT = 2
 SUCCESS_REDUCE_COUNT = 1
 
 ########################################################################
-class PeerEntry:
+class PeerEntry(object):
     """"""
 
     #----------------------------------------------------------------------
     def __init__(self):
         """Constructor"""
+        self.ID = 0          # integer
+        self.Type = 0        # integer
+        self.IP = ''         # string
+        self.Port = 0        # integer
+        self.Token = ''      # string
+        self.CipheredPublicKey = ''  # bytes
+        self.Geo = ''        # string
+        self.Status = ''
+
         self.transport = None
         self.status = 'Disconnected'
 
-    ID = 0          # integer
-    Type = 0        # integer
-    IP = ''         # string
-    Port = 0        # integer
-    Token = ''      # string
-    CipheredPublicKey = ''  # bytes
-    Geo = ''        # string
-    Status = ''
 
 ########################################################################
 class PeerManager:

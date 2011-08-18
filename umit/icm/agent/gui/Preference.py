@@ -324,27 +324,11 @@ class Tests(gtk.VBox):
         table = gtk.Table(8, 5, False)
         table.set_col_spacings(3)
 
-        title = gtk.Label("Installed Tests")
+        self.tree_view_installed_tests = TestsView("Installed Tests")
+        table.attach(self.tree_view_installed_tests, 0, 1, 0, 3,
+	             gtk.FILL | gtk.EXPAND, gtk.FILL | gtk.EXPAND, 1, 1)
 
-        halign = gtk.Alignment(0, 0, 0, 0)
-        halign.add(title)
-
-        table.attach(halign, 0, 1, 0, 1, gtk.FILL,
-                     gtk.FILL, 0, 0);
-
-        sw = gtk.ScrolledWindow()
-        sw.set_policy(gtk.POLICY_AUTOMATIC, gtk.POLICY_AUTOMATIC)
-        wins = gtk.TextView()
-        textbuffer = wins.get_buffer()
-        wins.set_editable(True)
-        wins.modify_fg(gtk.STATE_NORMAL, gtk.gdk.Color(5140, 5140, 5140))
-        wins.set_cursor_visible(True)
-        wins.show()
-        sw.add(wins)
-        sw.show()
-        #table.attach(wins, 0, 2, 1, 3, gtk.FILL | gtk.EXPAND, gtk.FILL | gtk.EXPAND, 1, 1)
-        table.attach(sw, 0, 1, 1, 3)
-        updatebtn = gtk.Button("update")
+	updatebtn = gtk.Button("update")
         updatebtn.set_size_request(50, 30)
         table.attach(updatebtn, 0, 1, 3, 4, gtk.FILL | gtk.EXPAND, gtk.SHRINK, 1, 1)
 
@@ -369,27 +353,40 @@ class Tests(gtk.VBox):
         vbox.add(btnbox)
         table.attach(vbox, 3, 4, 1, 2, gtk.FILL, gtk.SHRINK, 1, 1)
 
-        title = gtk.Label("Selected Tests")
+	self.tree_view_selected_tests = TestsView("Selected Tests")
+	table.attach(self.tree_view_selected_tests, 4, 5, 1, 3)
 
-        halign = gtk.Alignment(0, 0, 0, 0)
-        halign.add(title)
-
-        table.attach(halign, 4, 5, 0, 1, gtk.FILL,
-                     gtk.FILL, 0, 0);
-
-        sw = gtk.ScrolledWindow()
-        sw.set_policy(gtk.POLICY_AUTOMATIC, gtk.POLICY_AUTOMATIC)
-        wins2 = gtk.TextView()
-        textbuffer = wins2.get_buffer()
-        wins2.set_editable(True)
-        wins2.modify_fg(gtk.STATE_NORMAL, gtk.gdk.Color(5140, 5140, 5140))
-        wins2.set_cursor_visible(True)
-        wins2.show()
-        sw.add(wins2)
-        sw.show()
-        table.attach(sw, 4, 5, 1, 3)
-        halign2 = gtk.Alignment(0, 1, 0, 0)
         self.add(table)
+
+class TestsView(HIGVBox):
+
+    def __init__(self, viewName):
+        super(TestsView, self).__init__()
+
+        self.set_size_request(180, 180)
+
+        self.treestore = gtk.TreeStore(str)
+
+        for parent in range(4):
+            piter = self.treestore.append(None, ['tests %i' % parent])
+
+        self.treeview = gtk.TreeView(self.treestore)
+
+        self.tvcolumn = gtk.TreeViewColumn(viewName)
+        self.treeview.append_column(self.tvcolumn)
+
+        self.cell = gtk.CellRendererText()
+        self.tvcolumn.pack_start(self.cell, True)
+
+        self.tvcolumn.add_attribute(self.cell, 'text', 0)
+
+        self.treeview.set_search_column(0)
+
+        self.tvcolumn.set_sort_column_id(0)
+
+        self.treeview.set_reorderable(True)
+        self.add(self.treeview)
+        self.show_all()
 
 class SuperPeerListWindow(HIGWindow):
     def __init__(self):

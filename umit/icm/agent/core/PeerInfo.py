@@ -27,19 +27,20 @@ from umit.icm.agent.utils.Network import get_local_ip, get_internet_ip
 ########################################################################
 class PeerInfo(object):
     """"""
-    ID = 0
-    Type = 2  # normal peer by default
-    AuthToken = ''
-    Email = ''
-    PublicKey = ''
-    PrivateKey = ''
-    CipheredPublicKey = ''
-    AggregatorPublicKey = ''
-    props = {}
 
     #----------------------------------------------------------------------
     def __init__(self):
         """Constructor"""
+        self.ID = 0
+        self.Type = 2  # normal peer by default
+        self.AuthToken = ''
+        self.Email = ''
+        self.PublicKey = ''
+        self.PrivateKey = ''
+        self.CipheredPublicKey = ''
+        self.AggregatorPublicKey = ''
+        self.props = {}
+
         self.props['local_ip'] = get_local_ip()
         self.props['internet_ip'] = get_internet_ip()
         self.registered = False

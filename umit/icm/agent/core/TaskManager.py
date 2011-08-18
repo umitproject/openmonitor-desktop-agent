@@ -33,6 +33,16 @@ class TestEntry(object):
     #----------------------------------------------------------------------
     def __init__(self):
         """Constructor"""
+        self.ID = 0
+        self.Name = None
+        self.Priority = 0
+        self.CronTimeStr = None
+        self.RunTime = None
+        self.LastRunTime = 0
+        self.Enabled = True
+        self.Args = {}
+        self.RunFlag = False
+
         self.parser = CronParser()
         self.RunTime = self._CronTime()
 
@@ -77,15 +87,6 @@ class TestEntry(object):
         month = None
         weekday = None
 
-    ID = 0
-    Name = None
-    Priority = 0
-    CronTimeStr = None
-    RunTime = None
-    LastRunTime = 0
-    Enabled = True
-    Args = {}
-    RunFlag = False
 
 ########################################################################
 class TaskManager(object):
