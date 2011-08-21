@@ -29,11 +29,7 @@ from higwidgets import HIGWindow
 from umit.icm.agent.I18N import _
 from umit.icm.agent.BasePaths import *
 from umit.icm.agent.Application import theApp
-from umit.icm.agent.gui.About import About
-from umit.icm.agent.gui.Event import EventWindow
-from umit.icm.agent.gui.Login import LoginDialog
-from umit.icm.agent.gui.Logs import LogsWindow
-from umit.icm.agent.gui.Preference import PreferenceWindow
+
 from umit.icm.agent.gui.Splash import Splash
 
 
@@ -52,7 +48,7 @@ class GtkMain(object):
         self.tray_menu_logged_in.append(menu_item)
 
         menu_item = gtk.ImageMenuItem(_("Dashboard"))
-        #menu_item.connect("activate", lambda w: gtk.main_quit())
+        menu_item.connect("activate", lambda w: self.show_dashboard())
         self.tray_menu_logged_in.append(menu_item)
 
         menu_item = gtk.ImageMenuItem(_("Event List"))
@@ -138,23 +134,33 @@ class GtkMain(object):
         url = urlparse.urljoin(theApp.aggregator.base_url, '/map/')
         webbrowser.open(url)
 
+    def show_dashboard(self):
+        from umit.icm.agent.gui.Dashboard import DashboardWindow
+        wnd = DashboardWindow()
+        wnd.show_all()
+
     def show_event_list(self):
+        from umit.icm.agent.gui.Event import EventWindow
         wnd = EventWindow()
         wnd.show_all()
 
     def show_logs(self):
+        from umit.icm.agent.gui.Logs import LogsWindow
         wnd = LogsWindow()
         wnd.show_all()
 
     def show_preference(self):
+        from umit.icm.agent.gui.Preference import PreferenceWindow
         wnd = PreferenceWindow()
         wnd.show_all()
 
     def show_about(self):
+        from umit.icm.agent.gui.About import About
         about = About()
         about.show_all()
 
     def show_login(self):
+        from umit.icm.agent.gui.Login import LoginDialog
         login_dlg = LoginDialog()
         login_dlg.show_all()
 

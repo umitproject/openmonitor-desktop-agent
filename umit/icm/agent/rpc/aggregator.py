@@ -102,8 +102,8 @@ class AggregatorAPI(object):
         self.pending_report_ids = []
 
     def _make_request_header(self, header):
-        header.token = theApp.peer_info.AuthToken
-        header.agentID = theApp.peer_info.ID
+        header.token = 'null'#theApp.peer_info.AuthToken
+        header.agentID = 1000#theApp.peer_info.ID
 
     def check_availability(self):
         g_logger.info("Sending CheckAggregator message to aggregator")
@@ -229,7 +229,6 @@ class AggregatorAPI(object):
         return defer_
 
     def _handle_get_events(self, message):
-        print(message)
         for event in message.events:
             theApp.event_manager.add_event(event)
 
@@ -325,6 +324,9 @@ class AggregatorAPI(object):
         g_logger.info("Sending NewVersion message to aggregator")
         request_msg = NewVersion()
         self._make_request_header(request_msg.header)
+        from umit.icm.agent.Version import VERSION_INT
+        request_msg.agentVersionNo = VERSION_INT
+        request_msg.agentType = 'DESKTOP'
         defer_ = self._send_message(request_msg)
         defer_.addCallback(self._handle_check_version)
         defer_.addErrback(self._handle_error)
@@ -381,7 +383,7 @@ class AggregatorAPI(object):
 
     def _handle_error(self, failure):
         from twisted.internet import error
-        failure.trap(error.ConnectError)
+        failure.trap(error.ConnectError, error.DNSLookupError)
         g_logger.error("Connecting to the aggregator failed.")
         self.available = False
         theApp.statistics.aggregator_fail_num = \
@@ -394,7 +396,7 @@ if __name__ == "__main__":
     import time
     api = AggregatorAPI()
     #api = AggregatorAPI('http://www.baidu.com')
-    d = api.get_events()
+    d = api.check_version()
     d.addCallback(out)
     report = WebsiteReport()
     report.header.reportID = 'xw384kkre'

@@ -18,7 +18,7 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
-VERSION = '0.0'
+VERSION = '1.0'
 VERSION_INT = 1
 
 def compare_version(ver1, ver2):

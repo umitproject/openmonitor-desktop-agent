@@ -1,6 +1,7 @@
 [application]
 startup_on_boot = True
 auto_update = True
+auto_update_test = False
 
 [logging]
 log_level = DEBUG

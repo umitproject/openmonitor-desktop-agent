@@ -59,7 +59,7 @@ class LogsWindow(HIGWindow):
         self.LogsGUI_hbox1.add(self.LogsGUI_subbox)
 
     def __pack_widgets(self):
-        self.main_vbox._pack_expand_fill(self.LogsGUI_hbox1)
+        self.main_vbox._pack_expand_fill(self.LogsGUI_vbox)
 
         self.btn_box.set_layout(gtk.BUTTONBOX_END)
         self.btn_box.set_spacing(3)
@@ -89,8 +89,7 @@ class LogsGUI(gtk.VBox):
         halign = gtk.Alignment(0, 0, 0, 0)
         halign.add(title)
 
-        table.attach(halign, 0, 1, 0, 1, gtk.FILL,
-                     gtk.FILL, 0, 0);
+        table.attach(halign, 0, 1, 0, 1, gtk.FILL, gtk.FILL, 0, 0);
 
         self.sw = gtk.ScrolledWindow()
         self.sw.set_policy(gtk.POLICY_AUTOMATIC, gtk.POLICY_AUTOMATIC)
@@ -129,10 +128,9 @@ class LogsGUI(gtk.VBox):
         vbox.add(self.checkbtn_debug)
         table.attach(vbox, 3, 4, 1, 2, gtk.FILL, gtk.SHRINK, 1, 1)
 
-        table.attach(halign, 4, 5, 0, 1, gtk.FILL,
-                     gtk.FILL, 0, 0);
-
         halign2 = gtk.Alignment(0, 1, 0, 0)
+        table.attach(halign2, 4, 5, 0, 1, gtk.FILL, gtk.FILL, 0, 0)
+
         self.add(table)
         self.refresh()
         gobject.timeout_add(5000, self.refresh)

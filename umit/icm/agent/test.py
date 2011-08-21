@@ -20,7 +20,7 @@
 
 __all__ = ['test_by_id', 'test_name_by_id', 'WebsiteTest', 'ServiceTest']
 
-TEST_PACKAGE_VERSION = '0.0'
+TEST_PACKAGE_VERSION = '1.0'
 TEST_PACKAGE_VERSION_INT = 1
 
 import hashlib
@@ -188,6 +188,13 @@ test_name_by_id = {
     1: 'WebsiteTest',
     2: 'ServiceTest',
 }
+
+ALL_TESTS = ['WebsiteTest', 'ServiceTest']
+#import inspect
+#clsmembers = inspect.getmembers(sys.modules[__name__], inspect.isclass)
+#for clsname,cls in clsmembers:
+    #if clsname.endswith('Test') and clsname != 'Test':
+        #ALL_TESTS.append(clsname)
 
 
 if __name__ == "__main__":

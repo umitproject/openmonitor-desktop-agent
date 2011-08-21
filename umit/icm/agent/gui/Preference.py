@@ -112,7 +112,7 @@ class PreferenceWindow(HIGWindow):
         self.tests_hbox2 = HIGHBox()
         self.tests_subbox = Tests()
         self.tests_hbox1.add(self.tests_subbox)
-        self.tests_checkbtn = gtk.CheckButton("Update plugins automatically")
+        self.tests_checkbtn = gtk.CheckButton("Update tests module automatically")
 
         #Feedback page
         self.feedback_vbox = HIGVBox()
@@ -297,6 +297,8 @@ class PreferenceWindow(HIGWindow):
         aggregator_url = self.pref_cloudagg_entry.get_text()
         theApp.aggregator.base_url = aggregator_url
         g_db_helper.set_config('aggregator_url', aggregator_url)
+        # Save test tab
+        self.save_tests()
 
     def load_preference(self):
         self.pref_peerid_label2.set_text(str(theApp.peer_info.ID))
@@ -314,6 +316,35 @@ class PreferenceWindow(HIGWindow):
             self.pref_update_check.set_active(False)
 
         self.pref_cloudagg_entry.set_text(theApp.aggregator.base_url)
+        # load test tab
+        self.load_tests()
+
+    def save_tests(self):
+        SELECTED_TESTS = [ r[0] for r in self.tests_subbox.\
+                           tree_view_selected_tests.treestore ]
+        g_db_helper.set_config('selected_tests', SELECTED_TESTS)
+
+        auto_update_test = self.tests_checkbtn.get_active()
+        g_config.set('application', 'auto_update_test', str(auto_update_test))
+
+    def load_tests(self):
+        from umit.icm.agent.test import ALL_TESTS
+        ts = self.tests_subbox.tree_view_installed_tests.treestore
+        for tname in ALL_TESTS:
+            ts.append(None, [tname])
+
+        SELECTED_TESTS = g_db_helper.get_config('selected_tests')
+        if SELECTED_TESTS:
+            ts = self.tests_subbox.tree_view_selected_tests.treestore
+            for tname in SELECTED_TESTS:
+                ts.append(None, [tname])
+
+        auto_update_test = g_config.getboolean('application', 'auto_update_test')
+        if auto_update_test:
+            self.tests_checkbtn.set_active(True)
+        else:
+            self.tests_checkbtn.set_active(False)
+
 
 class Tests(gtk.VBox):
     def __init__(self):
@@ -326,9 +357,10 @@ class Tests(gtk.VBox):
 
         self.tree_view_installed_tests = TestsView("Installed Tests")
         table.attach(self.tree_view_installed_tests, 0, 1, 0, 3,
-	             gtk.FILL | gtk.EXPAND, gtk.FILL | gtk.EXPAND, 1, 1)
+                     gtk.FILL | gtk.EXPAND, gtk.FILL | gtk.EXPAND, 1, 1)
 
-	updatebtn = gtk.Button("update")
+        updatebtn = gtk.Button("Update")
+        updatebtn.connect('clicked', lambda w: self.update_test_mod())
         updatebtn.set_size_request(50, 30)
         table.attach(updatebtn, 0, 1, 3, 4, gtk.FILL | gtk.EXPAND, gtk.SHRINK, 1, 1)
 
@@ -337,54 +369,78 @@ class Tests(gtk.VBox):
         btnbox.set_border_width(5)
         btnbox.set_layout(gtk.BUTTONBOX_START)
         btnbox.set_spacing(5)
-        button = gtk.Button("add >>")
+        button = gtk.Button("Add")
+        button.connect('clicked', lambda w: self.add_test())
         button.set_size_request(50, 30)
         btnbox.add(button)
-        button = gtk.Button("add all")
+        button = gtk.Button("Add All")
+        button.connect('clicked', lambda w: self.add_all())
         button.set_size_request(50, 30)
         btnbox.add(button)
-        button = gtk.Button("<< remove")
+        button = gtk.Button("Remove")
+        button.connect('clicked', lambda w: self.remove_test())
         button.set_size_request(50, 30)
         btnbox.add(button)
-        button = gtk.Button("remove all")
+        button = gtk.Button("Remove All")
+        button.connect('clicked', lambda w: self.remove_all())
         button.set_size_request(50, 30)
         btnbox.add(button)
         table.set_row_spacing(1, 3)
         vbox.add(btnbox)
         table.attach(vbox, 3, 4, 1, 2, gtk.FILL, gtk.SHRINK, 1, 1)
 
-	self.tree_view_selected_tests = TestsView("Selected Tests")
-	table.attach(self.tree_view_selected_tests, 4, 5, 1, 3)
+        self.tree_view_selected_tests = TestsView("Selected Tests")
+        table.attach(self.tree_view_selected_tests, 4, 5, 1, 3)
 
         self.add(table)
+
+    def add_test(self):
+        tree_selection = self.tree_view_installed_tests.treeview.get_selection()
+        tree_iter = tree_selection.get_selected()[1]
+        if tree_iter:
+            tname = self.tree_view_installed_tests.treestore.\
+                  get_value(tree_selection.get_selected()[1], 0)
+            values = [ r[0] for r in self.tree_view_selected_tests.treestore ]
+            if tname not in values:
+                self.tree_view_selected_tests.treestore.append(None, [tname])
+
+    def add_all(self):
+        self.tree_view_selected_tests.treestore.clear()
+        values = [ r[0] for r in self.tree_view_installed_tests.treestore ]
+        for tname in values:
+            self.tree_view_selected_tests.treestore.append(None, [tname])
+
+    def remove_test(self):
+        tree_selection = self.tree_view_selected_tests.treeview.get_selection()
+        tree_iter = tree_selection.get_selected()[1]
+        if tree_iter:
+            self.tree_view_selected_tests.treestore.remove(tree_iter)
+
+    def remove_all(self):
+        self.tree_view_selected_tests.treestore.clear()
+
+    def update_test_mod(self):
+        theApp.aggregator.check_tests()
 
 class TestsView(HIGVBox):
 
     def __init__(self, viewName):
         super(TestsView, self).__init__()
-
         self.set_size_request(180, 180)
 
         self.treestore = gtk.TreeStore(str)
-
-        for parent in range(4):
-            piter = self.treestore.append(None, ['tests %i' % parent])
-
         self.treeview = gtk.TreeView(self.treestore)
-
         self.tvcolumn = gtk.TreeViewColumn(viewName)
         self.treeview.append_column(self.tvcolumn)
 
         self.cell = gtk.CellRendererText()
         self.tvcolumn.pack_start(self.cell, True)
-
         self.tvcolumn.add_attribute(self.cell, 'text', 0)
 
         self.treeview.set_search_column(0)
-
         self.tvcolumn.set_sort_column_id(0)
-
         self.treeview.set_reorderable(True)
+        self.treeview.get_selection().set_mode(gtk.SELECTION_SINGLE)
         self.add(self.treeview)
         self.show_all()
 

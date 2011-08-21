@@ -22,7 +22,6 @@ import cPickle
 
 from umit.icm.agent.Global import *
 from umit.icm.agent.Application import theApp
-from umit.icm.agent.utils.Network import get_local_ip, get_internet_ip
 
 ########################################################################
 class PeerInfo(object):
@@ -41,10 +40,11 @@ class PeerInfo(object):
         self.AggregatorPublicKey = ''
         self.props = {}
 
-        self.props['local_ip'] = get_local_ip()
-        self.props['internet_ip'] = get_internet_ip()
         self.registered = False
         self.login = False
+
+        self.get_local_ip()
+        self.get_internet_ip()
 
     def _handle_register_response(self, data):
         if data is not None:
@@ -92,6 +92,34 @@ class PeerInfo(object):
                 "insert or replace into peer_info values (?, ?)",
                 (key, g_db_helper.pack(self.props[key])))
         g_db_helper.commit()
+
+    def get_local_ip(self):
+        from socket import socket, SOCK_DGRAM, AF_INET
+        ip_urls = ["www.google.com", "www.baidu.com"]
+        for each in ip_urls:
+            try:
+                s = socket(AF_INET, SOCK_DGRAM)
+                s.settimeout(3)
+                s.connect((each, 0))
+                ip = s.getsockname()[0]
+                self.props['local_ip'] = ip
+                #print(each, ip)
+                break
+            except:
+                pass
+
+    def get_internet_ip(self):
+        from twisted.web.client import getPage
+        ip_urls = ["http://whereismyip.com/", "http://www.whereismyip.org/",
+                   "http://myip.eu/"]
+        for each in ip_urls:
+            getPage(each).addCallback(self._handle_get_internet_ip)
+
+    def _handle_get_internet_ip(self, data):
+        import re
+        ip = re.search('\d+\.\d+\.\d+\.\d+', data).group(0)
+        #print(data, ip)
+        self.props['internet_ip'] = ip
 
 
 if __name__ == "__main__":
