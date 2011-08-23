@@ -4,6 +4,5 @@ icm-agent-docs.prj
 dist.bat
 dist
 log
-tools
 tmp
 Thumbs.db

@@ -270,7 +270,7 @@ class PreferenceWindow(HIGWindow):
             text = self.feedback_suggestion_entry.get_text()
             service_name = text.split(':')[0]
             host_name = text.split(':')[1]
-            ip = int(text.split(':')[2])
+            ip = text.split(':')[2]
             theApp.aggregator.send_service_suggestion(service_name, host_name, ip)
 
     def send_bug_report(self):
