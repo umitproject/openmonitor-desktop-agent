@@ -59,7 +59,7 @@ class PeerInfo(object):
             self.save_to_db()
 
     def load_from_db(self):
-        rs = g_db_helper.select('select * from user_info')
+        rs = g_db_helper.select('select * from peer_info')
         if not rs:
             g_logger.info("No peer info in db.")
         else:

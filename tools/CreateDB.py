@@ -103,8 +103,12 @@ c.execute("CREATE TABLE stats ("
 # Insert pre-defined values
 c.execute("INSERT INTO kvp VALUES('aggregator_url', ?)",
           (pack('http://icm-dev.appspot.com/api'),))
+c.execute("INSERT INTO kvp VALUES('selected_tests', ?)",
+          (pack(''),))
 
 # Data for test
+c.execute("INSERT INTO peers VALUES(10004, 1, '202.206.64.11', 3128, '', '', "
+          "'China')")
 
 
 conn.commit()

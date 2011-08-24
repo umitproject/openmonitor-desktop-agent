@@ -296,7 +296,7 @@ class PreferenceWindow(HIGWindow):
 
         aggregator_url = self.pref_cloudagg_entry.get_text()
         theApp.aggregator.base_url = aggregator_url
-        g_db_helper.set_config('aggregator_url', aggregator_url)
+        g_db_helper.set_value('aggregator_url', aggregator_url)
         # Save test tab
         self.save_tests()
 
@@ -322,7 +322,7 @@ class PreferenceWindow(HIGWindow):
     def save_tests(self):
         SELECTED_TESTS = [ r[0] for r in self.tests_subbox.\
                            tree_view_selected_tests.treestore ]
-        g_db_helper.set_config('selected_tests', SELECTED_TESTS)
+        g_db_helper.set_value('selected_tests', SELECTED_TESTS)
 
         auto_update_test = self.tests_checkbtn.get_active()
         g_config.set('application', 'auto_update_test', str(auto_update_test))
