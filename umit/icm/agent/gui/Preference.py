@@ -52,7 +52,7 @@ class PreferenceWindow(HIGWindow):
         # Main widgets
         self.hpaned = gtk.HPaned()
         self.add(self.hpaned)
-        self.main_vbox = HIGVBox()
+        self.vbox = HIGVBox()
         self.btn_box = gtk.HButtonBox()
         self.ok_button = gtk.Button(stock=gtk.STOCK_OK)
         self.ok_button.connect('clicked', lambda x: self.clicked_ok())
@@ -60,213 +60,39 @@ class PreferenceWindow(HIGWindow):
         self.apply_button.connect('clicked', lambda x: self.save_preference())
         self.cancel_button = gtk.Button(stock=gtk.STOCK_CANCEL)
         self.cancel_button.connect('clicked', lambda x: self.destroy())
-
         # notebook
-        self.preference_vbox = HIGVBox()
-        self.preference_notebook = gtk.Notebook()
-
+        self.notebook = gtk.Notebook()
         # Preference page
-        self.pref_vbox = HIGVBox()
-        self.pref_peerinfo_hbox = HIGHBox()
-        self.pref_cloudagg_hbox = HIGHBox()
-        self.pref_superpeers_hbox = HIGHBox()
-
-        self.pref_peerinfo_section = HIGSectionLabel("Peer Info")
-        self.pref_peerinfo_table = HIGTable()
-        self.pref_cloudagg_section = HIGSectionLabel("Cloud Aggregator")
-        self.pref_cloudagg_table = HIGTable()
-        self.pref_cloudagg_subhbox = HIGHBox()
-        self.pref_superpeers_section = HIGSectionLabel("Super Peers")
-        self.pref_superpeers_table = HIGTable()
-
-        self.pref_peerid_label = HIGEntryLabel("Peer ID:")
-        self.pref_email_label = HIGEntryLabel("Email Address:")
-        self.pref_peerid_label2 = HIGEntryLabel()
-        self.pref_email_entry = gtk.Entry()
-        self.pref_startup_check = gtk.CheckButton("Startup on the boot")
-        self.pref_update_check = gtk.CheckButton("Automatically update plugins")
-
-        self.pref_cloudagg_entry = gtk.Entry()
-        self.pref_cloudagg_button = HIGButton("Reset")
-        self.pref_cloudagg_button.connect('clicked', lambda w:
-                                          self.pref_cloudagg_entry.set_text(
-                                              'http://icm-dev.appspot.com/api'))
-        self.pref_cloudagg_button.set_size_request(80, 28)
-
-        self.pref_superpeers_entry = gtk.Entry()
-        self.pref_superpeers_entry.set_size_request(300, 26)
-        self.pref_superpeers_subhbox = HIGHBox()
-        self.pref_btn_box = gtk.HButtonBox()
-        self.pref_superpeers_button1 = HIGButton("Add")
-        self.pref_superpeers_button1.connect(
-            'clicked', lambda w: reactor.connectTCP(peer_entry.IP,
-                                                    peer_entry.Port,
-                                                    theApp.factory))
-        self.pref_superpeers_button2 = HIGButton("Show all")
-        self.pref_superpeers_button2.connect('clicked', lambda w:
-                                             self.show_super_peer_list_window())
-
+        self.pref_page = PreferencePage()
+        self.notebook.append_page(self.pref_page, gtk.Label(_("Preference")))
         # Tests page
-        self.tests_vbox = HIGVBox()
-        self.tests_hbox1 = HIGHBox()
-        self.tests_hbox2 = HIGHBox()
-        self.tests_subbox = Tests()
-        self.tests_hbox1.add(self.tests_subbox)
-        self.tests_checkbtn = gtk.CheckButton("Update tests module automatically")
-
-        #Feedback page
-        self.feedback_vbox = HIGVBox()
-        self.feedback_suggestion_hbox = HIGHBox()
-        self.feedback_report_hbox = HIGHBox()
-
-        self.feedback_suggestion_section = HIGSectionLabel(("Send Suggestion"))
-        self.feedback_suggestion_table = HIGTable()
-        self.feedback_report_section = HIGSectionLabel(("Bug Report"))
-        self.feedback_report_table = HIGTable()
-
-        self.feedback_suggestion_radiobtn1 = gtk.RadioButton(None, 'Website')
-        self.feedback_suggestion_radiobtn1.set_active(True)
-        self.feedback_suggestion_radiobtn2 = gtk.RadioButton(
-            self.feedback_suggestion_radiobtn1, 'Service')
-        #put these two radio button on a boutton box
-        self.feedback_suggestion_bbox = gtk.HButtonBox()
-        self.feedback_suggestion_entry = gtk.Entry()
-        self.feedback_suggestion_sendbtn = HIGButton('Send')
-        self.feedback_suggestion_sendbtn.connect('clicked',
-                                                 lambda x: self.send_suggestion())
-
-        self.feedback_report_namelabel = HIGEntryLabel("Your Name:")
-        self.feedback_report_nameentry = gtk.Entry()
-        #self.feedback_report_nameentry.set_has_frame(True)
-        self.feedback_report_nameentry.set_size_request(100, 26)
-        self.feedback_report_emaillabel = HIGEntryLabel("Email:")
-        self.feedback_report_emailentry = gtk.Entry()
-        self.feedback_report_emailentry.set_size_request(198, 26)
-        self.feedback_report_subhbox1 = HIGHBox()
-
-        self.feedback_report_sw = gtk.ScrolledWindow()
-        self.feedback_report_sw.set_policy(gtk.POLICY_AUTOMATIC, gtk.POLICY_AUTOMATIC)
-        self.feedback_report_textview = gtk.TextView()
-        self.feedback_report_textbuffer = self.feedback_report_textview.get_buffer()
-        self.feedback_report_textview.set_editable(True)
-        self.feedback_report_textview.set_wrap_mode(True)
-        self.feedback_report_textview.set_border_width(2)
-        self.feedback_report_sw.add(self.feedback_report_textview)
-        self.feedback_report_sw.show()
-        self.feedback_report_textview.show()
-        self.feedback_report_subhbox2 = HIGHBox()
-        self.feedback_report_sendbtn = HIGButton('Send')
-        self.feedback_report_sendbtn.connect('clicked',
-                                             lambda x: self.send_bug_report())
-        self.feedback_report_subhbox3 = HIGHBox()
+        self.test_page = TestPage()
+        self.notebook.append_page(self.test_page, gtk.Label(_("Tests")))
+        # Feedback page
+        self.feedback_page = FeedbackPage()
+        self.notebook.append_page(self.feedback_page, gtk.Label(_("Feedback")))
 
     def __pack_widgets(self):
         # Search Notebook
-        self.preference_vbox._pack_expand_fill(self.preference_notebook)
+        self.vbox._pack_expand_fill(self.notebook)
 
         self.btn_box.set_layout(gtk.BUTTONBOX_END)
         self.btn_box.set_spacing(3)
         self.btn_box.pack_start(self.ok_button)
         self.btn_box.pack_start(self.apply_button)
         self.btn_box.pack_start(self.cancel_button)
-        self.preference_vbox.pack_start(self.btn_box)
-        #self.add(self.vbox)
+        self.vbox.pack_start(self.btn_box)
 
-        self.preference_notebook.set_border_width(1)
-        self.preference_vbox.set_border_width(12)
+        self.notebook.set_border_width(1)
+        self.vbox.set_border_width(12)
 
-        # Preference page
-        self.pref_vbox.set_border_width(12)
-
-        self.pref_vbox._pack_noexpand_nofill(self.pref_peerinfo_section)
-        self.pref_vbox._pack_noexpand_nofill(self.pref_peerinfo_hbox)
-        self.pref_vbox._pack_noexpand_nofill(self.pref_cloudagg_section)
-        self.pref_vbox._pack_noexpand_nofill(self.pref_cloudagg_hbox)
-        self.pref_vbox._pack_noexpand_nofill(self.pref_superpeers_section)
-        self.pref_vbox._pack_noexpand_nofill(self.pref_superpeers_hbox)
-
-        self.pref_peerinfo_hbox._pack_noexpand_nofill(hig_box_space_holder())
-        self.pref_peerinfo_hbox._pack_expand_fill(self.pref_peerinfo_table)
-        self.pref_cloudagg_hbox._pack_noexpand_nofill(hig_box_space_holder())
-        self.pref_cloudagg_hbox._pack_expand_fill(self.pref_cloudagg_table)
-        self.pref_superpeers_hbox._pack_noexpand_nofill(hig_box_space_holder())
-        self.pref_superpeers_hbox._pack_expand_fill(self.pref_superpeers_table)
-
-        self.pref_peerinfo_table.attach_label(self.pref_peerid_label, 0, 1, 0, 1)
-        self.pref_peerinfo_table.attach_label(self.pref_email_label, 0, 1, 1, 2)
-
-        self.pref_peerinfo_table.attach_label(self.pref_peerid_label2, 1, 2, 0, 1)
-        self.pref_peerinfo_table.attach_entry(self.pref_email_entry, 1, 2, 1, 2)
-        self.pref_peerinfo_table.attach_label(self.pref_startup_check, 0, 2, 2, 3)
-        self.pref_peerinfo_table.attach_label(self.pref_update_check, 0, 3, 3, 4)
-
-        self.pref_cloudagg_subhbox._pack_expand_fill(self.pref_cloudagg_entry)
-        self.pref_cloudagg_subhbox._pack_noexpand_nofill(self.pref_cloudagg_button)
-        self.pref_cloudagg_table.attach_entry(self.pref_cloudagg_subhbox, 0, 1, 0, 1)
-
-        self.pref_btn_box.set_layout(gtk.BUTTONBOX_END)
-        self.pref_btn_box.set_spacing(8)
-        self.pref_btn_box.pack_start(self.pref_superpeers_button1)
-        self.pref_btn_box.pack_start(self.pref_superpeers_button2)
-        self.pref_superpeers_subhbox._pack_expand_fill(self.pref_superpeers_entry)
-        self.pref_superpeers_subhbox._pack_noexpand_nofill(self.pref_btn_box)
-        self.pref_superpeers_table.attach_label(self.pref_superpeers_subhbox, 0, 1, 0, 1)
-
-        self.preference_notebook.append_page(self.pref_vbox,
-                                             gtk.Label("Preference"))
-
-        #Test page
-        #self.tests_hbox.set_border_width(12)
-        self.tests_vbox.pack_start(self.tests_hbox1, True, True, 5)
-        self.tests_vbox.pack_start(self.tests_hbox2, True, True, 5)
-
-        self.tests_checkbtn.set_border_width(8)
-        self.tests_hbox2.add(self.tests_checkbtn)
-        self.preference_notebook.append_page(self.tests_vbox,
-                                             gtk.Label("Tests"))
-
-        #Feedback page
-        self.feedback_vbox.set_border_width(12)
-
-        self.feedback_vbox._pack_noexpand_nofill(self.feedback_suggestion_section)
-        self.feedback_vbox._pack_noexpand_nofill(self.feedback_suggestion_hbox)
-        self.feedback_vbox._pack_noexpand_nofill(self.feedback_report_section)
-        self.feedback_vbox._pack_noexpand_nofill(self.feedback_report_hbox)
-
-        self.feedback_suggestion_hbox._pack_noexpand_nofill(hig_box_space_holder())
-        self.feedback_suggestion_hbox._pack_expand_fill(self.feedback_suggestion_table)
-        self.feedback_report_hbox._pack_noexpand_nofill(hig_box_space_holder())
-        self.feedback_report_hbox._pack_expand_fill(self.feedback_report_table)
-
-        self.feedback_suggestion_bbox.set_layout(gtk.BUTTONBOX_START)
-        self.btn_box.set_spacing(5)
-        self.feedback_suggestion_bbox.pack_start(self.feedback_suggestion_radiobtn1)
-        self.feedback_suggestion_bbox.pack_start(self.feedback_suggestion_radiobtn2)
-        self.feedback_suggestion_table.attach_label(self.feedback_suggestion_bbox, 0, 1, 0, 1)
-        self.feedback_suggestion_table.attach_entry(self.feedback_suggestion_entry, 0, 1, 1, 2)
-        self.feedback_suggestion_table.attach(self.feedback_suggestion_sendbtn,
-                                              0, 1, 2, 3, gtk.PACK_START)
-
-        self.feedback_report_subhbox1.pack_start(self.feedback_report_namelabel, True, True, 0)
-        self.feedback_report_subhbox1.pack_start(self.feedback_report_nameentry, True, True, 0)
-        self.feedback_report_subhbox1.pack_start(self.feedback_report_emaillabel, True, True, 0)
-        self.feedback_report_subhbox1.pack_start(self.feedback_report_emailentry)
-        self.feedback_report_table.attach(self.feedback_report_subhbox1, 0, 1, 0, 1)
-        self.feedback_report_subhbox2.pack_start(self.feedback_report_sw)
-        self.feedback_report_table.attach(self.feedback_report_subhbox2, 0, 1, 1, 2)
-        self.feedback_report_subhbox3.pack_start(self.feedback_report_sendbtn)
-        self.feedback_report_table.attach(self.feedback_report_subhbox3, 0, 1, 2, 3, gtk.PACK_START)
-
-        self.preference_notebook.append_page(self.feedback_vbox,
-                                             gtk.Label("Feedback"))
-
-        self.hpaned.pack1(self.preference_vbox, True, False)
+        self.hpaned.pack1(self.vbox, True, False)
 
     def send_suggestion(self):
-        if self.feedback_suggestion_radiobtn1.get_active():
+        if self.suggestion_radiobtn1.get_active():
             website_url = self.feedback_suggestion_entry.get_text()
             theApp.aggregator.send_website_suggestion(website_url)
-        elif self.feedback_suggestion_radiobtn2.get_active():
+        elif self.suggestion_radiobtn2.get_active():
             text = self.feedback_suggestion_entry.get_text()
             service_name = text.split(':')[0]
             host_name = text.split(':')[1]
@@ -301,50 +127,163 @@ class PreferenceWindow(HIGWindow):
         self.save_tests()
 
     def load_preference(self):
-        self.pref_peerid_label2.set_text(str(theApp.peer_info.ID))
-        self.pref_email_entry.set_text(theApp.peer_info.Email)
+        self.pref_page.peerid_label2.set_text(str(theApp.peer_info.ID))
+        self.pref_page.email_entry.set_text(theApp.peer_info.Email)
 
         startup_on_boot = g_config.getboolean('application', 'startup_on_boot')
         if startup_on_boot:
-            self.pref_startup_check.set_active(True)
+            self.pref_page.startup_check.set_active(True)
         else:
-            self.pref_startup_check.set_active(False)
+            self.pref_page.startup_check.set_active(False)
         auto_update = g_config.getboolean('application', 'auto_update')
         if auto_update:
-            self.pref_update_check.set_active(True)
+            self.pref_page.update_check.set_active(True)
         else:
-            self.pref_update_check.set_active(False)
+            self.pref_page.update_check.set_active(False)
 
-        self.pref_cloudagg_entry.set_text(theApp.aggregator.base_url)
+        self.pref_page.cloudagg_entry.set_text(theApp.aggregator.base_url)
         # load test tab
         self.load_tests()
 
     def save_tests(self):
-        SELECTED_TESTS = [ r[0] for r in self.tests_subbox.\
+        SELECTED_TESTS = [ r[0] for r in self.test_page.subbox.\
                            tree_view_selected_tests.treestore ]
         g_db_helper.set_value('selected_tests', SELECTED_TESTS)
 
-        auto_update_test = self.tests_checkbtn.get_active()
+        auto_update_test = self.test_page.checkbtn.get_active()
         g_config.set('application', 'auto_update_test', str(auto_update_test))
 
     def load_tests(self):
         from umit.icm.agent.test import ALL_TESTS
-        ts = self.tests_subbox.tree_view_installed_tests.treestore
+        ts = self.test_page.subbox.tree_view_installed_tests.treestore
         for tname in ALL_TESTS:
             ts.append(None, [tname])
 
         SELECTED_TESTS = g_db_helper.get_value('selected_tests')
         if SELECTED_TESTS:
-            ts = self.tests_subbox.tree_view_selected_tests.treestore
+            ts = self.test_page.subbox.tree_view_selected_tests.treestore
             for tname in SELECTED_TESTS:
                 ts.append(None, [tname])
 
         auto_update_test = g_config.getboolean('application', 'auto_update_test')
         if auto_update_test:
-            self.tests_checkbtn.set_active(True)
+            self.test_page.checkbtn.set_active(True)
         else:
-            self.tests_checkbtn.set_active(False)
+            self.test_page.checkbtn.set_active(False)
 
+########################################################################
+class PreferencePage(HIGVBox):
+    """"""
+
+    #----------------------------------------------------------------------
+    def __init__(self):
+        """Constructor"""
+        HIGVBox.__init__(self)
+        self.__create_widgets()
+        self.__pack_widgets()
+
+    def __create_widgets(self):
+        self.peerinfo_hbox = HIGHBox()
+        self.cloudagg_hbox = HIGHBox()
+        self.superpeers_hbox = HIGHBox()
+
+        self.peerinfo_section = HIGSectionLabel(_("Peer Info"))
+        self.peerinfo_table = HIGTable()
+        self.cloudagg_section = HIGSectionLabel(_("Cloud Aggregator"))
+        self.cloudagg_table = HIGTable()
+        self.cloudagg_subhbox = HIGHBox()
+        self.superpeers_section = HIGSectionLabel(_("Super Peers"))
+        self.superpeers_table = HIGTable()
+
+        self.peerid_label = HIGEntryLabel(_("Peer ID:"))
+        self.email_label = HIGEntryLabel(_("Email Address:"))
+        self.peerid_label2 = HIGEntryLabel()
+        self.email_entry = gtk.Entry()
+        self.startup_check = gtk.CheckButton(_("Startup on boot"))
+        self.update_check = gtk.CheckButton(_("Automatically update"))
+
+        self.cloudagg_entry = gtk.Entry()
+        self.cloudagg_button = HIGButton(_("Reset"))
+        self.cloudagg_button.connect('clicked', lambda w:
+                                          self.pref_cloudagg_entry.set_text(
+                                              'http://icm-dev.appspot.com/api'))
+        self.cloudagg_button.set_size_request(80, 28)
+
+        self.superpeers_entry = gtk.Entry()
+        self.superpeers_entry.set_size_request(300, 26)
+        self.superpeers_subhbox = HIGHBox()
+        self.btn_box = gtk.HButtonBox()
+        self.superpeers_button1 = HIGButton(_("Add"))
+        self.superpeers_button1.connect(
+            'clicked', lambda w: reactor.connectTCP(peer_entry.IP,
+                                                    peer_entry.Port,
+                                                    theApp.factory))
+        self.superpeers_button2 = HIGButton(_("Show all"))
+        self.superpeers_button2.connect('clicked', lambda w:
+                                        self.show_super_peer_list_window())
+
+    def __pack_widgets(self):
+        self.set_border_width(12)
+
+        self._pack_noexpand_nofill(self.peerinfo_section)
+        self._pack_noexpand_nofill(self.peerinfo_hbox)
+        self._pack_noexpand_nofill(self.cloudagg_section)
+        self._pack_noexpand_nofill(self.cloudagg_hbox)
+        self._pack_noexpand_nofill(self.superpeers_section)
+        self._pack_noexpand_nofill(self.superpeers_hbox)
+
+        self.peerinfo_hbox._pack_noexpand_nofill(hig_box_space_holder())
+        self.peerinfo_hbox._pack_expand_fill(self.peerinfo_table)
+        self.cloudagg_hbox._pack_noexpand_nofill(hig_box_space_holder())
+        self.cloudagg_hbox._pack_expand_fill(self.cloudagg_table)
+        self.superpeers_hbox._pack_noexpand_nofill(hig_box_space_holder())
+        self.superpeers_hbox._pack_expand_fill(self.superpeers_table)
+
+        self.peerinfo_table.attach_label(self.peerid_label, 0, 1, 0, 1)
+        self.peerinfo_table.attach_label(self.email_label, 0, 1, 1, 2)
+
+        self.peerinfo_table.attach_label(self.peerid_label2, 1, 2, 0, 1)
+        self.peerinfo_table.attach_entry(self.email_entry, 1, 2, 1, 2)
+        self.peerinfo_table.attach_label(self.startup_check, 0, 2, 2, 3)
+        self.peerinfo_table.attach_label(self.update_check, 0, 3, 3, 4)
+
+        self.cloudagg_subhbox._pack_expand_fill(self.cloudagg_entry)
+        self.cloudagg_subhbox._pack_noexpand_nofill(self.cloudagg_button)
+        self.cloudagg_table.attach_entry(self.cloudagg_subhbox, 0, 1, 0, 1)
+
+        self.btn_box.set_layout(gtk.BUTTONBOX_END)
+        self.btn_box.set_spacing(8)
+        self.btn_box.pack_start(self.superpeers_button1)
+        self.btn_box.pack_start(self.superpeers_button2)
+        self.superpeers_subhbox._pack_expand_fill(self.superpeers_entry)
+        self.superpeers_subhbox._pack_noexpand_nofill(self.btn_box)
+        self.superpeers_table.attach_label(self.superpeers_subhbox, 0, 1, 0, 1)
+
+########################################################################
+class TestPage(HIGVBox):
+    """"""
+
+    #----------------------------------------------------------------------
+    def __init__(self):
+        """Constructor"""
+        HIGVBox.__init__(self)
+        self.__create_widgets()
+        self.__pack_widgets()
+
+    def __create_widgets(self):
+        self.hbox1 = HIGHBox()
+        self.hbox2 = HIGHBox()
+        self.subbox = Tests()
+        self.hbox1.add(self.subbox)
+        self.checkbtn = gtk.CheckButton(_("Update tests module automatically"))
+
+    def __pack_widgets(self):
+        #self.tests_hbox.set_border_width(12)
+        self.pack_start(self.hbox1, True, True, 5)
+        self.pack_start(self.hbox2, True, True, 5)
+
+        self.checkbtn.set_border_width(8)
+        self.hbox2.add(self.checkbtn)
 
 class Tests(gtk.VBox):
     def __init__(self):
@@ -355,11 +294,11 @@ class Tests(gtk.VBox):
         table = gtk.Table(8, 5, False)
         table.set_col_spacings(3)
 
-        self.tree_view_installed_tests = TestsView("Installed Tests")
+        self.tree_view_installed_tests = TestsView(_("Installed Tests"))
         table.attach(self.tree_view_installed_tests, 0, 1, 0, 3,
                      gtk.FILL | gtk.EXPAND, gtk.FILL | gtk.EXPAND, 1, 1)
 
-        updatebtn = gtk.Button("Update")
+        updatebtn = gtk.Button(_("Update"))
         updatebtn.connect('clicked', lambda w: self.update_test_mod())
         updatebtn.set_size_request(50, 30)
         table.attach(updatebtn, 0, 1, 3, 4, gtk.FILL | gtk.EXPAND, gtk.SHRINK, 1, 1)
@@ -369,19 +308,19 @@ class Tests(gtk.VBox):
         btnbox.set_border_width(5)
         btnbox.set_layout(gtk.BUTTONBOX_START)
         btnbox.set_spacing(5)
-        button = gtk.Button("Add")
+        button = gtk.Button(_("Add"))
         button.connect('clicked', lambda w: self.add_test())
         button.set_size_request(50, 30)
         btnbox.add(button)
-        button = gtk.Button("Add All")
+        button = gtk.Button(_("Add All"))
         button.connect('clicked', lambda w: self.add_all())
         button.set_size_request(50, 30)
         btnbox.add(button)
-        button = gtk.Button("Remove")
+        button = gtk.Button(_("Remove"))
         button.connect('clicked', lambda w: self.remove_test())
         button.set_size_request(50, 30)
         btnbox.add(button)
-        button = gtk.Button("Remove All")
+        button = gtk.Button(_("Remove All"))
         button.connect('clicked', lambda w: self.remove_all())
         button.set_size_request(50, 30)
         btnbox.add(button)
@@ -389,7 +328,7 @@ class Tests(gtk.VBox):
         vbox.add(btnbox)
         table.attach(vbox, 3, 4, 1, 2, gtk.FILL, gtk.SHRINK, 1, 1)
 
-        self.tree_view_selected_tests = TestsView("Selected Tests")
+        self.tree_view_selected_tests = TestsView(_("Selected Tests"))
         table.attach(self.tree_view_selected_tests, 4, 5, 1, 3)
 
         self.add(table)
@@ -443,6 +382,93 @@ class TestsView(HIGVBox):
         self.treeview.get_selection().set_mode(gtk.SELECTION_SINGLE)
         self.add(self.treeview)
         self.show_all()
+
+########################################################################
+class FeedbackPage(HIGVBox):
+    """"""
+
+    #----------------------------------------------------------------------
+    def __init__(self):
+        """Constructor"""
+        HIGVBox.__init__(self)
+        self.__create_widgets()
+        self.__pack_widgets()
+
+    def __create_widgets(self):
+        self.suggestion_hbox = HIGHBox()
+        self.report_hbox = HIGHBox()
+
+        self.suggestion_section = HIGSectionLabel(_("Send Suggestion"))
+        self.suggestion_table = HIGTable()
+        self.report_section = HIGSectionLabel(_("Bug Report"))
+        self.report_table = HIGTable()
+
+        self.suggestion_radiobtn1 = gtk.RadioButton(None, 'Website')
+        self.suggestion_radiobtn1.set_active(True)
+        self.suggestion_radiobtn2 = gtk.RadioButton(
+            self.suggestion_radiobtn1, 'Service')
+        #put these two radio button on a boutton box
+        self.suggestion_bbox = gtk.HButtonBox()
+        self.feedback_suggestion_entry = gtk.Entry()
+        self.feedback_suggestion_sendbtn = HIGButton(_('Send'))
+        self.feedback_suggestion_sendbtn.connect('clicked',
+                                                 lambda x: self.send_suggestion())
+
+        self.feedback_report_namelabel = HIGEntryLabel(_("Your Name:"))
+        self.feedback_report_nameentry = gtk.Entry()
+        #self.feedback_report_nameentry.set_has_frame(True)
+        self.feedback_report_nameentry.set_size_request(100, 26)
+        self.feedback_report_emaillabel = HIGEntryLabel(_("Email:"))
+        self.feedback_report_emailentry = gtk.Entry()
+        self.feedback_report_emailentry.set_size_request(198, 26)
+        self.report_subhbox1 = HIGHBox()
+
+        self.feedback_report_sw = gtk.ScrolledWindow()
+        self.feedback_report_sw.set_policy(gtk.POLICY_AUTOMATIC, gtk.POLICY_AUTOMATIC)
+        self.feedback_report_textview = gtk.TextView()
+        self.feedback_report_textbuffer = self.feedback_report_textview.get_buffer()
+        self.feedback_report_textview.set_editable(True)
+        self.feedback_report_textview.set_wrap_mode(True)
+        self.feedback_report_textview.set_border_width(2)
+        self.feedback_report_sw.add(self.feedback_report_textview)
+        self.feedback_report_sw.show()
+        self.feedback_report_textview.show()
+        self.report_subhbox2 = HIGHBox()
+        self.feedback_report_sendbtn = HIGButton(_('Send'))
+        self.feedback_report_sendbtn.connect('clicked',
+                                             lambda x: self.send_bug_report())
+        self.report_subhbox3 = HIGHBox()
+
+    def __pack_widgets(self):
+        self.set_border_width(12)
+
+        self._pack_noexpand_nofill(self.suggestion_section)
+        self._pack_noexpand_nofill(self.suggestion_hbox)
+        self._pack_noexpand_nofill(self.report_section)
+        self._pack_noexpand_nofill(self.report_hbox)
+
+        self.suggestion_hbox._pack_noexpand_nofill(hig_box_space_holder())
+        self.suggestion_hbox._pack_expand_fill(self.suggestion_table)
+        self.report_hbox._pack_noexpand_nofill(hig_box_space_holder())
+        self.report_hbox._pack_expand_fill(self.report_table)
+
+        self.suggestion_bbox.set_layout(gtk.BUTTONBOX_START)
+        self.suggestion_bbox.pack_start(self.suggestion_radiobtn1)
+        self.suggestion_bbox.pack_start(self.suggestion_radiobtn2)
+        self.suggestion_table.attach_label(self.suggestion_bbox, 0, 1, 0, 1)
+        self.suggestion_table.attach_entry(self.feedback_suggestion_entry, 0, 1, 1, 2)
+        self.suggestion_table.attach(self.feedback_suggestion_sendbtn,
+                                              0, 1, 2, 3, gtk.PACK_START)
+
+        self.report_subhbox1.pack_start(self.feedback_report_namelabel, True, True, 0)
+        self.report_subhbox1.pack_start(self.feedback_report_nameentry, True, True, 0)
+        self.report_subhbox1.pack_start(self.feedback_report_emaillabel, True, True, 0)
+        self.report_subhbox1.pack_start(self.feedback_report_emailentry)
+        self.report_table.attach(self.report_subhbox1, 0, 1, 0, 1)
+        self.report_subhbox2.pack_start(self.feedback_report_sw)
+        self.report_table.attach(self.report_subhbox2, 0, 1, 1, 2)
+        self.report_subhbox3.pack_start(self.feedback_report_sendbtn)
+        self.report_table.attach(self.report_subhbox3, 0, 1, 2, 3, gtk.PACK_START)
 
 class SuperPeerListWindow(HIGWindow):
     def __init__(self):
