@@ -39,6 +39,8 @@ class EventWindow(HIGWindow):
 
     def __init__(self):
         HIGWindow.__init__(self, type=gtk.WINDOW_TOPLEVEL)
+        self.set_title(_('Event List'))
+        self.set_size_request(640, 380)
 
         self.__create_widgets()
         self.__load_events()
@@ -46,11 +48,6 @@ class EventWindow(HIGWindow):
     def __create_widgets(self):
         #cell_data_funcs = (None, self.event_type, self.time,
                            #self.location, self.report)
-
-        # Create a new window
-        #self.window = gtk.Window(gtk.WINDOW_TOPLEVEL)
-        self.set_title(_('Event List'))
-        self.set_size_request(400, 300)
 
         self.listmodel = gtk.ListStore(str, str, str, str, str)
 

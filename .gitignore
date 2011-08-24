@@ -6,3 +6,4 @@ dist
 log
 tmp
 Thumbs.db
+share/db/*

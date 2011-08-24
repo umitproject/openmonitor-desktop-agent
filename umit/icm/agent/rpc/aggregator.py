@@ -97,7 +97,7 @@ class AggregatorAPI(object):
     #----------------------------------------------------------------------
     def __init__(self):
         """Constructor"""
-        self.base_url = g_db_helper.get_config('aggregator_url')
+        self.base_url = g_db_helper.get_value('aggregator_url')
         self.available = False
         self.pending_report_ids = []
 
@@ -129,8 +129,8 @@ class AggregatorAPI(object):
         from umit.icm.agent.Version import VERSION_INT
         request_msg.versionNo = VERSION_INT
         request_msg.agentType = 'DESKTOP'
-        if theApp.peer_info.props['internet_ip']:
-            request_msg.ip = theApp.peer_info.props['internet_ip']
+        if theApp.peer_info.internet_ip:
+            request_msg.ip = theApp.peer_info.internet_ip
         defer_ = self._send_message(request_msg, True)
         defer_.addCallback(self._handle_register)
         defer_.addErrback(self._handle_error)
@@ -153,8 +153,8 @@ class AggregatorAPI(object):
         g_logger.info("Sending Login message to aggregator")
         request_msg = Login()
         self._make_request_header(request_msg.header)
-        if theApp.peer_info.props['internet_ip']:
-            request_msg.ip = theApp.peer_info.props['internet_ip']
+        if theApp.peer_info.internet_ip:
+            request_msg.ip = theApp.peer_info.internet_ip
         defer_ = self._send_message(request_msg, True)
         defer_.addCallback(self._handle_login)
         defer_.addErrback(self._handle_error)

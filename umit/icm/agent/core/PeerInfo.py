@@ -38,7 +38,9 @@ class PeerInfo(object):
         self.PrivateKey = ''
         self.CipheredPublicKey = ''
         self.AggregatorPublicKey = ''
-        self.props = {}
+
+        self.local_ip = ''
+        self.internet_ip = ''
 
         self.registered = False
         self.login = False
@@ -74,24 +76,20 @@ class PeerInfo(object):
             self.AggregatorPublicKey = rs[0][6]
             self.Type = rs[0][7]
             self.registered = True
-        # load properties
-        rs = g_db_helper.select('select * from peer_info')
-        for entry in rs:
-            self.props[entry[0]] = g_db_helper.unpack(entry[1])
+
+        self.local_ip = g_db_helper.get_value('local_ip', '')
+        self.internet_ip = g_db_helper.get_value('internet_ip', '')
 
     def save_to_db(self):
         if self.registered:
-            g_db_helper.execute("insert or replace into user_info values " \
+            g_db_helper.execute("insert or replace into peer_info values " \
                             "(%d, '%s', '%s', '%s', '%s', '%s', '%s', %d)" % \
                             (self.ID, self.Email, self.AuthToken,
                              self.PublicKey, self.PrivateKey,
                              self.CipheredPublicKey, self.AggregatorPublicKey,
                              self.Type))
-        for key in self.props:
-            g_db_helper.execute(
-                "insert or replace into peer_info values (?, ?)",
-                (key, g_db_helper.pack(self.props[key])))
-        g_db_helper.commit()
+        g_db_helper.set_value('local_ip', self.local_ip)
+        g_db_helper.set_value('internet_ip', self.internet_ip)
 
     def get_local_ip(self):
         from socket import socket, SOCK_DGRAM, AF_INET
@@ -102,7 +100,7 @@ class PeerInfo(object):
                 s.settimeout(3)
                 s.connect((each, 0))
                 ip = s.getsockname()[0]
-                self.props['local_ip'] = ip
+                self.local_ip = ip
                 #print(each, ip)
                 break
             except:
@@ -119,7 +117,7 @@ class PeerInfo(object):
         import re
         ip = re.search('\d+\.\d+\.\d+\.\d+', data).group(0)
         #print(data, ip)
-        self.props['internet_ip'] = ip
+        self.internet_ip = ip
 
 
 if __name__ == "__main__":

@@ -333,7 +333,7 @@ class PreferenceWindow(HIGWindow):
         for tname in ALL_TESTS:
             ts.append(None, [tname])
 
-        SELECTED_TESTS = g_db_helper.get_config('selected_tests')
+        SELECTED_TESTS = g_db_helper.get_value('selected_tests')
         if SELECTED_TESTS:
             ts = self.tests_subbox.tree_view_selected_tests.treestore
             for tname in SELECTED_TESTS:

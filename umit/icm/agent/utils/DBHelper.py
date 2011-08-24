@@ -75,29 +75,29 @@ class DBHelper(object):
     def unpack(self, data):
         return self.db_helper.unpack(data)
 
-    def get_config(self, key, default=None):
+    def get_value(self, key, default=None):
         result = self.db_helper.select(
-            "select * from config where key=?", (key,))
+            "select * from kvp where key=?", (key,))
         try:
             return self.unpack(result[0][1])
         except:
-            g_logger.warning("No value found for key '%s' in db config." % key)
+            g_logger.warning("No value found for key '%s' in db kvp." % key)
             return default
 
-    def set_config(self, key, value):
+    def set_value(self, key, value):
         self.db_helper.execute(
-            "insert or replace into config values(?, ?)",
+            "insert or replace into kvp values(?, ?)",
             (key, self.pack(value)))
         self.commit()
 
-    def del_config(self, key):
+    def del_value(self, key):
         self.db_helper.execute(
-            "delete from config where key=?", (key,))
+            "delete from kvp where key=?", (key,))
         self.commit()
 
 
 if __name__ == "__main__":
     helper = DBHelper('sqlite')
     helper.connect(os.path.join(DB_DIR, 'storage.db3'))
-    helper.set_config('aggregator_url', 'http://icm-dev.appspot.com/api')
-    print(helper.get_config('aggregator_url'))
+    helper.set_value('aggregator_url', 'http://icm-dev.appspot.com/api')
+    print(helper.get_value('aggregator_url'))
