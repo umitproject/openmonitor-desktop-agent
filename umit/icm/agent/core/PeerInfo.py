@@ -73,8 +73,7 @@ class PeerInfo(object):
             self.PublicKey = rs[0][3]
             self.PrivateKey = rs[0][4]
             self.CipheredPublicKey = rs[0][5]
-            self.AggregatorPublicKey = rs[0][6]
-            self.Type = rs[0][7]
+            self.Type = rs[0][6]
             self.registered = True
 
         self.local_ip = g_db_helper.get_value('local_ip', '')
@@ -83,11 +82,10 @@ class PeerInfo(object):
     def save_to_db(self):
         if self.registered:
             g_db_helper.execute("insert or replace into peer_info values " \
-                            "(%d, '%s', '%s', '%s', '%s', '%s', '%s', %d)" % \
+                            "(%d, '%s', '%s', '%s', '%s', '%s', %d)" % \
                             (self.ID, self.Email, self.AuthToken,
                              self.PublicKey, self.PrivateKey,
-                             self.CipheredPublicKey, self.AggregatorPublicKey,
-                             self.Type))
+                             self.CipheredPublicKey, self.Type))
         g_db_helper.set_value('local_ip', self.local_ip)
         g_db_helper.set_value('internet_ip', self.internet_ip)
 

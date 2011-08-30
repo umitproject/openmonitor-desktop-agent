@@ -80,12 +80,7 @@ class DashboardWindow(HIGWindow):
 
     def insert_text(self, buffer):
         iter = buffer.get_iter_at_offset(0)
-        buffer.insert(iter,
-                      "this is the test\n"
-                      "we can place here\n"
-                      "data about the softwre\n"
-                      "correspondent with the chart above\n"
-                      )
+        buffer.insert(iter, "")
 
     # Create a scrolled text area that displays a "message"
     def create_text(self):

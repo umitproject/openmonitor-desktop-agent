@@ -18,6 +18,11 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
+try:
+    execfile("F:\\workspace\\PyWork\\icm-agent\\umit\\icm\\agent\\UmitImporter.py")
+except:
+    pass
+
 __all__ = ['test_by_id', 'test_name_by_id', 'WebsiteTest', 'ServiceTest']
 
 TEST_PACKAGE_VERSION = '1.0'
@@ -29,7 +34,7 @@ import sys
 import time
 
 from twisted.internet import reactor, defer
-from twisted.internet.protocol import Protocol
+from twisted.internet.protocol import Protocol, ClientCreator
 from twisted.web.client import Agent, HTTPDownloader
 from twisted.web.http_headers import Headers
 from twisted.web._newclient import ResponseDone
@@ -45,6 +50,13 @@ else:
     # On most other platforms the best timer is time.time()
     default_timer = time.time
 
+def generate_report_id(self, list_):
+    m = hashlib.md5()
+    for item in list_:
+        m.update(str(item))
+    report_id = m.hexdigest()
+    return report_id
+
 ########################################################################
 class Test(object):
     """"""
@@ -55,11 +67,10 @@ class Test(object):
 
     def prepare(self, param):
         """Setup parameters and prepare for running"""
-        raise NotImplementedError
+        raise NotImplementedError('You need to implement this method')
 
     def execute(self):
-        """Need to be implemented"""
-        raise NotImplementedError
+        raise NotImplementedError('You need to implement this method')
 
 ########################################################################
 class WebsiteTest(Test):
@@ -113,23 +124,15 @@ class WebsiteTest(Test):
                                                      self.pattern))
         return report
 
-    def _generate_report_id(self, list_):
-        m = hashlib.md5()
-        for item in list_:
-            m.update(str(item))
-        report_id = m.hexdigest()
-        return report_id
-
     def _generate_report(self):
         report = WebsiteReport()
         report.header.agentID = theApp.peer_info.ID
         report.header.timeUTC = int(time.time())
         report.header.timeZone = 8
         report.header.testID = 1
-        report.header.reportID = self._generate_report_id(\
-            [report.header.agentID,
-             report.header.timeUTC,
-             report.header.testID])
+        report.header.reportID = generate_report_id([report.header.agentID,
+                                                     report.header.timeUTC,
+                                                     report.header.testID])
         #report.header.traceroute
         report.report.websiteURL = self.url
         report.report.statusCode = self.status_code
@@ -177,16 +180,92 @@ class ServiceTest(Test):
         self.defer_ = defer.Deferred()
         return self.defer_
 
+########################################################################
+class FTPTest(Test):
+    """"""
+
+    #----------------------------------------------------------------------
+    def __init__(self):
+        """Constructor"""
+        self.service_name = 'ftp'
+        self.host = None
+        self.port = 21
+        self.username = 'anonymous'
+        self.password = 'icm-agent@umitproject.org'
+
+    def prepare(self, param):
+        self.host = param['host']
+        if 'port' in param:
+            self.port = param['port']
+        if 'username' in param:
+            self.username = param['username']
+        if 'password' in param:
+            self.password = param['password']
+
+    def execute(self):
+        from twisted.protocols.ftp import FTPClient
+        creator = ClientCreator(reactor, FTPClient, self.username, self.password)
+        d = creator.connectTCP(self.host, self.port)
+        d.addCallback(self._connectionMade)
+        d.addErrback(self._connectionFailed)
+        self.time_start = default_timer()
+
+    def _connectionMade(self, ftpClient):
+        # execute pwd cmd
+        ftpClient.pwd().addCallbacks(self._success, self._fail)
+
+    def _connectionFailed(self, f):
+        print(f)
+        self.status_code = -1
+        time_end = default_timer()
+        self.response_time = time_end - self.time_start
+        self._generate_report()
+
+    def _success(self, response):
+        print(response)
+        self.status_code = 0
+        time_end = default_timer()
+        self.response_time = time_end - self.time_start
+        self._generate_report()
+
+    def _fail(self, error):
+        print(error)
+        self.status_code = -1
+        time_end = default_timer()
+        self.response_time = time_end - self.time_start
+        self._generate_report()
+
+    def _generate_report(self):
+        report = ServiceReport()
+        report.header.agentID = theApp.peer_info.ID
+        report.header.timeUTC = int(time.time())
+        report.header.timeZone = 8
+        report.header.testID = 2
+        report.header.reportID = generate_report_id([report.header.agentID,
+                                                     report.header.timeUTC,
+                                                     report.header.testID])
+        #report.header.traceroute
+        report.report.serviceName = self.service_name
+        report.report.statusCode = self.status_code
+        report.report.responseTime = (int)(self.response_time * 1000)
+        #...
+        theApp.statistics.reports_generated = \
+              theApp.statistics.reports_generated + 1
+        return report
+
+
 test_by_id = {
     0: Test,
     1: WebsiteTest,
     2: ServiceTest,
+    3: FTPTest,
 }
 
 test_name_by_id = {
     0: 'Test',
     1: 'WebsiteTest',
     2: 'ServiceTest',
+    3: 'FTPTest',
 }
 
 ALL_TESTS = ['WebsiteTest', 'ServiceTest']
@@ -198,12 +277,16 @@ ALL_TESTS = ['WebsiteTest', 'ServiceTest']
 
 
 if __name__ == "__main__":
-    test1 = WebsiteTest()
-    test1.prepare({'url': 'http://www.baidu.com', 'pattern': 'baidu'})
-    test1.execute()
-    test2 = WebsiteTest()
-    test2.prepare({'url': 'https://www.alipay.com', 'pattern': 'baidu'})
-    test2.execute()
+    #test1 = WebsiteTest()
+    #test1.prepare({'url': 'http://www.baidu.com', 'pattern': 'baidu'})
+    #test1.execute()
+    #test2 = WebsiteTest()
+    #test2.prepare({'url': 'https://www.alipay.com', 'pattern': 'baidu'})
+    #test2.execute()
+    test3 = FTPTest()
+    test3.prepare({'host': 'ftp.secureftp-test.com', 'port': 21,
+                   'username': 'test', 'password': 'test'})
+    test3.execute()
 
     reactor.callLater(5, reactor.stop)
     reactor.run()
