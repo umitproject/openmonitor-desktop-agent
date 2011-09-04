@@ -34,7 +34,7 @@ import sys
 import time
 
 from twisted.internet import reactor, defer
-from twisted.internet.protocol import Protocol, ClientCreator
+from twisted.internet.protocol import Protocol, ClientCreator, ClientFactory
 from twisted.web.client import Agent, HTTPDownloader
 from twisted.web.http_headers import Headers
 from twisted.web._newclient import ResponseDone
@@ -142,25 +142,25 @@ class WebsiteTest(Test):
               theApp.statistics.reports_generated + 1
         return report
 
-class ContentExaminer(Protocol):
-    def __init__(self, url, pattern):
-        """Constructor"""
-        self.url = url
-        self.content = ""
-        self.pattern = pattern
+    class ContentExaminer(Protocol):
+        def __init__(self, url, pattern):
+            """Constructor"""
+            self.url = url
+            self.content = ""
+            self.pattern = pattern
 
-    def dataReceived(self, bytes):
-        self.content = ''.join((self.content, bytes))
+        def dataReceived(self, bytes):
+            self.content = ''.join((self.content, bytes))
 
-    def connectionLost(self, reason):
-        if reason.check(ResponseDone):
-            match = self.pattern.search(self.content)
-            if (match is not None):
-                g_logger.info("Content unchanged.")
+        def connectionLost(self, reason):
+            if reason.check(ResponseDone):
+                match = self.pattern.search(self.content)
+                if (match is not None):
+                    g_logger.info("Content unchanged.")
+                else:
+                    g_logger.info("Content changed.")
             else:
-                g_logger.info("Content changed.")
-        else:
-            g_logger.error("The connection was broken. [%s]" % self.url)
+                g_logger.error("The connection was broken. [%s]" % self.url)
 
 ########################################################################
 class ServiceTest(Test):
@@ -253,12 +253,92 @@ class FTPTest(Test):
               theApp.statistics.reports_generated + 1
         return report
 
+########################################################################
+class SMTPTest(Test):
+    """"""
+
+    #----------------------------------------------------------------------
+    def __init__(self):
+        """Constructor"""
+        self.service_name = 'smtp'
+
+    def prepare(self, param):
+        pass
+
+    def execute(self):
+        pass
+
+########################################################################
+class POP3Test(Test):
+    """"""
+
+    #----------------------------------------------------------------------
+    def __init__(self):
+        """Constructor"""
+        self.service_name = 'pop3'
+
+    def prepare(self, param):
+        pass
+
+    def execute(self):
+        pass
+
+########################################################################
+class IMAPTest(Test):
+    """"""
+    from twisted.mail import imap4
+
+    class SimpleIMAP4Client(imap4.IMAP4Client):
+        greetDeferred = None
+
+        def connectionMade(self):
+            print("connected.")
+
+        def connectionLost(self, reason):
+            print(reason)
+
+        def serverGreeting(self, caps):
+            print(caps)
+
+    #----------------------------------------------------------------------
+    def __init__(self):
+        """Constructor"""
+        self.service_name = 'imap'
+        self.host = None
+        self.port = 143
+        self.username = ''
+        self.password = ''
+
+    def prepare(self, param):
+        self.host = param['host']
+        if 'port' in param:
+            self.port = param['port']
+        #if 'username' in param:
+            #self.username = param['username']
+        #if 'password' in param:
+            #self.password = param['password']
+
+        self.factory = ClientFactory()
+        self.factory.protocol = self.SimpleIMAP4Client()
+
+    def execute(self):
+        reactor.connectTCP(self.host, self.port, self.factory)
+
+    def _success(self, data):
+        print(data)
+
+    def _fail(self, failure):
+        print(failure)
+
 
 test_by_id = {
     0: Test,
     1: WebsiteTest,
     2: ServiceTest,
     3: FTPTest,
+    4: SMTPTest,
+    5: POP3Test,
+    6: IMAPTest,
 }
 
 test_name_by_id = {
@@ -266,9 +346,13 @@ test_name_by_id = {
     1: 'WebsiteTest',
     2: 'ServiceTest',
     3: 'FTPTest',
+    4: 'SMTPTest',
+    5: 'POP3Test',
+    6: 'IMAPTest',
 }
 
-ALL_TESTS = ['WebsiteTest', 'ServiceTest']
+ALL_TESTS = ['WebsiteTest', 'FTPTest', 'SMTPTest', 'POP3Test', 'IMAPTest']
+SUPPORTED_SERVICES = ['FTP', 'SMTP', 'POP3', 'IMAP']
 #import inspect
 #clsmembers = inspect.getmembers(sys.modules[__name__], inspect.isclass)
 #for clsname,cls in clsmembers:
@@ -283,10 +367,13 @@ if __name__ == "__main__":
     #test2 = WebsiteTest()
     #test2.prepare({'url': 'https://www.alipay.com', 'pattern': 'baidu'})
     #test2.execute()
-    test3 = FTPTest()
-    test3.prepare({'host': 'ftp.secureftp-test.com', 'port': 21,
-                   'username': 'test', 'password': 'test'})
-    test3.execute()
+    #test3 = FTPTest()
+    #test3.prepare({'host': 'ftp.secureftp-test.com', 'port': 21,
+                   #'username': 'test', 'password': 'test'})
+    #test3.execute()
+    test4 = IMAPTest()
+    test4.prepare({'host': 'imap.gmail.com'})
+    test4.execute()
 
     reactor.callLater(5, reactor.stop)
     reactor.run()

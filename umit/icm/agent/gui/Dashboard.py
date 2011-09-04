@@ -30,18 +30,17 @@ from higwidgets.higwindows import HIGWindow
 from umit.icm.agent.I18N import _
 from umit.icm.agent.Application import theApp
 
-
-class TestsView(HIGVBox):
+class MenuBox(HIGVBox):
 
     def __init__(self, viewName):
-        super(TestsView, self).__init__()
+        super(MenuBox, self).__init__()
 
         self.set_size_request(180, 180)
 
         self.treestore = gtk.TreeStore(str)
-        #for parent in range(4):
+
         piter = self.treestore.append(None, ['Total Reports'])
-        #for child in range(3):
+
         self.treestore.append(piter, ['Report in Queue'])
         self.treestore.append(piter, ['Report generated'])
         self.treestore.append(piter, ['Report received'])
@@ -56,33 +55,29 @@ class TestsView(HIGVBox):
         self.treestore.append(piter, ['mobile agent'])
 
         self.treeview = gtk.TreeView(self.treestore)
-
         self.tvcolumn = gtk.TreeViewColumn(viewName)
         self.treeview.append_column(self.tvcolumn)
-
         self.treeview.set_show_expanders(True)
-
         self.cell = gtk.CellRendererText()
         self.tvcolumn.pack_start(self.cell, True)
-
         self.tvcolumn.add_attribute(self.cell, 'text', 0)
-
         self.treeview.set_search_column(0)
-
         self.tvcolumn.set_sort_column_id(0)
-
         self.treeview.set_reorderable(True)
         self.add(self.treeview)
-        #self.set_show_expanders(False)
         self.show_all()
 
 class DashboardWindow(HIGWindow):
 
     def insert_text(self, buffer):
         iter = buffer.get_iter_at_offset(0)
-        buffer.insert(iter, "")
+        buffer.insert(iter,
+                      "this is the test\n"
+                      "we can place here\n"
+                      "data about the softwre\n"
+                      "correspondent with the chart above\n"
+                      )
 
-    # Create a scrolled text area that displays a "message"
     def create_text(self):
         view = gtk.TextView()
         buffer = view.get_buffer()
@@ -113,38 +108,60 @@ class DashboardWindow(HIGWindow):
         self.__pack_widgets()
         return scrolled_window
 
+    def __create_reportdata(self):
+        scrolled_window = gtk.ScrolledWindow()
+        scrolled_window.set_size_request(450, 180)
+
+        self.liststore = gtk.ListStore(str, str, str)
+        self.treeview = gtk.TreeView(self.liststore)
+
+        self.catacolumn = gtk.TreeViewColumn('Catagories')
+        self.timescolumn = gtk.TreeViewColumn('Times')
+
+        self.liststore.append(['Report sent to Aggregator',None, '45'])
+        self.liststore.append(['Report sent to Super Agent', None, '50'])
+        self.liststore.append(['Report sent to Desk Agent', None, '35'])
+
+        self.treeview.append_column(self.catacolumn)
+        self.treeview.append_column(self.timescolumn)
+
+        self.catacell = gtk.CellRendererText()
+        self.timecell = gtk.CellRendererText()
+
+        self.catacolumn.pack_start(self.catacell, True)
+        self.timescolumn.pack_start(self.timecell, True)
+
+        self.catacolumn.set_attributes(self.catacell, text=0)
+        self.timescolumn.set_attributes(self.timecell, text=2)
+        self.treeview.set_search_column(0)
+        self.catacolumn.set_sort_column_id(0)
+        self.treeview.set_reorderable(True)
+        scrolled_window.add(self.treeview)
+        return scrolled_window
+
     def __init__(self):
         HIGWindow.__init__(self, type=gtk.WINDOW_TOPLEVEL)
-        #window = gtk.Window(gtk.WINDOW_TOPLEVEL)
         self.set_title(_('Dashboard'))
-        self.connect("destroy", lambda w: self.destroy())
+        #self.connect("delete_event", self.destroy)
         self.set_border_width(10)
         self.set_size_request(640, 500)
 
-        # create a vpaned widget and add it to our toplevel window
         hpaned = gtk.HPaned()
         self.add(hpaned)
         hpaned.show()
 
-        # Now create the contents of the two halves of the window
-        #list = self.create_list()
-        tvexample = TestsView(_('Dashboard Menu'))
+        tvexample = MenuBox(_('Dashboard Menu'))
         hpaned.add1(tvexample)
-        #list.show()
 
         vpaned = gtk.VPaned()
         hpaned.add2(vpaned)
         vpaned.show()
 
-        #text1 = self.create_text()
         board = self.create_chart()
-        #board = DashboardWindow()
         vpaned.add1(board)
-        #board.show_all()
 
-        text2 = self.create_text()
-        vpaned.add2(text2)
-        text2.show()
+        reportdata = self.__create_reportdata()
+        vpaned.add2(reportdata)
         self.show()
 
 

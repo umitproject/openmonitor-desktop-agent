@@ -88,20 +88,6 @@ class PreferenceWindow(HIGWindow):
 
         self.hpaned.pack1(self.vbox, True, False)
 
-    def send_suggestion(self):
-        if self.suggestion_radiobtn1.get_active():
-            website_url = self.feedback_suggestion_entry.get_text()
-            theApp.aggregator.send_website_suggestion(website_url)
-        elif self.suggestion_radiobtn2.get_active():
-            text = self.feedback_suggestion_entry.get_text()
-            service_name = text.split(':')[0]
-            host_name = text.split(':')[1]
-            ip = text.split(':')[2]
-            theApp.aggregator.send_service_suggestion(service_name, host_name, ip)
-
-    def send_bug_report(self):
-        pass
-
     def show_super_peer_list_window(self):
         wnd = SuperPeerListWindow()
         wnd.show_all()
@@ -111,16 +97,16 @@ class PreferenceWindow(HIGWindow):
         self.destroy()
 
     def save_preference(self):
-        user_email = self.pref_email_entry.get_text()
+        user_email = self.pref_page.email_entry.get_text()
         if user_email != '': # and is valid
             theApp.peer_info.Email = user_email
 
-        startup_on_boot = self.pref_startup_check.get_active()
+        startup_on_boot = self.pref_page.startup_check.get_active()
         g_config.set('application', 'startup_on_boot', str(startup_on_boot))
-        auto_update = self.pref_update_check.get_active()
+        auto_update = self.pref_page.update_check.get_active()
         g_config.set('application', 'auto_update', str(auto_update))
 
-        aggregator_url = self.pref_cloudagg_entry.get_text()
+        aggregator_url = self.pref_page.cloudagg_entry.get_text()
         theApp.aggregator.base_url = aggregator_url
         g_db_helper.set_value('aggregator_url', aggregator_url)
         # Save test tab
@@ -205,7 +191,7 @@ class PreferencePage(HIGVBox):
         self.cloudagg_entry = gtk.Entry()
         self.cloudagg_button = HIGButton(_("Reset"))
         self.cloudagg_button.connect('clicked', lambda w:
-                                          self.pref_cloudagg_entry.set_text(
+                                          self.cloudagg_entry.set_text(
                                               'http://icm-dev.appspot.com/api'))
         self.cloudagg_button.set_size_request(80, 28)
 
@@ -393,50 +379,68 @@ class FeedbackPage(HIGVBox):
         HIGVBox.__init__(self)
         self.__create_widgets()
         self.__pack_widgets()
+        self.__set_values()
 
     def __create_widgets(self):
         self.suggestion_hbox = HIGHBox()
         self.report_hbox = HIGHBox()
 
-        self.suggestion_section = HIGSectionLabel(_("Send Suggestion"))
+        self.suggestion_section = HIGSectionLabel(_("Test Suggestion"))
         self.suggestion_table = HIGTable()
         self.report_section = HIGSectionLabel(_("Bug Report"))
         self.report_table = HIGTable()
 
-        self.suggestion_radiobtn1 = gtk.RadioButton(None, 'Website')
-        self.suggestion_radiobtn1.set_active(True)
-        self.suggestion_radiobtn2 = gtk.RadioButton(
-            self.suggestion_radiobtn1, 'Service')
-        #put these two radio button on a boutton box
-        self.suggestion_bbox = gtk.HButtonBox()
-        self.feedback_suggestion_entry = gtk.Entry()
-        self.feedback_suggestion_sendbtn = HIGButton(_('Send'))
-        self.feedback_suggestion_sendbtn.connect('clicked',
-                                                 lambda x: self.send_suggestion())
+        # Website Suggestion
+        self.website_suggestion_table = HIGTable()
+        self.website_suggestion_slabel = HIGSectionLabel(_("Website Suggestion"))
+        self.website_url_subhbox = HIGHBox()
+        self.website_url_label = HIGEntryLabel(_("URL:"))
+        self.website_url_entry = gtk.Entry()
+        self.website_suggestion_sendbtn = HIGButton(_('Send'))
+        self.website_suggestion_sendbtn.set_size_request(60, 25)
+        self.website_suggestion_sendbtn.connect(
+            'clicked', lambda x: self.send_website_suggestion())
+        # Service Suggestion
+        self.service_suggestion_table = HIGTable()
+        self.service_suggestion_slabel = HIGSectionLabel(_("Service Suggestion"))
+        self.service_name_subhbox = HIGHBox()
+        self.service_name_label = HIGEntryLabel(_("Name:"))
+        self.service_list_store = gtk.ListStore(str)
+        self.service_name_entry = gtk.ComboBoxEntry(self.service_list_store, 0)
+        self.service_host_subhbox = HIGHBox()
+        self.service_host_label = HIGEntryLabel(_("Hostname:"))
+        self.service_host_entry = gtk.Entry()
+        self.service_ip_subhbox = HIGHBox()
+        self.service_ip_label = HIGEntryLabel(_("IP:"))
+        self.service_ip_entry = gtk.Entry()
+        self.service_suggestion_sendbtn = HIGButton(_('Send'))
+        self.service_suggestion_sendbtn.set_size_request(60, 25)
+        self.service_suggestion_sendbtn.connect(
+            'clicked', lambda x: self.send_service_suggestion())
 
-        self.feedback_report_namelabel = HIGEntryLabel(_("Your Name:"))
-        self.feedback_report_nameentry = gtk.Entry()
-        #self.feedback_report_nameentry.set_has_frame(True)
-        self.feedback_report_nameentry.set_size_request(100, 26)
-        self.feedback_report_emaillabel = HIGEntryLabel(_("Email:"))
-        self.feedback_report_emailentry = gtk.Entry()
-        self.feedback_report_emailentry.set_size_request(198, 26)
+        self.report_namelabel = HIGEntryLabel(_("Your Name:"))
+        self.report_nameentry = gtk.Entry()
+        #self.report_nameentry.set_has_frame(True)
+        self.report_nameentry.set_size_request(100, 26)
+        self.report_emaillabel = HIGEntryLabel(_("Email:"))
+        self.report_emailentry = gtk.Entry()
+        self.report_emailentry.set_size_request(198, 26)
         self.report_subhbox1 = HIGHBox()
 
-        self.feedback_report_sw = gtk.ScrolledWindow()
-        self.feedback_report_sw.set_policy(gtk.POLICY_AUTOMATIC, gtk.POLICY_AUTOMATIC)
-        self.feedback_report_textview = gtk.TextView()
-        self.feedback_report_textbuffer = self.feedback_report_textview.get_buffer()
-        self.feedback_report_textview.set_editable(True)
-        self.feedback_report_textview.set_wrap_mode(True)
-        self.feedback_report_textview.set_border_width(2)
-        self.feedback_report_sw.add(self.feedback_report_textview)
-        self.feedback_report_sw.show()
-        self.feedback_report_textview.show()
+        self.report_sw = gtk.ScrolledWindow()
+        self.report_sw.set_policy(gtk.POLICY_AUTOMATIC, gtk.POLICY_AUTOMATIC)
+        self.report_textview = gtk.TextView()
+        self.report_textbuffer = self.report_textview.get_buffer()
+        self.report_textview.set_editable(True)
+        self.report_textview.set_wrap_mode(True)
+        self.report_textview.set_border_width(2)
+        self.report_sw.add(self.report_textview)
+        self.report_sw.show()
+        self.report_textview.show()
         self.report_subhbox2 = HIGHBox()
-        self.feedback_report_sendbtn = HIGButton(_('Send'))
-        self.feedback_report_sendbtn.connect('clicked',
-                                             lambda x: self.send_bug_report())
+        self.report_sendbtn = HIGButton(_('Send'))
+        self.report_sendbtn.set_size_request(60, 25)
+        self.report_sendbtn.connect('clicked', lambda x: self.send_bug_report())
         self.report_subhbox3 = HIGHBox()
 
     def __pack_widgets(self):
@@ -447,28 +451,96 @@ class FeedbackPage(HIGVBox):
         self._pack_noexpand_nofill(self.report_section)
         self._pack_noexpand_nofill(self.report_hbox)
 
-        self.suggestion_hbox._pack_noexpand_nofill(hig_box_space_holder())
-        self.suggestion_hbox._pack_expand_fill(self.suggestion_table)
-        self.report_hbox._pack_noexpand_nofill(hig_box_space_holder())
+        #self.suggestion_hbox._pack_noexpand_nofill(hig_box_space_holder())
+        #self.suggestion_hbox._pack_expand_fill(self.suggestion_table)
+        #self.report_hbox._pack_noexpand_nofill(hig_box_space_holder())
         self.report_hbox._pack_expand_fill(self.report_table)
 
-        self.suggestion_bbox.set_layout(gtk.BUTTONBOX_START)
-        self.suggestion_bbox.pack_start(self.suggestion_radiobtn1)
-        self.suggestion_bbox.pack_start(self.suggestion_radiobtn2)
-        self.suggestion_table.attach_label(self.suggestion_bbox, 0, 1, 0, 1)
-        self.suggestion_table.attach_entry(self.feedback_suggestion_entry, 0, 1, 1, 2)
-        self.suggestion_table.attach(self.feedback_suggestion_sendbtn,
-                                              0, 1, 2, 3, gtk.PACK_START)
 
-        self.report_subhbox1.pack_start(self.feedback_report_namelabel, True, True, 0)
-        self.report_subhbox1.pack_start(self.feedback_report_nameentry, True, True, 0)
-        self.report_subhbox1.pack_start(self.feedback_report_emaillabel, True, True, 0)
-        self.report_subhbox1.pack_start(self.feedback_report_emailentry)
+        self.suggestion_hbox._pack_expand_fill(self.suggestion_table)
+        #self.suggestion_hbox._pack_expand_fill(self.service_suggestion_table)
+
+        self.suggestion_table.attach_label(self.website_suggestion_slabel,
+                                           0, 2, 0, 1)
+        self.suggestion_table.attach_label(self.website_url_label,
+                                           0, 1, 1, 2)
+        self.suggestion_table.attach_entry(self.website_url_entry,
+                                           1, 2, 1, 2)
+        self.suggestion_table.attach(self.website_suggestion_sendbtn,
+                                     0, 2, 2, 3, gtk.PACK_START)
+
+        self.suggestion_table.attach_label(self.service_suggestion_slabel,
+                                           2, 4, 0, 1)
+        self.suggestion_table.attach_label(self.service_name_label,
+                                           2, 3, 1, 2)
+        self.suggestion_table.attach_entry(self.service_name_entry,
+                                           3, 4, 1, 2)
+        self.suggestion_table.attach_label(self.service_host_label,
+                                           2, 3, 2, 3)
+        self.suggestion_table.attach_entry(self.service_host_entry,
+                                           3, 4, 2, 3)
+        self.suggestion_table.attach_label(self.service_ip_label,
+                                           2, 3, 3, 4)
+        self.suggestion_table.attach_entry(self.service_ip_entry,
+                                           3, 4, 3, 4)
+        self.suggestion_table.attach(self.service_suggestion_sendbtn,
+                                     2, 4, 4, 5, gtk.PACK_START)
+
+        self.report_subhbox1.pack_start(self.report_namelabel, True, True, 0)
+        self.report_subhbox1.pack_start(self.report_nameentry, True, True, 0)
+        self.report_subhbox1.pack_start(self.report_emaillabel, True, True, 0)
+        self.report_subhbox1.pack_start(self.report_emailentry)
         self.report_table.attach(self.report_subhbox1, 0, 1, 0, 1)
-        self.report_subhbox2.pack_start(self.feedback_report_sw)
+        self.report_subhbox2.pack_start(self.report_sw)
         self.report_table.attach(self.report_subhbox2, 0, 1, 1, 2)
-        self.report_subhbox3.pack_start(self.feedback_report_sendbtn)
+        self.report_subhbox3.pack_start(self.report_sendbtn)
         self.report_table.attach(self.report_subhbox3, 0, 1, 2, 3, gtk.PACK_START)
+
+    def __set_values(self):
+        from umit.icm.agent.test import SUPPORTED_SERVICES
+        for each in SUPPORTED_SERVICES:
+            self.service_list_store.append([each])
+
+    def send_website_suggestion(self):
+        website_url = self.website_url_entry.get_text()
+        if website_url == '':
+            alert = HIGAlertDialog(message_format=_("Missing fields."),
+                                   secondary_text=_("Please input all fields "
+                                                    "for website suggestion."))
+            alert.run()
+            alert.destroy()
+            return
+        d = theApp.aggregator.send_website_suggestion(website_url)
+        d.addCallback(self.show_result)
+
+    def send_service_suggestion(self):
+        service_name = self.service_name_entry.child.get_text()
+        host_name = self.service_host_entry.get_text()
+        ip = self.service_ip_entry.get_text()
+        if service_name == '' or host_name == '' or ip == '':
+            alert = HIGAlertDialog(message_format=_("Missing fields."),
+                                   secondary_text=_("Please input all fields "\
+                                                    "for service suggestion."))
+            alert.run()
+            alert.destroy()
+            return
+        d = theApp.aggregator.send_service_suggestion(service_name, host_name, ip)
+        d.addCallback(self.show_result)
+
+    def send_bug_report(self):
+        pass
+
+    def show_result(self, result):
+        if result is True:
+            alert = HIGAlertDialog(message_format=_("Succuss."),
+                                   secondary_text=_("Send to aggregaetor successfully."))
+            alert.run()
+            alert.destroy()
+        else:
+            alert = HIGAlertDialog(message_format=_("Error."),
+                                   secondary_text=_("Send to aggregaetor failed."))
+            alert.run()
+            alert.destroy()
 
 class SuperPeerListWindow(HIGWindow):
     def __init__(self):

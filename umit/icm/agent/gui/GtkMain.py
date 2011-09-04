@@ -71,9 +71,9 @@ class GtkMain(object):
 
         self.tray_menu_logged_in.append(gtk.SeparatorMenuItem())
 
-        #menu_item = gtk.MenuItem(_("Logout"))
-        #menu_item.connect("activate", lambda w: self.logout())
-        #self.tray_menu_logged_in.append(menu_item)
+        menu_item = gtk.MenuItem(_("Logout"))
+        menu_item.connect("activate", lambda w: self.logout())
+        self.tray_menu_logged_in.append(menu_item)
 
         menu_item = gtk.ImageMenuItem(_("Exit"))
         menu_item.connect("activate", lambda w: reactor.stop())
@@ -82,11 +82,11 @@ class GtkMain(object):
         ###
         self.tray_menu_logged_out = gtk.Menu()
 
-        #menu_item = gtk.MenuItem(_("Login"))
-        #menu_item.connect("activate", lambda w: self.login())
-        #self.tray_menu_logged_out.append(menu_item)
+        menu_item = gtk.MenuItem(_("Login"))
+        menu_item.connect("activate", lambda w: self.login())
+        self.tray_menu_logged_out.append(menu_item)
 
-        #self.tray_menu_logged_out.append(gtk.SeparatorMenuItem())
+        self.tray_menu_logged_out.append(gtk.SeparatorMenuItem())
 
         menu_item = gtk.MenuItem(_("Exit"))
         menu_item.connect("activate", lambda w: reactor.stop())
