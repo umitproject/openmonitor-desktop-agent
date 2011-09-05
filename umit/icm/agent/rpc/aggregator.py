@@ -77,8 +77,8 @@ class AggregagorSession(Session):
 aggregator_api_url = {
     'CheckAggregator': '/checkaggregator/',
     'RegisterAgent': '/registeragent/',
-    'Login': '/login/',
-    'Logout': '/logout/',
+    'Login': '/loginagent/',
+    'Logout': '/logoutagent/',
     'GetSuperPeerList': '/getsuperpeerlist/',
     'GetPeerList': '/getpeerlist/',
     'GetEvents': '/getevents/',
@@ -300,6 +300,7 @@ class AggregatorAPI(object):
 
     def _handle_send_website_suggestion(self, message):
         g_logger.info("WebsiteSuggestion has been sent to aggregator")
+        return True
 
     def send_service_suggestion(self, service_name, host_name, ip):
         g_logger.info("Sending ServiceSuggestion message to aggregator")
@@ -317,6 +318,7 @@ class AggregatorAPI(object):
 
     def _handle_send_service_suggestion(self, message):
         g_logger.info("ServiceSuggestion has been sent to aggregator")
+        return True
 
     """ Version """
     #----------------------------------------------------------------------
@@ -339,6 +341,8 @@ class AggregatorAPI(object):
         g_logger.info("Sending NewTests message to aggregator")
         request_msg = NewTests()
         self._make_request_header(request_msg.header)
+        from umit.icm.agent.test import TEST_PACKAGE_VERSION_INT
+        request_msg.currentTestVersionNo = TEST_PACKAGE_VERSION_INT
         defer_ = self._send_message(request_msg)
         defer_.addCallback(self._handle_check_tests)
         defer_.addErrback(self._handle_error)
