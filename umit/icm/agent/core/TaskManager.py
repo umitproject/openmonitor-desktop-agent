@@ -145,9 +145,9 @@ class TaskManager(object):
 
 if __name__ == "__main__":
     task_manager = TaskManager()
-    task_manager.add_test(1, '*/2 * * * *', {'url':'http://www.baidu.com'}, 3)
-    task_manager.add_test(2, '*/3 * * * *', {'service':'ftp'})
-    task_manager.add_test(1, '*/5 * * * *', {'url':'http://www.sina.com'}, 2)
+    task_manager.add_test(1, '*/10 * * * *', {'url':'http://www.baidu.com'}, 3)
+    task_manager.add_test(2, '*/6 * * * *', {'service':'ftp'})
+    task_manager.add_test(1, '*/3 * * * *', {'url':'http://www.sina.com'}, 2)
     task_manager.list_tests()
     #task_manager.toggle_test_by_pos(1)
     task_manager.sort_by_priority()

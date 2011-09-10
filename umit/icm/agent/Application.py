@@ -113,6 +113,8 @@ class Application(object):
 
         self._initialize()
 
+        self.task_manager.add_test(1, '*/10 * * * *', {'url':'http://www.google.com'}, 3)
+
         reactor.addSystemEventTrigger('before', 'shutdown', self.quit)
         reactor.run()
 

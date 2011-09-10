@@ -38,3 +38,24 @@ IMAGES_DIR = os.path.join(ROOT_DIR, 'share', 'images')
 ICONS_DIR = os.path.join(ROOT_DIR, 'share', 'icons')
 DB_DIR = os.path.join(ROOT_DIR, 'share', 'db')
 TMP_DIR = os.path.join(ROOT_DIR, 'tmp')
+
+if not os.path.exists(CONFIG_DIR):
+    os.mkdir(CONFIG_DIR)
+
+if not os.path.exists(LOG_DIR):
+    os.mkdir(LOG_DIR)
+
+if not os.path.exists(LOCALES_DIR):
+    os.mkdir(LOCALES_DIR)
+
+if not os.path.exists(IMAGES_DIR):
+    os.mkdir(IMAGES_DIR)
+
+if not os.path.exists(ICONS_DIR):
+    os.mkdir(ICONS_DIR)
+
+if not os.path.exists(DB_DIR):
+    os.mkdir(DB_DIR)
+
+if not os.path.exists(TMP_DIR):
+    os.mkdir(TMP_DIR)
