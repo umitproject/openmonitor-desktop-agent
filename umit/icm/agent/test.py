@@ -33,7 +33,8 @@ import re
 import sys
 import time
 
-from twisted.internet import reactor, defer
+from twisted.internet import reactor, ssl
+from twisted.internet.defer import Deferred
 from twisted.internet.protocol import Protocol, ClientCreator, ClientFactory
 from twisted.web.client import Agent, HTTPDownloader
 from twisted.web.http_headers import Headers
@@ -50,7 +51,7 @@ else:
     # On most other platforms the best timer is time.time()
     default_timer = time.time
 
-def generate_report_id(list_):
+def generate_report_id(self, list_):
     m = hashlib.md5()
     for item in list_:
         m.update(str(item))
@@ -73,6 +74,9 @@ class Test(object):
         raise NotImplementedError('You need to implement this method')
 
 ########################################################################
+# Website Test
+########################################################################
+
 class WebsiteTest(Test):
     def __init__(self):
         """Constructor"""
@@ -97,14 +101,8 @@ class WebsiteTest(Test):
                                     None)
         self.time_start = default_timer()
         defer_.addCallback(self._handle_response)
-        defer_.addErrback(self._handle_err)
+        defer_.addErrback(g_logger.error)
         return defer_
-    
-    def _handle_err(self, failure):
-        g_logger.critical('>>> %s' % failure)
-        self.status_code = response.code
-        g_logger.critical(self.status_code)
-        g_logger.critical(dir(response))
 
     def _handle_response(self, response):
         """Result Handler (generate report)"""
@@ -169,35 +167,21 @@ class WebsiteTest(Test):
                 g_logger.error("The connection was broken. [%s]" % self.url)
 
 ########################################################################
+# Service Test
+########################################################################
+
 class ServiceTest(Test):
     """"""
 
     #----------------------------------------------------------------------
     def __init__(self):
         """Constructor"""
-        self.service = None
-        self._done = False
-
-    def prepare(self, param):
-        self.service = param['service']
-
-    def execute(self):
-        g_logger.info("Testing service: %s" % self.service)
-        self.defer_ = defer.Deferred()
-        return self.defer_
-
-########################################################################
-class FTPTest(Test):
-    """"""
-
-    #----------------------------------------------------------------------
-    def __init__(self):
-        """Constructor"""
-        self.service_name = 'ftp'
+        self.service_name = None
         self.host = None
-        self.port = 21
-        self.username = 'anonymous'
-        self.password = 'icm-agent@umitproject.org'
+        self.port = 0
+        self.username = ''
+        self.password = ''
+        self._done = False
 
     def prepare(self, param):
         self.host = param['host']
@@ -208,40 +192,27 @@ class FTPTest(Test):
         if 'password' in param:
             self.password = param['password']
 
+    def checkArgs(self):
+        if not self.host or not self.port:
+            g_logger.warning("%s test missing Host and Port." %
+                             self.service_name)
+            return False
+
+        if not self.username or not self.password:
+            g_logger.warning("%s test missing credentials. Host: %s, Port: %d" %
+                             self.service_name, self.host, self.port)
+            return False
+
+        return True
+
     def execute(self):
-        from twisted.protocols.ftp import FTPClient
-        creator = ClientCreator(reactor, FTPClient, self.username, self.password)
-        d = creator.connectTCP(self.host, self.port)
-        d.addCallback(self._connectionMade)
-        d.addErrback(self._connectionFailed)
-        self.time_start = default_timer()
+        raise NotImplementedError
 
-    def _connectionMade(self, ftpClient):
-        # execute pwd cmd
-        ftpClient.pwd().addCallbacks(self._success, self._fail)
+    def _connectionFailed(self, failure):
+        result = {'status_code': 1, 'time_end': default_timer()}
+        self._generate_report(result)
 
-    def _connectionFailed(self, f):
-        print(f)
-        self.status_code = -1
-        time_end = default_timer()
-        self.response_time = time_end - self.time_start
-        self._generate_report()
-
-    def _success(self, response):
-        print(response)
-        self.status_code = 0
-        time_end = default_timer()
-        self.response_time = time_end - self.time_start
-        self._generate_report()
-
-    def _fail(self, error):
-        print(error)
-        self.status_code = -1
-        time_end = default_timer()
-        self.response_time = time_end - self.time_start
-        self._generate_report()
-
-    def _generate_report(self):
+    def _generateReport(self, result):
         report = ServiceReport()
         report.header.agentID = theApp.peer_info.ID
         report.header.timeUTC = int(time.time())
@@ -252,89 +223,239 @@ class FTPTest(Test):
                                                      report.header.testID])
         #report.header.traceroute
         report.report.serviceName = self.service_name
-        report.report.statusCode = self.status_code
-        report.report.responseTime = (int)(self.response_time * 1000)
+        report.report.statusCode = result['status_code']
+        report.report.responseTime = \
+              int((result['time_end'] - self.time_start) * 1000)
         #...
         theApp.statistics.reports_generated = \
               theApp.statistics.reports_generated + 1
-        return report
+        theApp.report_manager.add_report(report)
 
 ########################################################################
-class SMTPTest(Test):
+# FTP Test
+########################################################################
+from twisted.protocols.ftp import FTPClient, FTPClientBasic
+
+class FTPTestProtocol(FTPClient):
+    """"""
+    test = None
+    reportDeferred = None
+
+    #----------------------------------------------------------------------
+    def __init__(self, report_deferred=None, test=None):
+        """Constructor"""
+        FTPClient.__init__(self, test.username, test.password)
+        self.reportDeferred = report_deferred
+        self.test = test
+
+    def lineReceived(self, line):
+        print(line)
+        FTPClient.lineReceived(self, line)
+        if line.startswith('230'): # Logged in
+            self.quit()
+            if self.reportDeferred:
+                result = {'status_code': 0, 'time_end': default_timer()}
+                self.reportDeferred.callback(result)
+        elif line.startswith('530'): # Login failed
+            if self.reportDeferred:
+                result = {'status_code': 1, 'time_end': default_timer()}
+                self.reportDeferred.callback(result)
+
+class FTPTest(ServiceTest):
     """"""
 
     #----------------------------------------------------------------------
     def __init__(self):
         """Constructor"""
+        ServiceTest.__init__(self)
+        self.service = 'ftp'
+        self.port = 21
+        self.username = 'anonymous'
+        self.password = 'icm-agent@umitproject.org'
+
+    def execute(self):
+        if not self.checkArgs():
+            return
+
+        reportDeferred = Deferred().addBoth(self._generateReport)
+        ClientCreator(reactor, FTPTestProtocol, reportDeferred, self)\
+                     .connectTCP(self.host, self.port)\
+                     .addErrback(self._connectionFailed)
+        self.time_start = default_timer()
+        self.time_end = 0
+
+########################################################################
+# SMTP Test
+########################################################################
+from twisted.mail.smtp import SMTPClient, ESMTPClient
+
+class SMTPTestProtocol(ESMTPClient):
+    """"""
+    test = None
+    reportDeferred = None
+
+    def __init__(self, report_deferred=None, test=None):
+        ESMTPClient.__init__(self, test.password,
+                             ssl.ClientContextFactory(),
+                             test.username)
+        self.reportDeferred = report_deferred
+        self.test = test
+
+    def getMailFrom(self):
+        return "icmdesktopagent@umitproject.org"
+
+    def getMailTo(self):
+        return "nonexist@umitproject.org"
+
+    def sentMail(self, code, resp, numOk, addresses, log):
+        if self.reportDeferred:
+            result = {'status_code': 0, 'time_end': default_timer()}
+            self.reportDeferred.callback(result)
+            self.reportDeferred = None
+        self._disconnectFromServer()
+
+    def lineReceived(self, line):
+        print(line)
+        ESMTPClient.lineReceived(self, line)
+
+class SMTPTest(ServiceTest):
+    """"""
+
+    #----------------------------------------------------------------------
+    def __init__(self):
+        """Constructor"""
+        ServiceTest.__init__(self)
         self.service_name = 'smtp'
-
-    def prepare(self, param):
-        pass
+        self.port = 25
 
     def execute(self):
-        pass
+        if not self.checkArgs():
+            return
+
+        reportDeferred = Deferred().addBoth(self._generateReport)
+        ClientCreator(reactor, SMTPTestProtocol, reportDeferred, self)\
+                     .connectTCP(self.host, self.port)\
+                     .addErrback(self._connectionFailed)
+        self.time_start = default_timer()
+        self.time_end = 0
 
 ########################################################################
-class POP3Test(Test):
+# POP3 Test
+########################################################################
+from twisted.mail.pop3client import POP3Client
+
+class POP3TestProtocol(POP3Client):
+    """"""
+    test = None
+    reportDeferred = None
+
+    #----------------------------------------------------------------------
+    def __init__(self, report_deferred=None, test=None):
+        """Constructor"""
+        self.reportDeferred = report_deferred
+        self.test = test
+
+    def serverGreeting(self, greeting):
+        POP3Client.serverGreeting(self, greeting)
+        login = self.login(self.test.username, self.test.password)
+        login.addCallback(self._loggedIn)
+        login.addErrback(self._loginFailed)
+
+    def _loggedIn(self, res):
+        if self.reportDeferred:
+            result = {'status_code': 0, 'time_end': default_timer()}
+            self.reportDeferred.callback(result)
+        self.quit()
+
+    def _loginFailed(self, failure):
+        if self.reportDeferred:
+            result = {'status_code': 1, 'time_end': default_timer()}
+            self.reportDeferred.callback(result)
+
+    #def lineReceived(self, line):
+        #print(line)
+        #POP3Client.lineReceived(self, line)
+
+class POP3Test(ServiceTest):
     """"""
 
     #----------------------------------------------------------------------
     def __init__(self):
         """Constructor"""
-        self.service_name = 'pop3'
-
-    def prepare(self, param):
-        pass
+        ServiceTest.__init__(self)
+        self.service = 'pop3'
+        self.port = 110
 
     def execute(self):
-        pass
+        if not self.checkArgs():
+            return
+
+        reportDeferred = Deferred().addBoth(self._generateReport)
+        ClientCreator(reactor, POP3TestProtocol, reportDeferred, self)\
+                     .connectTCP(self.host, self.port)\
+                     .addErrback(self._connectionFailed)
+        self.time_start = default_timer()
+        self.time_end = 0
 
 ########################################################################
-class IMAPTest(Test):
+# IMAP Test
+########################################################################
+from twisted.mail.imap4 import IMAP4Client, CramMD5ClientAuthenticator
+
+class IMAPTestProtocol(IMAP4Client):
     """"""
-    from twisted.mail import imap4
+    test = None
+    reportDeferred = None
 
-    class SimpleIMAP4Client(imap4.IMAP4Client):
-        greetDeferred = None
+    #----------------------------------------------------------------------
+    def __init__(self, report_deferred=None, test=None):
+        IMAP4Client.__init__(self, ssl.ClientContextFactory())
+        self.username = username
+        self.password = password
+        self.reportDeferred = report_deferred
+        self.test = test
 
-        def connectionMade(self):
-            print("connected.")
+    def serverGreeting(self, caps):
+        IMAP4Client.serverGreeting(self, caps)
+        login = self.login(self.test.username, self.test.password)
+        login.addCallback(self._loggedIn)
+        login.addErrback(self._loginFailed)
 
-        def connectionLost(self, reason):
-            print(reason)
+    def _loggedIn(self, res):
+        if self.reportDeferred:
+            result = {'status_code': 0, 'time_end': default_timer()}
+            self.reportDeferred.callback(result)
+        self.logout()
 
-        def serverGreeting(self, caps):
-            print(caps)
+    def _loginFailed(self, failure):
+        if self.reportDeferred:
+            result = {'status_code': 1, 'time_end': default_timer()}
+            self.reportDeferred.callback(result)
+
+    #def lineReceived(self, line):
+        #print(line)
+        #IMAP4Client.lineReceived(self, line)
+
+class IMAPTest(ServiceTest):
+    """"""
 
     #----------------------------------------------------------------------
     def __init__(self):
         """Constructor"""
-        self.service_name = 'imap'
-        self.host = None
+        ServiceTest.__init__(self)
+        self.service = 'imap'
         self.port = 143
-        self.username = ''
-        self.password = ''
-
-    def prepare(self, param):
-        self.host = param['host']
-        if 'port' in param:
-            self.port = param['port']
-        #if 'username' in param:
-            #self.username = param['username']
-        #if 'password' in param:
-            #self.password = param['password']
-
-        self.factory = ClientFactory()
-        self.factory.protocol = self.SimpleIMAP4Client()
 
     def execute(self):
-        reactor.connectTCP(self.host, self.port, self.factory)
+        if not self.checkArgs():
+            return
 
-    def _success(self, data):
-        print(data)
-
-    def _fail(self, failure):
-        print(failure)
+        reportDeferred = Deferred().addBoth(self._generateReport)
+        ClientCreator(reactor, IMAPTestProtocol, reportDeferred, self)\
+                     .connectTCP(self.host, self.port)\
+                     .addErrback(self._connectionFailed)
+        self.time_start = default_timer()
+        self.time_end = 0
 
 
 test_by_id = {
@@ -377,10 +498,7 @@ if __name__ == "__main__":
     #test3.prepare({'host': 'ftp.secureftp-test.com', 'port': 21,
                    #'username': 'test', 'password': 'test'})
     #test3.execute()
-    test4 = IMAPTest()
-    test4.prepare({'host': 'imap.gmail.com'})
-    test4.execute()
 
-    reactor.callLater(5, reactor.stop)
+    #reactor.callLater(5, reactor.stop)
     reactor.run()
     g_logger.info("finished")

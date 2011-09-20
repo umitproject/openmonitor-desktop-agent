@@ -30,31 +30,30 @@ from higwidgets.higwindows import HIGWindow
 from umit.icm.agent.I18N import _
 from umit.icm.agent.Application import theApp
 
-class MenuBox(HIGVBox):
+class NavigationBox(HIGVBox):
 
-    def __init__(self, viewName):
-        super(MenuBox, self).__init__()
-
+    def __init__(self, viewName, dashboard):
+        HIGVBox.__init__(self)
+        self.dashboard = dashboard
         self.set_size_request(180, 180)
-
         self.treestore = gtk.TreeStore(str)
 
-        piter = self.treestore.append(None, ['Total Reports'])
+        piter = self.treestore.append(None, ['Reports'])
+        self.treestore.append(piter, ['Reports Sent'])
+        self.treestore.append(piter, ['Reports Received'])
 
-        self.treestore.append(piter, ['Report in Queue'])
-        self.treestore.append(piter, ['Report generated'])
-        self.treestore.append(piter, ['Report received'])
-        piter = self.treestore.append(None, ['Task'])
-        piter = self.treestore.append(None, ['Link'])
-        self.treestore.append(piter, ['Linked super peer'])
-        self.treestore.append(piter, ['Linked desktop agent'])
-        self.treestore.append(piter, ['Linked mobile agent'])
-        piter = self.treestore.append(None, ['Failed Times'])
-        self.treestore.append(piter, ['super peer'])
-        self.treestore.append(piter, ['desktop agent'])
-        self.treestore.append(piter, ['mobile agent'])
+        piter = self.treestore.append(None, ['Tasks'])
+        self.treestore.append(piter, ['Tasks Succeeded'])
+        self.treestore.append(piter, ['Tasks Failed'])
+
+        piter = self.treestore.append(None, ['Connections'])
+        self.treestore.append(piter, ['Aggregator'])
+        self.treestore.append(piter, ['Super Agent'])
+        self.treestore.append(piter, ['Normal Agent'])
+        self.treestore.append(piter, ['Mobile Agent'])
 
         self.treeview = gtk.TreeView(self.treestore)
+        self.treeview.connect('cursor-changed', self.on_cursor_changed)
         self.tvcolumn = gtk.TreeViewColumn(viewName)
         self.treeview.append_column(self.tvcolumn)
         self.treeview.set_show_expanders(True)
@@ -64,105 +63,85 @@ class MenuBox(HIGVBox):
         self.treeview.set_search_column(0)
         self.tvcolumn.set_sort_column_id(0)
         self.treeview.set_reorderable(True)
+        self.treeview.expand_all()
         self.add(self.treeview)
         self.show_all()
 
+    def on_cursor_changed(self, treeview):
+        selection = self.treeview.get_selection()
+	(model, iter) = selection.get_selected()
+        self.dashboard.cur_tab = self.treestore.get_value(iter, 0)
+        self.dashboard.refresh()
+
 class DashboardWindow(HIGWindow):
-
-    def insert_text(self, buffer):
-        iter = buffer.get_iter_at_offset(0)
-        buffer.insert(iter,
-                      "this is the test\n"
-                      "we can place here\n"
-                      "data about the softwre\n"
-                      "correspondent with the chart above\n"
-                      )
-
-    def create_text(self):
-        view = gtk.TextView()
-        buffer = view.get_buffer()
-        scrolled_window = gtk.ScrolledWindow()
-        scrolled_window.set_policy(gtk.POLICY_AUTOMATIC, gtk.POLICY_AUTOMATIC)
-        scrolled_window.add(view)
-        self.insert_text(buffer)
-        scrolled_window.show_all()
-        return scrolled_window
-
-    def __create_widgets(self):
-        chart = LineChart()
-        graph = Graph("NewGraph", "Title", [(1,1),(2,2),(3,3)])
-        chart.set_xrange((0, 10))
-        chart.set_yrange((0, 5))
-        chart.add_graph(graph)
-        return chart
-
-    def __pack_widgets(self):
-        pass
-
-    def create_chart(self):
-        scrolled_window = gtk.ScrolledWindow()
-        scrolled_window.set_policy(gtk.POLICY_AUTOMATIC, gtk.POLICY_AUTOMATIC)
-        chart=self.__create_widgets()
-        scrolled_window.add(chart)
-        scrolled_window.set_size_request(460,320)
-        self.__pack_widgets()
-        return scrolled_window
-
-    def __create_reportdata(self):
-        scrolled_window = gtk.ScrolledWindow()
-        scrolled_window.set_size_request(450, 180)
-
-        self.liststore = gtk.ListStore(str, str, str)
-        self.treeview = gtk.TreeView(self.liststore)
-
-        self.catacolumn = gtk.TreeViewColumn('Catagories')
-        self.timescolumn = gtk.TreeViewColumn('Times')
-
-        self.liststore.append(['Report sent to Aggregator',None, '45'])
-        self.liststore.append(['Report sent to Super Agent', None, '50'])
-        self.liststore.append(['Report sent to Desk Agent', None, '35'])
-
-        self.treeview.append_column(self.catacolumn)
-        self.treeview.append_column(self.timescolumn)
-
-        self.catacell = gtk.CellRendererText()
-        self.timecell = gtk.CellRendererText()
-
-        self.catacolumn.pack_start(self.catacell, True)
-        self.timescolumn.pack_start(self.timecell, True)
-
-        self.catacolumn.set_attributes(self.catacell, text=0)
-        self.timescolumn.set_attributes(self.timecell, text=2)
-        self.treeview.set_search_column(0)
-        self.catacolumn.set_sort_column_id(0)
-        self.treeview.set_reorderable(True)
-        scrolled_window.add(self.treeview)
-        return scrolled_window
-
     def __init__(self):
         HIGWindow.__init__(self, type=gtk.WINDOW_TOPLEVEL)
         self.set_title(_('Dashboard'))
-        #self.connect("delete_event", self.destroy)
         self.set_border_width(10)
         self.set_size_request(640, 500)
 
-        hpaned = gtk.HPaned()
-        self.add(hpaned)
-        hpaned.show()
+        self.__create_widgets()
+        self.__pack_widgets()
 
-        tvexample = MenuBox(_('Dashboard Menu'))
-        hpaned.add1(tvexample)
+    def __create_widgets(self):
+        self.hpaned = gtk.HPaned()
+        self.add(self.hpaned)
 
-        vpaned = gtk.VPaned()
-        hpaned.add2(vpaned)
-        vpaned.show()
+        self.navigation_box = NavigationBox(_('Dashboard Menu'), self)
 
-        board = self.create_chart()
-        vpaned.add1(board)
+        self.vpaned = gtk.VPaned()
+        self.line_chart = LineChart()
+        self.graph = Graph("NewGraph", "Title", [(1,1),(2,2),(3,3)])
+        self.line_chart.set_xrange((0, 10))
+        self.line_chart.set_yrange((0, 5))
+        self.line_chart.add_graph(self.graph)
+        self.line_chart.set_size_request(460, 320)
 
-        reportdata = self.__create_reportdata()
-        vpaned.add2(reportdata)
-        self.show()
+        self.detail_sw = gtk.ScrolledWindow()
+        self.detail_sw.set_size_request(450, 180)
+
+        self.detail_liststore = gtk.ListStore(str, str, str)
+        self.detail_treeview = gtk.TreeView(self.detail_liststore)
+
+        catacolumn = gtk.TreeViewColumn('Catagories')
+        timescolumn = gtk.TreeViewColumn('Times')
+
+        self.detail_liststore.append(['Report sent to Aggregator',None, '45'])
+        self.detail_liststore.append(['Report sent to Super Agent', None, '50'])
+        self.detail_liststore.append(['Report sent to Desk Agent', None, '35'])
+        self.detail_liststore.append(['Report sent to Desk Agent', None, '35'])
+        self.detail_liststore.append(['Report sent to Desk Agent', None, '35'])
+        self.detail_liststore.append(['Report sent to Desk Agent', None, '35'])
+        self.detail_liststore.append(['Report sent to Desk Agent', None, '35'])
+        self.detail_liststore.append(['Report sent to Desk Agent', None, '35'])
+        self.detail_liststore.append(['Report sent to Desk Agent', None, '35'])
+
+        self.detail_treeview.append_column(catacolumn)
+        self.detail_treeview.append_column(timescolumn)
+
+        catacell = gtk.CellRendererText()
+        timecell = gtk.CellRendererText()
+
+        catacolumn.pack_start(catacell, True)
+        timescolumn.pack_start(timecell, True)
+
+        catacolumn.set_attributes(catacell, text=0)
+        timescolumn.set_attributes(timecell, text=2)
+        self.detail_treeview.set_search_column(0)
+        catacolumn.set_sort_column_id(0)
+        self.detail_treeview.set_reorderable(True)
+        self.detail_sw.add(self.detail_treeview)
+
+
+    def __pack_widgets(self):
+        self.hpaned.add1(self.navigation_box)
+        self.hpaned.add2(self.vpaned)
+
+        self.vpaned.add1(self.line_chart)
+        self.vpaned.add2(self.detail_sw)
+
+    def refresh(self):
+        print(self.cur_tab)
 
 
 if __name__ == "__main__":
