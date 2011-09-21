@@ -18,11 +18,6 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
-try:
-    execfile("F:\\workspace\\PyWork\\icm-agent\\umit\\icm\\agent\\UmitImporter.py")
-except:
-    pass
-
 import base64
 import os
 import sys
@@ -102,13 +97,13 @@ class AggregatorAPI(object):
         self.pending_report_ids = []
 
     def _make_request_header(self, header):
-        header.token = 'null'#theApp.peer_info.AuthToken
-        header.agentID = 1000#theApp.peer_info.ID
+        header.token = theApp.peer_info.AuthToken
+        header.agentID = theApp.peer_info.ID
 
     def check_availability(self):
         g_logger.info("Sending CheckAggregator message to aggregator")
         request_msg = CheckAggregator()
-        self._make_request_header(request_msg.header)
+        request_msg.agentType = 'DESKTOP'
         defer_ = self._send_message(request_msg)
         defer_.addCallback(self._handle_check_availability)
         defer_.addErrback(self._handle_error)

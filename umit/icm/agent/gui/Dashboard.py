@@ -69,7 +69,7 @@ class NavigationBox(HIGVBox):
 
     def on_cursor_changed(self, treeview):
         selection = self.treeview.get_selection()
-	(model, iter) = selection.get_selected()
+        (model, iter) = selection.get_selected()
         self.dashboard.cur_tab = self.treestore.get_value(iter, 0)
         self.dashboard.refresh()
 
@@ -141,11 +141,81 @@ class DashboardWindow(HIGWindow):
         self.vpaned.add2(self.detail_sw)
 
     def refresh(self):
-        print(self.cur_tab)
+        self.detail_liststore.clear()
+        if self.cur_tab == "Reports":
+            self.detail_liststore.append(['Reports Total', None,
+                                          theApp.statistics.reports_total])
+            self.detail_liststore.append(['Reports In Queue', None,
+                                          theApp.statistics.reports_in_queue])
+            self.detail_liststore.append(['Reports Generated', None,
+                                          theApp.statistics.reports_generated])
+        elif self.cur_tab == "Reports Sent":
+            self.detail_liststore.append(['Reports Sent', None,
+                                          theApp.statistics.reports_sent])
+            self.detail_liststore.append(['Reports Sent To Aggregator', None,
+                                          theApp.statistics.reports_sent_to_aggregator])
+            self.detail_liststore.append(['Reports Sent To Super Agent', None,
+                                          theApp.statistics.reports_sent_to_super_agent])
+            self.detail_liststore.append(['Reports Sent To Normal Agent', None,
+                                          theApp.statistics.reports_sent_to_normal_agent])
+            self.detail_liststore.append(['Reports Sent To Mobile Agent', None,
+                                          theApp.statistics.reports_sent_to_mobile_agent])
+        elif self.cur_tab == "Reports Received":
+            self.detail_liststore.append(['Reports Received', None,
+                                          theApp.statistics.reports_received])
+            self.detail_liststore.append(['Reports Received From Aggregator', None,
+                                          theApp.statistics.reports_received_from_aggregator])
+            self.detail_liststore.append(['Reports Received From Super Agent', None,
+                                          theApp.statistics.reports_received_from_super_agent])
+            self.detail_liststore.append(['Reports Received From Normal Agent', None,
+                                          theApp.statistics.reports_received_from_normal_agent])
+            self.detail_liststore.append(['Reports Received From Mobile Agent', None,
+                                          theApp.statistics.reports_received_from_mobile_agent])
+        elif self.cur_tab == "Tasks":
+            self.detail_liststore.append(['Current Tasks Num', None,
+                                          theApp.statistics.tasks_current_num])
+            self.detail_liststore.append(['Tasks Done', None,
+                                          theApp.statistics.tasks_done])
+            self.detail_liststore.append(['Tasks Failed', None,
+                                          theApp.statistics.tasks_failed])
+        elif self.cur_tab == "Tasks Succeeded":
+            for key,value in theApp.statistics.tasks_done_by_type:
+                self.detail_liststore.append([key, None, value])
+        elif self.cur_tab == "Tasks Failed":
+            for key,value in theApp.statistics.tasks_failed_by_type:
+                self.detail_liststore.append([key, None, value])
+        elif self.cur_tab == "Connections":
+            self.detail_liststore.append(['Aggregator Status', None,
+                                          theApp.aggregator.available])
+            self.detail_liststore.append(['Super Agent Connected', None,
+                                          theApp.statistics.super_agents_num])
+            self.detail_liststore.append(['Normal Agent Connected', None,
+                                          theApp.statistics.normal_agents_num])
+            self.detail_liststore.append(['Mobile Agent Connected', None,
+                                          theApp.statistics.mobile_agents_num])
+        elif self.cur_tab == "Aggregator":
+            self.detail_liststore.append(['Aggregator Status', None,
+                                          theApp.aggregator.available])
+            self.detail_liststore.append(['Aggregator Failure Times', None,
+                                          theApp.statistics.aggregator_fail_num])
+        elif self.cur_tab == "Super Agent":
+            self.detail_liststore.append(['Super Agent Connected', None,
+                                          theApp.statistics.super_agents_num])
+            self.detail_liststore.append(['Super Agent Failure Times', None,
+                                          theApp.statistics.super_agents_fail_num])
+        elif self.cur_tab == "Normal Agent":
+            self.detail_liststore.append(['Normal Agent Connected', None,
+                                          theApp.statistics.normal_agents_num])
+            self.detail_liststore.append(['Normal Agent Failure Times', None,
+                                          theApp.statistics.normal_agents_fail_num])
+        elif self.cur_tab == "Mobile Agent":
+            self.detail_liststore.append(['Mobile Agent Connected', None,
+                                          theApp.statistics.mobile_agents_num])
+            self.detail_liststore.append(['Mobile Agent Failure Times', None,
+                                          theApp.statistics.mobile_agents_fail_num])
 
 
 if __name__ == "__main__":
     wnd = DashboardWindow()
     wnd.show_all()
     gtk.main()
-

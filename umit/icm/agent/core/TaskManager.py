@@ -108,7 +108,7 @@ class TaskManager(object):
         self.task_list.append(test_entry)
         g_logger.info("Test has been added. %s" % test_entry)
         self.sort_by_priority()
-        theApp.statistics.tests_total = theApp.statistics.tests_total + 1
+        theApp.statistics.tasks_current_num = theApp.statistics.tasks_current_num + 1
 
     def remove_test(self, test_id, args):
         """"""
@@ -123,13 +123,13 @@ class TaskManager(object):
                     entry = self.task_list.pop(i)
                     g_logger.info("Test has been removed. %s" % entry)
                     theApp.statistics.tests_total = \
-                          theApp.statistics.tests_total - 1
+                          theApp.statistics.tasks_current_num - 1
                     i = i - 1
 
     def remove_test_by_pos(self, index):
         entry = self.task_list.pop(index-1)
         g_logger.info("Test has been removed. %s" % entry)
-        theApp.statistics.tests_total = theApp.statistics.tests_total - 1
+        theApp.statistics.tasks_current_num = theApp.statistics.tasks_current_num - 1
 
     def toggle_test_by_pos(self, index):
         self.task_list[index-1].Enabled = not self.task_list[index-1].Enabled

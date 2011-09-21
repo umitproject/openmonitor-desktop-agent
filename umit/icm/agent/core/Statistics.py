@@ -23,17 +23,22 @@ class Statistics(object):
         self.reports_total = 0
         self.reports_in_queue = 0
         self.reports_generated = 0
+        self.reports_sent = 0
         self.reports_sent_to_aggregator = 0
         self.reports_sent_to_super_agent = 0
         self.reports_sent_to_normal_agent = 0
         self.reports_sent_to_mobile_agent = 0
         self.reports_received = 0
+        self.reports_received_from_aggregator = 0
+        self.reports_received_from_super_agent = 0
+        self.reports_received_from_normal_agent = 0
+        self.reports_received_from_mobile_agent = 0
 
-        self.tests_total = 0
-        self.tests_done = 0
-        self.tests_failed = 0
-        self.tests_done_by_type = {}
-        self.tests_failed_by_type = {}
+        self.tasks_current_num = 0
+        self.tasks_done = 0
+        self.tasks_failed = 0
+        self.tasks_done_by_type = {}
+        self.tasks_failed_by_type = {}
 
         self.super_agents_num = 0
         self.normal_agents_num = 0
