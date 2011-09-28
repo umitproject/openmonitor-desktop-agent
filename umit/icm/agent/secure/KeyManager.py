@@ -18,6 +18,11 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
+from umit.icm.agent.Global import *
+from umit.icm.agent.Application import theApp
+from umit.icm.agent.Errors import *
+from umit.icm.agent.secure.Key import *
+
 ########################################################################
 class KeyManager(object):
     """"""
@@ -25,9 +30,16 @@ class KeyManager(object):
     #----------------------------------------------------------------------
     def __init__(self):
         """Constructor"""
+        ag_key_tup = g_db_helper.get_value('aggregator_public_key', None)
+        if not ag_key_tup:
+            raise InitializationError("Missing aggregator public key.")
+        self.aggregator_public_key = RSAKey()
+        self.aggregator_public_key.construct(*ag_key_tup)
+
         self.ciphered_public_keys = {}
         self.public_keys = {}
         self.private_keys = {}
+        self.symmetric_keys = {}
 
     def add_key_pair(self, name, public_key, private_key):
         self.public_keys[name] = public_key

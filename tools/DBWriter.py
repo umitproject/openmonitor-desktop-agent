@@ -35,28 +35,17 @@ sys.path.insert(0, os.path.join(ROOT_DIR, 'deps'))
 sys.path.insert(0, os.path.join(ROOT_DIR, 'deps', 'icm-common'))
 sys.path.insert(0, os.path.join(ROOT_DIR, 'deps', 'umit-common'))
 
-# check if there's GTK environment
-useGTK = True
-if useGTK:
-    if 'twisted.internet.reactor' in sys.modules:
-        del sys.modules['twisted.internet.reactor']
-    from twisted.internet import gtk2reactor # for gtk-2.0
-    gtk2reactor.install()
 
-from umit.icm.agent.Application import theApp
+#----------------------------------------------------------------------
+from umit.icm.agent.Global import *
 
-def main(args):
-    if useGTK:
-        theApp.use_gui = True
-    else:
-        theApp.use_gui = False
+from umit.icm.agent.secure.Key import RSAKey
 
-    try:
-        theApp.start()
-    except Exception as e:
-        from umit.icm.agent.Errors import ErrorHandler
-        ErrorHandler.handle_error(e)
+ag_key = RSAKey()
+ag_key.generate()
+
+print(ag_key.mod)
+print(ag_key.exp)
+g_db_helper.set_value('aggregator_public_key', (ag_key.mod, ag_key.exp))
 
 
-if __name__ == "__main__":
-    main(sys.argv)

@@ -94,6 +94,9 @@ class Application(object):
         from umit.icm.agent.rpc.aggregator import AggregatorAPI
         self.aggregator = AggregatorAPI()
 
+        from umit.icm.agent.secure.KeyManager import KeyManager
+        self.key_manager = KeyManager()
+
         from umit.icm.agent.core.Statistics import Statistics
         self.statistics = Statistics()
 
@@ -108,17 +111,17 @@ class Application(object):
         The Main function
         """
         g_logger.info("Starting ICM agent. Version: %s", VERSION)
-        open(os.path.join(ROOT_DIR, 'umit', 'icm', 'agent', 'running'), 'w')\
-            .close()
-
         self._initialize()
 
         self.task_manager.add_test(1, '*/10 * * * *', {'url':'http://www.google.com'}, 3)
 
-        reactor.addSystemEventTrigger('before', 'shutdown', self.quit)
+        reactor.addSystemEventTrigger('before', 'shutdown', self.on_quit)
         reactor.run()
 
-    def quit(self):
+    def terminate(self):
+        reactor.callWhenRunning(reactor.stop)
+
+    def on_quit(self):
         g_logger.info("ICM Agent quit.")
 
         if hasattr(self, 'peer_info'):
@@ -127,7 +130,9 @@ class Application(object):
         if hasattr(self, 'peer_manager'):
             self.peer_manager.save_to_db()
 
-        os.remove(os.path.join(ROOT_DIR, 'umit', 'icm', 'agent', 'running'))
+        m = os.path.join(ROOT_DIR, 'umit', 'icm', 'agent', 'agent_restart_mark')
+        if os.path.exists(m):
+            os.remove(m)
 
 
 theApp = Application()

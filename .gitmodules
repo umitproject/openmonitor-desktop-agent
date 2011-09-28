@@ -1,9 +1,6 @@
 [submodule "deps/higwidgets"]
 	path = deps/higwidgets
 	url = http://git.umitproject.org/higwidgets
-[submodule "deps/icm-common"]
-	path = deps/icm-common
-	url = http://git.umitproject.org/icm-common
 [submodule "deps/umit-common"]
 	path = deps/umit-common
 	url = http://git.umitproject.org/umit-common

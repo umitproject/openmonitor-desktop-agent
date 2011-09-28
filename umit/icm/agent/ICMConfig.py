@@ -31,6 +31,8 @@ class ICMConfig(ConfigParser):
     def __init__(self, filename):
         ConfigParser.__init__(self)
         filename = self.read(filename)
+        if not filename:
+            raise IOError("Read %s failed." % filename)
 
     #def get(self, section, option):
         #try:

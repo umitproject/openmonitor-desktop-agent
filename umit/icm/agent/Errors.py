@@ -18,21 +18,35 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
-from OpenSSL.crypto import PKey, TYPE_RSA
+import sys
+
+from umit.icm.agent.Global import g_logger
 
 ########################################################################
-class KeyGenerator(object):
+class InitializationError(Exception):
+    """"""
+
+    #----------------------------------------------------------------------
+    def __init__(self, value):
+        """Constructor"""
+        self.value = value
+
+    def __str__(self):
+        return self.value
+
+
+########################################################################
+class ErrorHandler(object):
     """"""
 
     #----------------------------------------------------------------------
     def __init__(self):
         """Constructor"""
 
-    def generateRSAKeyPair(self):
-        #PKey.generate_key(TYPE_RSA)
-        key = PKey()
-        key.generate_key(TYPE_RSA, )
-        return key
+    @classmethod
+    def handle_error(self, error):
+        g_logger.error("%s: %s" % (type(error), error))
+        if isinstance(error, InitializationError):
+            sys.exit(1)
 
-if __name__ == "__main__":
-    print(KeyGenerator().generateRSAKeyPair())
+

@@ -8,7 +8,9 @@ Dependencies:
   - Zope.Interface 3.6.3
 * PyGTK 2.24.0
 * pyOpenSSL 0.12
-* Google Protocol Buffers 2.4.1 
+* Google Protocol Buffers 2.4.1
+* pygtkChart
+* Chilkat Module for Python 
 
 Running ICM Desktop Agent:
   Execute bin/icm-agent.py. It will start the agent and read configuration from

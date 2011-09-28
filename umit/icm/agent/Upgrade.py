@@ -52,6 +52,8 @@ def update_agent(result, *args, **kw):
                            filename)
             return
     # Stop current agent
+    open(os.path.join(
+        ROOT_DIR, 'umit', 'icm', 'agent', 'agent_restart_mark'), 'w').close()
     from twisted.internet import reactor
     reactor.callInThread(restart_agent, path)
     reactor.stop()

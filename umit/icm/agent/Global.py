@@ -23,12 +23,18 @@ __all__ = ['g_config', 'g_logger', 'g_db_helper',
            'ICONS_DIR', 'DB_DIR', 'TMP_DIR']
 
 import os
+import sys
 
 from umit.icm.agent.BasePaths import *
 
 #----------------------------------------------------------------------
 from umit.icm.agent.ICMConfig import ICMConfig
-g_config = ICMConfig(os.path.join(CONFIG_DIR, 'agent_config.txt'))
+
+config_path = os.path.join(CONFIG_DIR, 'agent.cfg')
+if not os.path.exists(config_path):
+    sys.exit("Can't find config file.")
+
+g_config = ICMConfig(config_path)
 
 #----------------------------------------------------------------------
 from umit.common.UmitLogging import Log
@@ -52,5 +58,7 @@ g_logger = Log("ICM Desktop Agent", _levels[LOGLEVEL], log_filename)
 
 #----------------------------------------------------------------------
 from umit.icm.agent.utils.DBHelper import DBHelper
+
+db_path = os.path.join(DB_DIR, 'storage.db3')
 g_db_helper = DBHelper('sqlite')
-g_db_helper.connect(os.path.join(DB_DIR, 'storage.db3'))
+g_db_helper.connect(db_path)
