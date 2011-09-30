@@ -278,8 +278,8 @@ class PeerManager:
     normal peers, also check the availability of the aggregator
     """
     def maintain(self):
-        theApp.peer_info.login = True
-        self._after_login(None)
+        #theApp.peer_info.login = True
+        #self._after_login(None)
 
         # check the availability of the aggregator
         if not theApp.aggregator.available:

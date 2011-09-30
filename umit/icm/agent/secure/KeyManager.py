@@ -30,13 +30,33 @@ class KeyManager(object):
     #----------------------------------------------------------------------
     def __init__(self):
         """Constructor"""
-        ag_key_tup = g_db_helper.get_value('aggregator_public_key', None)
-        if not ag_key_tup:
+        # Load Aggregator Public Key
+        ag_pubkey = g_db_helper.get_value('aggregator_public_key', None)
+        if not ag_pubkey:
             raise InitializationError("Missing aggregator public key.")
         self.aggregator_public_key = RSAKey()
-        self.aggregator_public_key.construct(*ag_key_tup)
+        self.aggregator_public_key.construct(*ag_pubkey)
 
-        self.ciphered_public_keys = {}
+        public_key = g_db_helper.get_value('public_key')
+        private_key = g_db_helper.get_value('private_key')
+        if not public_key or not private_key:
+            # Generate RSA key
+            g_logger.info("Generate RSA key for first time running.")
+            rsa_key = RSAKey()
+            rsa_key.generate()
+            self.public_key = RSAKey()
+            self.public_key.construct(rsa_key.obj.n, rsa_key.obj.e)
+            self.private_key = RSAKey()
+            self.private_key.construct(rsa_key.obj.n, rsa_key.obj.d)
+            # write into db
+            g_db_helper.set_value('public_key', (rsa_key.obj.n, rsa_key.obj.e))
+            g_db_helper.set_value('private_key', (rsa_key.obj.n, rsa_key.obj.d))
+        else:
+            self.public_key = RSAKey()
+            self.public_key.construct(public_key[0], public_key[1])
+            self.private_key = RSAKey()
+            self.private_key.construct(private_key[0], private_key[1])
+
         self.public_keys = {}
         self.private_keys = {}
         self.symmetric_keys = {}

@@ -20,22 +20,34 @@
 
 from Crypto.Cipher import AES
 
-RSA_KEY_SIZE = 128
+AES_KEY_SIZE = 128
 
 ########################################################################
 class AESKey(object):
     """"""
 
     #----------------------------------------------------------------------
-    def __init__(self, secret):
+    def __init__(self):
         """Constructor"""
-        self.obj = AES.new(secret)
+        self.obj = None
+
+    def generate(self, bits=AES_KEY_SIZE):
+        self.obj = AES.new(Random.get_random_bytes(bits/8))
+
+    def setKey(self, key):
+        if len(key) > AES_KEY_SIZE/8:
+            key = key[:AES_KEY_SIZE/8]
+        elif len(key) < AES_KEY_SIZE/8:
+            key += '\0' * (AES_KEY_SIZE/8 - len(key))
+        self.obj = AES.new(key)
 
     def encrypt(self, plaintext):
+        if len(plaintext) % 16 != 0:
+            plaintext += '\0' * (16 - len(plaintext) % 16)
         return self.obj.encrypt(plaintext)
 
     def decrypt(self, ciphertext):
-        return self.obj.decrypt(ciphertext)
+        return self.obj.decrypt(ciphertext).rstrip('\0')
 
 
 from Crypto.PublicKey import RSA
@@ -72,14 +84,15 @@ class RSAKey(object):
         return self.obj.decrypt(ciphertext)
 
 if __name__ == "__main__":
-    aes_key = AESKey('simple')
+    aes_key = AESKey()
+    aes_key.generate()
     ct = aes_key.encrypt("Hello World!")
     print(ct)
     pt = aes_key.decrypt(ct)
     print(pt)
 
     rsa_key = RSAKey()
-    rsa_key.generate(1024)
+    rsa_key.generate()
     ct = rsa_key.encrypt('Hello World!')
     print(ct)
     pt = rsa_key.decrypt(ct)

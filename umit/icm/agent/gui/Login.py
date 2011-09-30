@@ -28,6 +28,7 @@ from higwidgets.higboxes import HIGHBox, HIGVBox, hig_box_space_holder
 from higwidgets.higbuttons import HIGStockButton
 
 from umit.icm.agent.I18N import _
+from umit.icm.agent.Global import *
 from umit.icm.agent.Application import theApp
 from umit.icm.agent.gui.Registration import RegistrationDialog
 
@@ -38,11 +39,12 @@ class LoginDialog(HIGDialog):
     #----------------------------------------------------------------------
     def __init__(self, title=_('Login')):
         """Constructor"""
-        HIGDialog.__init__(self, title=title,
+        HIGDialog.__init__(self, title=title, flags=gtk.DIALOG_MODAL,
                            buttons=(gtk.STOCK_OK, gtk.RESPONSE_ACCEPT,
                                     gtk.STOCK_CANCEL, gtk.RESPONSE_CANCEL))
 
         self.set_position(gtk.WIN_POS_CENTER_ALWAYS)
+        #self.set_size_request(400, 200)
         self._create_widgets()
         self._pack_widgets()
         self._connect_widgets()
@@ -62,15 +64,18 @@ class LoginDialog(HIGDialog):
 
         #hbox = gtk.HBox(False)
         #box.pack_start(hbox, True, True, 0)
-        self.forgot_password_label = gtk.Label("<span foreground='blue'" \
-                                               "underline='low'>Forgot password?</span>")
+        self.forgot_password_label = \
+            gtk.Label(_("<span foreground='blue' underline='low'>" \
+                        "Forgot password?</span>"))
         self.forgot_password_label.set_use_markup(True)
         self.forgot_password = gtk.Button()
         self.forgot_password.add(self.forgot_password_label)
         self.forgot_password.set_relief(gtk.RELIEF_NONE)
 
+        self.checkbtn = gtk.CheckButton(_("Save login credentials"))
         self.hbox = HIGHBox()
         self.table = HIGTable()
+        self.action_area.set_homogeneous(False)
 
     def _pack_widgets(self):
         self.login_icon.set_from_stock(gtk.STOCK_DIALOG_INFO,
@@ -88,6 +93,7 @@ class LoginDialog(HIGDialog):
         self.table.attach_label(self.password_label, 0, 1, 1, 2)
         self.table.attach_entry(self.password_entry, 1, 2, 1, 2)
         self.vbox.pack_start(self.table)
+        self.vbox.pack_start(self.checkbtn)
 
         spaceholder = hig_box_space_holder()
         self.action_area.pack_end(spaceholder)
@@ -103,24 +109,41 @@ class LoginDialog(HIGDialog):
         self.forgot_password.connect('clicked', self._forgot_password)
 
     def _register(self, widget):
-        registration_form = RegistrationDialog()
-        registration_form.show_all()
+        #registration_form = RegistrationDialog()
+        #registration_form.show_all()
+        webbrowser.open('www.openmonitor.org')
 
     def _forgot_password(self, widget):
-        webbrowser.open('forgotpwd')
+        webbrowser.open('www.openmonitor.org')
 
     def check_response(self, widget, response_id):
-        print(response_id)
         if response_id == gtk.RESPONSE_ACCEPT: # clicked on Ok btn
-            self.login()
+            self._login1()
         elif response_id in (gtk.RESPONSE_DELETE_EVENT, gtk.RESPONSE_CANCEL,
                 gtk.RESPONSE_NONE):
             self.destroy()
+            theApp.gtk_main.login_dlg = None
 
-    def login(self):
+    def _login1(self):
         username = self.username_entry.get_text()
         password = self.password_entry.get_text()
-        theApp.aggregator.authenticate(username, password)
+        if not theApp.peer_info.registered:
+            d = theApp.aggregator.register(username, password)
+            d.addCallback(self._login2)
+        else:
+            d = theApp.aggregator.login(username, password)
+
+    def _login2(self, data):
+        if data is not None:
+            username = self.username_entry.get_text()
+            password = self.password_entry.get_text()
+            d = theApp.aggregator.login(username, password)
+
+    def _login_response(self, data):
+        if data is not None:
+            if self.save_login_checkbtn.get_active():
+                g_db_helper.set_value('login_saved', True)
+
 
 if __name__ == "__main__":
     dialog = LoginDialog()

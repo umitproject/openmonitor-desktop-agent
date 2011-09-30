@@ -32,12 +32,9 @@ class PeerInfo(object):
         """Constructor"""
         self.ID = 0
         self.Type = 2  # normal peer by default
-        self.AuthToken = ''
+        self.Username = ''
         self.Email = ''
-        self.PublicKey = ''
-        self.PrivateKey = ''
-        self.CipheredPublicKey = ''
-        self.AggregatorPublicKey = ''
+        self.CipheredPublicKey = None
 
         self.local_ip = ''
         self.internet_ip = ''
@@ -52,8 +49,6 @@ class PeerInfo(object):
         if data is not None:
             self.ID = data[0]
             self.AuthToken = data[1]
-            self.PublicKey = data[2]
-            self.PrivateKey = data[3]
             self.CipheredPublicKey = data[4]
             self.AggregatorPublicKey = data[5]
             self.save_to_db()
@@ -68,10 +63,8 @@ class PeerInfo(object):
                                  "Use the first one.")
             g_logger.debug(rs[0])
             self.ID = rs[0][0]
-            self.Email = rs[0][1]
-            self.AuthToken = rs[0][2]
-            self.PublicKey = rs[0][3]
-            self.PrivateKey = rs[0][4]
+            self.Username = rs[0][1]
+            #self.AuthToken = rs[0][2]
             self.CipheredPublicKey = rs[0][5]
             self.Type = rs[0][6]
             self.registered = True

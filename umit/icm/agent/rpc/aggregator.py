@@ -32,43 +32,6 @@ from umit.icm.agent.Global import *
 from umit.icm.agent.rpc.Session import Session
 from umit.icm.agent.core.ReportManager import ReportStatus
 
-########################################################################
-class AggregagorSession(Session):
-    """"""
-
-    #----------------------------------------------------------------------
-    def __init__(self, transport):
-        """Constructor"""
-        Session.__init__(self, 0, transport)
-
-    def _handle_assign_task(self, message):
-        pass
-
-    def _handle_agent_update(self, message):
-        pass
-
-    def _handle_test_mod_update(self, message):
-        pass
-
-    def _handle_notification(self, message):
-        pass
-
-    def handle_message(self, message):
-        g_logger.debug("AggregatorSession - Handling %s message." %
-                       message.DESCRIPTOR.name)
-        if isinstance(message, AssignTask):
-            self._handle_assign_task(message)
-        elif isinstance(message, AgentUpdate):
-            self._handle_assign_task(message)
-        elif isinstance(message, TestModuleUpdate):
-            self._handle_assign_task(message)
-        elif isinstance(message, Notification):
-            self._handle_notification(message)
-
-    def close(self):
-        pass
-
-
 aggregator_api_url = {
     'CheckAggregator': '/checkaggregator/',
     'RegisterAgent': '/registeragent/',
@@ -118,33 +81,40 @@ class AggregatorAPI(object):
 
     """ Peer """
     #----------------------------------------------------------------------
-    def register(self):
+    def register(self, username, password):
         g_logger.info("Sending RegisterAgent message to aggregator")
         request_msg = RegisterAgent()
-        from umit.icm.agent.Version import VERSION_INT
-        request_msg.versionNo = VERSION_INT
+        from umit.icm.agent.Version import VERSION_NUM
+        request_msg.versionNo = VERSION_NUM
         request_msg.agentType = 'DESKTOP'
+        request_msg.credentials.username = username
+        request_msg.credentials.password = password
+        request_msg.agentPublicKey.mod = str(theApp.key_manager.public_key.mod)
+        request_msg.agentPublicKey.exp = str(theApp.key_manager.public_key.exp)
         if theApp.peer_info.internet_ip:
             request_msg.ip = theApp.peer_info.internet_ip
-        defer_ = self._send_message(request_msg, True)
-        defer_.addCallback(self._handle_register)
+
+        defer_ = self._send_request(
+            self._rsa_encrypt(self._encode(request_msg),
+                              theApp.key_manager.aggregator_public_key),
+            self.base_url + '/checkaggregator/'
+        )
+        defer_.addCallback(self._handle_register_response)
         defer_.addErrback(self._handle_error)
         return defer_
 
-    def _handle_register(self, message):
-        g_logger.info("RegisterAgent response: (%d, %s, %s, %s, %s, %s)" %
-                      (message.agentID, message.token, message.publicKey,
-                       message.privateKey, message.cipheredPublicKey,
-                       message.aggregatorPublicKey))
+    def _handle_register_response(self, data):
+        response_msg = self._decode(
+            self._rsa_decrypt(data, theApp.key_manager.private_key),
+            RegisterAgentResponse)
+
+        g_logger.info("RegisterAgent response: (%d, %s)" %
+                      (response_msg.agentID, message.cipheredPublicKey))
         theApp.peer_info.ID = message.agentID
-        theApp.peer_info.AuthToken = message.token
-        theApp.peer_info.PublicKey = message.publicKey
-        theApp.peer_info.PrivateKey = message.privateKey
         theApp.peer_info.CipheredPublicKey = message.cipheredPublicKey
-        theApp.peer_info.AggregatorPublicKey = message.aggregatorPublicKey
         theApp.peer_info.registered = True
 
-    def login(self):
+    def login(self, username, password):
         g_logger.info("Sending Login message to aggregator")
         request_msg = Login()
         self._make_request_header(request_msg.header)
@@ -321,8 +291,8 @@ class AggregatorAPI(object):
         g_logger.info("Sending NewVersion message to aggregator")
         request_msg = NewVersion()
         self._make_request_header(request_msg.header)
-        from umit.icm.agent.Version import VERSION_INT
-        request_msg.agentVersionNo = VERSION_INT
+        from umit.icm.agent.Version import VERSION_NUM
+        request_msg.agentVersionNo = VERSION_NUM
         request_msg.agentType = 'DESKTOP'
         defer_ = self._send_message(request_msg)
         defer_.addCallback(self._handle_check_version)
@@ -336,8 +306,8 @@ class AggregatorAPI(object):
         g_logger.info("Sending NewTests message to aggregator")
         request_msg = NewTests()
         self._make_request_header(request_msg.header)
-        from umit.icm.agent.test import TEST_PACKAGE_VERSION_INT
-        request_msg.currentTestVersionNo = TEST_PACKAGE_VERSION_INT
+        from umit.icm.agent.test import TEST_PACKAGE_VERSION_NUM
+        request_msg.currentTestVersionNo = TEST_PACKAGE_VERSION_NUM
         defer_ = self._send_message(request_msg)
         defer_.addCallback(self._handle_check_tests)
         defer_.addErrback(self._handle_error)
@@ -346,8 +316,24 @@ class AggregatorAPI(object):
     def _handle_check_tests(self, message):
         print(message)
 
+    """ Private """
     #----------------------------------------------------------------------
-    def _decode_message(self, data, msg_type):
+    def _rsa_encrypt(self, plaintext, rsa_key):
+        return rsa_key.encrypt(plaintext)
+
+    def _rsa_decrypt(self, ciphertext, rsa_key):
+        return rsa_key.decrypt(ciphertext)
+
+    def _aes_encrypt(self, plaintext, aes_key):
+        return aes_key.encrypt(plaintext)
+
+    def _aes_decrypt(self, ciphertext, aes_key):
+        return aes_key.decrypt(ciphertext)
+
+    def _encode(self, message):
+        return base64.b64encode(message.SerializeToString())
+
+    def _decode(self, data, msg_type):
         message = message_creator[msg_type]()
         message.ParseFromString(base64.b64decode(data))
         return message
@@ -364,7 +350,7 @@ class AggregatorAPI(object):
         response_msg_type = message_id_to_type.get(\
             message_type_to_id[message.DESCRIPTOR.name] + 1)
         if response_msg_type:
-            defer_.addCallback(self._decode_message, response_msg_type)
+            defer_.addCallback(self._decode, response_msg_type)
         return defer_
 
     def _send_request(self, method, uri, data="", mimeType=None):

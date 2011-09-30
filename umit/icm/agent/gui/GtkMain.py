@@ -36,6 +36,7 @@ from umit.icm.agent.gui.Splash import Splash
 class GtkMain(object):
     def __init__(self, *args, **kwargs):
         self.is_login = False
+        self.login_dlg = None
         self._create_widgets()
 
     def _create_widgets(self):
@@ -159,16 +160,15 @@ class GtkMain(object):
         about = About()
         about.show_all()
 
-    def show_login(self):
-        from umit.icm.agent.gui.Login import LoginDialog
-        login_dlg = LoginDialog()
-        login_dlg.show_all()
-
     def login(self):
-        self.show_login()
+        if not self.login_dlg:
+            from umit.icm.agent.gui.Login import LoginDialog
+            self.login_dlg = LoginDialog()
+            self.login_dlg.show_all()
 
     def logout(self):
         self.set_login_status(False)
+        g_db_helper.set_value('login_saved', False)
 
 
 if __name__ == "__main__":

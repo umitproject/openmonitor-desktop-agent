@@ -37,7 +37,6 @@ from umit.icm.agent.Global import *
 from umit.icm.agent.Application import theApp
 from umit.icm.agent.rpc.message import *
 from umit.icm.agent.rpc.MessageFactory import MessageFactory
-from umit.icm.agent.rpc.aggregator import AggregagorSession
 from umit.icm.agent.rpc.desktop import DesktopAgentSession, \
      DesktopSuperAgentSession
 from umit.icm.agent.rpc.mobile import MobileAgentSession

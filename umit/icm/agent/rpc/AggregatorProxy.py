@@ -59,8 +59,8 @@ class AggregatorProxy(object):
         g_logger.info("Sending RegisterAgent message to aggregator")
         url = self.base_url + "/registeragent/"
         request_msg = RegisterAgent()
-        from umit.icm.agent.Version import VERSION_INT
-        request_msg.versionNo = VERSION_INT
+        from umit.icm.agent.Version import VERSION_NUM
+        request_msg.versionNo = VERSION_NUM
         request_msg.agentType = 'DESKTOP'
         if ip:
             request_msg.ip = ip

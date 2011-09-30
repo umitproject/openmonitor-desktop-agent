@@ -21,7 +21,7 @@
 from umit.icm.agent.Application import theApp
 from umit.icm.agent.Global import *
 from umit.icm.agent.Version import *
-from umit.icm.agent.test import TEST_PACKAGE_VERSION_INT
+from umit.icm.agent.test import TEST_PACKAGE_VERSION_NUM
 from umit.icm.agent.rpc.message import *
 from umit.icm.agent.rpc.MessageFactory import MessageFactory
 from umit.icm.agent.rpc.Session import Session
@@ -90,8 +90,8 @@ class MobileAgentSession(Session):
         theApp.report_manager.add_report(message.report)
         # send response
         response_msg = SendReportResponse()
-        response_msg.header.currentVersionNo = VERSION_INT
-        response_msg.header.currentTestVersionNo = TEST_PACKAGE_VERSION_INT
+        response_msg.header.currentVersionNo = VERSION_NUM
+        response_msg.header.currentTestVersionNo = TEST_PACKAGE_VERSION_NUM
         self._send_message(response_msg)
 
     def _handle_send_service_report(self, message):
@@ -101,8 +101,8 @@ class MobileAgentSession(Session):
         theApp.report_manager.add_report(message.report)
         # send response
         response_msg = SendReportResponse()
-        response_msg.header.currentVersionNo = VERSION_INT
-        response_msg.header.currentTestVersionNo = TEST_PACKAGE_VERSION_INT
+        response_msg.header.currentVersionNo = VERSION_NUM
+        response_msg.header.currentTestVersionNo = TEST_PACKAGE_VERSION_NUM
         self._send_message(response_msg)
 
     def _handle_send_report_response(self, message):
@@ -151,8 +151,8 @@ class MobileAgentService(object):
         """Constructor"""
 
     def _make_response_header(self, header):
-        header.currentVersionNo = VERSION_INT
-        header.currentTestVersionNo = TEST_PACKAGE_VERSION_INT
+        header.currentVersionNo = VERSION_NUM
+        header.currentTestVersionNo = TEST_PACKAGE_VERSION_NUM
 
     def _handle_get_super_peer_list(self, message, transport):
         agentID = message.header.agentID

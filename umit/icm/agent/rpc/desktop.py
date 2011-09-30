@@ -125,8 +125,8 @@ class DesktopAgentSession(Session):
         theApp.report_manager.add_report(message.report)
         # send response
         response_msg = SendReportResponse()
-        response_msg.header.currentVersionNo = VERSION_INT
-        response_msg.header.currentTestVersionNo = TEST_PACKAGE_VERSION_INT
+        response_msg.header.currentVersionNo = VERSION_NUM
+        response_msg.header.currentTestVersionNo = TEST_PACKAGE_VERSION_NUM
         self._send_message(response_msg)
 
     def send_service_report(self, report):
@@ -146,8 +146,8 @@ class DesktopAgentSession(Session):
         theApp.report_manager.add_report(message.report)
         # send response
         response_msg = SendReportResponse()
-        response_msg.header.currentVersionNo = VERSION_INT
-        response_msg.header.currentTestVersionNo = TEST_PACKAGE_VERSION_INT
+        response_msg.header.currentVersionNo = VERSION_NUM
+        response_msg.header.currentTestVersionNo = TEST_PACKAGE_VERSION_NUM
         self._send_message(response_msg)
 
     def _handle_send_report_response(self, data):
@@ -300,8 +300,8 @@ class DesktopSuperAgentSession(Session):
         theApp.report_manager.add_report(message.report)
         # send response
         response_msg = SendReportResponse()
-        response_msg.header.currentVersionNo = VERSION_INT
-        response_msg.header.currentTestVersionNo = TEST_PACKAGE_VERSION_INT
+        response_msg.header.currentVersionNo = VERSION_NUM
+        response_msg.header.currentTestVersionNo = TEST_PACKAGE_VERSION_NUM
         self._send_message(response_msg)
 
     def send_service_report(self, report):
@@ -321,8 +321,8 @@ class DesktopSuperAgentSession(Session):
         theApp.report_manager.add_report(message.report)
         # send response
         response_msg = SendReportResponse()
-        response_msg.header.currentVersionNo = VERSION_INT
-        response_msg.header.currentTestVersionNo = TEST_PACKAGE_VERSION_INT
+        response_msg.header.currentVersionNo = VERSION_NUM
+        response_msg.header.currentTestVersionNo = TEST_PACKAGE_VERSION_NUM
         self._send_message(response_msg)
 
     def _handle_send_report_response(self, data):

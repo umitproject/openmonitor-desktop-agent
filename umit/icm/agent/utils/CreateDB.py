@@ -29,13 +29,13 @@ def pack(val):
 def create(conn_str):
     conn = sqlite3.connect(conn_str)
     c = conn.cursor()
-    
+
     # Create the tables
     c.execute("CREATE TABLE kvp ("
               "key TEXT primary key not null, "
               "value BLOB not null"
               ")")
-    
+
     c.execute("CREATE TABLE events ("
               "id INTEGER NOT NULL PRIMARY KEY, "
               "test_type TEXT NOT NULL, "
@@ -46,17 +46,18 @@ def create(conn_str):
               "website_report TEXT, "
               "service_report TEXT"
               ")")
-    
+
     c.execute("CREATE TABLE peers ("
               "id INTEGER NOT NULL PRIMARY KEY, "
               "type INTEGER NOT NULL, "
               "ip TEXT NOT NULL, "
               "port INTEGER NOT NULL, "
-              "token TEXT, "
               "public_key BLOB, "
-              "geo TEXT"
+              "token TEXT, "
+              "geo TEXT, "
+              "staus TEXT"
               ")")
-    
+
     c.execute("CREATE TABLE reports ("
               "report_id TEXT NOT NULL PRIMARY KEY, "
               "test_id INTEGER NOT NULL, "
@@ -66,7 +67,7 @@ def create(conn_str):
               "source_ip TEXT DEFAULT (''), "
               "status TEXT DEFAULT ('')"
               ")")
-    
+
     c.execute("CREATE TABLE unsent_reports ("
               "report_id TEXT NOT NULL, "
               "test_id INTEGER NOT NULL, "
@@ -76,17 +77,15 @@ def create(conn_str):
               "source_ip TEXT DEFAULT (''), "
               "status TEXT DEFAULT ('')"
               ")")
-    
+
     c.execute("CREATE TABLE peer_info ("
               "agent_id INTEGER PRIMARY KEY NOT NULL, "
-              "email TEXT, "
-              "token TEXT, "
-              "public_key BLOB NOT NULL, "
-              "private_key BLOB NOT NULL, "
+              "username TEXT NOT NULL, "
+              "password TEXT NOT NULL, "
               "ciphered_public_key BLOB NOT NULL, "
               "type INTEGER DEFAULT 2"
               ")")
-    
+
     c.execute("CREATE TABLE stats ("
               "time INTEGER NOT NULL PRIMARY KEY, "
               "super_agent_num INTEGER NOT NULL, "
@@ -99,17 +98,17 @@ def create(conn_str):
               "reports_received INTEGER NOT NULL, "
               "tests_done INTEGER NOT NULL"
               ")")
-    
+
     # Insert pre-defined values
     c.execute("INSERT INTO kvp VALUES('aggregator_url', ?)",
               (pack('http://icm-dev.appspot.com/api'),))
     c.execute("INSERT INTO kvp VALUES('selected_tests', ?)",
               (pack(''),))
-    
+
     # Data for test
     c.execute("INSERT INTO peers VALUES(10004, 1, '202.206.64.11', 3128, '', '', "
-              "'China')")
-    
-    
+              "'China', 'UNKNOWN')")
+
+
     conn.commit()
     c.close()

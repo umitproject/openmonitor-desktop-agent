@@ -71,7 +71,7 @@ class ReportManager(object):
         if report is None:
             g_logger.critical("Received None as report. Please, investigate.")
             return
-        
+
         if report.header.reportID in self.cached_reports:
             g_logger.info("ReportID '%s' already in cache." %
                           report.header.reportID)
@@ -123,6 +123,7 @@ class ReportManager(object):
             report_entry.SourceIP = record[5]
             report_entry.Status = record[6]
             self.cached_reports[report_entry.ID] = report_entry
+        theApp.statistics.reports_in_queue = len(rs)
         g_logger.info("Loaded %d unsent reports from DB." % len(rs))
 
     def load_reports_from_db(self, table_name):

@@ -26,7 +26,7 @@ except:
 __all__ = ['test_by_id', 'test_name_by_id', 'WebsiteTest', 'ServiceTest']
 
 TEST_PACKAGE_VERSION = '1.0'
-TEST_PACKAGE_VERSION_INT = 1
+TEST_PACKAGE_VERSION_NUM = 1
 
 import hashlib
 import re

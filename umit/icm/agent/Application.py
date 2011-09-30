@@ -38,36 +38,6 @@ class Application(object):
     def __init__(self):
         pass
 
-    def _initialize(self):
-        # Initialize components
-        self._init_components()
-        self._load_from_db()
-
-        # Create agent service
-        self.listen_port = g_config.getint('network', 'listen_port')
-        from umit.icm.agent.rpc.AgentService import AgentFactory
-        self.factory = AgentFactory()
-        g_logger.info("Listening on port %d.", self.listen_port)
-        reactor.listenTCP(self.listen_port, self.factory)
-        # Create mobile agent service
-        from umit.icm.agent.rpc.mobile import MobileAgentService
-        self.ma_service = MobileAgentService()
-
-        if self.use_gui:
-            # Init GUI
-            from umit.icm.agent.gui.GtkMain import GtkMain
-            self.gtk_main = GtkMain()
-
-        # Add looping calls
-        self.peer_maintain_lc = task.LoopingCall(self.peer_manager.maintain)
-        self.peer_maintain_lc.start(30)
-
-        self.task_run_lc = task.LoopingCall(self.task_scheduler.schedule)
-        self.task_run_lc.start(30)
-
-        self.report_proc_lc = task.LoopingCall(self.report_uploader.process)
-        self.report_proc_lc.start(30)
-
     def _init_components(self):
         from umit.icm.agent.core.PeerInfo import PeerInfo
         self.peer_info = PeerInfo()
@@ -106,16 +76,48 @@ class Application(object):
         # restore unsent reports
         self.report_manager.load_unsent_reports()
 
+    def _init_after_running(self):
+        # Create agent service
+        self.listen_port = g_config.getint('network', 'listen_port')
+        from umit.icm.agent.rpc.AgentService import AgentFactory
+        self.factory = AgentFactory()
+        g_logger.info("Listening on port %d.", self.listen_port)
+        reactor.listenTCP(self.listen_port, self.factory)
+        # Create mobile agent service
+        from umit.icm.agent.rpc.mobile import MobileAgentService
+        self.ma_service = MobileAgentService()
+
+        if self.use_gui:
+            # Init GUI
+            from umit.icm.agent.gui.GtkMain import GtkMain
+            self.gtk_main = GtkMain()
+
+        if g_db_helper.get_value('login_saved'):
+            # login with saved credentials
+            pass
+
+        # Add looping calls
+        self.peer_maintain_lc = task.LoopingCall(self.peer_manager.maintain)
+        self.peer_maintain_lc.start(30)
+
+        self.task_run_lc = task.LoopingCall(self.task_scheduler.schedule)
+        self.task_run_lc.start(30)
+
+        self.report_proc_lc = task.LoopingCall(self.report_uploader.process)
+        self.report_proc_lc.start(30)
+
     def start(self):
         """
         The Main function
         """
         g_logger.info("Starting ICM agent. Version: %s", VERSION)
-        self._initialize()
+        self._init_components()
+        self._load_from_db()
 
         self.task_manager.add_test(1, '*/10 * * * *', {'url':'http://www.google.com'}, 3)
 
         reactor.addSystemEventTrigger('before', 'shutdown', self.on_quit)
+        reactor.callWhenRunning(self._init_after_running)
         reactor.run()
 
     def terminate(self):
