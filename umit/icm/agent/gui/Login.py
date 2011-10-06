@@ -23,6 +23,7 @@ import webbrowser
 
 from higwidgets.higdialogs import HIGDialog
 from higwidgets.higlabels import HIGLabel
+from higwidgets.higentries import HIGTextEntry, HIGPasswordEntry
 from higwidgets.higtables import HIGTable
 from higwidgets.higboxes import HIGHBox, HIGVBox, hig_box_space_holder
 from higwidgets.higbuttons import HIGStockButton
@@ -51,10 +52,10 @@ class LoginDialog(HIGDialog):
 
     def _create_widgets(self):
         self.username_label = HIGLabel(_("Username"))
-        self.username_entry = gtk.Entry()
+        self.username_entry = HIGTextEntry()
 
         self.password_label = HIGLabel(_("Password"))
-        self.password_entry = gtk.Entry()
+        self.password_entry = HIGPasswordEntry()
 
         self.login_icon = gtk.Image()
         self.login_text = gtk.Label(_("Log into your ICM agent."))

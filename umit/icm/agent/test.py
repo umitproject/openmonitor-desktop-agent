@@ -51,7 +51,17 @@ else:
     # On most other platforms the best timer is time.time()
     default_timer = time.time
 
-def generate_report_id(self, list_):
+def task_done(name):
+    theApp.statistics.tasks_done = theApp.statistics.tasks_done + 1
+    theApp.statistics.tasks_done_by_type[name] = \
+        theApp.statistics.tasks_done_by_type.get(name, 0) + 1
+
+def task_failed(name):
+    theApp.statistics.tasks_failed = theApp.statistics.tasks_failed + 1
+    theApp.statistics.tasks_failed_by_type[name] = \
+        theApp.statistics.tasks_failed_by_type.get(name, 0) + 1
+
+def generate_report_id(list_):
     m = hashlib.md5()
     for item in list_:
         m.update(str(item))
@@ -101,8 +111,13 @@ class WebsiteTest(Test):
                                     None)
         self.time_start = default_timer()
         defer_.addCallback(self._handle_response)
-        defer_.addErrback(g_logger.error)
+        defer_.addErrback(self._connectionFailed)
         return defer_
+
+    def _connectionFailed(self, failure):
+        task_failed(self.__class__.__name__)
+        result = {'status_code': 1, 'time_end': default_timer()}
+        return self._generate_report(result)
 
     def _handle_response(self, response):
         """Result Handler (generate report)"""
@@ -115,17 +130,14 @@ class WebsiteTest(Test):
         #print(response.headers)
         report = self._generate_report()
 
-        theApp.statistics.tests_done = theApp.statistics.tests_done + 1
-        if 1 in theApp.statistics.tests_done_by_type:
-            theApp.statistics.tests_done_by_type[1] = \
-                  theApp.statistics.tests_done_by_type[1] + 1
+        HTTP_SUCCESS_CODE = (200, 302)
+        if response.code in HTTP_SUCCESS_CODE:
+            task_done(self.__class__.__name__)
+            #if self.pattern is not None:
+                #response.deliverBody(ContentExaminer(self.url,
+                                                     #self.pattern))
         else:
-            theApp.statistics.tests_done_by_type[1] = 0
-
-        if response.code == 200:
-            if self.pattern is not None:
-                response.deliverBody(ContentExaminer(self.url,
-                                                     self.pattern))
+            task_failed(self.__class__.__name__)
         return report
 
     def _generate_report(self):
@@ -209,8 +221,9 @@ class ServiceTest(Test):
         raise NotImplementedError
 
     def _connectionFailed(self, failure):
+        task_failed(self.__class__.__name__)
         result = {'status_code': 1, 'time_end': default_timer()}
-        self._generate_report(result)
+        self.reportDeferred.callback(result)
 
     def _generateReport(self, result):
         report = ServiceReport()
@@ -229,7 +242,7 @@ class ServiceTest(Test):
         #...
         theApp.statistics.reports_generated = \
               theApp.statistics.reports_generated + 1
-        theApp.report_manager.add_report(report)
+        return report
 
 ########################################################################
 # FTP Test
@@ -253,10 +266,12 @@ class FTPTestProtocol(FTPClient):
         FTPClient.lineReceived(self, line)
         if line.startswith('230'): # Logged in
             self.quit()
+            task_done(self.test.__class__.__name__)
             if self.reportDeferred:
                 result = {'status_code': 0, 'time_end': default_timer()}
                 self.reportDeferred.callback(result)
         elif line.startswith('530'): # Login failed
+            task_failed(self.test.__class__.__name__)
             if self.reportDeferred:
                 result = {'status_code': 1, 'time_end': default_timer()}
                 self.reportDeferred.callback(result)
@@ -277,12 +292,13 @@ class FTPTest(ServiceTest):
         if not self.checkArgs():
             return
 
-        reportDeferred = Deferred().addBoth(self._generateReport)
-        ClientCreator(reactor, FTPTestProtocol, reportDeferred, self)\
+        self.reportDeferred = Deferred().addCallback(self._generateReport)
+        ClientCreator(reactor, FTPTestProtocol, self.reportDeferred, self)\
                      .connectTCP(self.host, self.port)\
                      .addErrback(self._connectionFailed)
         self.time_start = default_timer()
         self.time_end = 0
+        return self.reportDeferred
 
 ########################################################################
 # SMTP Test
@@ -309,14 +325,15 @@ class SMTPTestProtocol(ESMTPClient):
 
     def sentMail(self, code, resp, numOk, addresses, log):
         if self.reportDeferred:
+            task_done(self.test.__class__.__name__)
             result = {'status_code': 0, 'time_end': default_timer()}
             self.reportDeferred.callback(result)
             self.reportDeferred = None
         self._disconnectFromServer()
 
-    def lineReceived(self, line):
-        print(line)
-        ESMTPClient.lineReceived(self, line)
+    #def lineReceived(self, line):
+        #print(line)
+        #ESMTPClient.lineReceived(self, line)
 
 class SMTPTest(ServiceTest):
     """"""
@@ -332,12 +349,13 @@ class SMTPTest(ServiceTest):
         if not self.checkArgs():
             return
 
-        reportDeferred = Deferred().addBoth(self._generateReport)
-        ClientCreator(reactor, SMTPTestProtocol, reportDeferred, self)\
+        self.reportDeferred = Deferred().addCallback(self._generateReport)
+        ClientCreator(reactor, SMTPTestProtocol, self.reportDeferred, self)\
                      .connectTCP(self.host, self.port)\
                      .addErrback(self._connectionFailed)
         self.time_start = default_timer()
         self.time_end = 0
+        return self.reportDeferred
 
 ########################################################################
 # POP3 Test
@@ -363,12 +381,14 @@ class POP3TestProtocol(POP3Client):
 
     def _loggedIn(self, res):
         if self.reportDeferred:
+            task_done(self.test.__class__.__name__)
             result = {'status_code': 0, 'time_end': default_timer()}
             self.reportDeferred.callback(result)
         self.quit()
 
     def _loginFailed(self, failure):
         if self.reportDeferred:
+            task_failed(self.test.__class__.__name__)
             result = {'status_code': 1, 'time_end': default_timer()}
             self.reportDeferred.callback(result)
 
@@ -390,12 +410,13 @@ class POP3Test(ServiceTest):
         if not self.checkArgs():
             return
 
-        reportDeferred = Deferred().addBoth(self._generateReport)
-        ClientCreator(reactor, POP3TestProtocol, reportDeferred, self)\
+        self.reportDeferred = Deferred().addCallback(self._generateReport)
+        ClientCreator(reactor, POP3TestProtocol, self.reportDeferred, self)\
                      .connectTCP(self.host, self.port)\
                      .addErrback(self._connectionFailed)
         self.time_start = default_timer()
         self.time_end = 0
+        return self.reportDeferred
 
 ########################################################################
 # IMAP Test
@@ -423,12 +444,14 @@ class IMAPTestProtocol(IMAP4Client):
 
     def _loggedIn(self, res):
         if self.reportDeferred:
+            task_done(self.test.__class__.__name__)
             result = {'status_code': 0, 'time_end': default_timer()}
             self.reportDeferred.callback(result)
         self.logout()
 
     def _loginFailed(self, failure):
         if self.reportDeferred:
+            task_failed(self.test.__class__.__name__)
             result = {'status_code': 1, 'time_end': default_timer()}
             self.reportDeferred.callback(result)
 
@@ -450,12 +473,13 @@ class IMAPTest(ServiceTest):
         if not self.checkArgs():
             return
 
-        reportDeferred = Deferred().addBoth(self._generateReport)
-        ClientCreator(reactor, IMAPTestProtocol, reportDeferred, self)\
+        self.reportDeferred = Deferred().addCallback(self._generateReport)
+        ClientCreator(reactor, IMAPTestProtocol, self.reportDeferred, self)\
                      .connectTCP(self.host, self.port)\
                      .addErrback(self._connectionFailed)
         self.time_start = default_timer()
         self.time_end = 0
+        return self.reportDeferred
 
 
 test_by_id = {

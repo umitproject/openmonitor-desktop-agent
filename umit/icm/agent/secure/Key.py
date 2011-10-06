@@ -78,7 +78,7 @@ class RSAKey(object):
         self.exp = self.obj.e
 
     def encrypt(self, plaintext):
-        return self.obj.encrypt(plaintext, self.random)
+        return self.obj.encrypt(plaintext, self.random)[0]
 
     def decrypt(self, ciphertext):
         return self.obj.decrypt(ciphertext)

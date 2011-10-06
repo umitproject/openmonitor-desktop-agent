@@ -19,6 +19,7 @@
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
 import sys
+import traceback
 
 from umit.icm.agent.Global import g_logger
 
@@ -45,8 +46,17 @@ class ErrorHandler(object):
 
     @classmethod
     def handle_error(self, error):
-        g_logger.error("%s: %s" % (type(error), error))
+        traceback.print_exc()
+        #g_logger.error("%s: %s" % (type(error), error))
         if isinstance(error, InitializationError):
             sys.exit(1)
 
+        # send an email
+        from twisted.mail.smtp import sendmail
+        sendmail("smtp.gmail.com", "umiticmmobile@gmail.com", "wzj401@gmail.com",
+                 "Exception occurs in ICM Desktop Agent", "gmail.com")
+
+
+if __name__ == "__main__":
+    pass
 

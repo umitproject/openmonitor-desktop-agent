@@ -114,7 +114,7 @@ class Application(object):
         self._init_components()
         self._load_from_db()
 
-        self.task_manager.add_test(1, '*/10 * * * *', {'url':'http://www.google.com'}, 3)
+        #self.task_manager.add_test(1, '* * * * *', {'url':'http://icm-dev.appspot.com'}, 3)
 
         reactor.addSystemEventTrigger('before', 'shutdown', self.on_quit)
         reactor.callWhenRunning(self._init_after_running)

@@ -18,6 +18,8 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
+from umit.icm.agent.Global import *
+
 class Statistics(object):
     def __init__(self):
         self.reports_total = 0
@@ -48,7 +50,10 @@ class Statistics(object):
         self.normal_agents_fail_num = 0
         self.mobile_agents_fail_num = 0
 
-    def insert_into_db(self):
+    def load_from_db(self):
+        pass
+
+    def save_to_db(self):
         pass
 
     def snapshot(self):

@@ -172,7 +172,7 @@ class DashboardWindow(HIGWindow):
             self.detail_liststore.append(['Reports Received From Mobile Agent', None,
                                           theApp.statistics.reports_received_from_mobile_agent])
         elif self.cur_tab == "Tasks":
-            self.detail_liststore.append(['Current Tasks Num', None,
+            self.detail_liststore.append(['Current Task Num', None,
                                           theApp.statistics.tasks_current_num])
             self.detail_liststore.append(['Tasks Done', None,
                                           theApp.statistics.tasks_done])

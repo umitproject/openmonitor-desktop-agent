@@ -88,15 +88,34 @@ def create(conn_str):
 
     c.execute("CREATE TABLE stats ("
               "time INTEGER NOT NULL PRIMARY KEY, "
-              "super_agent_num INTEGER NOT NULL, "
-              "normal_agent_num INTEGER NOT NULL, "
-              "mobile_agent_num INTEGER NOT NULL, "
-              "reports_sent_to_aggregator INTEGER NOT NULL, "
-              "reports_sent_to_super_agent INTEGER NOT NULL, "
-              "reports_sent_to_normal_agent INTEGER NOT NULL, "
-              "reports_sent_to_mobile_agent INTEGER NOT NULL, "
-              "reports_received INTEGER NOT NULL, "
-              "tests_done INTEGER NOT NULL"
+              # report stats
+              "reports_total INTEGER NOT NULL, "
+              "reports_in_queue INTEGER NOT NULL, "
+              "reports_generated INTEGER NOT NULL, "
+              "reports_sent INTEGER NOT NULL, "
+              "reports_sent_to_ag INTEGER NOT NULL, "
+              "reports_sent_to_sa INTEGER NOT NULL, "
+              "reports_sent_to_da INTEGER NOT NULL, "
+              "reports_sent_to_ma INTEGER NOT NULL, "
+              "reports_recved INTEGER NOT NULL, "
+              "reports_recved_from_sa INTEGER NOT NULL, "
+              "reports_recved_from_da INTEGER NOT NULL, "
+              "reports_recved_from_ma INTEGER NOT NULL, "
+              # task stats
+              "running_task_num INTEGER NOT NULL, "
+              "task_done INTEGER NOT NULL, "
+              "task_failed INTEGER NOT NULL, "
+              "task_done_by_type BLOB NOT NULL, "
+              "task_failed_by_type BLOB NOT NULL, "
+              # connection stats
+              "ag_status TEXT NOT NULL, "
+              "ag_failed_times INTEGER NOT NULL, "
+              "sa_num INTEGER NOT NULL, "
+              "sa_failed_times INTEGER NOT NULL, "
+              "da_num INTEGER NOT NULL, "
+              "da_failed_times INTEGER NOT NULL, "
+              "ma_num INTEGER NOT NULL, "
+              "ma_failed_times INTEGER NOT NULL, "
               ")")
 
     # Insert pre-defined values

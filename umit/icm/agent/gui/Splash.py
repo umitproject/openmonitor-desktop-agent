@@ -31,7 +31,6 @@ class Splash(gtk.Window):
         splash_img = gtk.gdk.pixbuf_new_from_file(image)
         pixmap, mask = splash_img.render_pixmap_and_mask()
         width, height = pixmap.get_size()
-        del splash_img
 
         self.set_app_paintable(True)
         self.set_size_request(width, height)

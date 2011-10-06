@@ -67,7 +67,12 @@ class AggregatorAPI(object):
         g_logger.info("Sending CheckAggregator message to aggregator")
         request_msg = CheckAggregator()
         request_msg.agentType = 'DESKTOP'
-        defer_ = self._send_message(request_msg)
+
+        data = self._encode(request_msg)
+        data = "msg=" + data
+        url = self.base_url + aggregator_api_url[request_msg.DESCRIPTOR.name]
+        defer_ = self._send_request('POST', url, data)
+        defer_.addCallback(self._decode, CheckAggregatorResponse)
         defer_.addCallback(self._handle_check_availability)
         defer_.addErrback(self._handle_error)
         return defer_
@@ -94,20 +99,17 @@ class AggregatorAPI(object):
         if theApp.peer_info.internet_ip:
             request_msg.ip = theApp.peer_info.internet_ip
 
-        defer_ = self._send_request(
-            self._rsa_encrypt(self._encode(request_msg),
-                              theApp.key_manager.aggregator_public_key),
-            self.base_url + '/checkaggregator/'
-        )
+        data = self._rsa_encrypt(request_msg,
+                                 theApp.key_manager.aggregator_public_key)
+        data = "msg=" + data
+        url = self.base_url + aggregator_api_url[request_msg.DESCRIPTOR.name]
+        defer_ = self._send_request('POST', url, data)
+        defer_.addCallback(self._rsa_decrypt, theApp.key_manager.private_key)
         defer_.addCallback(self._handle_register_response)
         defer_.addErrback(self._handle_error)
         return defer_
 
-    def _handle_register_response(self, data):
-        response_msg = self._decode(
-            self._rsa_decrypt(data, theApp.key_manager.private_key),
-            RegisterAgentResponse)
-
+    def _handle_register_response(self, message):
         g_logger.info("RegisterAgent response: (%d, %s)" %
                       (response_msg.agentID, message.cipheredPublicKey))
         theApp.peer_info.ID = message.agentID
@@ -117,7 +119,7 @@ class AggregatorAPI(object):
     def login(self, username, password):
         g_logger.info("Sending Login message to aggregator")
         request_msg = Login()
-        self._make_request_header(request_msg.header)
+        #self._make_request_header(request_msg.header)
         if theApp.peer_info.internet_ip:
             request_msg.ip = theApp.peer_info.internet_ip
         defer_ = self._send_message(request_msg, True)
@@ -132,11 +134,15 @@ class AggregatorAPI(object):
     def logout(self):
         g_logger.info("Sending Logout message to aggregator")
         request_msg = Logout()
-        self._make_request_header(request_msg.header)
+        #self._make_request_header(request_msg.header)
         defer_ = self._send_message(request_msg, True)
-        defer_.addCallback(self._handle_check_availability)
+        defer_.addCallback(self._handle_logout)
         defer_.addErrback(self._handle_error)
         return defer_
+
+    def _handle_logout(self, message):
+        g_logger.info("Received LogoutResponse from aggregator.")
+        theApp.peer_info.login = False
 
     #def report_peer_info(self):
         #g_logger.info("Sending ReportPeerInfo message to aggregator")
@@ -147,7 +153,7 @@ class AggregatorAPI(object):
         g_logger.info("Sending GetSuperPeerList message to aggregator")
         url = self.base_url + "/getsuperpeerlist/"
         request_msg = GetSuperPeerList()
-        self._make_request_header(request_msg.header)
+        #self._make_request_header(request_msg.header)
         defer_ = self._send_message(request_msg)
         defer_.addCallback(self._handle_get_super_peer_list)
         defer_.addErrback(self._handle_error)
@@ -166,7 +172,7 @@ class AggregatorAPI(object):
         g_logger.info("Sending GetPeerList message to aggregator")
         url = self.base_url + "/getpeerlist/"
         request_msg = GetPeerList()
-        self._make_request_header(request_msg.header)
+        #self._make_request_header(request_msg.header)
         defer_ = self._send_message(request_msg)
         defer_.addCallback(self._handle_get_peer_list)
         defer_.addErrback(self._handle_error)
@@ -187,7 +193,7 @@ class AggregatorAPI(object):
         g_logger.info("Sending GetEvents message to aggregator")
         url = self.base_url + "/getevents/"
         request_msg = GetEvents()
-        self._make_request_header(request_msg.header)
+        #self._make_request_header(request_msg.header)
         defer_ = self._send_message(request_msg)
         defer_.addCallback(self._handle_get_events)
         defer_.addErrback(self._handle_error)
@@ -213,7 +219,7 @@ class AggregatorAPI(object):
         g_logger.debug("Sending WebsiteReport to aggregator")
         url = self.base_url + "/sendwebsitereport/"
         request_msg = SendWebsiteReport()
-        self._make_request_header(request_msg.header)
+        #self._make_request_header(request_msg.header)
         request_msg.report.CopyFrom(report)
         defer_ = self._send_message(request_msg)
         defer_.addCallback(self._handle_send_website_report)
@@ -233,7 +239,7 @@ class AggregatorAPI(object):
         g_logger.debug("Sending ServiceReport to aggregator")
         url = self.base_url + "/sendservicereport/"
         request_msg = SendServiceReport()
-        self._make_request_header(request_msg.header)
+        #self._make_request_header(request_msg.header)
         request_msg.report.CopyFrom(report)
         defer_ = self._send_message(request_msg)
         defer_.addCallback(self._handle_send_service_report)
@@ -255,7 +261,7 @@ class AggregatorAPI(object):
         g_logger.info("Sending WebsiteSuggestion message to aggregator")
         url = self.base_url + "/websitesuggestion/"
         request_msg = WebsiteSuggestion()
-        self._make_request_header(request_msg.header)
+        #self._make_request_header(request_msg.header)
         request_msg.websiteURL = website_url
         request_msg.emailAddress = theApp.peer_info.Email
         defer_ = self._send_message(request_msg)
@@ -271,7 +277,7 @@ class AggregatorAPI(object):
         g_logger.info("Sending ServiceSuggestion message to aggregator")
         url = self.base_url + "/servicesuggestion/"
         request_msg = ServiceSuggestion()
-        self._make_request_header(request_msg.header)
+        #self._make_request_header(request_msg.header)
         request_msg.serviceName = service_name
         request_msg.emailAddress = theApp.peer_info.Email
         request_msg.hostName = host_name
@@ -290,7 +296,7 @@ class AggregatorAPI(object):
     def check_version(self):
         g_logger.info("Sending NewVersion message to aggregator")
         request_msg = NewVersion()
-        self._make_request_header(request_msg.header)
+        #self._make_request_header(request_msg.header)
         from umit.icm.agent.Version import VERSION_NUM
         request_msg.agentVersionNo = VERSION_NUM
         request_msg.agentType = 'DESKTOP'
@@ -305,7 +311,7 @@ class AggregatorAPI(object):
     def check_tests(self):
         g_logger.info("Sending NewTests message to aggregator")
         request_msg = NewTests()
-        self._make_request_header(request_msg.header)
+        #self._make_request_header(request_msg.header)
         from umit.icm.agent.test import TEST_PACKAGE_VERSION_NUM
         request_msg.currentTestVersionNo = TEST_PACKAGE_VERSION_NUM
         defer_ = self._send_message(request_msg)
@@ -318,47 +324,49 @@ class AggregatorAPI(object):
 
     """ Private """
     #----------------------------------------------------------------------
-    def _rsa_encrypt(self, plaintext, rsa_key):
-        return rsa_key.encrypt(plaintext)
+    def _rsa_encrypt(self, message, rsa_key):
+        return base64.b64encode(rsa_key.encrypt(message.SerializeToString()))
 
-    def _rsa_decrypt(self, ciphertext, rsa_key):
-        return rsa_key.decrypt(ciphertext)
+    def _rsa_decrypt(self, text, msg_type, rsa_key):
+        message = msg_type()
+        message.ParseFromString(rsa_key.decrypt(base64.b64decode(text)))
+        return message
 
-    def _aes_encrypt(self, plaintext, aes_key):
-        return aes_key.encrypt(plaintext)
+    def _aes_encrypt(self, message, aes_key):
+        return base64.b64encode(aes_key.encrypt(message.SerializeToString()))
 
-    def _aes_decrypt(self, ciphertext, aes_key):
-        return aes_key.decrypt(ciphertext)
+    def _aes_decrypt(self, text, msg_type, aes_key):
+        message = msg_type()
+        message.ParseFromString(aes_key.decrypt(base64.b64decode(text)))
+        return message
 
     def _encode(self, message):
         return base64.b64encode(message.SerializeToString())
 
-    def _decode(self, data, msg_type):
-        message = message_creator[msg_type]()
-        message.ParseFromString(base64.b64decode(data))
+    def _decode(self, text, msg_type):
+        message = msg_type()
+        message.ParseFromString(base64.b64decode(text))
         return message
 
-    def _send_message(self, message, safeSend=False):
-        if safeSend and not self.available:
-            speer_id = theApp.peer_manager.get_random_speer_connected()
-            if speer_id is not None:
-                return theApp.peer_manager.sessions[speer_id].\
-                       forward_message(0, message)
-        data = base64.b64encode(message.SerializeToString())
-        url = self.base_url + aggregator_api_url[message.DESCRIPTOR.name]
-        defer_ = self._send_request('POST', url, data)
-        response_msg_type = message_id_to_type.get(\
-            message_type_to_id[message.DESCRIPTOR.name] + 1)
-        if response_msg_type:
-            defer_.addCallback(self._decode, response_msg_type)
-        return defer_
+    #def _send_message(self, message, safeSend=False):
+        #if safeSend and not self.available:
+            #speer_id = theApp.peer_manager.get_random_speer_connected()
+            #if speer_id is not None:
+                #return theApp.peer_manager.sessions[speer_id].\
+                       #forward_message(0, message)
+        #data = base64.b64encode(message.SerializeToString())
+        #url = self.base_url + aggregator_api_url[message.DESCRIPTOR.name]
+        #defer_ = self._send_request('POST', url, data)
+        #response_msg_type = message_id_to_type.get(\
+            #message_type_to_id[message.DESCRIPTOR.name] + 1)
+        #if response_msg_type:
+            #defer_.addCallback(self._decode, response_msg_type)
+        #return defer_
 
     def _send_request(self, method, uri, data="", mimeType=None):
         headers = {}
         if mimeType:
             headers['Content-Type'] = mimeType
-        if data != "":
-            data = 'msg=' + data
         if data:
             headers['Content-Length'] = str(len(data))
         d = client.getPage(uri, method=method, postdata=data,
@@ -367,6 +375,7 @@ class AggregatorAPI(object):
         return d
 
     def _handle_error(self, failure):
+        print("[AggregatorAPI] - %s" % failure)
         from twisted.internet import error
         failure.trap(error.ConnectError, error.DNSLookupError)
         g_logger.error("Connecting to the aggregator failed.")
