@@ -10,7 +10,8 @@ Dependencies:
 * pyOpenSSL 0.12
 * Google Protocol Buffers 2.4.1
 * pygtkChart
-* Chilkat Module for Python 
+* Chilkat Module for Python
+* PyCrypto
 
 Running ICM Desktop Agent:
   Execute bin/icm-agent.py. It will start the agent and read configuration from
