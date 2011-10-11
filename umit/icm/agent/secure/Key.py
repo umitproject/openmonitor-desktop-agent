@@ -18,6 +18,8 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
+import base64
+
 from Crypto.Cipher import AES
 
 AES_KEY_SIZE = 128
@@ -32,14 +34,20 @@ class AESKey(object):
         self.obj = None
 
     def generate(self, bits=AES_KEY_SIZE):
-        self.obj = AES.new(Random.get_random_bytes(bits/8))
+        # generate a key with alpha, num and +,/,=
+        self.key = base64.b64encode(Random.get_random_bytes(bits/8))[:bits/8]
+        self.obj = AES.new(self.key)
 
-    def setKey(self, key):
+    def set_key(self, key):
         if len(key) > AES_KEY_SIZE/8:
             key = key[:AES_KEY_SIZE/8]
         elif len(key) < AES_KEY_SIZE/8:
             key += '\0' * (AES_KEY_SIZE/8 - len(key))
+        self.key = key
         self.obj = AES.new(key)
+
+    def get_key(self):
+        return self.key
 
     def encrypt(self, plaintext):
         if len(plaintext) % 16 != 0:
@@ -96,9 +104,8 @@ if __name__ == "__main__":
     ct = rsa_key.encrypt('Hello World!')
     print(ct)
     pt = rsa_key.decrypt(ct)
+    print('a')
     print(pt)
-
-
 
 
 

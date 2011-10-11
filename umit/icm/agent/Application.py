@@ -61,14 +61,14 @@ class Application(object):
         self.task_scheduler = TaskScheduler(self.task_manager,
                                             self.report_manager)
 
-        from umit.icm.agent.rpc.aggregator import AggregatorAPI
-        self.aggregator = AggregatorAPI()
-
         from umit.icm.agent.secure.KeyManager import KeyManager
         self.key_manager = KeyManager()
 
         from umit.icm.agent.core.Statistics import Statistics
         self.statistics = Statistics()
+
+        from umit.icm.agent.rpc.aggregator import AggregatorAPI
+        self.aggregator = AggregatorAPI()
 
     def _load_from_db(self):
         self.peer_info.load_from_db()

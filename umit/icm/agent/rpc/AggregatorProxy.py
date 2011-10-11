@@ -33,18 +33,18 @@ class AggregatorProxy(object):
         header.token = theApp.peer_info.AuthToken
         header.agentID = theApp.peer_info.ID
 
-    def check_availability(self):
+    def check_aggregator(self):
         g_logger.info("Sending CheckAggregator message to aggregator")
         url = self.base_url + '/checkaggregator/' # temporarily hardcoded
         request_msg = CheckAggregator()
         self._make_request_header(request_msg.header)
         data = base64.b64encode(request_msg.SerializeToString())
         defer_ = self._send_request('POST', url, data)
-        defer_.addCallback(self._handle_check_availability)
+        defer_.addCallback(self._handle_check_aggregator_response)
         defer_.addErrback(self._handle_error)
         return defer_
 
-    def _handle_check_availability(self, data):
+    def _handle_check_aggregator_response(self, data):
         response_msg = CheckAggregatorResponse()
         response_msg.ParseFromString(base64.b64decode(data))
         if response_msg.status == "ON":

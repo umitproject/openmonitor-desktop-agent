@@ -53,12 +53,17 @@ class KeyManager(object):
             g_db_helper.set_value('private_key', (rsa_key.obj.n, rsa_key.obj.d))
         else:
             self.public_key = RSAKey()
-            self.public_key.construct(public_key[0], public_key[1])
+            self.public_key.construct(*public_key)
             self.private_key = RSAKey()
-            self.private_key.construct(private_key[0], private_key[1])
+            self.private_key.construct(*private_key)
+
+        ag_aeskey = g_db_helper.get_value('aggregator_aes_key')
+        self.aggregator_aes_key = None
+        if ag_aeskey:
+            self.aggregator_aes_key = AESKey()
+            self.aggregator_aes_key.set_key(ag_aeskey)
 
         self.public_keys = {}
-        self.private_keys = {}
         self.symmetric_keys = {}
 
     def add_key_pair(self, name, public_key, private_key):

@@ -283,7 +283,7 @@ class PeerManager:
 
         # check the availability of the aggregator
         if not theApp.aggregator.available:
-            d = theApp.aggregator.check_availability()
+            d = theApp.aggregator.check_aggregator()
             d.addCallback(self._connected_to_aggregator)
 
         for peer in self.super_peers.values():
