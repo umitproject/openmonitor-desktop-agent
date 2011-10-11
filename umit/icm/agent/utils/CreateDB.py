@@ -115,7 +115,7 @@ def create(conn_str):
               "da_num INTEGER NOT NULL, "
               "da_failed_times INTEGER NOT NULL, "
               "ma_num INTEGER NOT NULL, "
-              "ma_failed_times INTEGER NOT NULL, "
+              "ma_failed_times INTEGER NOT NULL "
               ")")
 
     # Insert pre-defined values
