@@ -55,7 +55,7 @@ def create(conn_str):
               "public_key BLOB, "
               "token TEXT, "
               "geo TEXT, "
-              "staus TEXT"
+              "status TEXT"
               ")")
 
     c.execute("CREATE TABLE reports ("
