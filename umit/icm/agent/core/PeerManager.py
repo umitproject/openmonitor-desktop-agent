@@ -68,24 +68,24 @@ class PeerManager:
         for peer_entry in self.super_peers.values():
             g_db_helper.execute(
                 "insert or replace into peers values" \
-                "(%d, %d, '%s', %d, '%s', '%s', '%s')" % \
+                "(%d, %d, '%s', %d, '%s', '%s', '%s', '%s')" % \
                 (peer_entry.ID, peer_entry.Type, peer_entry.IP,
-                 peer_entry.Port, peer_entry.Token,
-                 peer_entry.CipheredPublicKey, peer_entry.Geo))
+                 peer_entry.Port, peer_entry.CipheredPublicKey,
+                 peer_entry.Token, peer_entry.Geo, peer_entry.Status))
         for peer_entry in self.normal_peers.values():
             g_db_helper.execute(
                 "insert or replace into peers values" \
-                "(%d, %d, '%s', %d, '%s', '%s', '%s')" % \
+                "(%d, %d, '%s', %d, '%s', '%s', '%s', '%s')" % \
                 (peer_entry.ID, peer_entry.Type, peer_entry.IP,
-                 peer_entry.Port, peer_entry.Token,
-                 peer_entry.CipheredPublicKey, peer_entry.Geo))
+                 peer_entry.Port, peer_entry.CipheredPublicKey,
+                 peer_entry.Token, peer_entry.Geo, peer_entry.Status))
         for peer_entry in self.mobile_peers.values():
             g_db_helper.execute(
                 "insert or replace into peers values" \
-                "(%d, %d, '%s', %d, '%s', '%s', '%s')" % \
+                "(%d, %d, '%s', %d, '%s', '%s', '%s', '%s')" % \
                 (peer_entry.ID, peer_entry.Type, peer_entry.IP,
-                 peer_entry.Port, peer_entry.Token,
-                 peer_entry.CipheredPublicKey, peer_entry.Geo))
+                 peer_entry.Port, peer_entry.CipheredPublicKey,
+                 peer_entry.Token, peer_entry.Geo, peer_entry.Status))
         g_db_helper.commit()
 
     def load_from_db(self):
