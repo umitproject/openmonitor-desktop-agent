@@ -57,7 +57,7 @@ class AggregatorAPI(object):
     def __init__(self):
         """Constructor"""
         self.base_url = g_db_helper.get_value('aggregator_url')
-        self.available = False
+        self.available = True
         self.pending_report_ids = []
 
     def _make_request_header(self, header):

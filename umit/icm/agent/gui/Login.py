@@ -144,6 +144,7 @@ class LoginDialog(HIGDialog):
         if data is not None:
             if self.save_login_checkbtn.get_active():
                 g_db_helper.set_value('login_saved', True)
+        theApp.logged_in()
 
 
 if __name__ == "__main__":

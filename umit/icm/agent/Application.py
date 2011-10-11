@@ -96,15 +96,19 @@ class Application(object):
             # login with saved credentials
             pass
 
+    def logged_in(self):
         # Add looping calls
-        self.peer_maintain_lc = task.LoopingCall(self.peer_manager.maintain)
-        self.peer_maintain_lc.start(30)
+        if not hasattr(self, 'peer_maintain_lc'):
+            self.peer_maintain_lc = task.LoopingCall(self.peer_manager.maintain)
+            self.peer_maintain_lc.start(30)
 
-        self.task_run_lc = task.LoopingCall(self.task_scheduler.schedule)
-        self.task_run_lc.start(30)
+        if not hasattr(self, 'task_run_lc'):
+            self.task_run_lc = task.LoopingCall(self.task_scheduler.schedule)
+            self.task_run_lc.start(30)
 
-        self.report_proc_lc = task.LoopingCall(self.report_uploader.process)
-        self.report_proc_lc.start(30)
+        if not hasattr(self, 'report_proc_lc'):
+            self.report_proc_lc = task.LoopingCall(self.report_uploader.process)
+            self.report_proc_lc.start(30)
 
     def start(self):
         """
