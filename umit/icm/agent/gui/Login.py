@@ -112,10 +112,11 @@ class LoginDialog(HIGDialog):
     def _register(self, widget):
         #registration_form = RegistrationDialog()
         #registration_form.show_all()
-        webbrowser.open('www.openmonitor.org')
+        aggregator_url = g_db_helper.get_value('aggregator_url') 
+        webbrowser.open(aggregator_url + "/accounts/register/")
 
     def _forgot_password(self, widget):
-        webbrowser.open('www.openmonitor.org')
+        webbrowser.open(aggregator_url + "/accounts/register/")
 
     def check_response(self, widget, response_id):
         if response_id == gtk.RESPONSE_ACCEPT: # clicked on Ok btn
