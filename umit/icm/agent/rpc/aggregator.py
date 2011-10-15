@@ -101,9 +101,9 @@ class AggregatorAPI(object):
 
     def _handle_register_response(self, message):
         g_logger.info("RegisterAgent response: (%d, %s)" %
-                      (response_msg.agentID, message.cipheredPublicKey))
+                      (response_msg.agentID, message.publicKeyHash))
         theApp.peer_info.ID = message.agentID
-        theApp.peer_info.CipheredPublicKey = message.cipheredPublicKey
+        theApp.peer_info.CipheredPublicKeyHash = message.publicKeyHash
         theApp.peer_info.registered = True
 
     def login(self, username, password):
@@ -386,9 +386,11 @@ class AggregatorAPI(object):
             theApp.key_manager.aggregator_aes_key.generate()
             g_db_helper.set_value('aggregator_aes_key',
                                   theApp.key_manager.aggregator_aes_key.get_key())
+
             postdata['key'] = base64.b64encode(
                 theApp.key_manager.aggregator_public_key.encrypt(
-                    theApp.key_manager.aggregator_aes_key.get_key()))
+                    base64.b64encode(
+                        theApp.key_manager.aggregator_aes_key.get_key())))
             postdata['msg'] = self._aes_encrypt(message)
         else:
             postdata['msg'] = self._aes_encrypt(message)
@@ -405,6 +407,35 @@ class AggregatorAPI(object):
             else:
                 defer_.addCallback(self._aes_decrypt, response_msg_type)
         return defer_
+
+    def test_register(self):
+        from CryptoLib import *
+        crypto = CryptoLib()
+        AESKey = crypto.generateAESKey()
+        RSAKEY_MOD = 93740173714873692520486809225128030132198461438147249362129501889664779512410440220785650833428588898698591424963196756217514115251721698086685512592960422731696162410024157767288910468830028582731342024445624992243984053669314926468760439060317134193339836267660799899385710848833751883032635625332235630111L
+        RSAKEY_EXP = 65537L
+        RSAKEY_D = 62297015822781158796363618856389920569720490554603739852574703225696321267124285722204224123764419501867928817657919519054848555406464849450959012702348251941541095546410973524267691136995700233299378960173993986706088589136001011922024584878399897228054794884245267290619407261307654480907250669720474301281L
+        RSAKEY_P = 7757705817565141349021648120631369992682141789699152399326127816192467211564791533199816990028647490792876630757010309393888042701542789312864387282715209L
+        RSAKEY_Q = 12083491681603271568173938267128976608289124671971871656030565887109349091047806314688865045109296709421488821701923256321238599753290254378297945671005479L
+        RSAKEY_U = 4807166779721366881723532650380832638823203637550840979310831953962905310688603113539132663918756964730460591047978835536521726443169772132990407509799218L
+        aggregatorKey = RSAKey(RSAKEY_MOD, RSAKEY_EXP, RSAKEY_D, RSAKEY_P, RSAKEY_Q, RSAKEY_U)
+
+        registerMsg = RegisterAgent()
+        registerMsg.versionNo = 1
+        registerMsg.agentType = "DESKTOP"
+        registerMsg.credentials.username = "zeux1"
+        registerMsg.credentials.password = "123"
+        registerMsg.agentPublicKey.mod = str(theApp.key_manager.public_key.mod)
+        registerMsg.agentPublicKey.exp = str(theApp.key_manager.public_key.exp)
+        registerMsg.ip = "192.168.2.1"
+
+        registerMsgSerialized = registerMsg.SerializeToString()
+        registerMsg_str = crypto.encodeAES(registerMsgSerialized, AESKey)
+
+        key_str = crypto.encodeRSAPublicKey(AESKey, aggregatorKey)
+
+        d = self._send_request('POST', 'http://icm-dev.appspot.com/api/registeragent/', 'msg=' + registerMsg_str + '&key=' + key_str)
+        return d
 
     def _send_request(self, method, uri, data="", mimeType=None):
         headers = {}

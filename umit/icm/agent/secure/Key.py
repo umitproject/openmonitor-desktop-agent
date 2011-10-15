@@ -22,27 +22,30 @@ import base64
 
 from Crypto.Cipher import AES
 
-AES_KEY_SIZE = 128
+DEFAULT_BLOCK_SIZE = 32
+DEFAULT_PADDING = '{'
 
 ########################################################################
 class AESKey(object):
     """"""
 
     #----------------------------------------------------------------------
-    def __init__(self):
+    def __init__(self, block_size=DEFAULT_BLOCK_SIZE):
         """Constructor"""
         self.obj = None
+        self.block_size = block_size
 
-    def generate(self, bits=AES_KEY_SIZE):
+    def generate(self):
         # generate a key with alpha, num and +,/,=
-        self.key = base64.b64encode(Random.get_random_bytes(bits/8))[:bits/8]
+        self.key = base64.b64encode(
+            Random.get_random_bytes(self.block_size))[:self.block_size]
         self.obj = AES.new(self.key)
 
     def set_key(self, key):
-        if len(key) > AES_KEY_SIZE/8:
-            key = key[:AES_KEY_SIZE/8]
-        elif len(key) < AES_KEY_SIZE/8:
-            key += '\0' * (AES_KEY_SIZE/8 - len(key))
+        if len(key) > self.block_size:
+            key = key[:self.block_size]
+        elif len(key) < self.block_size:
+            key += DEFAULT_PADDING * (self.block_size - len(key))
         self.key = key
         self.obj = AES.new(key)
 
@@ -50,12 +53,13 @@ class AESKey(object):
         return self.key
 
     def encrypt(self, plaintext):
-        if len(plaintext) % 16 != 0:
-            plaintext += '\0' * (16 - len(plaintext) % 16)
+        if len(plaintext) % self.block_size != 0:
+            plaintext += DEFAULT_PADDING * \
+                (self.block_size - len(plaintext) % self.block_size)
         return self.obj.encrypt(plaintext)
 
     def decrypt(self, ciphertext):
-        return self.obj.decrypt(ciphertext).rstrip('\0')
+        return self.obj.decrypt(ciphertext).rstrip(DEFAULT_PADDING)
 
 
 from Crypto.PublicKey import RSA

@@ -34,7 +34,7 @@ class PeerInfo(object):
         self.Type = 2  # normal peer by default
         self.Username = ''
         self.Email = ''
-        self.CipheredPublicKey = None
+        self.CipheredPublicKeyHash = None
 
         self.local_ip = ''
         self.internet_ip = ''

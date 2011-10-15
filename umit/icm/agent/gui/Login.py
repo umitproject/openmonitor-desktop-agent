@@ -112,7 +112,7 @@ class LoginDialog(HIGDialog):
     def _register(self, widget):
         #registration_form = RegistrationDialog()
         #registration_form.show_all()
-        aggregator_url = g_db_helper.get_value('aggregator_url') 
+        aggregator_url = g_db_helper.get_value('aggregator_url')
         webbrowser.open(aggregator_url + "/accounts/register/")
 
     def _forgot_password(self, widget):
@@ -130,7 +130,8 @@ class LoginDialog(HIGDialog):
         username = self.username_entry.get_text()
         password = self.password_entry.get_text()
         if not theApp.peer_info.registered:
-            d = theApp.aggregator.register(username, password)
+            d = theApp.aggregator.test_register()
+            #d = theApp.aggregator.register(username, password)
             d.addCallback(self._login2)
         else:
             d = theApp.aggregator.login(username, password)
