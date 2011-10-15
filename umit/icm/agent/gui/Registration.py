@@ -22,10 +22,12 @@ import gtk
 
 from higwidgets.higdialogs import HIGDialog
 from higwidgets.higlabels import HIGLabel
+from higwidgets.higentries import HIGPasswordEntry
 from higwidgets.higtables import HIGTable
 from higwidgets.higboxes import HIGHBox, HIGVBox
 
 from umit.icm.agent.I18N import _
+from umit.icm.agent.Global import *
 
 from umit.icm.agent.Application import theApp
 
@@ -44,19 +46,19 @@ class RegistrationDialog(HIGDialog):
         self._create_widgets()
         self._pack_widgets()
         
+        # Register callbacks
+        self.connect("response", self.check_response)
+        
     def _create_widgets(self):
         self.username_label = HIGLabel(_("Username"))
         self.username_entry = gtk.Entry()
         
         self.password_label = HIGLabel(_("Password"))
-        self.password_entry = gtk.Entry()
+        self.password_entry = HIGPasswordEntry()
         
         self.retype_password_label = HIGLabel(_("Retype password"))
-        self.retype_password_entry = gtk.Entry()
+        self.retype_password_entry = HIGPasswordEntry()
         
-        self.email_label = HIGLabel(_("Email"))
-        self.email_entry = gtk.Entry()
- 
         self.registration_icon = gtk.Image()
         self.registration_text = gtk.Label(_("If you don't have an ICM account,"
                 "please register a new account."))
@@ -81,12 +83,10 @@ class RegistrationDialog(HIGDialog):
         self.table.attach_entry(self.password_entry, 1, 2, 1, 2)
         self.table.attach_label(self.retype_password_label, 0, 1, 2, 3)        
         self.table.attach_entry(self.retype_password_entry, 1, 2, 2, 3)
-        self.table.attach_label(self.email_label, 0, 1, 3, 4)
-        self.table.attach_entry(self.email_entry, 1, 2, 3, 4)
         self.vbox.pack_start(self.table)
         
     def check_response(self, widget, response_id):
-        #print(response_id)
+        g_logger.info("Register: check response")
         if response_id == gtk.RESPONSE_ACCEPT: # clicked on Ok btn
             self.register()
         elif response_id in (gtk.RESPONSE_DELETE_EVENT, gtk.RESPONSE_CANCEL,
@@ -96,8 +96,7 @@ class RegistrationDialog(HIGDialog):
     def register(self):
         username = self.username_entry.get_text()
         password = self.password_entry.get_text()
-        email = self.email_entry.get_text()
-        theApp.aggregator.register(username, password, email)
+        theApp.aggregator.register(username, password)
     
 if __name__ == "__main__":
     dialog = RegistrationDialog()
