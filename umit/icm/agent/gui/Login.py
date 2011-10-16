@@ -45,6 +45,7 @@ class LoginDialog(HIGDialog):
                                     gtk.STOCK_CANCEL, gtk.RESPONSE_CANCEL))
 
         self.set_position(gtk.WIN_POS_CENTER_ALWAYS)
+        self.set_default_response(gtk.RESPONSE_ACCEPT)
         #self.set_size_request(400, 200)
         self._create_widgets()
         self._pack_widgets()
@@ -53,9 +54,11 @@ class LoginDialog(HIGDialog):
     def _create_widgets(self):
         self.username_label = HIGLabel(_("Username"))
         self.username_entry = HIGTextEntry()
+        self.username_entry.set_activates_default(True)
 
         self.password_label = HIGLabel(_("Password"))
         self.password_entry = HIGPasswordEntry()
+        self.password_entry.set_activates_default(True)
 
         self.login_icon = gtk.Image()
         self.login_text = gtk.Label(_("Log into your ICM agent."))
@@ -112,11 +115,10 @@ class LoginDialog(HIGDialog):
     def _register(self, widget):
         #registration_form = RegistrationDialog()
         #registration_form.show_all()
-        aggregator_url = g_db_helper.get_value('aggregator_url')
-        webbrowser.open(aggregator_url + "/accounts/register/")
+        webbrowser.open(theApp.aggregator.base_url + "/accounts/register/")
 
     def _forgot_password(self, widget):
-        webbrowser.open(aggregator_url + "/accounts/register/")
+        webbrowser.open(theApp.aggregator.base_url + "/accounts/register/")
 
     def check_response(self, widget, response_id):
         if response_id == gtk.RESPONSE_ACCEPT: # clicked on Ok btn
@@ -134,18 +136,20 @@ class LoginDialog(HIGDialog):
             d.addCallback(self._login2)
         else:
             d = theApp.aggregator.login(username, password)
+            #d.addCallback(self._login_response)
 
-    def _login2(self, data):
-        if data is not None:
+    def _login2(self, result):
+        if result is True:
             username = self.username_entry.get_text()
             password = self.password_entry.get_text()
             d = theApp.aggregator.login(username, password)
+            #d.addCallback(self._login_response)
 
-    def _login_response(self, data):
-        if data is not None:
+    def _login_response(self, result):
+        if result is True:
             if self.save_login_checkbtn.get_active():
                 g_db_helper.set_value('login_saved', True)
-        theApp.logged_in()
+            theApp.logged_in()
 
 
 if __name__ == "__main__":

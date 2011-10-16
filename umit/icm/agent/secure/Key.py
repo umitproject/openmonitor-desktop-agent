@@ -79,8 +79,11 @@ class RSAKey(object):
         self.exp = 0
         self.random = Random.new().read
 
-    def construct(self, mod, exp):
-        self.obj = RSA.construct((mod, exp))
+    def construct(self, mod, exp, d=None, p=None, q=None, u=None):
+        if d and p and q and u:
+            self.obj = RSA.construct((mod, exp, d, p, q, u))
+        else:
+            self.obj = RSA.construct((mod, exp))
         self.mod = self.obj.n
         self.exp = self.obj.e
 
@@ -94,6 +97,42 @@ class RSAKey(object):
 
     def decrypt(self, ciphertext):
         return self.obj.decrypt(ciphertext)
+
+########################################################################
+class RSAPublicKey(RSAKey):
+    """"""
+
+    #----------------------------------------------------------------------
+    def __init__(self):
+        """Constructor"""
+        RSAKey.__init__(self)
+
+    def construct(self, mod, exp):
+        self.obj = RSA.construct((mod, exp)).publickey()
+        self.mod = self.obj.n
+        self.exp = self.obj.e
+
+    def verify(self, data, signed_data):
+        return self.obj.verify(str(data), (long(base64.b64decode(signed_data)),))
+
+########################################################################
+class RSAPrivateKey(RSAKey):
+    """"""
+
+    #----------------------------------------------------------------------
+    def __init__(self):
+        """Constructor"""
+        RSAKey.__init__(self)
+
+    def construct(self, n, e, d, p, q, u):
+        self.obj = RSA.construct((n, e, d, p, q, u))
+        self.mod = self.obj.n
+        self.exp = self.obj.e
+
+    def sign(self, data):
+        signed_data = self.obj.sign(str(data), '')
+        return base64.b64encode(str(signed_data[0]))
+
 
 if __name__ == "__main__":
     aes_key = AESKey()
