@@ -130,8 +130,7 @@ class LoginDialog(HIGDialog):
         username = self.username_entry.get_text()
         password = self.password_entry.get_text()
         if not theApp.peer_info.registered:
-            d = theApp.aggregator.test_register()
-            #d = theApp.aggregator.register(username, password)
+            d = theApp.aggregator.register(username, password)
             d.addCallback(self._login2)
         else:
             d = theApp.aggregator.login(username, password)
