@@ -92,23 +92,64 @@ class Application(object):
             from umit.icm.agent.gui.GtkMain import GtkMain
             self.gtk_main = GtkMain()
 
-        if g_db_helper.get_value('login_saved'):
+        if g_db_helper.get_value('auto_login'):
             # login with saved credentials
-            pass
+            self.login(self.peer_info.Username, self.peer_info.Password, True)
 
-    def logged_in(self):
-        # Add looping calls
-        if not hasattr(self, 'peer_maintain_lc'):
-            self.peer_maintain_lc = task.LoopingCall(self.peer_manager.maintain)
-            self.peer_maintain_lc.start(30)
+    def register_agent(self, username, password):
+        defer_ = self.aggregator.register(username, password)
+        defer_.addCallback(self._handle_register)
+        return defer_
 
-        if not hasattr(self, 'task_run_lc'):
-            self.task_run_lc = task.LoopingCall(self.task_scheduler.schedule)
-            self.task_run_lc.start(30)
+    def _handle_register(self, result):
+        if result:
+            self.peer_info.ID = result['id']
+            self.peer_info.CipheredPublicKeyHash = result['hash']
+            self.peer_info.is_registered = True
+            self.peer_info.save_to_db()
 
-        if not hasattr(self, 'report_proc_lc'):
-            self.report_proc_lc = task.LoopingCall(self.report_uploader.process)
-            self.report_proc_lc.start(30)
+    def login(self, username, password, save_login=False):
+        self.gtk_main.tray_icon.set_tooltip("Logging in...")
+        self.gtk_main.tray_menu.children()[0].set_sensitive(False)
+        defer_ = self.aggregator.login(username, password)
+        defer_.addCallback(self._handle_login, username, password, save_login)
+        return defer_
+
+    def _handle_login(self, result, username, password, save_login):
+        if result:
+            self.peer_info.Username = username
+            self.peer_info.Password = password
+            self.peer_info.is_logged_in = True
+            self.peer_info.save_to_db()
+
+            if save_login:
+                g_db_helper.set_value('auto_login', True)
+            else:
+                g_db_helper.set_value('auto_login', False)
+
+            self.gtk_main.set_login_status(True)
+
+            # Add looping calls
+            if not hasattr(self, 'peer_maintain_lc'):
+                self.peer_maintain_lc = task.LoopingCall(self.peer_manager.maintain)
+                self.peer_maintain_lc.start(30)
+
+            if not hasattr(self, 'task_run_lc'):
+                self.task_run_lc = task.LoopingCall(self.task_scheduler.schedule)
+                self.task_run_lc.start(30)
+
+            if not hasattr(self, 'report_proc_lc'):
+                self.report_proc_lc = task.LoopingCall(self.report_uploader.process)
+                self.report_proc_lc.start(30)
+
+    def logout(self):
+        defer_ = self.aggregator.logout()
+        defer_.addCallback(self._handle_logout)
+        return defer_
+
+    def _handle_logout(self, result):
+        self.gtk_main.set_login_status(False)
+        g_db_helper.set_value('auto_login', False)
 
     def start(self):
         """

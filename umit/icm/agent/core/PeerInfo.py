@@ -33,25 +33,18 @@ class PeerInfo(object):
         self.ID = 0
         self.Type = 2  # normal peer by default
         self.Username = ''
+        self.Password = ''
         self.Email = ''
         self.CipheredPublicKeyHash = None
 
         self.local_ip = ''
         self.internet_ip = ''
 
-        self.registered = False
-        self.login = False
+        self.is_registered = False
+        self.is_logged_in = False
 
         self.get_local_ip()
         self.get_internet_ip()
-
-    def _handle_register_response(self, data):
-        if data is not None:
-            self.ID = data[0]
-            self.AuthToken = data[1]
-            self.CipheredPublicKey = data[4]
-            self.AggregatorPublicKey = data[5]
-            self.save_to_db()
 
     def load_from_db(self):
         rs = g_db_helper.select('select * from peer_info')
@@ -64,23 +57,19 @@ class PeerInfo(object):
             g_logger.debug(rs[0])
             self.ID = rs[0][0]
             self.Username = rs[0][1]
-            #self.AuthToken = rs[0][2]
-            self.CipheredPublicKey = rs[0][5]
-            self.Type = rs[0][6]
-            self.registered = True
-
-        self.local_ip = g_db_helper.get_value('local_ip', '')
-        self.internet_ip = g_db_helper.get_value('internet_ip', '')
+            self.Password = rs[0][2]
+            self.Email = rs[0][3]
+            self.CipheredPublicKeyHash = rs[0][4]
+            self.Type = rs[0][5]
+            self.is_registered = True
 
     def save_to_db(self):
-        if self.registered:
+        if self.is_registered:
             g_db_helper.execute("insert or replace into peer_info values " \
-                            "(%d, '%s', '%s', '%s', '%s', '%s', %d)" % \
-                            (self.ID, self.Email, self.AuthToken,
-                             self.PublicKey, self.PrivateKey,
-                             self.CipheredPublicKey, self.Type))
-        g_db_helper.set_value('local_ip', self.local_ip)
-        g_db_helper.set_value('internet_ip', self.internet_ip)
+                            "(%d, '%s', '%s', '%s', '%s', %d)" % \
+                            (self.ID, self.Username, self.Password, self.Email,
+                             self.CipheredPublicKeyHash, self.Type))
+            g_db_helper.commit()
 
     def get_local_ip(self):
         from socket import socket, SOCK_DGRAM, AF_INET
@@ -113,4 +102,4 @@ class PeerInfo(object):
 
 if __name__ == "__main__":
     pi = PeerInfo()
-    pi.load()
+    pi.load_from_db()

@@ -73,7 +73,7 @@ class GtkMain(object):
         self.tray_menu_logged_in.append(gtk.SeparatorMenuItem())
 
         menu_item = gtk.MenuItem(_("Logout"))
-        menu_item.connect("activate", lambda w: self.logout())
+        menu_item.connect("activate", lambda w: theApp.logout())
         self.tray_menu_logged_in.append(menu_item)
 
         menu_item = gtk.ImageMenuItem(_("Exit"))
@@ -84,7 +84,7 @@ class GtkMain(object):
         self.tray_menu_logged_out = gtk.Menu()
 
         menu_item = gtk.MenuItem(_("Login"))
-        menu_item.connect("activate", lambda w: self.login())
+        menu_item.connect("activate", lambda w: self.show_login())
         self.tray_menu_logged_out.append(menu_item)
 
         self.tray_menu_logged_out.append(gtk.SeparatorMenuItem())
@@ -96,7 +96,7 @@ class GtkMain(object):
 
         self.tray_menu = self.tray_menu_logged_out
         self.tray_icon.connect('popup-menu', self.show_menu)
-        self.tray_icon.set_tooltip("Logging in...")
+        self.tray_icon.set_tooltip("ICM Desktop Agent")
 
         self.tray_icon.set_from_file(
                 os.path.join(ICONS_DIR, "tray_icon_gray_32.ico"))
@@ -114,14 +114,12 @@ class GtkMain(object):
             #self.tray_icon.connect('popup-menu', self.show_menu)
             self.tray_icon.set_from_file(
                 os.path.join(ICONS_DIR, "tray_icon_32.ico"))
-            self.tray_icon.set_tooltip("ICM Desktop Agent")
         else:
             self.tray_menu.popdown()
             self.tray_menu = self.tray_menu_logged_out
             #self.tray_icon.connect('popup-menu', self.show_menu)
             self.tray_icon.set_from_file(
                 os.path.join(ICONS_DIR, "tray_icon_gray_32.ico"))
-            self.tray_icon.set_tooltip("ICM Desktop Agent")
 
     def show_menu(self, status_icon, button, activate_time):
         self.tray_menu.popup(None, None, None, button, activate_time,
@@ -160,15 +158,11 @@ class GtkMain(object):
         about = About()
         about.show_all()
 
-    def login(self):
+    def show_login(self):
         if not self.login_dlg:
             from umit.icm.agent.gui.Login import LoginDialog
             self.login_dlg = LoginDialog()
             self.login_dlg.show_all()
-
-    def logout(self):
-        self.set_login_status(False)
-        g_db_helper.set_value('login_saved', False)
 
 
 if __name__ == "__main__":

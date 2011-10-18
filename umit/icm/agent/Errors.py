@@ -35,6 +35,8 @@ class InitializationError(Exception):
     def __str__(self):
         return self.value
 
+class AggergatorError(RuntimeError):
+    pass
 
 ########################################################################
 class ErrorHandler(object):

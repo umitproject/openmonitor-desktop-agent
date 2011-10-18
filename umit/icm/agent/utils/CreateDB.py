@@ -82,6 +82,7 @@ def create(conn_str):
               "agent_id INTEGER PRIMARY KEY NOT NULL, "
               "username TEXT NOT NULL, "
               "password TEXT NOT NULL, "
+              "email TEXT, "
               "ciphered_public_key_hash BLOB NOT NULL, "
               "type INTEGER DEFAULT 2"
               ")")

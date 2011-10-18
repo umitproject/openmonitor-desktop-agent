@@ -18,6 +18,10 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
+"""
+The login process is used to bind the agent with a certain account
+"""
+
 import gtk
 import webbrowser
 
@@ -76,7 +80,7 @@ class LoginDialog(HIGDialog):
         self.forgot_password.add(self.forgot_password_label)
         self.forgot_password.set_relief(gtk.RELIEF_NONE)
 
-        self.checkbtn = gtk.CheckButton(_("Save login credentials"))
+        self.auto_login_checkbtn = gtk.CheckButton(_("Auto login"))
         self.hbox = HIGHBox()
         self.table = HIGTable()
         self.action_area.set_homogeneous(False)
@@ -97,7 +101,7 @@ class LoginDialog(HIGDialog):
         self.table.attach_label(self.password_label, 0, 1, 1, 2)
         self.table.attach_entry(self.password_entry, 1, 2, 1, 2)
         self.vbox.pack_start(self.table)
-        self.vbox.pack_start(self.checkbtn)
+        self.vbox.pack_start(self.auto_login_checkbtn)
 
         spaceholder = hig_box_space_holder()
         self.action_area.pack_end(spaceholder)
@@ -122,34 +126,21 @@ class LoginDialog(HIGDialog):
 
     def check_response(self, widget, response_id):
         if response_id == gtk.RESPONSE_ACCEPT: # clicked on Ok btn
-            self._login1()
+            username = self.username_entry.get_text()
+            password = self.password_entry.get_text()
+            save_login = self.auto_login_checkbtn.get_active()
+            if not theApp.peer_info.is_registered:
+                defer_ = theApp.register_agent(username, password)
+                defer_.addCallback(
+                    lambda x: theApp.login(username, password, save_login))
+            else:
+                defer_ = theApp.login(username, password, save_login)
+            self.destroy()
+            theApp.gtk_main.login_dlg = None
         elif response_id in (gtk.RESPONSE_DELETE_EVENT, gtk.RESPONSE_CANCEL,
                 gtk.RESPONSE_NONE):
             self.destroy()
             theApp.gtk_main.login_dlg = None
-
-    def _login1(self):
-        username = self.username_entry.get_text()
-        password = self.password_entry.get_text()
-        if not theApp.peer_info.registered:
-            d = theApp.aggregator.register(username, password)
-            d.addCallback(self._login2)
-        else:
-            d = theApp.aggregator.login(username, password)
-            #d.addCallback(self._login_response)
-
-    def _login2(self, result):
-        if result is True:
-            username = self.username_entry.get_text()
-            password = self.password_entry.get_text()
-            d = theApp.aggregator.login(username, password)
-            #d.addCallback(self._login_response)
-
-    def _login_response(self, result):
-        if result is True:
-            if self.save_login_checkbtn.get_active():
-                g_db_helper.set_value('login_saved', True)
-            theApp.logged_in()
 
 
 if __name__ == "__main__":
