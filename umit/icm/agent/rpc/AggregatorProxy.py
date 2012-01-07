@@ -17,8 +17,9 @@
 # You should have received a copy of the GNU General Public License
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
-
 ########################################################################
+
+
 class AggregatorProxy(object):
     """"""
 
@@ -89,7 +90,7 @@ class AggregatorProxy(object):
         url = self.base_url + "/getsuperpeerlist/"
         request_msg = GetSuperPeerList()
         self._make_request_header(request_msg.header)
-        data = base64.b64encode(request_msg.SerializeToString())
+        data = base64.b64encode(unicode(request_msg.SerializeToString(), 'utf8'))
         defer_ = self._send_request('POST', url, data)
         defer_.addCallback(self._handle_get_super_peer_list)
         return defer_

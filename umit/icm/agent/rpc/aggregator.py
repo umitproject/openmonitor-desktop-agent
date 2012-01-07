@@ -25,6 +25,8 @@ import urllib
 
 from twisted.web import client
 
+from google.protobuf.text_format import MessageToString
+
 from umit.icm.agent.rpc.message import *
 from umit.icm.agent.rpc.MessageFactory import MessageFactory
 
