@@ -7,3 +7,6 @@ log
 tmp
 Thumbs.db
 *.db3
+.project
+.pydevproject
+.settings

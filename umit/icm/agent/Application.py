@@ -38,7 +38,7 @@ class Application(object):
     def __init__(self):
         pass
 
-    def _init_components(self):
+    def _init_components(self, aggregator):
         from umit.icm.agent.core.PeerInfo import PeerInfo
         self.peer_info = PeerInfo()
 
@@ -68,7 +68,7 @@ class Application(object):
         self.statistics = Statistics()
 
         from umit.icm.agent.rpc.aggregator import AggregatorAPI
-        self.aggregator = AggregatorAPI()
+        self.aggregator = AggregatorAPI(aggregator)
 
     def _load_from_db(self):
         self.peer_info.load_from_db()
@@ -76,9 +76,10 @@ class Application(object):
         # restore unsent reports
         self.report_manager.load_unsent_reports()
 
-    def _init_after_running(self):
+    def init_after_running(self, port=None, username=None, password=None):
         # Create agent service
-        self.listen_port = g_config.getint('network', 'listen_port')
+        self.listen_port = port if port is not None else g_config.getint('network', 'listen_port')
+        
         from umit.icm.agent.rpc.AgentService import AgentFactory
         self.factory = AgentFactory()
         g_logger.info("Listening on port %d.", self.listen_port)
@@ -94,7 +95,8 @@ class Application(object):
 
         if g_db_helper.get_value('auto_login'):
             # login with saved credentials
-            self.login(self.peer_info.Username, self.peer_info.Password, True)
+            self.login(username if username is not None else self.peer_info.Username,
+                       password if password is not None else self.peer_info.Password, True)
 
     def register_agent(self, username, password):
         defer_ = self.aggregator.register(username, password)
@@ -151,19 +153,25 @@ class Application(object):
         self.gtk_main.set_login_status(False)
         g_db_helper.set_value('auto_login', False)
 
-    def start(self):
+    def start(self, run_reactor=True, managed_mode=False, aggregator=None):
         """
         The Main function
         """
         g_logger.info("Starting ICM agent. Version: %s", VERSION)
-        self._init_components()
+        self._init_components(aggregator)
         self._load_from_db()
 
         #self.task_manager.add_test(1, '* * * * *', {'url':'http://icm-dev.appspot.com'}, 3)
 
         reactor.addSystemEventTrigger('before', 'shutdown', self.on_quit)
-        reactor.callWhenRunning(self._init_after_running)
-        reactor.run()
+        
+        if not managed_mode:
+            # This is necessary so the bot can take over and control the agent
+            reactor.callWhenRunning(self.init_after_running)
+        
+        if run_reactor:
+            # This is necessary so the bot can take over and control the agent
+            reactor.run()
 
     def terminate(self):
         reactor.callWhenRunning(reactor.stop)

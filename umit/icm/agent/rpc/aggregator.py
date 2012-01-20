@@ -24,6 +24,8 @@ import sys
 import urllib
 
 from twisted.web import client
+from twisted.web.error import Error
+from twisted.internet import error
 
 from google.protobuf.text_format import MessageToString
 
@@ -58,9 +60,9 @@ class AggregatorAPI(object):
     """"""
 
     #----------------------------------------------------------------------
-    def __init__(self):
+    def __init__(self, aggregator=None):
         """Constructor"""
-        self.base_url = g_db_helper.get_value('aggregator_url')
+        self.base_url = g_db_helper.get_value('aggregator_url') if aggregator is None else aggregator
         self.available = True
         self.pending_report_ids = []
 
@@ -461,6 +463,7 @@ class AggregatorAPI(object):
         return defer_
 
     def _send_request(self, method, uri, data="", mimeType=None):
+        g_logger.info("Sending message to aggregator at %s" % uri)
         headers = {}
         if mimeType:
             headers['Content-Type'] = mimeType
@@ -473,13 +476,21 @@ class AggregatorAPI(object):
 
     def _connection_errback(self, failure):
         g_logger.error("[AggregatorAPI] - %s" % failure)
-        from twisted.internet import error
+        
         if isinstance(failure, error.ConnectError) or \
            isinstance(failure, error.DNSLookupError):
             g_logger.error("Connecting to the aggregator failed.")
             self.available = False
             theApp.statistics.aggregator_fail_num = \
                   theApp.statistics.aggregator_fail_num + 1
+
+        try:
+            failure.raiseException()
+        except Exception, err:
+            if isinstance(err, Error):
+                g_logger.error(">>> The Aggregator had an Internal Error:")
+                g_logger.error(err.response)
+
 
     def _decode_errback(self, failure):
         g_logger.error("[AggregatorAPI] - Failed to decode. %s" % failure)
