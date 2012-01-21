@@ -76,14 +76,16 @@ class Application(object):
         # restore unsent reports
         self.report_manager.load_unsent_reports()
 
-    def init_after_running(self, port=None, username=None, password=None):
+    def init_after_running(self, port=None, username=None, password=None, server_enabled=True):
         # Create agent service
-        self.listen_port = port if port is not None else g_config.getint('network', 'listen_port')
+        if server_enabled:
+            self.listen_port = port if port is not None else g_config.getint('network', 'listen_port')
         
-        from umit.icm.agent.rpc.AgentService import AgentFactory
-        self.factory = AgentFactory()
-        g_logger.info("Listening on port %d.", self.listen_port)
-        reactor.listenTCP(self.listen_port, self.factory)
+            from umit.icm.agent.rpc.AgentService import AgentFactory
+            self.factory = AgentFactory()
+            g_logger.info("Listening on port %d.", self.listen_port)
+            reactor.listenTCP(self.listen_port, self.factory)
+        
         # Create mobile agent service
         from umit.icm.agent.rpc.mobile import MobileAgentService
         self.ma_service = MobileAgentService()
