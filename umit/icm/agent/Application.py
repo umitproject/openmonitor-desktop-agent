@@ -69,6 +69,8 @@ class Application(object):
 
         from umit.icm.agent.rpc.aggregator import AggregatorAPI
         self.aggregator = AggregatorAPI(aggregator)
+        
+        self.quitting = False
 
     def _load_from_db(self):
         self.peer_info.load_from_db()
@@ -190,6 +192,8 @@ class Application(object):
         m = os.path.join(ROOT_DIR, 'umit', 'icm', 'agent', 'agent_restart_mark')
         if os.path.exists(m):
             os.remove(m)
+        
+        self.quitting = True
 
 
 theApp = Application()

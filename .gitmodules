@@ -4,3 +4,6 @@
 [submodule "deps/umit-common"]
 	path = deps/umit-common
 	url = http://git.umitproject.org/umit-common
+[submodule "deps/icm-common"]
+	path = deps/icm-common
+	url = ssh://umitgit@dev.umitproject.org/icm-common.git

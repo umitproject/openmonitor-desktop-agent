@@ -84,6 +84,8 @@ class AggregatorAPI(object):
         else:
             self.available = False
         g_logger.info("Aggregator status: %s" % message.status)
+        g_logger.debug("Aggregator version: %s" % message.header.currentVersionNo)
+        g_logger.debug("Aggregator test version: %s" % message.header.currentTestVersionNo)
 
     """ Peer """
     #----------------------------------------------------------------------
@@ -496,7 +498,7 @@ class AggregatorAPI(object):
         g_logger.error("[AggregatorAPI] - Failed to decode. %s" % failure)
 
     def _handle_errback(self, failure):
-        g_logger.error(str(failure))
+        g_logger.error("Aggregator failure: %s" % str(failure))
 
 
 if __name__ == "__main__":
