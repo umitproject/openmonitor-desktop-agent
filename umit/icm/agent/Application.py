@@ -101,6 +101,8 @@ class Application(object):
             # login with saved credentials
             self.login(username if username is not None else self.peer_info.Username,
                        password if password is not None else self.peer_info.Password, True)
+        else:
+            g_logger.info("Auto-login is disabled. You need to manually login.")
 
     def register_agent(self, username, password):
         defer_ = self.aggregator.register(username, password)
@@ -115,8 +117,10 @@ class Application(object):
             self.peer_info.save_to_db()
 
     def login(self, username, password, save_login=False):
-        self.gtk_main.tray_icon.set_tooltip("Logging in...")
-        self.gtk_main.tray_menu.children()[0].set_sensitive(False)
+        if self.use_gui:
+            self.gtk_main.tray_icon.set_tooltip("Logging in...")
+            self.gtk_main.tray_menu.children()[0].set_sensitive(False)
+        
         defer_ = self.aggregator.login(username, password)
         defer_.addCallback(self._handle_login, username, password, save_login)
         return defer_
@@ -133,7 +137,8 @@ class Application(object):
             else:
                 g_db_helper.set_value('auto_login', False)
 
-            self.gtk_main.set_login_status(True)
+            if self.use_gui:
+                self.gtk_main.set_login_status(True)
 
             # Add looping calls
             if not hasattr(self, 'peer_maintain_lc'):
@@ -154,7 +159,8 @@ class Application(object):
         return defer_
 
     def _handle_logout(self, result):
-        self.gtk_main.set_login_status(False)
+        if self.use_gui:
+            self.gtk_main.set_login_status(False)
         g_db_helper.set_value('auto_login', False)
 
     def start(self, run_reactor=True, managed_mode=False, aggregator=None):

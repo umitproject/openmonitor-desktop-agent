@@ -113,8 +113,10 @@ class AggregatorAPI(object):
     def _handle_register_response(self, message):
         if message is None:
             return
+        
         g_logger.info("RegisterAgent response: (%d, %s)" %
                       (message.agentID, message.publicKeyHash))
+        
         return {'id': message.agentID, 'hash': message.publicKeyHash}
 
     def login(self, username, password):
@@ -165,12 +167,15 @@ class AggregatorAPI(object):
         request_msg = Logout()
         request_msg.agentID = theApp.peer_info.ID
         defer_ = self._send_message(request_msg)
-        #defer_.addCallback(self._handle_logout)
+        defer_.addCallback(self._handle_logout)
+        
         return defer_
 
-    #def _handle_logout(self, message):
-        #g_logger.info("Received LogoutResponse from aggregator.")
-        #theApp.peer_info.login = False
+    def _handle_logout(self, message):
+        g_logger.info("Received LogoutResponse from aggregator.")
+        g_logger.debug("Logout message: %s" % message)
+        
+        theApp.peer_info.login = False
 
     #def report_peer_info(self):
         #g_logger.info("Sending ReportPeerInfo message to aggregator")
@@ -197,6 +202,8 @@ class AggregatorAPI(object):
                                                speer.token,
                                                speer.publicKey)
             theApp.peer_manager.connect_to_peer(speer.agentID)
+        
+        return message
 
     def get_peer_list(self, count):
         g_logger.info("Sending GetPeerList message to aggregator")
@@ -219,6 +226,8 @@ class AggregatorAPI(object):
                                                 peer.token,
                                                 peer.publicKey)
             theApp.peer_manager.connect_to_peer(peer.agentID)
+        
+        return message
 
     """ Event """
     #----------------------------------------------------------------------

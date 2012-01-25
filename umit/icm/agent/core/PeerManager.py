@@ -272,6 +272,9 @@ class PeerManager:
             theApp.gtk_main.set_login_status(True)
         #else:
             #theApp.gtk_main.set_login_status(False)
+            
+    def _check_aggregator_errback(self, messgae):
+        g_logger.critical("Failed to check aggregator: %s" % message)
 
     """
     Make the desktop agent connect to a certain number of super peers and \
@@ -285,6 +288,7 @@ class PeerManager:
         if not theApp.aggregator.available:
             d = theApp.aggregator.check_aggregator()
             d.addCallback(self._connected_to_aggregator)
+            d.addErrback(self._check_aggregator_errback)
 
         for peer in self.super_peers.values():
             if peer.status == 'Disconnected':
