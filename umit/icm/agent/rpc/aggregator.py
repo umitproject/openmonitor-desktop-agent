@@ -37,6 +37,7 @@ from umit.icm.agent.Global import *
 from umit.icm.agent.rpc.Session import Session
 from umit.icm.agent.core.ReportManager import ReportStatus
 from umit.icm.agent.Errors import AggergatorError
+from umit.icm.agent.secure.Key import AESKey
 
 aggregator_api_url = {
     'CheckAggregator': '/checkaggregator/',
@@ -400,11 +401,14 @@ class AggregatorAPI(object):
     def _aes_decrypt(self, text, msg_type):
         if text is None:
             return
+        
         assert theApp.key_manager.aggregator_aes_key
+        
         message = msg_type()
         message.ParseFromString(
             theApp.key_manager.aggregator_aes_key.decrypt(
                 base64.b64decode(text)))
+        
         return message
 
     def _encode(self, message):
@@ -413,17 +417,13 @@ class AggregatorAPI(object):
     def _decode(self, text, msg_type):
         if text is None:
             return
+        
         message = msg_type()
         message.ParseFromString(base64.b64decode(text))
+        
         return message
 
     def _send_message(self, message, response_msg_type=None):
-        #if safeSend and not self.available:
-            #speer_id = theApp.peer_manager.get_random_speer_connected()
-            #if speer_id is not None:
-                #return theApp.peer_manager.sessions[speer_id].\
-                       #forward_message(0, message)
-
         postdata = {}
 
         # encode message
@@ -433,7 +433,6 @@ class AggregatorAPI(object):
             postdata['msg'] = self._encode(message)
         elif isinstance(message, RegisterAgent):
             # generate AES key
-            from umit.icm.agent.secure.Key import AESKey
             theApp.key_manager.aggregator_aes_key = AESKey()
             theApp.key_manager.aggregator_aes_key.generate()
             g_db_helper.set_value('aggregator_aes_key',
@@ -447,7 +446,7 @@ class AggregatorAPI(object):
         else:
             postdata['agentID'] = theApp.peer_info.ID
             postdata['msg'] = self._aes_encrypt(message)
-
+        
         # send message
         url = self.base_url + aggregator_api_url[message.DESCRIPTOR.name]
         data = urllib.urlencode(postdata)
@@ -461,7 +460,9 @@ class AggregatorAPI(object):
                 defer_.addCallback(self._decode, response_msg_type)
             else:
                 defer_.addCallback(self._aes_decrypt, response_msg_type)
+        
         defer_.addErrback(self._decode_errback)
+        
         return defer_
 
     def _send_request(self, method, uri, data="", mimeType=None):
