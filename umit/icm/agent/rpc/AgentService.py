@@ -191,13 +191,13 @@ class AgentProtocol(Protocol):
         elif isinstance(message, AuthenticatePeerResponse):
             if self.remote_type == 1:
                 theApp.peer_manager.super_peers[self.remote_id].Token = \
-                      message.secretKey
+                      message.token
             elif self.remote_type == 2:
                 theApp.peer_manager.normal_peers[self.remote_id].Token = \
-                      message.secretKey
+                      message.token
             elif self.remote_type == 3:
                 theApp.peer_manager.mobile_peers[self.remote_id].Token = \
-                      message.secretKey
+                      message.token
         elif isinstance(message, ForwardingMessage):
             if theApp.peer_info.Type == 1:
                 forward_message = MessageFactory.decode(\
@@ -245,8 +245,8 @@ class AgentProtocol(Protocol):
         request_msg.agentID = theApp.peer_info.ID
         request_msg.agentType = theApp.peer_info.Type
         request_msg.agentPort = theApp.listen_port
-        request_msg.cipheredPublicKey.mod = ''
-        request_msg.cipheredPublicKey.exp = ''
+        request_msg.cipheredPublicKey.mod = str(theApp.key_manager.public_key.mod)
+        request_msg.cipheredPublicKey.exp = unicode(theApp.key_manager.public_key.exp)
         #theApp.peer_info.CipheredPublicKey
         g_logger.debug("Sending AuthenticatePeer message:\n%s" % request_msg)
         self._send_message(request_msg)
@@ -254,8 +254,8 @@ class AgentProtocol(Protocol):
 
     def _send_auth_response_message(self):
         response_msg = AuthenticatePeerResponse()
-        response_msg.cipheredPublicKey.mod = ''
-        response_msg.cipheredPublicKey.exp = ''
+        response_msg.cipheredPublicKey.mod = str(theApp.key_manager.public_key.mod)
+        response_msg.cipheredPublicKey.exp = unicode(theApp.key_manager.public_key.exp)
         g_logger.debug("Sending AuthenticatePeerResponse message:\n%s" % \
                        response_msg)
         self._send_message(response_msg)
