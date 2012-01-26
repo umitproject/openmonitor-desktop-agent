@@ -240,6 +240,7 @@ class AggregatorAPI(object):
         defer_ = self._send_message(request_msg, GetEventsResponse)
         defer_.addCallback(self._handle_get_events_response)
         defer_.addErrback(self._handle_errback)
+        
         return defer_
 
     def _handle_get_events_response(self, message):
@@ -247,6 +248,8 @@ class AggregatorAPI(object):
             return
         for event in message.events:
             theApp.event_manager.add_event(event)
+        
+        return message
 
     """ Report """
     #----------------------------------------------------------------------
