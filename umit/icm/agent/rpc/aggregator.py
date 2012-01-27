@@ -80,6 +80,7 @@ class AggregatorAPI(object):
     def _handle_check_aggregator_response(self, message):
         if message is None:
             return
+        
         if message.status == "ON":
             self.available = True
         else:
@@ -87,6 +88,8 @@ class AggregatorAPI(object):
         g_logger.info("Aggregator status: %s" % message.status)
         g_logger.debug("Aggregator version: %s" % message.header.currentVersionNo)
         g_logger.debug("Aggregator test version: %s" % message.header.currentTestVersionNo)
+        
+        return message
 
     """ Peer """
     #----------------------------------------------------------------------
@@ -153,6 +156,7 @@ class AggregatorAPI(object):
         defer_ = self._send_message(request_msg, LoginResponse)
         defer_.addCallback(self._handle_login_response)
         defer_.addErrback(self._handle_errback)
+        
         return defer_
 
     def _handle_login_response(self, message):
@@ -160,6 +164,7 @@ class AggregatorAPI(object):
             return
         g_logger.info("Received LoginResponse from aggregator.")
         g_logger.info("Login successfully.")
+        
         return True
 
     def logout(self):
@@ -176,6 +181,8 @@ class AggregatorAPI(object):
         g_logger.debug("Logout message: %s" % message)
         
         theApp.peer_info.login = False
+        
+        return message
 
     #def report_peer_info(self):
         #g_logger.info("Sending ReportPeerInfo message to aggregator")
@@ -273,18 +280,26 @@ class AggregatorAPI(object):
         defer_ = self._send_message(request_msg, SendReportResponse)
         defer_.addCallback(self._handle_send_website_report_response)
         defer_.addErrback(self._handle_errback)
+        
         return defer_
 
     def _handle_send_website_report_response(self, message):
         if message is None:
             return
+        
         theApp.statistics.reports_sent_to_aggregator = \
               theApp.statistics.reports_sent_to_aggregator + 1
-        report_id = self.pending_report_ids.pop(0) # assume FIFO
-        g_logger.info("WebsiteReport '%s' has been sent to aggregator" % \
-                      report_id)
-        theApp.report_manager.remove_report(report_id,
-                                            ReportStatus.SENT_TO_AGGREGATOR)
+        
+        if len(self.pending_report_ids):
+            report_id = self.pending_report_ids.pop(0) # assume FIFO
+            g_logger.info("WebsiteReport '%s' has been sent to aggregator" % \
+                          report_id)
+            theApp.report_manager.remove_report(report_id,
+                                                ReportStatus.SENT_TO_AGGREGATOR)
+        else:
+            g_logger.info("WebsiteReport has been sent to aggregator")
+        
+        return message
 
     def send_service_report(self, report):
         g_logger.debug("Sending ServiceReport to aggregator")
@@ -296,11 +311,14 @@ class AggregatorAPI(object):
         defer_ = self._send_message(request_msg, SendReportResponse)
         defer_.addCallback(self._handle_send_service_report_response)
         defer_.addErrback(self._handle_errback)
+        
         return defer_
 
     def _handle_send_service_report_response(self, message):
+        g_logger.debug("Handle Send Service Report: %s" % message)
         if message is None:
             return
+        
         theApp.statistics.reports_sent_to_aggregator = \
               theApp.statistics.reports_sent_to_aggregator + 1
         report_id = self.pending_report_ids.pop(0) # assume FIFO
@@ -308,6 +326,8 @@ class AggregatorAPI(object):
                       report_id)
         theApp.report_manager.remove_report(report_id,
                                             ReportStatus.SENT_TO_AGGREGATOR)
+        
+        return message
 
     """ Suggestion """
     #----------------------------------------------------------------------
@@ -369,7 +389,8 @@ class AggregatorAPI(object):
     def _handle_check_version_response(self, message):
         if message is None:
             return
-        print(message)
+        
+        return message
 
     def check_tests(self):
         g_logger.info("Sending NewTests message to aggregator")
@@ -386,7 +407,8 @@ class AggregatorAPI(object):
     def _handle_check_tests_response(self, message):
         if message is None:
             return
-        print(message)
+        
+        return message
 
     """ Private """
     #----------------------------------------------------------------------
