@@ -107,6 +107,7 @@ class Application(object):
     def register_agent(self, username, password):
         defer_ = self.aggregator.register(username, password)
         defer_.addCallback(self._handle_register)
+        
         return defer_
 
     def _handle_register(self, result):
@@ -115,17 +116,39 @@ class Application(object):
             self.peer_info.CipheredPublicKeyHash = result['hash']
             self.peer_info.is_registered = True
             self.peer_info.save_to_db()
+        
+        return result
+    
+    def _handle_errback(self, failure):
+        failure.printTraceback()
+        g_logger.error(">>> Failure from Application: %s" % failure)
 
-    def login(self, username, password, save_login=False):
+    def login(self, username, password, save_login=False, login_only=False):
         if self.use_gui:
             self.gtk_main.tray_icon.set_tooltip("Logging in...")
             self.gtk_main.tray_menu.children()[0].set_sensitive(False)
         
+        if not theApp.peer_info.is_registered:
+            deferred = self.register_agent(username, password)
+            deferred.addCallback(self._login_after_register_callback,
+                                 username, password, save_login, login_only)
+            deferred.addErrback(self._handle_errback)
+            
+            return deferred
+        
+        return self._login_after_register_callback(None, username,
+                                                   password, save_login,
+                                                   login_only)
+
+    def _login_after_register_callback(self, message, username,
+                                       password, save_login, login_only):
         defer_ = self.aggregator.login(username, password)
-        defer_.addCallback(self._handle_login, username, password, save_login)
+        defer_.addCallback(self._handle_login, username, password,
+                           save_login, login_only)
+        
         return defer_
 
-    def _handle_login(self, result, username, password, save_login):
+    def _handle_login(self, result, username, password, save_login, login_only=False):
         if result:
             self.peer_info.Username = username
             self.peer_info.Password = password
@@ -139,6 +162,9 @@ class Application(object):
 
             if self.use_gui:
                 self.gtk_main.set_login_status(True)
+            
+            if login_only:
+                return result
 
             # Add looping calls
             if not hasattr(self, 'peer_maintain_lc'):
@@ -152,16 +178,23 @@ class Application(object):
             if not hasattr(self, 'report_proc_lc'):
                 self.report_proc_lc = task.LoopingCall(self.report_uploader.process)
                 self.report_proc_lc.start(30)
+        
+        return result
 
     def logout(self):
         defer_ = self.aggregator.logout()
         defer_.addCallback(self._handle_logout)
+        
         return defer_
 
     def _handle_logout(self, result):
         if self.use_gui:
             self.gtk_main.set_login_status(False)
+        
         g_db_helper.set_value('auto_login', False)
+        
+        return result
+    
 
     def start(self, run_reactor=True, managed_mode=False, aggregator=None):
         """

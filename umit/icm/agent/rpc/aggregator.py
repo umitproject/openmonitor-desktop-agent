@@ -22,6 +22,7 @@ import base64
 import os
 import sys
 import urllib
+import random
 
 from twisted.web import client
 from twisted.web.error import Error
@@ -38,6 +39,8 @@ from umit.icm.agent.rpc.Session import Session
 from umit.icm.agent.core.ReportManager import ReportStatus
 from umit.icm.agent.Errors import AggergatorError
 from umit.icm.agent.secure.Key import AESKey
+from umit.icm.agent.Version import VERSION_NUM
+from umit.icm.agent.test import TEST_PACKAGE_VERSION_NUM
 
 aggregator_api_url = {
     'CheckAggregator': '/checkaggregator/',
@@ -97,7 +100,6 @@ class AggregatorAPI(object):
     def register(self, username, password):
         g_logger.info("Sending RegisterAgent message to aggregator")
         request_msg = RegisterAgent()
-        from umit.icm.agent.Version import VERSION_NUM
         request_msg.versionNo = VERSION_NUM
         request_msg.agentType = 'DESKTOP'
         request_msg.credentials.username = username
@@ -126,7 +128,7 @@ class AggregatorAPI(object):
         g_logger.info("Sending Login message to aggregator")
         request_msg = Login()
         request_msg.agentID = theApp.peer_info.ID
-        import random
+        
         self.challenge = str(random.random())
         request_msg.challenge = self.challenge
         request_msg.port = theApp.listen_port
@@ -384,7 +386,6 @@ class AggregatorAPI(object):
         g_logger.info("Sending NewVersion message to aggregator")
         request_msg = NewVersion()
         #self._make_request_header(request_msg.header)
-        from umit.icm.agent.Version import VERSION_NUM
         request_msg.agentVersionNo = VERSION_NUM
         request_msg.agentType = 'DESKTOP'
 
@@ -403,7 +404,7 @@ class AggregatorAPI(object):
         g_logger.info("Sending NewTests message to aggregator")
         request_msg = NewTests()
         #self._make_request_header(request_msg.header)
-        from umit.icm.agent.test import TEST_PACKAGE_VERSION_NUM
+        
         request_msg.currentTestVersionNo = TEST_PACKAGE_VERSION_NUM
 
         defer_ = self._send_message(request_msg, NewTestsResponse)
