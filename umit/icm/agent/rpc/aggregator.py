@@ -321,11 +321,15 @@ class AggregatorAPI(object):
         
         theApp.statistics.reports_sent_to_aggregator = \
               theApp.statistics.reports_sent_to_aggregator + 1
-        report_id = self.pending_report_ids.pop(0) # assume FIFO
-        g_logger.info("ServiceReport '%s' has been sent to aggregator" % \
-                      report_id)
-        theApp.report_manager.remove_report(report_id,
-                                            ReportStatus.SENT_TO_AGGREGATOR)
+        
+        if len(self.pending_report_ids):
+            report_id = self.pending_report_ids.pop(0) # assume FIFO
+            g_logger.info("ServiceReport '%s' has been sent to aggregator" % \
+                          report_id)
+            theApp.report_manager.remove_report(report_id,
+                                                ReportStatus.SENT_TO_AGGREGATOR)
+        else:
+            g_logger.info("ServiceReport has been sent to aggregator")
         
         return message
 
