@@ -341,39 +341,42 @@ class AggregatorAPI(object):
         request_msg = WebsiteSuggestion()
         #self._make_request_header(request_msg.header)
         request_msg.websiteURL = website_url
-        request_msg.emailAddress = theApp.peer_info.Email
 
         defer_ = self._send_message(request_msg, TestSuggestionResponse)
         defer_.addCallback(self._handle_website_suggestion_response)
         defer_.addErrback(self._handle_errback)
+        
         return defer_
 
     def _handle_website_suggestion_response(self, message):
         if message is None:
             return
         g_logger.info("WebsiteSuggestion has been sent to aggregator")
-        return True
+        
+        return message
 
-    def send_service_suggestion(self, service_name, host_name, ip):
+    def send_service_suggestion(self, service_name, host_name, ip, port):
         g_logger.info("Sending ServiceSuggestion message to aggregator")
         url = self.base_url + "/servicesuggestion/"
         request_msg = ServiceSuggestion()
         #self._make_request_header(request_msg.header)
         request_msg.serviceName = service_name
-        request_msg.emailAddress = theApp.peer_info.Email
         request_msg.hostName = host_name
         request_msg.ip = ip
+        request_msg.port = port
 
         defer_ = self._send_message(request_msg, TestSuggestionResponse)
         defer_.addCallback(self._handle_service_suggestion_response)
         defer_.addErrback(self._handle_errback)
+        
         return defer_
 
     def _handle_service_suggestion_response(self, message):
         if message is None:
             return
         g_logger.info("ServiceSuggestion has been sent to aggregator")
-        return True
+        
+        return message
 
     """ Version """
     #----------------------------------------------------------------------
