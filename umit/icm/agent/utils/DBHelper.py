@@ -22,11 +22,6 @@ DBHelper is a class used to store/retrieve data from a relational SQL database
 for the agent.
 """
 
-try:
-    execfile("F:\\workspace\\PyWork\\icm-agent\\umit\\icm\\agent\\UmitImporter.py")
-except:
-    pass
-
 import os
 
 from umit.icm.agent.BasePaths import *

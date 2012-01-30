@@ -57,6 +57,9 @@ aggregator_api_url = {
     'ServiceSuggestion': '/servicesuggestion/',
     'NewVersion': '/checkversion/',
     'NewTests': '/checktests/',
+    'GetNetlist': '/get_netlist/',
+    'GetBanlist': '/get_banlist/',
+    'GetBannets': '/get_bannets/',
 }
 
 ########################################################################
@@ -403,7 +406,6 @@ class AggregatorAPI(object):
     def check_tests(self):
         g_logger.info("Sending NewTests message to aggregator")
         request_msg = NewTests()
-        #self._make_request_header(request_msg.header)
         
         request_msg.currentTestVersionNo = TEST_PACKAGE_VERSION_NUM
 
@@ -417,6 +419,62 @@ class AggregatorAPI(object):
             return
         
         return message
+    
+    def get_netlist(self, count):
+        g_logger.info("Sending GetNetlist message to aggregator")
+        request_msg = GetNetlist()
+        request_msg.count = count
+
+        defer_ = self._send_message(request_msg, GetNetlistResponse)
+        defer_.addCallback(self._handle_get_netlist_response)
+        defer_.addErrback(self._handle_errback)
+        return defer_
+
+    def _handle_get_netlist_response(self, message):
+        if message is None:
+            return
+        
+        # TODO: Store the netlist locally
+        
+        return message
+    
+    def get_banlist(self, count):
+        g_logger.info("Sending GetBanlist message to aggregator")
+        request_msg = GetBanlist()
+        request_msg.count = count
+
+        defer_ = self._send_message(request_msg, GetBanlistResponse)
+        defer_.addCallback(self._handle_get_banlist_response)
+        defer_.addErrback(self._handle_errback)
+        return defer_
+
+    def _handle_get_banlist_response(self, message):
+        if message is None:
+            return
+        
+        # TODO: Store the banlist locally
+        
+        return message
+
+    def get_bannets(self, count):
+        g_logger.info("Sending GetBannets message to aggregator")
+        request_msg = GetBannets()
+        request_msg.count = count
+
+        defer_ = self._send_message(request_msg, GetBannetsResponse)
+        defer_.addCallback(self._handle_get_bannets_response)
+        defer_.addErrback(self._handle_errback)
+        return defer_
+
+    def _handle_get_bannets_response(self, message):
+        if message is None:
+            return
+        
+        # TODO: Store the bannets locally
+        
+        return message
+
+
 
     """ Private """
     #----------------------------------------------------------------------

@@ -18,9 +18,9 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
-__all__ = ['g_config', 'g_logger', 'g_db_helper',
+__all__ = ['g_config', 'g_logger', 'g_db_helper', 'db_path', "config_path",
            'ROOT_DIR', 'CONFIG_DIR', 'LOG_DIR', 'LOCALES_DIR', 'IMAGES_DIR',
-           'ICONS_DIR', 'DB_DIR', 'TMP_DIR']
+           'ICONS_DIR', 'DB_DIR', 'TMP_DIR', 'LOGLEVEL']
 
 import os
 import sys

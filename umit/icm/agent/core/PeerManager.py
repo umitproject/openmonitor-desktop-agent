@@ -105,6 +105,49 @@ class PeerManager:
                 self.normal_peers[peer_entry.ID] = peer_entry
             elif peer_entry.Type == 3:
                 self.mobile_peers[peer_entry.ID] = peer_entry
+    
+    def scan(self):
+        """The scanning procedure works as follows:
+        Scanning Peer A, sends check_alive packets in preferred networks in
+        specific port ranges with its own info (ID, ip, port, pb key).
+        
+        The receiving peer, would receive this packet and check against the
+        aggregator or another super peer if that is a tagged agent. If negative,
+        the agent can respond with its own details and proceed with connection.
+        If positive, which means the agent was tagged for abuse or misconduct
+        in the past, it will ignore the request as if it never received it.
+        
+        ---
+        
+        The preferred networks are defined as follows:
+        - A compilation you can get from the Aggregator or another super peer
+        - The networks with higher concentration of nodes
+        - Your local network
+        - The networks within your region
+        - The networks in regions nearby
+        - The rest of the internet
+        
+        API: get_netlist
+        Message: GetNetlist
+        Response: GetNetlistResponse
+        
+        ---
+        
+        The logic on refusing to answer scan probes:
+        - Match ip against a compilation you can get from the Aggregator or
+          another super peer
+        - Refuse to connect from networks with higher concentration of tagged
+          nodes.
+        
+        API: get_banlist (for the compilation)
+        Message: GetBanlist
+        Response: GetBanlistResponse
+        
+        API: get_bannets (for the tagged networks)
+        Message: GetBannets
+        Response: GetBannetsResponse
+        
+        """
 
     def add_super_peer(self, peer_id, ip, port, ciphered_public_key=None,
                        status='Disconnected'):
@@ -248,6 +291,9 @@ class PeerManager:
                                theApp.factory)
             g_logger.debug("Connecting to %s:%d..." %
                            (peer_entry.IP, peer_entry.Port))
+        elif peer_id == theApp.peer_info.ID:
+            g_logger.error("Can't connect to self.")
+            
 
     def _connected_to_aggregator(self, data):
         if theApp.aggregator.available:
