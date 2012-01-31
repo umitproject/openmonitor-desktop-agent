@@ -283,7 +283,7 @@ class PeerManager:
             elif peer_id in self.mobile_peers:
                 peer_entry = self.mobile_peers[peer_id]
             else:
-                g_logger.error("Peer id %d doesn't exist in all peer lists." %
+                g_logger.error("Peer id '%s' doesn't exist in all peer lists." %
                                peer_id)
                 return
 
