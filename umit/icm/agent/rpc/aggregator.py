@@ -423,11 +423,12 @@ class AggregatorAPI(object):
     def get_netlist(self, count):
         g_logger.info("Sending GetNetlist message to aggregator")
         request_msg = GetNetlist()
-        request_msg.count = count
+        request_msg.list = count
 
         defer_ = self._send_message(request_msg, GetNetlistResponse)
         defer_.addCallback(self._handle_get_netlist_response)
         defer_.addErrback(self._handle_errback)
+        
         return defer_
 
     def _handle_get_netlist_response(self, message):
@@ -435,6 +436,7 @@ class AggregatorAPI(object):
             return
         
         # TODO: Store the netlist locally
+        g_logger.info("NET LIST: %s" % message)
         
         return message
     
