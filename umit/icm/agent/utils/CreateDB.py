@@ -55,7 +55,8 @@ def create(conn_str):
               "public_key BLOB, "
               "token TEXT, "
               "geo TEXT, "
-              "status TEXT"
+              "status TEXT,"
+              "network_id INTEGER"
               ")")
 
     c.execute("CREATE TABLE reports ("
@@ -117,6 +118,15 @@ def create(conn_str):
               "da_failed_times INTEGER NOT NULL, "
               "ma_num INTEGER NOT NULL, "
               "ma_failed_times INTEGER NOT NULL "
+              ")")
+    
+    c.execute("CREATE TABLE networks ("
+              "id INTEGER NOT NULL PRIMARY KEY,"
+              "start_number INTEGER NOT NULL,"
+              "end_number INTEGER NOT NULL,"
+              "nodes_count INTEGER NOT NULL,"
+              "created_at INTEGER NOT NULL,"
+              "updated_at INTEGER NOT NULL"
               ")")
 
     # Insert pre-defined values
