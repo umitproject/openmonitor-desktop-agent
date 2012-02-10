@@ -64,9 +64,8 @@ class AgentProtocol(Protocol):
 
     def connectionMade(self):
         self.factory.connectionNum = self.factory.connectionNum + 1
-        g_logger.info("New connection established. with Peer: %s" %
-                      self.transport.getPeer())
-        g_logger.info("Connection num: %d" % self.factory.connectionNum)
+        g_logger.info("New connection #%d established. with Peer: %s" % (
+                      self.factory.connectionNum, self.transport.getPeer()))
 
         maxConnectionNum = g_config.getint('network', 'max_connections_num')
         if self.factory.connectionNum > maxConnectionNum:
@@ -84,11 +83,10 @@ class AgentProtocol(Protocol):
 
     def connectionLost(self, reason):
         self.factory.connectionNum = self.factory.connectionNum - 1
-        g_logger.info("Connection closed.")
-        g_logger.info("Current connection num: %d" % self.factory.connectionNum)
+        g_logger.debug("Connection #%d closed." % self.factory.connectionNum)
 
         if self._session is not None:
-            g_logger.info("Session %d ended." % self.remote_id)
+            g_logger.debug("Session %d ended." % self.remote_id)
             if self.remote_type == 1:
                 theApp.peer_manager.super_peers[self.remote_id].status = \
                       'Disconnected'
@@ -153,7 +151,7 @@ class AgentProtocol(Protocol):
                 self._session = DesktopSuperAgentSession(message.agentID,
                                                          self.transport)
                 theApp.peer_manager.sessions[message.agentID] = self._session
-                g_logger.info("Session %d created." % message.agentID)
+                g_logger.debug("Session %d created." % message.agentID)
                 theApp.statistics.super_agents_num = \
                       theApp.statistics.super_agents_num + 1
             elif self.remote_type == 2:  # desktop agent
@@ -167,7 +165,7 @@ class AgentProtocol(Protocol):
                 self._session = DesktopAgentSession(message.agentID,
                                                     self.transport)
                 theApp.peer_manager.sessions[message.agentID] = self._session
-                g_logger.info("Session %d created." % message.agentID)
+                g_logger.debug("Session %d created." % message.agentID)
                 theApp.statistics.normal_agents_num = \
                       theApp.statistics.super_agents_num + 1
             elif self.remote_type == 3:  # mobile agent

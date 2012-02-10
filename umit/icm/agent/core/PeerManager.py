@@ -2,7 +2,8 @@
 # -*- coding: utf-8 -*-
 # Copyright (C) 2011 Adriano Monteiro Marques
 #
-# Author:  Zhongjie Wang <wzj401@gmail.com>
+# Authors:  Zhongjie Wang <wzj401@gmail.com>
+#           Adriano Marques <adriano@umitproject.org>
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -42,9 +43,16 @@ class PeerEntry(object):
         self.CipheredPublicKey = ''  # bytes
         self.Geo = ''        # string
         self.Status = ''
+        self.network_id = 0
 
         self.transport = None
         self.status = 'Disconnected'
+    
+    def __unicode__(self):
+        return u"Peer Entry %d (%s - %d) %s:%s - Net ID %s" % \
+                        (self.ID,
+                         {1:"super peer", 2:"desktop", 3:"mobile"}[self.Type],
+                         self.Type, self.IP, self.Port, self.network_id)
 
 
 ########################################################################
@@ -68,24 +76,27 @@ class PeerManager:
         for peer_entry in self.super_peers.values():
             g_db_helper.execute(
                 "insert or replace into peers values" \
-                "(%d, %d, '%s', %d, '%s', '%s', '%s', '%s')" % \
+                "(%d, %d, '%s', %d, '%s', '%s', '%s', '%s', %d)" % \
                 (peer_entry.ID, peer_entry.Type, peer_entry.IP,
                  peer_entry.Port, peer_entry.CipheredPublicKey,
-                 peer_entry.Token, peer_entry.Geo, peer_entry.Status))
+                 peer_entry.Token, peer_entry.Geo, peer_entry.Status,
+                 peer_entry.network_id))
         for peer_entry in self.normal_peers.values():
             g_db_helper.execute(
                 "insert or replace into peers values" \
-                "(%d, %d, '%s', %d, '%s', '%s', '%s', '%s')" % \
+                "(%d, %d, '%s', %d, '%s', '%s', '%s', '%s', %d)" % \
                 (peer_entry.ID, peer_entry.Type, peer_entry.IP,
                  peer_entry.Port, peer_entry.CipheredPublicKey,
-                 peer_entry.Token, peer_entry.Geo, peer_entry.Status))
+                 peer_entry.Token, peer_entry.Geo, peer_entry.Status,
+                 peer_entry.network_id))
         for peer_entry in self.mobile_peers.values():
             g_db_helper.execute(
                 "insert or replace into peers values" \
-                "(%d, %d, '%s', %d, '%s', '%s', '%s', '%s')" % \
+                "(%d, %d, '%s', %d, '%s', '%s', '%s', '%s', %d)" % \
                 (peer_entry.ID, peer_entry.Type, peer_entry.IP,
                  peer_entry.Port, peer_entry.CipheredPublicKey,
-                 peer_entry.Token, peer_entry.Geo, peer_entry.Status))
+                 peer_entry.Token, peer_entry.Geo, peer_entry.Status,
+                 peer_entry.network_id))
         g_db_helper.commit()
 
     def load_from_db(self):
@@ -150,7 +161,7 @@ class PeerManager:
         """
 
     def add_super_peer(self, peer_id, ip, port, ciphered_public_key=None,
-                       status='Disconnected'):
+                       status='Disconnected', network_id=None):
         if peer_id in self.super_peers:
             g_logger.info("Peer id %d already exists in super peer list." %
                           peer_id)
@@ -162,11 +173,12 @@ class PeerManager:
             peer_entry.Port = port
             peer_entry.CipheredPublicKey = ciphered_public_key
             peer_entry.status = status
+            peer_entry.network_id = network_id
             self.super_peers[peer_entry.ID] = peer_entry
             self.super_peer_num = self.super_peer_num + 1
 
     def add_normal_peer(self, peer_id, ip, port, ciphered_public_key=None,
-                        status='Disconnected'):
+                        status='Disconnected', network_id=None):
         if peer_id in self.normal_peers:
             g_logger.info("Peer id %d already exists in normal peer list." %
                           peer_id)
@@ -178,11 +190,12 @@ class PeerManager:
             peer_entry.Port = port
             peer_entry.CipheredPublicKey = ciphered_public_key
             peer_entry.status = status
+            peer_entry.network_id = network_id
             self.normal_peers[peer_entry.ID] = peer_entry
             self.normal_peer_num = self.normal_peer_num + 1
 
     def add_mobile_peer(self, peer_id, ip, port, ciphered_public_key=None,
-                        status='Disconnected'):
+                        status='Disconnected', network_id=None):
         if peer_id in self.mobile_peers:
             g_logger.info("Peer id %d already exists in mobile peer list." %
                           peer_id)
@@ -194,6 +207,7 @@ class PeerManager:
             peer_entry.Port = port
             peer_entry.CipheredPublicKey = ciphered_public_key
             peer_entry.status = status
+            peer_entry.network_id = network_id
             self.mobile_peers[peer_entry.ID] = peer_entry
             self.mobile_peer_num = self.mobile_peer_num + 1
 
@@ -296,15 +310,21 @@ class PeerManager:
             
 
     def _connected_to_aggregator(self, data):
+        g_logger.info("Connected to Aggregator.")
         if theApp.aggregator.available:
             if not theApp.peer_info.registered:
                 d = theApp.aggregator.register()
                 d.addCallback(self._after_registration)
-            elif not theApp.peer_info.login:
-                #d = theApp.aggregator.login()
-                #d.addCallback(self._after_login)
-                theApp.peer_info.login = True
-                self._after_login(None)
+                
+                # Being available, we need to retrieve the bannets and banlist
+                d = theApp.aggregator.get_banlist()
+                d = theApp.aggregator.get_bannets()
+            
+            #elif not theApp.peer_info.login:
+            #    #d = theApp.aggregator.login()
+            #    #d.addCallback(self._after_login)
+            #    theApp.peer_info.login = True
+            #    self._after_login(None)
 
     def _after_registration(self, data):
         theApp.aggregator.login()
@@ -327,9 +347,6 @@ class PeerManager:
     normal peers, also check the availability of the aggregator
     """
     def maintain(self):
-        #theApp.peer_info.login = True
-        #self._after_login(None)
-
         # check the availability of the aggregator
         if not theApp.aggregator.available:
             d = theApp.aggregator.check_aggregator()

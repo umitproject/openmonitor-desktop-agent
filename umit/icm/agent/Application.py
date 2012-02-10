@@ -148,7 +148,8 @@ class Application(object):
         
         return defer_
 
-    def _handle_login(self, result, username, password, save_login, login_only=False):
+    def _handle_login(self, result, username, password, save_login,
+                      login_only=False):
         if result:
             self.peer_info.Username = username
             self.peer_info.Password = password

@@ -23,6 +23,7 @@ for the agent.
 """
 
 import os
+import time
 
 from umit.icm.agent.BasePaths import *
 from umit.icm.agent.Global import g_logger
@@ -95,6 +96,30 @@ class DBHelper(object):
         self.db_helper.execute(
             "delete from kvp where key=?", (key,))
         self.commit()
+    
+    def insert_network(self, start_number, end_number, nodes_count):
+        network = self.get_network(start_number, end_number)
+        if network:
+            g_logger.critical("Exists! Returning %s" % network)
+            return network[0][0]
+        
+        self.execute("INSERT INTO networks ("
+                     "start_number, end_number, "
+                     "nodes_count, created_at, updated_at) "
+                     "values (%s, %s, %s, %s, %s)" % (start_number,
+                                                      end_number,
+                                                      nodes_count,
+                                                      int(time.time()),
+                                                      int(time.time())))
+        self.commit()
+        
+        network = self.get_network(start_number, end_number)
+        return network[0][0]
+    
+    def get_network(self, start_number, end_number):
+        return self.select("SELECT * FROM networks WHERE "
+                           "start_number <= %s AND end_number >= %s" % \
+                              (start_number, end_number))
 
 
 if __name__ == "__main__":

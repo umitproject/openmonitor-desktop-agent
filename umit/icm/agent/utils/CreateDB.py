@@ -142,7 +142,7 @@ def create(conn_str):
 
     # Data for test
     c.execute("INSERT INTO peers VALUES(10004, 1, '202.206.64.11', 3128, '', '', "
-              "'China', 'UNKNOWN')")
+              "'China', 'UNKNOWN', NULL)")
 
 
     conn.commit()

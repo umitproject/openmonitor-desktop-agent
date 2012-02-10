@@ -32,6 +32,7 @@ from google.protobuf.text_format import MessageToString
 
 from umit.icm.agent.rpc.message import *
 from umit.icm.agent.rpc.MessageFactory import MessageFactory
+from umit.icm.agent.rpc import messages_pb2
 
 from umit.icm.agent.Application import theApp
 from umit.icm.agent.Global import *
@@ -120,6 +121,7 @@ class AggregatorAPI(object):
 
     def _handle_register_response(self, message):
         if message is None:
+            g_logger.error("Empty response while trying to register.")
             return
         
         g_logger.info("RegisterAgent response: (%d, %s)" %
@@ -435,12 +437,24 @@ class AggregatorAPI(object):
         if message is None:
             return
         
-        # TODO: Store the netlist locally
-        g_logger.info("NET LIST: %s" % message)
+        for net in message.networks:
+            id = g_db_helper.insert_network(net.start_ip,
+                                            net.end_ip,
+                                            net.nodesCount)
+
+            for node in net.nodes:
+                theApp.peer_manager.add_normal_peer(node.agentID,
+                                                    node.agentIP,
+                                                    node.agentPort,
+                                                    node.publicKey,
+                                                    node.peerStatus,
+                                                    id)
+            
+            theApp.peer_manager.save_to_db()
         
         return message
     
-    def get_banlist(self, count):
+    def get_banlist(self, count=100):
         g_logger.info("Sending GetBanlist message to aggregator")
         request_msg = GetBanlist()
         request_msg.count = count
@@ -451,6 +465,7 @@ class AggregatorAPI(object):
         return defer_
 
     def _handle_get_banlist_response(self, message):
+        g_logger.critical("GET BANLIST RESPONSE: %s" % message)
         if message is None:
             return
         
@@ -458,7 +473,7 @@ class AggregatorAPI(object):
         
         return message
 
-    def get_bannets(self, count):
+    def get_bannets(self, count=100):
         g_logger.info("Sending GetBannets message to aggregator")
         request_msg = GetBannets()
         request_msg.count = count
