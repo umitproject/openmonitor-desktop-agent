@@ -128,6 +128,20 @@ def create(conn_str):
               "created_at INTEGER NOT NULL,"
               "updated_at INTEGER NOT NULL"
               ")")
+    
+    c.execute("CREATE TABLE banlist ("
+              "agent_id INTEGER NOT NULL UNIQUE"
+              ")")
+    
+    c.execute("CREATE TABLE bannets ("
+              "id INTEGER NOT NULL PRIMARY KEY,"
+              "start_number INTEGER NOT NULL,"
+              "end_number INTEGER NOT NULL,"
+              "nodes_count INTEGER NOT NULL,"
+              "flags INTEGER NOT NULL,"
+              "created_at INTEGER NOT NULL,"
+              "updated_at INTEGER NOT NULL"
+              ")")
 
     # Insert pre-defined values
     c.execute("INSERT INTO kvp VALUES('aggregator_url', ?)",

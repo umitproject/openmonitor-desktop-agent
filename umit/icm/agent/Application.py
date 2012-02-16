@@ -170,12 +170,12 @@ class Application(object):
             # Add looping calls
             if not hasattr(self, 'peer_maintain_lc'):
                 self.peer_maintain_lc = task.LoopingCall(self.peer_manager.maintain)
-                self.peer_maintain_lc.start(30)
-
+                self.peer_maintain_lc.start(7200)
+            
             if not hasattr(self, 'task_run_lc'):
                 self.task_run_lc = task.LoopingCall(self.task_scheduler.schedule)
                 self.task_run_lc.start(30)
-
+            
             if not hasattr(self, 'report_proc_lc'):
                 self.report_proc_lc = task.LoopingCall(self.report_uploader.process)
                 self.report_proc_lc.start(30)

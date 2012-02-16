@@ -310,15 +310,10 @@ class PeerManager:
             
 
     def _connected_to_aggregator(self, data):
-        g_logger.info("Connected to Aggregator.")
         if theApp.aggregator.available:
             if not theApp.peer_info.registered:
                 d = theApp.aggregator.register()
                 d.addCallback(self._after_registration)
-                
-                # Being available, we need to retrieve the bannets and banlist
-                d = theApp.aggregator.get_banlist()
-                d = theApp.aggregator.get_bannets()
             
             #elif not theApp.peer_info.login:
             #    #d = theApp.aggregator.login()

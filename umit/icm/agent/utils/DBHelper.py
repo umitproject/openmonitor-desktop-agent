@@ -106,7 +106,7 @@ class DBHelper(object):
         self.execute("INSERT INTO networks ("
                      "start_number, end_number, "
                      "nodes_count, created_at, updated_at) "
-                     "values (%s, %s, %s, %s, %s)" % (start_number,
+                     "values (%d, %d, %d, %d, %d)" % (start_number,
                                                       end_number,
                                                       nodes_count,
                                                       int(time.time()),
@@ -118,8 +118,47 @@ class DBHelper(object):
     
     def get_network(self, start_number, end_number):
         return self.select("SELECT * FROM networks WHERE "
-                           "start_number <= %s AND end_number >= %s" % \
+                           "start_number <= %d AND end_number >= %d" % \
                               (start_number, end_number))
+        
+    def insert_banned_agent(self, agent_id):
+        agent = self.get_peer(agent_id)
+        if agent:
+            self.remove_peer(agent_id)
+        insert = self.execute("INSERT INTO banlist VALUES (%d)" % agent_id)
+        self.commit()
+        
+        return insert
+    
+    def get_peer(self, agent_id):
+        return self.select("SELECT * FROM peers WHERE id = %d" % agent_id)
+    
+    def remove_peer(self, agent_id):
+        return self.execute("DELETE FROM peers WHERE id = %d" % agent_id)
+    
+    def insert_banned_network(self, start_ip, end_ip, nodes_count, flag):
+        bannet = self.get_banned_network(start_ip, end_ip)
+        if bannet:
+            # Update node count and flags
+            self.execute("UPDATE bannets SET start_number=%d, "
+                         "end_number=%d, nodes_count=%d, "
+                         "flags=%d, updated_at=%d WHERE " 
+                         "id=%d" % (start_ip, end_ip, nodes_count,
+                                    flag, int(time.time()), bannet[0][0]))
+        else:
+            # Insert into db
+            self.execute("INSERT INTO bannets (start_number, end_number, "
+                         "nodes_count, flags, created_at, updated_at) VALUES "
+                         "(%s, %s, %s, %d, %d, %d)" % \
+                            (start_ip, end_ip, nodes_count, flag,
+                             int(time.time()), int(time.time())))
+            
+        self.commit()
+    
+    def get_banned_network(self, start_ip, end_ip):
+        return self.select("SELECT * FROM bannets WHERE "
+                           "start_number <= %s AND end_number >= %s" % \
+                           (start_ip, end_ip))
 
 
 if __name__ == "__main__":
