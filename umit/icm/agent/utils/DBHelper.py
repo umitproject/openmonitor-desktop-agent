@@ -185,5 +185,5 @@ class DBHelper(object):
 if __name__ == "__main__":
     helper = DBHelper('sqlite')
     helper.connect(os.path.join(DB_DIR, 'storage.db3'))
-    helper.set_value('aggregator_url', 'http://icm-dev.appspot.com/api')
+    helper.set_value('aggregator_url', 'http://alpha.openmonitor.org/api')
     print(helper.get_value('aggregator_url'))

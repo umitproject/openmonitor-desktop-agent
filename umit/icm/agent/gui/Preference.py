@@ -192,7 +192,7 @@ class PreferencePage(HIGVBox):
         self.cloudagg_button = HIGButton(_("Reset"))
         self.cloudagg_button.connect('clicked', lambda w:
                                           self.cloudagg_entry.set_text(
-                                              'http://icm-dev.appspot.com/api'))
+                                              'http://alpha.openmonitor.org/api'))
         self.cloudagg_button.set_size_request(80, 28)
 
         self.superpeers_entry = gtk.Entry()

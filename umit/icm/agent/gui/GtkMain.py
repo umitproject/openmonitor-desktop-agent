@@ -26,80 +26,109 @@ from twisted.internet import reactor
 
 from higwidgets import HIGWindow
 
+from umit.icm.agent.Global import *
 from umit.icm.agent.I18N import _
 from umit.icm.agent.BasePaths import *
 from umit.icm.agent.Application import theApp
 
 from umit.icm.agent.gui.Splash import Splash
 
+appindicator = None
+try:
+    import appindicator
+except ImportError:
+    pass
+
 
 class GtkMain(object):
     def __init__(self, *args, **kwargs):
         self.is_login = False
         self.login_dlg = None
+        self._create_tray()
         self._create_widgets()
+        self.set_login_status(False)
+        
+    def _create_tray(self):
+        self.tray_menu_logged_in = gtk.Menu()
+        self.tray_menu_logged_out = gtk.Menu()
+        
+        if appindicator is not None:
+            g_logger.info("APP INDICATOR!")
+            # This means we're running on unity and we need a different tray
+            self.tray_indicator = appindicator.Indicator("open-monitor", # APP ID
+                                     "internet-feed-reader", # ICON NAME
+                                     appindicator.CATEGORY_APPLICATION_STATUS) # APP CATEGORY
+            self.tray_indicator.set_status(appindicator.STATUS_ACTIVE)
+            self.tray_indicator.set_attention_icon("indicator-messages-new")
+            self.tray_indicator.set_menu(self.tray_menu_logged_out)
+        else:
+            self.tray_icon = gtk.StatusIcon()
+            self.tray_icon.connect('popup-menu', self.show_menu)
+            self.tray_icon.set_tooltip("Open Monitor")
+            self.tray_icon.set_from_file(
+                            os.path.join(ICONS_DIR, "tray_icon_gray_32.ico"))
 
     def _create_widgets(self):
-        self.tray_icon = gtk.StatusIcon()
-        #
-        self.tray_menu_logged_in = gtk.Menu()
-
         menu_item = gtk.MenuItem(_("ICM Webpage"))
         menu_item.connect("activate", lambda w: self.show_web_map())
+        menu_item.show()
         self.tray_menu_logged_in.append(menu_item)
 
         menu_item = gtk.ImageMenuItem(_("Dashboard"))
         menu_item.connect("activate", lambda w: self.show_dashboard())
+        menu_item.show()
         self.tray_menu_logged_in.append(menu_item)
 
         menu_item = gtk.ImageMenuItem(_("Event List"))
         menu_item.connect("activate", lambda w: self.show_event_list())
+        menu_item.show()
         self.tray_menu_logged_in.append(menu_item)
 
         menu_item = gtk.ImageMenuItem(_("Logs"))
         menu_item.connect("activate", lambda w: self.show_logs())
+        menu_item.show()
         self.tray_menu_logged_in.append(menu_item)
 
         self.tray_menu_logged_in.append(gtk.SeparatorMenuItem())
 
         menu_item = gtk.MenuItem(_("Preference"))
         menu_item.connect("activate", lambda w: self.show_preference())
+        menu_item.show()
         self.tray_menu_logged_in.append(menu_item)
 
         menu_item = gtk.MenuItem(_("About"))
         menu_item.connect("activate", lambda w: self.show_about())
+        menu_item.show()
         self.tray_menu_logged_in.append(menu_item)
 
         self.tray_menu_logged_in.append(gtk.SeparatorMenuItem())
 
         menu_item = gtk.MenuItem(_("Logout"))
         menu_item.connect("activate", lambda w: theApp.logout())
+        menu_item.show()
         self.tray_menu_logged_in.append(menu_item)
 
         menu_item = gtk.ImageMenuItem(_("Exit"))
         menu_item.connect("activate", lambda w: reactor.stop())
+        menu_item.show()
         self.tray_menu_logged_in.append(menu_item)
         self.tray_menu_logged_in.show_all()
         ###
-        self.tray_menu_logged_out = gtk.Menu()
 
         menu_item = gtk.MenuItem(_("Login"))
         menu_item.connect("activate", lambda w: self.show_login())
+        menu_item.show()
         self.tray_menu_logged_out.append(menu_item)
 
         self.tray_menu_logged_out.append(gtk.SeparatorMenuItem())
 
         menu_item = gtk.MenuItem(_("Exit"))
         menu_item.connect("activate", lambda w: reactor.stop())
+        menu_item.show()
         self.tray_menu_logged_out.append(menu_item)
         self.tray_menu_logged_out.show_all()
 
         self.tray_menu = self.tray_menu_logged_out
-        self.tray_icon.connect('popup-menu', self.show_menu)
-        self.tray_icon.set_tooltip("ICM Desktop Agent")
-
-        self.tray_icon.set_from_file(
-                os.path.join(ICONS_DIR, "tray_icon_gray_32.ico"))
 
         # Show splash window
         splash = Splash(os.path.join(IMAGES_DIR, 'splash.png'))
@@ -109,17 +138,25 @@ class GtkMain(object):
             return
         self.is_login = is_login
         if is_login:
-            self.tray_menu.popdown()
+            if appindicator is not None:
+                self.tray_indicator.set_menu(self.tray_menu_logged_in)
+            else:
+                self.tray_menu.popdown()
             self.tray_menu = self.tray_menu_logged_in
-            #self.tray_icon.connect('popup-menu', self.show_menu)
-            self.tray_icon.set_from_file(
-                os.path.join(ICONS_DIR, "tray_icon_32.ico"))
+            
+            if appindicator is None:
+                self.tray_icon.set_from_file(
+                    os.path.join(ICONS_DIR, "tray_icon_32.ico"))
         else:
-            self.tray_menu.popdown()
+            if appindicator is not None:
+                self.tray_indicator.set_menu(self.tray_menu_logged_out)
+            else:
+                self.tray_menu.popdown()
             self.tray_menu = self.tray_menu_logged_out
-            #self.tray_icon.connect('popup-menu', self.show_menu)
-            self.tray_icon.set_from_file(
-                os.path.join(ICONS_DIR, "tray_icon_gray_32.ico"))
+            
+            if appindicator is None:
+                self.tray_icon.set_from_file(
+                    os.path.join(ICONS_DIR, "tray_icon_gray_32.ico"))
 
     def show_menu(self, status_icon, button, activate_time):
         self.tray_menu.popup(None, None, None, button, activate_time,

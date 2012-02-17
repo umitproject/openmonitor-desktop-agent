@@ -146,7 +146,7 @@ def create(conn_str):
 
     # Insert pre-defined values
     c.execute("INSERT INTO kvp VALUES('aggregator_url', ?)",
-              (pack('http://icm-dev.appspot.com/api'),))
+              (pack('http://alpha.openmonitor.org/api'),))
     c.execute("INSERT INTO kvp VALUES('selected_tests', ?)",
               (pack(''),))
 
