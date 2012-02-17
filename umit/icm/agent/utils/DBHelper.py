@@ -2,7 +2,8 @@
 # -*- coding: utf-8 -*-
 # Copyright (C) 2011 Adriano Monteiro Marques
 #
-# Author:  Zhongjie Wang <wzj401@gmail.com>
+# Authors:  Zhongjie Wang <wzj401@gmail.com>
+#           Adriano Marques <adriano@umitproject.org>
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -125,6 +126,11 @@ class DBHelper(object):
         agent = self.get_peer(agent_id)
         if agent:
             self.remove_peer(agent_id)
+        
+        agent = self.get_banned_agent(agent_id)
+        if agent:
+            return agent
+        
         insert = self.execute("INSERT INTO banlist VALUES (%d)" % agent_id)
         self.commit()
         
@@ -159,7 +165,22 @@ class DBHelper(object):
         return self.select("SELECT * FROM bannets WHERE "
                            "start_number <= %s AND end_number >= %s" % \
                            (start_ip, end_ip))
+    
+    def get_banned_agent(self, agent_id):
+        return self.select("SELECT * FROM banlist WHERE "
+                           "agent_id = %d" % agent_id)
 
+    def agent_is_banned(self, agent_id):
+        agent = self.get_banned_agent(agent_id)
+        if agent:
+            return True
+        return False
+    
+    def network_is_banned(self, ip):
+        network = self.get_banned_network(ip, ip)
+        if network:
+            return True
+        return False
 
 if __name__ == "__main__":
     helper = DBHelper('sqlite')

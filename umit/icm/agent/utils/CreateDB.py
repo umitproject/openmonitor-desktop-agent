@@ -2,7 +2,8 @@
 # -*- coding: utf-8 -*-
 # Copyright (C) 2011 Adriano Monteiro Marques
 #
-# Author:  Zhongjie Wang <wzj401@gmail.com>
+# Authors:  Zhongjie Wang <wzj401@gmail.com>
+#           Adriano Marques <adriano@umitproject.org>
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by

@@ -159,9 +159,24 @@ class PeerManager:
         Response: GetBannetsResponse
         
         """
+    
+    def agent_is_banned(self, agent_id):
+        return g_db_helper.agent_is_banned(agent_id)
+    
+    def network_is_banned(self, ip):
+        return g_db_helper.network_is_banned(ip)
 
     def add_super_peer(self, peer_id, ip, port, ciphered_public_key=None,
                        status='Disconnected', network_id=None):
+        if self.agent_is_banned(peer_id) or self.network_is_banned(ip):
+            g_logger.info("Super agent %s is banned or is running from a banned "
+                          "network %s" % (peer_id, ip))
+            
+            if peer_id in self.super_peers:
+                self.remove_super_peer(peer_id)
+            
+            return
+        
         if peer_id in self.super_peers:
             g_logger.info("Peer id %d already exists in super peer list." %
                           peer_id)
@@ -179,6 +194,15 @@ class PeerManager:
 
     def add_normal_peer(self, peer_id, ip, port, ciphered_public_key=None,
                         status='Disconnected', network_id=None):
+        if self.agent_is_banned(peer_id) or self.network_is_banned(ip):
+            g_logger.info("Desktop agent %s is banned or is running from a banned "
+                          "network %s" % (peer_id, ip))
+            
+            if peer_id in self.normal_peers:
+                self.remove_normal_peer(peer_id)
+            
+            return
+        
         if peer_id in self.normal_peers:
             g_logger.info("Peer id %d already exists in normal peer list." %
                           peer_id)
@@ -196,6 +220,15 @@ class PeerManager:
 
     def add_mobile_peer(self, peer_id, ip, port, ciphered_public_key=None,
                         status='Disconnected', network_id=None):
+        if self.agent_is_banned(peer_id) or self.network_is_banned(ip):
+            g_logger.info("Mobile agent %s is banned or is running from a banned "
+                          "network %s" % (peer_id, ip))
+            
+            if peer_id in self.mobile_peers:
+                self.remove_mobile_peer(peer_id)
+            
+            return
+        
         if peer_id in self.mobile_peers:
             g_logger.info("Peer id %d already exists in mobile peer list." %
                           peer_id)
@@ -287,6 +320,9 @@ class PeerManager:
             self.connect_to_peer(peer_id)
 
     def connect_to_peer(self, peer_id):
+        if self.agent_is_banned(peer_id):
+            g_logger.info("Agent %s is banned." % peer_id)
+        
         if peer_id != theApp.peer_info.ID and \
            peer_id not in self.sessions:
             peer_entry = None
@@ -301,12 +337,30 @@ class PeerManager:
                                peer_id)
                 return
 
+            if self.network_is_banned(peer_entry.IP):
+                g_logger.info("Agent %s is banned in network grounds (%s)." % \
+                                 (peer_id, peer_entry.IP))
+                return
+
             reactor.connectTCP(peer_entry.IP, peer_entry.Port,
                                theApp.factory)
             g_logger.debug("Connecting to %s:%d..." %
                            (peer_entry.IP, peer_entry.Port))
         elif peer_id == theApp.peer_info.ID:
             g_logger.error("Can't connect to self.")
+    
+    def sync_banlist(self, message):
+        for agent_id in message.agent_ids:
+            ban = g_db_helper.insert_banned_agent(agent_id)
+            g_logger.info("Banned %s: %s" % (agent_id, str(ban)))
+    
+    def sync_bannets(self, message):
+        for network in message.networks:
+            ban = g_db_helper.insert_banned_network(network.start_ip,
+                                                    network.end_ip,
+                                                    network.nodes_count,
+                                                    network.flags)
+            g_logger.info("Banned %s: %s" % (network, str(ban)))
             
 
     def _connected_to_aggregator(self, data):
@@ -383,3 +437,6 @@ class PeerManager:
                         g_logger.debug("Requiring %d peers from "
                                        "super peer %d" % (required_num, peer.ID))
                         self.sessions[peer.ID].get_peer_list(required_num)
+
+
+

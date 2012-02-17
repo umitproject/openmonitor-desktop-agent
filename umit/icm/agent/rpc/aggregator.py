@@ -2,7 +2,8 @@
 # -*- coding: utf-8 -*-
 # Copyright (C) 2011 Adriano Monteiro Marques
 #
-# Author:  Zhongjie Wang <wzj401@gmail.com>
+# Authors:  Zhongjie Wang <wzj401@gmail.com>
+#           Adriano Marques <adriano@umitproject.org>
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -458,6 +459,7 @@ class AggregatorAPI(object):
             return
         
         # TODO: Store the banlist locally
+        theApp.peer_manager.sync_banlist(message)
         
         return message
 
@@ -476,6 +478,7 @@ class AggregatorAPI(object):
             return
         
         # TODO: Store the bannets locally
+        theApp.peer_manager.sync_bannets(message)
         
         return message
 
