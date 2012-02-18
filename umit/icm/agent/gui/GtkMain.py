@@ -200,6 +200,11 @@ class GtkMain(object):
             from umit.icm.agent.gui.Login import LoginDialog
             self.login_dlg = LoginDialog()
             self.login_dlg.show_all()
+    
+    def set_to_logging_in(self):
+        if appindicator is None:
+            self.tray_icon.set_tooltip("Logging in...")
+        self.tray_menu.children()[0].set_sensitive(False)
 
 
 if __name__ == "__main__":

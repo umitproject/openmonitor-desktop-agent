@@ -26,9 +26,12 @@ for the agent.
 import os
 import time
 
+from types import StringTypes
+
 from umit.icm.agent.BasePaths import *
 from umit.icm.agent.Global import g_logger
 from umit.icm.agent.utils.SQLiteHelper import SQLiteHelper
+from umit.icm.agent.utils.Network import convert_ip
 
 ########################################################################
 class DBHelper(object):
@@ -162,8 +165,14 @@ class DBHelper(object):
         self.commit()
     
     def get_banned_network(self, start_ip, end_ip):
+        if type(start_ip) in StringTypes:
+            start_ip = convert_ip(start_ip)
+        
+        if type(end_ip) in StringTypes:
+            end_ip = convert_ip(end_ip)
+        
         return self.select("SELECT * FROM bannets WHERE "
-                           "start_number <= %s AND end_number >= %s" % \
+                           "start_number <= %d AND end_number >= %d" % \
                            (start_ip, end_ip))
     
     def get_banned_agent(self, agent_id):

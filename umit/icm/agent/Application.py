@@ -125,8 +125,7 @@ class Application(object):
 
     def login(self, username, password, save_login=False, login_only=False):
         if self.use_gui:
-            self.gtk_main.tray_icon.set_tooltip("Logging in...")
-            self.gtk_main.tray_menu.children()[0].set_sensitive(False)
+            self.gtk_main.set_to_logging_in()
         
         if not theApp.peer_info.is_registered:
             deferred = self.register_agent(username, password)
