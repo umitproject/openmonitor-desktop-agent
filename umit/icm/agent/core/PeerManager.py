@@ -21,6 +21,7 @@
 
 import random
 
+from umit.icm.agent.logger import g_logger
 from umit.icm.agent.Application import theApp
 from umit.icm.agent.Global import *
 from twisted.internet import reactor
@@ -28,7 +29,7 @@ from twisted.internet import reactor
 FAILURE_INCREASE_COUNT = 2
 SUCCESS_REDUCE_COUNT = 1
 
-########################################################################
+
 class PeerEntry(object):
     """"""
 
@@ -47,7 +48,7 @@ class PeerEntry(object):
 
         self.transport = None
         self.status = 'Disconnected'
-    
+
     def __unicode__(self):
         return u"Peer Entry %d (%s - %d) %s:%s - Net ID %s" % \
                         (self.ID,
@@ -55,7 +56,7 @@ class PeerEntry(object):
                          self.Type, self.IP, self.Port, self.network_id)
 
 
-########################################################################
+#---------------------------------------------------------------------
 class PeerManager:
     """"""
 
@@ -116,20 +117,20 @@ class PeerManager:
                 self.normal_peers[peer_entry.ID] = peer_entry
             elif peer_entry.Type == 3:
                 self.mobile_peers[peer_entry.ID] = peer_entry
-    
+
     def scan(self):
         """The scanning procedure works as follows:
         Scanning Peer A, sends check_alive packets in preferred networks in
         specific port ranges with its own info (ID, ip, port, pb key).
-        
+
         The receiving peer, would receive this packet and check against the
         aggregator or another super peer if that is a tagged agent. If negative,
         the agent can respond with its own details and proceed with connection.
         If positive, which means the agent was tagged for abuse or misconduct
         in the past, it will ignore the request as if it never received it.
-        
+
         ---
-        
+
         The preferred networks are defined as follows:
         - A compilation you can get from the Aggregator or another super peer
         - The networks with higher concentration of nodes
@@ -137,32 +138,32 @@ class PeerManager:
         - The networks within your region
         - The networks in regions nearby
         - The rest of the internet
-        
+
         API: get_netlist
         Message: GetNetlist
         Response: GetNetlistResponse
-        
+
         ---
-        
+
         The logic on refusing to answer scan probes:
         - Match ip against a compilation you can get from the Aggregator or
           another super peer
         - Refuse to connect from networks with higher concentration of tagged
           nodes.
-        
+
         API: get_banlist (for the compilation)
         Message: GetBanlist
         Response: GetBanlistResponse
-        
+
         API: get_bannets (for the tagged networks)
         Message: GetBannets
         Response: GetBannetsResponse
-        
+
         """
-    
+
     def agent_is_banned(self, agent_id):
         return g_db_helper.agent_is_banned(agent_id)
-    
+
     def network_is_banned(self, ip):
         return g_db_helper.network_is_banned(ip)
 
@@ -171,12 +172,12 @@ class PeerManager:
         if self.agent_is_banned(peer_id) or self.network_is_banned(ip):
             g_logger.info("Super agent %s is banned or is running from a banned "
                           "network %s" % (peer_id, ip))
-            
+
             if peer_id in self.super_peers:
                 self.remove_super_peer(peer_id)
-            
+
             return
-        
+
         if peer_id in self.super_peers:
             g_logger.info("Peer id %d already exists in super peer list." %
                           peer_id)
@@ -197,12 +198,12 @@ class PeerManager:
         if self.agent_is_banned(peer_id) or self.network_is_banned(ip):
             g_logger.info("Desktop agent %s is banned or is running from a banned "
                           "network %s" % (peer_id, ip))
-            
+
             if peer_id in self.normal_peers:
                 self.remove_normal_peer(peer_id)
-            
+
             return
-        
+
         if peer_id in self.normal_peers:
             g_logger.info("Peer id %d already exists in normal peer list." %
                           peer_id)
@@ -223,12 +224,12 @@ class PeerManager:
         if self.agent_is_banned(peer_id) or self.network_is_banned(ip):
             g_logger.info("Mobile agent %s is banned or is running from a banned "
                           "network %s" % (peer_id, ip))
-            
+
             if peer_id in self.mobile_peers:
                 self.remove_mobile_peer(peer_id)
-            
+
             return
-        
+
         if peer_id in self.mobile_peers:
             g_logger.info("Peer id %d already exists in mobile peer list." %
                           peer_id)
@@ -322,9 +323,10 @@ class PeerManager:
     def connect_to_peer(self, peer_id):
         if self.agent_is_banned(peer_id):
             g_logger.info("Agent %s is banned." % peer_id)
-        
-        if peer_id != theApp.peer_info.ID and \
-           peer_id not in self.sessions:
+
+        if peer_id == theApp.peer_info.ID:
+            g_logger.error("Can't connect to self.")
+        if peer_id not in self.sessions:
             peer_entry = None
             if peer_id in self.super_peers:
                 peer_entry = self.super_peers[peer_id]
@@ -346,14 +348,12 @@ class PeerManager:
                                theApp.factory)
             g_logger.debug("Connecting to %s:%d..." %
                            (peer_entry.IP, peer_entry.Port))
-        elif peer_id == theApp.peer_info.ID:
-            g_logger.error("Can't connect to self.")
-    
+
     def sync_banlist(self, message):
         for agent_id in message.agent_ids:
             ban = g_db_helper.insert_banned_agent(agent_id)
             g_logger.info("Banned %s: %s" % (agent_id, str(ban)))
-    
+
     def sync_bannets(self, message):
         for network in message.networks:
             ban = g_db_helper.insert_banned_network(network.start_ip,
@@ -361,14 +361,14 @@ class PeerManager:
                                                     network.nodes_count,
                                                     network.flags)
             g_logger.info("Banned %s: %s" % (network, str(ban)))
-            
+
 
     def _connected_to_aggregator(self, data):
         if theApp.aggregator.available:
             if not theApp.peer_info.registered:
                 d = theApp.aggregator.register()
                 d.addCallback(self._after_registration)
-            
+
             #elif not theApp.peer_info.login:
             #    #d = theApp.aggregator.login()
             #    #d.addCallback(self._after_login)
@@ -387,7 +387,7 @@ class PeerManager:
             theApp.gtk_main.set_login_status(True)
         #else:
             #theApp.gtk_main.set_login_status(False)
-            
+
     def _check_aggregator_errback(self, messgae):
         g_logger.critical("Failed to check aggregator: %s" % message)
 

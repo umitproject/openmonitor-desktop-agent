@@ -26,6 +26,7 @@ from twisted.internet import reactor
 
 from higwidgets import HIGWindow
 
+from umit.icm.agent.logger import g_logger
 from umit.icm.agent.Global import *
 from umit.icm.agent.I18N import _
 from umit.icm.agent.BasePaths import *
@@ -47,11 +48,11 @@ class GtkMain(object):
         self._create_tray()
         self._create_widgets()
         self.set_login_status(False)
-        
+
     def _create_tray(self):
         self.tray_menu_logged_in = gtk.Menu()
         self.tray_menu_logged_out = gtk.Menu()
-        
+
         if appindicator is not None:
             g_logger.info("APP INDICATOR!")
             # This means we're running on unity and we need a different tray
@@ -143,7 +144,7 @@ class GtkMain(object):
             else:
                 self.tray_menu.popdown()
             self.tray_menu = self.tray_menu_logged_in
-            
+
             if appindicator is None:
                 self.tray_icon.set_from_file(
                     os.path.join(ICONS_DIR, "tray_icon_32.ico"))
@@ -153,7 +154,7 @@ class GtkMain(object):
             else:
                 self.tray_menu.popdown()
             self.tray_menu = self.tray_menu_logged_out
-            
+
             if appindicator is None:
                 self.tray_icon.set_from_file(
                     os.path.join(ICONS_DIR, "tray_icon_gray_32.ico"))
@@ -200,7 +201,7 @@ class GtkMain(object):
             from umit.icm.agent.gui.Login import LoginDialog
             self.login_dlg = LoginDialog()
             self.login_dlg.show_all()
-    
+
     def set_to_logging_in(self):
         if appindicator is None:
             self.tray_icon.set_tooltip("Logging in...")

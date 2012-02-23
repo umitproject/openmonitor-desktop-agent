@@ -37,7 +37,7 @@ from umit.icm.agent.Global import *
 from umit.icm.agent.Application import theApp
 from umit.icm.agent.gui.Registration import RegistrationDialog
 
-########################################################################
+
 class LoginDialog(HIGDialog):
     """"""
 

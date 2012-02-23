@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 # Copyright (C) 2011 Adriano Monteiro Marques
 #
-# Author:  Zhongjie Wang <wzj401@gmail.com>
+# Authors:  Zhongjie Wang <wzj401@gmail.com>
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -18,19 +18,29 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
-import time
+__all__ = ['g_logger']
+
+import os
+
+from umit.icm.agent.BasePaths import *
+from umit.common.UmitLogging import Log
 
 
-class Session(object):
-    """"""
+_levels = {
+    'CRITICAL' : 50,
+    'FATAL' : 50,
+    'ERROR' : 40,
+    'WARN' : 30,
+    'WARNING' : 30,
+    'INFO' : 20,
+    'DEBUG' : 10,
+    'NOTSET' : 0,
+}
+LOGLEVEL = 'DEBUG'
 
-    #----------------------------------------------------------------------
-    def __init__(self, id_, transport):
-        """Constructor"""
-        self.remote_id = id_
-        self._transport = transport
-        self.remote_ip = self._transport.getPeer().host
-        self.remote_port = self._transport.getPeer().port
-        self.begin_time = int(time.time())
+if not os.path.exists(LOG_DIR):
+    os.mkdir(LOG_DIR)
+log_path = os.path.join(LOG_DIR, 'icm-desktop.log')
 
-
+g_logger = Log("ICM Desktop Agent", _levels[LOGLEVEL], log_path)
+open(log_path, 'w')

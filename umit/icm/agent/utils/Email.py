@@ -25,7 +25,6 @@ from twisted.internet.protocol import ClientCreator, ClientFactory
 from twisted.mail import smtp
 
 
-########################################################################
 class BugReportMailProtocol(smtp.ESMTPClient):
     """"""
 
@@ -46,8 +45,7 @@ class BugReportMailProtocol(smtp.ESMTPClient):
         self._disconnectFromServer()
 
 
-
-########################################################################
+#---------------------------------------------------------------------
 class EmailSender(object):
     """"""
 

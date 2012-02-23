@@ -23,10 +23,11 @@ import time
 from zope.interface import implements
 from twisted.internet.interfaces import IConsumer
 
+from umit.icm.agent.logger import g_logger
 from umit.icm.agent.Application import theApp
 from umit.icm.agent.Global import *
 
-########################################################################
+
 class ReportUploader(object):
     """"""
 

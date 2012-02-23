@@ -145,7 +145,7 @@ class PreferenceWindow(HIGWindow):
         for tname in ALL_TESTS:
             ts.append(None, [tname])
 
-        SELECTED_TESTS = g_db_helper.get_value('selected_tests')
+        SELECTED_TESTS = g_config.get('application', 'selected_tests')
         if SELECTED_TESTS:
             ts = self.test_page.subbox.tree_view_selected_tests.treestore
             for tname in SELECTED_TESTS:
@@ -157,7 +157,7 @@ class PreferenceWindow(HIGWindow):
         else:
             self.test_page.checkbtn.set_active(False)
 
-########################################################################
+#---------------------------------------------------------------------
 class PreferencePage(HIGVBox):
     """"""
 
@@ -245,7 +245,7 @@ class PreferencePage(HIGVBox):
         self.superpeers_subhbox._pack_noexpand_nofill(self.btn_box)
         self.superpeers_table.attach_label(self.superpeers_subhbox, 0, 1, 0, 1)
 
-########################################################################
+#---------------------------------------------------------------------
 class TestPage(HIGVBox):
     """"""
 
@@ -369,7 +369,7 @@ class TestsView(HIGVBox):
         self.add(self.treeview)
         self.show_all()
 
-########################################################################
+#---------------------------------------------------------------------
 class FeedbackPage(HIGVBox):
     """"""
 

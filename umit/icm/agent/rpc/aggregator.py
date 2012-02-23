@@ -35,6 +35,7 @@ from umit.icm.agent.rpc.message import *
 from umit.icm.agent.rpc.MessageFactory import MessageFactory
 from umit.icm.agent.rpc import messages_pb2
 
+from umit.icm.agent.logger import g_logger
 from umit.icm.agent.Application import theApp
 from umit.icm.agent.Global import *
 from umit.icm.agent.rpc.Session import Session
@@ -64,14 +65,15 @@ aggregator_api_url = {
     'GetBannets': '/get_bannets/',
 }
 
-########################################################################
+#---------------------------------------------------------------------
 class AggregatorAPI(object):
     """"""
 
     #----------------------------------------------------------------------
     def __init__(self, aggregator=None):
         """Constructor"""
-        self.base_url = g_db_helper.get_value('aggregator_url') if aggregator is None else aggregator
+        self.base_url = g_config.get('network', 'aggregator_url') \
+            if aggregator is None else aggregator
         self.available = True
         self.pending_report_ids = []
 
@@ -87,7 +89,7 @@ class AggregatorAPI(object):
     def _handle_check_aggregator_response(self, message):
         if message is None:
             return
-        
+
         if message.status == "ON":
             self.available = True
         else:
@@ -95,7 +97,7 @@ class AggregatorAPI(object):
         g_logger.info("Aggregator status: %s" % message.status)
         g_logger.debug("Aggregator version: %s" % message.header.currentVersionNo)
         g_logger.debug("Aggregator test version: %s" % message.header.currentTestVersionNo)
-        
+
         return message
 
     """ Peer """
@@ -122,16 +124,16 @@ class AggregatorAPI(object):
         if message is None:
             g_logger.error("Empty response while trying to register.")
             return
-        
+
         g_logger.info("RegisterAgent response: (%d, %s)" %
                       (message.agentID, message.publicKeyHash))
-        
+
         return {'id': message.agentID, 'hash': message.publicKeyHash}
 
     def login(self, username, password):
         request_msg = Login()
         request_msg.agentID = theApp.peer_info.ID
-        
+
         self.challenge = str(random.random())
         request_msg.challenge = self.challenge
         request_msg.port = theApp.listen_port
@@ -146,14 +148,14 @@ class AggregatorAPI(object):
     def _handle_login_step1(self, message):
         if message is None:
             return
-        
+
         if not theApp.key_manager.aggregator_public_key.verify(
             self.challenge, message.cipheredChallenge):
             g_logger.warning("Challenge doesn't match. Maybe something wrong "
                              "with aggregator public key or the current "
                              "aggregator is fake.")
             return
-        
+
         request_msg = LoginStep2()
         request_msg.processID = message.processID
         request_msg.cipheredChallenge = theApp.key_manager.private_key.sign(message.challenge)
@@ -161,19 +163,19 @@ class AggregatorAPI(object):
         defer_ = self._send_message(request_msg, LoginResponse)
         defer_.addCallback(self._handle_login_response)
         defer_.addErrback(self._handle_errback)
-        
+
         return defer_
 
     def _handle_login_response(self, message):
         if message is None:
             return
-        
+
         g_logger.info("Login successfully.")
-        
+
         # Being available, we need to retrieve the bannets and banlist
         d = theApp.aggregator.get_banlist()
         d = theApp.aggregator.get_bannets()
-        
+
         return True
 
     def logout(self):
@@ -181,14 +183,14 @@ class AggregatorAPI(object):
         request_msg.agentID = theApp.peer_info.ID
         defer_ = self._send_message(request_msg)
         defer_.addCallback(self._handle_logout)
-        
+
         return defer_
 
     def _handle_logout(self, message):
         g_logger.debug("Logout message: %s" % message)
-        
+
         theApp.peer_info.login = False
-        
+
         return message
 
     #def report_peer_info(self):
@@ -215,7 +217,7 @@ class AggregatorAPI(object):
                                                speer.token,
                                                speer.publicKey)
             theApp.peer_manager.connect_to_peer(speer.agentID)
-        
+
         return message
 
     def get_peer_list(self, count):
@@ -238,7 +240,7 @@ class AggregatorAPI(object):
                                                 peer.token,
                                                 peer.publicKey)
             theApp.peer_manager.connect_to_peer(peer.agentID)
-        
+
         return message
 
     """ Event """
@@ -251,7 +253,7 @@ class AggregatorAPI(object):
         defer_ = self._send_message(request_msg, GetEventsResponse)
         defer_.addCallback(self._handle_get_events_response)
         defer_.addErrback(self._handle_errback)
-        
+
         return defer_
 
     def _handle_get_events_response(self, message):
@@ -259,7 +261,7 @@ class AggregatorAPI(object):
             return
         for event in message.events:
             theApp.event_manager.add_event(event)
-        
+
         return message
 
     """ Report """
@@ -283,16 +285,16 @@ class AggregatorAPI(object):
         defer_ = self._send_message(request_msg, SendReportResponse)
         defer_.addCallback(self._handle_send_website_report_response)
         defer_.addErrback(self._handle_errback)
-        
+
         return defer_
 
     def _handle_send_website_report_response(self, message):
         if message is None:
             return
-        
+
         theApp.statistics.reports_sent_to_aggregator = \
               theApp.statistics.reports_sent_to_aggregator + 1
-        
+
         if len(self.pending_report_ids):
             report_id = self.pending_report_ids.pop(0) # assume FIFO
             g_logger.info("WebsiteReport '%s' has been sent to aggregator" % \
@@ -301,7 +303,7 @@ class AggregatorAPI(object):
                                                 ReportStatus.SENT_TO_AGGREGATOR)
         else:
             g_logger.info("WebsiteReport has been sent to aggregator")
-        
+
         return message
 
     def send_service_report(self, report):
@@ -313,17 +315,17 @@ class AggregatorAPI(object):
         defer_ = self._send_message(request_msg, SendReportResponse)
         defer_.addCallback(self._handle_send_service_report_response)
         defer_.addErrback(self._handle_errback)
-        
+
         return defer_
 
     def _handle_send_service_report_response(self, message):
         g_logger.debug("Handle Send Service Report: %s" % message)
         if message is None:
             return
-        
+
         theApp.statistics.reports_sent_to_aggregator = \
               theApp.statistics.reports_sent_to_aggregator + 1
-        
+
         if len(self.pending_report_ids):
             report_id = self.pending_report_ids.pop(0) # assume FIFO
             g_logger.info("ServiceReport '%s' has been sent to aggregator" % \
@@ -332,7 +334,7 @@ class AggregatorAPI(object):
                                                 ReportStatus.SENT_TO_AGGREGATOR)
         else:
             g_logger.info("ServiceReport has been sent to aggregator")
-        
+
         return message
 
     """ Suggestion """
@@ -346,14 +348,14 @@ class AggregatorAPI(object):
         defer_ = self._send_message(request_msg, TestSuggestionResponse)
         defer_.addCallback(self._handle_website_suggestion_response)
         defer_.addErrback(self._handle_errback)
-        
+
         return defer_
 
     def _handle_website_suggestion_response(self, message):
         if message is None:
             return
         g_logger.info("WebsiteSuggestion has been sent to aggregator")
-        
+
         return message
 
     def send_service_suggestion(self, service_name, host_name, ip, port):
@@ -368,14 +370,14 @@ class AggregatorAPI(object):
         defer_ = self._send_message(request_msg, TestSuggestionResponse)
         defer_.addCallback(self._handle_service_suggestion_response)
         defer_.addErrback(self._handle_errback)
-        
+
         return defer_
 
     def _handle_service_suggestion_response(self, message):
         if message is None:
             return
         g_logger.info("ServiceSuggestion has been sent to aggregator")
-        
+
         return message
 
     """ Version """
@@ -394,12 +396,12 @@ class AggregatorAPI(object):
     def _handle_check_version_response(self, message):
         if message is None:
             return
-        
+
         return message
 
     def check_tests(self):
         request_msg = NewTests()
-        
+
         request_msg.currentTestVersionNo = TEST_PACKAGE_VERSION_NUM
 
         defer_ = self._send_message(request_msg, NewTestsResponse)
@@ -410,9 +412,9 @@ class AggregatorAPI(object):
     def _handle_check_tests_response(self, message):
         if message is None:
             return
-        
+
         return message
-    
+
     def get_netlist(self, count):
         request_msg = GetNetlist()
         request_msg.list = count
@@ -420,13 +422,13 @@ class AggregatorAPI(object):
         defer_ = self._send_message(request_msg, GetNetlistResponse)
         defer_.addCallback(self._handle_get_netlist_response)
         defer_.addErrback(self._handle_errback)
-        
+
         return defer_
 
     def _handle_get_netlist_response(self, message):
         if message is None:
             return
-        
+
         for net in message.networks:
             id = g_db_helper.insert_network(net.start_ip,
                                             net.end_ip,
@@ -439,11 +441,11 @@ class AggregatorAPI(object):
                                                     node.publicKey,
                                                     node.peerStatus,
                                                     id)
-            
+
             theApp.peer_manager.save_to_db()
-        
+
         return message
-    
+
     def get_banlist(self, count=100):
         request_msg = GetBanlist()
         request_msg.count = count
@@ -457,10 +459,10 @@ class AggregatorAPI(object):
         g_logger.info("GET BANLIST RESPONSE: %s" % message)
         if message is None:
             return
-        
+
         # TODO: Store the banlist locally
         theApp.peer_manager.sync_banlist(message)
-        
+
         return message
 
     def get_bannets(self, count=100):
@@ -476,10 +478,10 @@ class AggregatorAPI(object):
         g_logger.info("GET BANNETS RESPONSE: %s" % message)
         if message is None:
             return
-        
+
         # TODO: Store the bannets locally
         theApp.peer_manager.sync_bannets(message)
-        
+
         return message
 
 
@@ -509,14 +511,14 @@ class AggregatorAPI(object):
     def _aes_decrypt(self, text, msg_type):
         if text is None:
             return
-        
+
         assert theApp.key_manager.aggregator_aes_key
-        
+
         message = msg_type()
         message.ParseFromString(
             theApp.key_manager.aggregator_aes_key.decrypt(
                 base64.b64decode(text)))
-        
+
         return message
 
     def _encode(self, message):
@@ -525,10 +527,10 @@ class AggregatorAPI(object):
     def _decode(self, text, msg_type):
         if text is None:
             return
-        
+
         message = msg_type()
         message.ParseFromString(base64.b64decode(text))
-        
+
         return message
 
     def _send_message(self, message, response_msg_type=None):
@@ -554,7 +556,7 @@ class AggregatorAPI(object):
         else:
             postdata['agentID'] = theApp.peer_info.ID
             postdata['msg'] = self._aes_encrypt(message)
-        
+
         # send message
         url = self.base_url + aggregator_api_url[message.DESCRIPTOR.name]
         data = urllib.urlencode(postdata)
@@ -568,9 +570,9 @@ class AggregatorAPI(object):
                 defer_.addCallback(self._decode, response_msg_type)
             else:
                 defer_.addCallback(self._aes_decrypt, response_msg_type)
-        
+
         defer_.addErrback(self._decode_errback)
-        
+
         return defer_
 
     def _send_request(self, method, uri, data="", mimeType=None):
@@ -587,7 +589,7 @@ class AggregatorAPI(object):
 
     def _connection_errback(self, failure):
         g_logger.error("[AggregatorAPI] - %s" % failure)
-        
+
         if isinstance(failure, error.ConnectError) or \
            isinstance(failure, error.DNSLookupError):
             g_logger.error("Connecting to the aggregator failed.")

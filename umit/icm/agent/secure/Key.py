@@ -25,7 +25,7 @@ from Crypto.Cipher import AES
 DEFAULT_BLOCK_SIZE = 32
 DEFAULT_PADDING = '{'
 
-########################################################################
+
 class AESKey(object):
     """"""
 
@@ -67,7 +67,7 @@ from Crypto import Random
 
 RSA_KEY_SIZE = 1024
 
-########################################################################
+#---------------------------------------------------------------------
 class RSAKey(object):
     """"""
 
@@ -98,7 +98,7 @@ class RSAKey(object):
     def decrypt(self, ciphertext):
         return self.obj.decrypt(ciphertext)
 
-########################################################################
+#---------------------------------------------------------------------
 class RSAPublicKey(RSAKey):
     """"""
 
@@ -115,7 +115,7 @@ class RSAPublicKey(RSAKey):
     def verify(self, data, signed_data):
         return self.obj.verify(str(data), (long(base64.b64decode(signed_data)),))
 
-########################################################################
+#---------------------------------------------------------------------
 class RSAPrivateKey(RSAKey):
     """"""
 

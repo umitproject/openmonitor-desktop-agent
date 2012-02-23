@@ -18,19 +18,15 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
-try:
-    execfile("F:\\workspace\\PyWork\\icm-agent\\umit\\icm\\agent\\UmitImporter.py")
-except:
-    pass
-
 import base64
 import time
 
+from umit.icm.agent.logger import g_logger
 from umit.icm.agent.Global import *
 from umit.icm.agent.rpc.message import WebsiteReportDetail, ServiceReportDetail
 from umit.icm.agent.rpc.MessageFactory import MessageFactory
 
-########################################################################
+
 class EventEntry(object):
     """"""
 
@@ -46,7 +42,7 @@ class EventEntry(object):
         self.ServiceReport = None
 
 
-########################################################################
+#---------------------------------------------------------------------
 class EventManager(object):
     """"""
 

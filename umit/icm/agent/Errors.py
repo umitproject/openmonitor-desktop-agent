@@ -21,9 +21,9 @@
 import sys
 import traceback
 
-from umit.icm.agent.Global import g_logger
+from umit.icm.agent.logger import g_logger
 
-########################################################################
+
 class InitializationError(Exception):
     """"""
 
@@ -38,7 +38,7 @@ class InitializationError(Exception):
 class AggergatorError(RuntimeError):
     pass
 
-########################################################################
+#---------------------------------------------------------------------
 class ErrorHandler(object):
     """"""
 

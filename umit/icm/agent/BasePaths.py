@@ -22,7 +22,8 @@ import os
 import sys
 
 __all__ = ['ROOT_DIR', 'CONFIG_DIR', 'LOG_DIR', 'LOCALES_DIR', 'IMAGES_DIR',
-           'ICONS_DIR', 'DB_DIR', 'TMP_DIR']
+           'ICONS_DIR', 'DB_DIR', 'TMP_DIR',
+           'CONFIG_PATH', 'DB_PATH']
 
 ROOT_DIR = os.path.abspath(os.path.dirname(__file__))
 while not os.path.exists(os.path.join(ROOT_DIR, 'umit')):
@@ -59,3 +60,6 @@ if not os.path.exists(DB_DIR):
 
 if not os.path.exists(TMP_DIR):
     os.mkdir(TMP_DIR)
+
+CONFIG_PATH = os.path.join(CONFIG_DIR, 'agent.cfg')
+DB_PATH = os.path.join(DB_DIR, 'storage.db3')

@@ -21,6 +21,7 @@
 import base64
 import time
 
+from umit.icm.agent.logger import g_logger
 from umit.icm.agent.Application import theApp
 from umit.icm.agent.Global import *
 from umit.icm.agent.rpc.MessageFactory import MessageFactory
@@ -31,7 +32,6 @@ class ReportStatus:
     SENT_TO_SUPER_AGENT = 'SentToSuperAgent'
     SENT_TO_AGENT = 'SentToAgent'
 
-########################################################################
 class ReportEntry(object):
     """"""
 
@@ -57,7 +57,7 @@ class ReportEntry(object):
                 self.SourceIP,
                 self.Status)
 
-########################################################################
+#---------------------------------------------------------------------
 class ReportManager(object):
     """"""
 

@@ -18,6 +18,7 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
+from umit.icm.agent.logger import g_logger
 from umit.icm.agent.Application import theApp
 from umit.icm.agent.Global import *
 from umit.icm.agent.Version import *
@@ -26,7 +27,7 @@ from umit.icm.agent.rpc.message import *
 from umit.icm.agent.rpc.MessageFactory import MessageFactory
 from umit.icm.agent.rpc.Session import Session
 
-########################################################################
+
 class MobileAgentSession(Session):
     """"""
 
@@ -142,7 +143,7 @@ class MobileAgentSession(Session):
             theApp.peer_manager.mobile_peers[self.remote_id].Status = \
                   'Disconnected'
 
-########################################################################
+#---------------------------------------------------------------------
 class MobileAgentService(object):
     """"""
 

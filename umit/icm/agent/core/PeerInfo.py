@@ -20,10 +20,11 @@
 
 import cPickle
 
+from umit.icm.agent.logger import g_logger
 from umit.icm.agent.Global import *
 from umit.icm.agent.Application import theApp
 
-########################################################################
+
 class PeerInfo(object):
     """"""
 

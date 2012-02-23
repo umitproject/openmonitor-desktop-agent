@@ -24,6 +24,7 @@ import time
 
 from twisted.internet import defer
 
+from umit.icm.agent.logger import g_logger
 from umit.icm.agent.Application import theApp
 from umit.icm.agent.Global import *
 from umit.icm.agent.Version import *
@@ -35,7 +36,7 @@ from umit.icm.agent.utils.FileDownloader import FileDownloader
 from umit.icm.agent.Upgrade import *
 from umit.icm.agent.core.ReportManager import ReportStatus
 
-########################################################################
+
 class DesktopAgentSession(Session):
     """"""
 
@@ -208,7 +209,7 @@ class DesktopAgentSession(Session):
             theApp.peer_manager.normal_peers[self.remote_id].Status = \
                   'Disconnected'
 
-########################################################################
+#---------------------------------------------------------------------
 class DesktopSuperAgentSession(Session):
     """"""
 

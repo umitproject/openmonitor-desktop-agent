@@ -25,6 +25,7 @@ import time
 import zlib
 import subprocess
 
+from umit.icm.agent.logger import g_logger
 from umit.icm.agent.Global import *
 
 def update_agent(result, *args, **kw):

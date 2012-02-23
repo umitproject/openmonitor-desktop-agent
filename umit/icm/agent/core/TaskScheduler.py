@@ -23,10 +23,11 @@ import time
 from zope.interface import implements
 from twisted.internet.interfaces import IPushProducer
 
+from umit.icm.agent.logger import g_logger
 from umit.icm.agent.test import test_by_id
 from umit.icm.agent.Global import *
 
-########################################################################
+
 class TaskScheduler(object):
     """"""
 

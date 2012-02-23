@@ -33,6 +33,7 @@ from twisted.internet import reactor
 from twisted.internet.protocol import Factory, Protocol, ServerFactory, \
      ClientFactory
 
+from umit.icm.agent.logger import g_logger
 from umit.icm.agent.Global import *
 from umit.icm.agent.Application import theApp
 from umit.icm.agent.rpc.message import *
@@ -41,7 +42,7 @@ from umit.icm.agent.rpc.desktop import DesktopAgentSession, \
      DesktopSuperAgentSession
 from umit.icm.agent.rpc.mobile import MobileAgentSession
 
-########################################################################
+
 class AgentProtocol(Protocol):
     """"""
 
@@ -67,7 +68,7 @@ class AgentProtocol(Protocol):
         g_logger.info("New connection #%d established. with Peer: %s" % (
                       self.factory.connectionNum, self.transport.getPeer()))
 
-        maxConnectionNum = g_config.getint('network', 'max_connections_num')
+        maxConnectionNum = g_config.getint('network', 'max_conns_num')
         if self.factory.connectionNum > maxConnectionNum:
             self.transport.write("Too many connections, try later")
             self.transport.loseConnection()
@@ -272,7 +273,7 @@ class AgentProtocol(Protocol):
         self.transport.write(len32)
         self.transport.write(data)
 
-########################################################################
+#---------------------------------------------------------------------
 class AgentFactory(ServerFactory, ClientFactory):
     """"""
 
@@ -283,7 +284,7 @@ class AgentFactory(ServerFactory, ClientFactory):
         self.connectionNum = 0;
         self.peers = []
 
-########################################################################
+#---------------------------------------------------------------------
 class AgentService(service.Service):
     """"""
 

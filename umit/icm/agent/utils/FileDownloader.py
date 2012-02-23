@@ -21,9 +21,10 @@
 from twisted.internet import reactor
 from twisted.web.client import HTTPDownloader
 
+from umit.icm.agent.logger import g_logger
 from umit.icm.agent.Global import *
 
-########################################################################
+
 class FileDownloader(object):
     """Download file from HTTP server"""
 

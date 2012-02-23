@@ -18,9 +18,7 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
-__all__ = ['g_config', 'g_logger', 'g_db_helper', 'db_path', "config_path",
-           'ROOT_DIR', 'CONFIG_DIR', 'LOG_DIR', 'LOCALES_DIR', 'IMAGES_DIR',
-           'ICONS_DIR', 'DB_DIR', 'TMP_DIR', 'LOGLEVEL']
+__all__ = ['g_config', 'g_db_helper']
 
 import os
 import sys
@@ -28,37 +26,31 @@ import sys
 from umit.icm.agent.BasePaths import *
 
 #----------------------------------------------------------------------
-from umit.icm.agent.ICMConfig import ICMConfig
+from umit.icm.agent.config import FileConfig, DBConfig
 
-config_path = os.path.join(CONFIG_DIR, 'agent.cfg')
-if not os.path.exists(config_path):
-    sys.exit("Can't find config file.")
-
-g_config = ICMConfig(config_path)
-
-#----------------------------------------------------------------------
-from umit.common.UmitLogging import Log
-LOGLEVEL = g_config.get('logging', 'log_level')
-_levels = {
-    'CRITICAL' : 50,
-    'FATAL' : 50,
-    'ERROR' : 40,
-    'WARN' : 30,
-    'WARNING' : 30,
-    'INFO' : 20,
-    'DEBUG' : 10,
-    'NOTSET' : 0,
-}
-if not os.path.exists(LOG_DIR):
-    os.mkdir(LOG_DIR)
-log_filename = os.path.join(LOG_DIR, 'icm-desktop.log')
-
-open(log_filename, 'w')
-g_logger = Log("ICM Desktop Agent", _levels[LOGLEVEL], log_filename)
+useFileConf = True
+if useFileConf:
+    try:
+        g_config = FileConfig(CONFIG_PATH)
+    except IOError:
+        from umit.icm.agent.utils import CreateConf
+        CreateConf.create_file_conf(CONFIG_PATH)
+        g_config = FileConfig(CONFIG_PATH)
+else:
+    try:
+        g_config = DBConfig(DB_PATH)
+    except IOError:
+        from umit.icm.agent.utils import CreateConf
+        CreateConf.create_db_conf(DB_PATH)
+        g_config = DBConfig(DB_PATH)
 
 #----------------------------------------------------------------------
-from umit.icm.agent.utils.DBHelper import DBHelper
+from umit.icm.agent.db import DBHelper
 
-db_path = os.path.join(DB_DIR, 'storage.db3')
-g_db_helper = DBHelper('sqlite')
-g_db_helper.connect(db_path)
+try:
+    g_db_helper = DBHelper('sqlite')
+    g_db_helper.connect(DB_PATH)
+except IOError:
+    from umit.icm.agent.utils import CreateDB
+    CreateDB.create(DB_PATH)
+    g_db_helper.connect(DB_PATH)

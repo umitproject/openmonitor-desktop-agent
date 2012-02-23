@@ -18,12 +18,13 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
+from umit.icm.agent.logger import g_logger
 from umit.icm.agent.Global import *
 from umit.icm.agent.Application import theApp
 from umit.icm.agent.Errors import *
 from umit.icm.agent.secure.Key import *
 
-########################################################################
+
 class KeyManager(object):
     """"""
 
@@ -31,14 +32,14 @@ class KeyManager(object):
     def __init__(self):
         """Constructor"""
         # Load Aggregator Public Key
-        ag_pubkey = g_db_helper.get_value('aggregator_public_key', None)
+        ag_pubkey = g_db_helper.get_aggregator_publickey()
         if not ag_pubkey:
             raise InitializationError("Missing aggregator public key.")
         self.aggregator_public_key = RSAPublicKey()
         self.aggregator_public_key.construct(*ag_pubkey)
 
-        public_key = g_db_helper.get_value('public_key')
-        private_key = g_db_helper.get_value('private_key')
+        public_key = g_db_helper.get_self_publickey()
+        private_key = g_db_helper.get_self_privatekey()
         if not public_key or not private_key:
             # Generate RSA key
             g_logger.info("Generate RSA key for first time running.")
@@ -48,21 +49,21 @@ class KeyManager(object):
             self.public_key.construct(self.private_key.mod, self.private_key.exp)
 
             # write into db
-            g_db_helper.set_value('public_key', (self.public_key.mod,
-                                                 self.public_key.exp))
-            g_db_helper.set_value('private_key', (self.private_key.obj.n,
-                                                  self.private_key.obj.e,
-                                                  self.private_key.obj.d,
-                                                  self.private_key.obj.p,
-                                                  self.private_key.obj.q,
-                                                  self.private_key.obj.u))
+            g_db_helper.set_self_publickey((self.public_key.mod,
+                                            self.public_key.exp))
+            g_db_helper.set_self_privatekey((self.private_key.obj.n,
+                                             self.private_key.obj.e,
+                                             self.private_key.obj.d,
+                                             self.private_key.obj.p,
+                                             self.private_key.obj.q,
+                                             self.private_key.obj.u))
         else:
             self.public_key = RSAPublicKey()
             self.public_key.construct(*public_key)
             self.private_key = RSAPrivateKey()
             self.private_key.construct(*private_key)
 
-        ag_aeskey = g_db_helper.get_value('aggregator_aes_key')
+        ag_aeskey = g_db_helper.get_aggregator_aes_key()
         self.aggregator_aes_key = None
         if ag_aeskey:
             self.aggregator_aes_key = AESKey()

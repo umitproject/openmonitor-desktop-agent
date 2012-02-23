@@ -32,7 +32,12 @@ def create(conn_str):
     c = conn.cursor()
 
     # Create the tables
-    c.execute("CREATE TABLE kvp ("
+    c.execute("CREATE TABLE config ("
+              "key TEXT primary key not null, "
+              "value BLOB not null"
+              ")")
+
+    c.execute("CREATE TABLE keys ("
               "key TEXT primary key not null, "
               "value BLOB not null"
               ")")
@@ -120,7 +125,7 @@ def create(conn_str):
               "ma_num INTEGER NOT NULL, "
               "ma_failed_times INTEGER NOT NULL "
               ")")
-    
+
     c.execute("CREATE TABLE networks ("
               "id INTEGER NOT NULL PRIMARY KEY,"
               "start_number INTEGER NOT NULL,"
@@ -129,11 +134,11 @@ def create(conn_str):
               "created_at INTEGER NOT NULL,"
               "updated_at INTEGER NOT NULL"
               ")")
-    
+
     c.execute("CREATE TABLE banlist ("
               "agent_id INTEGER NOT NULL UNIQUE"
               ")")
-    
+
     c.execute("CREATE TABLE bannets ("
               "id INTEGER NOT NULL PRIMARY KEY,"
               "start_number INTEGER NOT NULL,"
@@ -145,14 +150,9 @@ def create(conn_str):
               ")")
 
     # Insert pre-defined values
-    c.execute("INSERT INTO kvp VALUES('aggregator_url', ?)",
-              (pack('http://alpha.openmonitor.org/api'),))
-    c.execute("INSERT INTO kvp VALUES('selected_tests', ?)",
-              (pack(''),))
-
     mod = 93740173714873692520486809225128030132198461438147249362129501889664779512410440220785650833428588898698591424963196756217514115251721698086685512592960422731696162410024157767288910468830028582731342024445624992243984053669314926468760439060317134193339836267660799899385710848833751883032635625332235630111L
     exp = 65537L
-    c.execute("INSERT INTO kvp VALUES('aggregator_public_key', ?)",
+    c.execute("INSERT INTO keys VALUES('aggregator_publickey', ?)",
               (pack((mod, exp)),))
 
     # Data for test
