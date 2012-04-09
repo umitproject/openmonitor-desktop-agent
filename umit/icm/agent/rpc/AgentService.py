@@ -89,15 +89,9 @@ class AgentProtocol(Protocol):
         if self._session is not None:
             g_logger.debug("Session %d ended." % self.remote_id)
             if self.remote_type == 1:
-                theApp.peer_manager.super_peers[self.remote_id].status = \
-                      'Disconnected'
-                theApp.statistics.super_agents_num = \
-                      theApp.statistics.super_agents_num - 1
+                theApp.peer_manager._super_peer_disconnected(self.remote_id)
             elif self.remote_type == 2:
-                theApp.peer_manager.normal_peers[self.remote_id].status = \
-                      'Disconnected'
-                theApp.statistics.normal_agents_num = \
-                      theApp.statistics.normal_agents_num - 1
+                theApp.peer_manager._normal_peer_disconnected(self.remote_id)
 
     def dataReceived(self, data):
         #print(data)
@@ -142,33 +136,27 @@ class AgentProtocol(Protocol):
                 #theApp.peer_manager.sessions[message.agentID] = self._session
                 pass
             elif self.remote_type == 1:  # super agent
-                if self.remote_id in theApp.peer_manager.super_peers:
-                    theApp.peer_manager.super_peers[self.remote_id]\
-                          .status = 'Connected'
-                else:
-                    theApp.peer_manager.add_super_peer(
-                        self.remote_id, self.remote_ip, serve_port,
-                        message.cipheredPublicKey)
-                self._session = DesktopSuperAgentSession(message.agentID,
-                                                         self.transport)
-                theApp.peer_manager.sessions[message.agentID] = self._session
-                g_logger.debug("Session %d created." % message.agentID)
-                theApp.statistics.super_agents_num = \
-                      theApp.statistics.super_agents_num + 1
+                res = theApp.peer_manager._super_peer_connected(
+                    self.remote_id, self.remote_ip, serve_port,
+                    message.cipheredPublicKey)
+                if res:
+                    self._session = DesktopSuperAgentSession(message.agentID,
+                                                             self.transport)
+                    theApp.peer_manager.sessions[message.agentID] = self._session
+                    g_logger.debug("Session %d created." % message.agentID)
+                    #theApp.statistics.super_agents_num = \
+                        #theApp.statistics.super_agents_num + 1
             elif self.remote_type == 2:  # desktop agent
-                if self.remote_id in theApp.peer_manager.normal_peers:
-                    theApp.peer_manager.normal_peers[self.remote_id]\
-                          .status = 'Connected'
-                else:
-                    theApp.peer_manager.add_normal_peer(
-                        self.remote_id, self.remote_ip, serve_port,
-                        message.cipheredPublicKey)
-                self._session = DesktopAgentSession(message.agentID,
-                                                    self.transport)
-                theApp.peer_manager.sessions[message.agentID] = self._session
-                g_logger.debug("Session %d created." % message.agentID)
-                theApp.statistics.normal_agents_num = \
-                      theApp.statistics.super_agents_num + 1
+                res = theApp.peer_manager._normal_peer_connected(
+                    self.remote_id, self.remote_ip, serve_port,
+                    message.cipheredPublicKey)
+                if res:
+                    self._session = DesktopAgentSession(message.agentID,
+                                                        self.transport)
+                    theApp.peer_manager.sessions[message.agentID] = self._session
+                    g_logger.debug("Session %d created." % message.agentID)
+                    #theApp.statistics.normal_agents_num = \
+                          #theApp.statistics.super_agents_num + 1
             elif self.remote_type == 3:  # mobile agent
                 if self.remote_id in theApp.peer_manager.mobile_peers:
                     theApp.peer_manager.mobile_peers[self.remote_id]\

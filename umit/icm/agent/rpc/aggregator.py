@@ -46,23 +46,23 @@ from umit.icm.agent.Version import VERSION_NUM
 from umit.icm.agent.test import TEST_PACKAGE_VERSION_NUM
 
 aggregator_api_url = {
-    'CheckAggregator': '/checkaggregator/',
-    'RegisterAgent': '/registeragent/',
-    'Login': '/loginagent/',
-    'LoginStep2': '/loginagent2/',
-    'Logout': '/logoutagent/',
-    'GetSuperPeerList': '/getsuperpeerlist/',
-    'GetPeerList': '/getpeerlist/',
-    'GetEvents': '/getevents/',
-    'SendWebsiteReport': '/sendwebsitereport/',
-    'SendServiceReport': '/sendservicereport/',
-    'WebsiteSuggestion': '/websitesuggestion/',
-    'ServiceSuggestion': '/servicesuggestion/',
-    'NewVersion': '/checkversion/',
-    'NewTests': '/checktests/',
-    'GetNetlist': '/get_netlist/',
-    'GetBanlist': '/get_banlist/',
-    'GetBannets': '/get_bannets/',
+    'CheckAggregator': '/api/checkaggregator/',
+    'RegisterAgent': '/api/registeragent/',
+    'Login': '/api/loginagent/',
+    'LoginStep2': '/api/loginagent2/',
+    'Logout': '/api/logoutagent/',
+    'GetSuperPeerList': '/api/getsuperpeerlist/',
+    'GetPeerList': '/api/getpeerlist/',
+    'GetEvents': '/api/getevents/',
+    'SendWebsiteReport': '/api/sendwebsitereport/',
+    'SendServiceReport': '/api/sendservicereport/',
+    'WebsiteSuggestion': '/api/websitesuggestion/',
+    'ServiceSuggestion': '/api/servicesuggestion/',
+    'NewVersion': '/api/checkversion/',
+    'NewTests': '/api/checktests/',
+    'GetNetlist': '/api/get_netlist/',
+    'GetBanlist': '/api/get_banlist/',
+    'GetBannets': '/api/get_bannets/',
 }
 
 #---------------------------------------------------------------------
@@ -545,7 +545,7 @@ class AggregatorAPI(object):
             # generate AES key
             theApp.key_manager.aggregator_aes_key = AESKey()
             theApp.key_manager.aggregator_aes_key.generate()
-            g_db_helper.set_value('aggregator_aes_key',
+            g_db_helper.set_value('keys', 'aggregator_aes_key',
                                   theApp.key_manager.aggregator_aes_key.get_key())
 
             postdata['key'] = base64.b64encode(

@@ -73,6 +73,9 @@ class PeerManager:
         self.max_speer_num = g_config.getint('network', 'max_speer_num')
         self.max_peer_num = g_config.getint('network', 'max_peer_num')
 
+        self.connected_peer_num = 0
+        self.connected_speer_num = 0
+
     def save_to_db(self):
         for peer_entry in self.super_peers.values():
             g_db_helper.execute(
@@ -118,6 +121,9 @@ class PeerManager:
             elif peer_entry.Type == 3:
                 self.mobile_peers[peer_entry.ID] = peer_entry
 
+    last_gotten = 0
+    last_connected = 0
+
     def scan(self):
         """The scanning procedure works as follows:
         Scanning Peer A, sends check_alive packets in preferred networks in
@@ -160,6 +166,50 @@ class PeerManager:
         Response: GetBannetsResponse
 
         """
+        # get the numbers of super peers and normal peers should be connected
+        speer_num = 0
+        peer_num = 0
+
+        if self.connected_speer_num < self.max_speer_num:
+            speer_num = self.max_speer_num - self.connected_speer_num
+
+        if self.connected_peer_num < self.max_peer_num:
+            peer_num = self.max_peer_num - self.connected_peer_num
+
+        # get the peer list from aggregator if available
+        # Also the peers gotten from aggregator last time could be connected
+        if theApp.aggregator.available and \
+           (self.last_gotten > 0 and self.last_connected > 0):
+            theApp.aggregator.get_super_peer_list(speer_num)
+            theApp.aggregator.get_peer_list(peer_num)
+            # check alive after peer list gotten
+            return
+
+        # get the peer list from super agents
+        # pick one super agent
+        speer = self.get_random_speer_connected()
+        speer.get_super_peer_list(speer_num)
+        speer.get_peer_list(peer_num)
+        #return
+
+        # get the peer list from other agents (gossip)
+        # pick some agents
+        peer = self.get_random_peer_connected()
+        peer.get_super_peer_list(speer_num)
+        peer.get_peer_list(peer_num)
+        #return
+
+        # scan local network
+
+        # scan local region
+
+        # scan nearby regions
+
+        # other ways
+
+        #
+        #
+        #
 
     def agent_is_banned(self, agent_id):
         return g_db_helper.agent_is_banned(agent_id)
@@ -167,20 +217,24 @@ class PeerManager:
     def network_is_banned(self, ip):
         return g_db_helper.network_is_banned(ip)
 
-    def add_super_peer(self, peer_id, ip, port, ciphered_public_key=None,
-                       status='Disconnected', network_id=None):
+    def _super_peer_connected(self, peer_id, ip, port, ciphered_public_key=None,
+                             network_id=None):
         if self.agent_is_banned(peer_id) or self.network_is_banned(ip):
-            g_logger.info("Super agent %s is banned or is running from a banned "
-                          "network %s" % (peer_id, ip))
-
+            g_logger.info("Super agent %d is banned or is running from "
+                          "a banned network %s" % (peer_id, ip))
             if peer_id in self.super_peers:
                 self.remove_super_peer(peer_id)
+            return False
 
-            return
+        if peer_id in self.super_peers and \
+           self.super_peers[peer_id].status == 'Connected':
+            g_logger.warning("Peer %d already connected." % peer_id)
+            return False
 
         if peer_id in self.super_peers:
-            g_logger.info("Peer id %d already exists in super peer list." %
-                          peer_id)
+            g_logger.debug("Peer id %d already exists in super peer list." %
+                           peer_id)
+            self.super_peers[peer_id].status = 'Connected'
         else:
             peer_entry = PeerEntry()
             peer_entry.Type = 1
@@ -188,25 +242,41 @@ class PeerManager:
             peer_entry.IP = ip
             peer_entry.Port = port
             peer_entry.CipheredPublicKey = ciphered_public_key
-            peer_entry.status = status
+            peer_entry.status = 'Connected'
             peer_entry.network_id = network_id
             self.super_peers[peer_entry.ID] = peer_entry
-            self.super_peer_num = self.super_peer_num + 1
 
-    def add_normal_peer(self, peer_id, ip, port, ciphered_public_key=None,
-                        status='Disconnected', network_id=None):
+        self.connected_speer_num = self.connected_speer_num + 1
+        return True
+
+    def _super_peer_disconnected(self, peer_id):
+        if peer_id not in self.super_peers:
+            g_logger.warning("Peer id %d is not in super peer list." % \
+                             (peer_id, ip))
+            return False
+        # will not remove the peer entry from the list
+        self.super_peers[peer_id].status = 'Disconnected'
+        self.connected_speer_num = self.connected_speer_num - 1
+        return True
+
+    def _normal_peer_connected(self, peer_id, ip, port, ciphered_public_key=None,
+                              network_id=None):
         if self.agent_is_banned(peer_id) or self.network_is_banned(ip):
-            g_logger.info("Desktop agent %s is banned or is running from a banned "
-                          "network %s" % (peer_id, ip))
-
+            g_logger.info("Desktop agent %d is banned or is running from "
+                          "a banned network %s" % (peer_id, ip))
             if peer_id in self.normal_peers:
                 self.remove_normal_peer(peer_id)
+            return False
 
-            return
+        if peer_id in self.normal_peers and \
+           self.normal_peers[peer_id].status == 'Connected':
+            g_logger.warning("Peer %d already connected." % peer_id)
+            return False
 
         if peer_id in self.normal_peers:
-            g_logger.info("Peer id %d already exists in normal peer list." %
-                          peer_id)
+            g_logger.debug("Peer id %d already exists in normal peer list." %
+                           peer_id)
+            self.normal_peers[peer_id].status = 'Connected'
         else:
             peer_entry = PeerEntry()
             peer_entry.Type = 2
@@ -214,15 +284,26 @@ class PeerManager:
             peer_entry.IP = ip
             peer_entry.Port = port
             peer_entry.CipheredPublicKey = ciphered_public_key
-            peer_entry.status = status
+            peer_entry.status = 'Connected'
             peer_entry.network_id = network_id
             self.normal_peers[peer_entry.ID] = peer_entry
-            self.normal_peer_num = self.normal_peer_num + 1
+
+        self.connected_peer_num = self.connected_peer_num + 1
+
+    def _normal_peer_disconnected(self, peer_id):
+        if peer_id not in self.normal_peers:
+            g_logger.warning("Peer id %d is not in normal peer list." % \
+                             (peer_id, ip))
+            return False
+        # will not remove the peer entry from the list
+        self.normal_peers[peer_id].status = 'Disconnected'
+        self.connected_peer_num = self.connected_peer_num - 1
+        return True
 
     def add_mobile_peer(self, peer_id, ip, port, ciphered_public_key=None,
                         status='Disconnected', network_id=None):
         if self.agent_is_banned(peer_id) or self.network_is_banned(ip):
-            g_logger.info("Mobile agent %s is banned or is running from a banned "
+            g_logger.info("Mobile agent %d is banned or is running from a banned "
                           "network %s" % (peer_id, ip))
 
             if peer_id in self.mobile_peers:
@@ -316,6 +397,20 @@ class PeerManager:
             idx = random.randint(0, len(id_list)-1)
             return id_list[idx]
 
+    def get_random_peer_connected(self):
+        id_list = []
+        for peer_entry in self.normal_peers.values():
+            if peer_entry.status == 'Connected' and \
+               peer_entry.ID in self.sessions:
+                id_list.append(peer_entry.ID)
+
+        if len(id_list) == 0:
+            g_logger.warning("No available peer.")
+            return None
+        else:
+            idx = random.randint(0, len(id_list)-1)
+            return id_list[idx]
+
     def connect_all_super_peers(self):
         for peer_id in self.super_peers:
             self.connect_to_peer(peer_id)
@@ -372,7 +467,7 @@ class PeerManager:
             #elif not theApp.peer_info.login:
             #    #d = theApp.aggregator.login()
             #    #d.addCallback(self._after_login)
-            #    theApp.peer_info.login = True
+            #    theApp.peer_info.login = Truchecke
             #    self._after_login(None)
 
     def _after_registration(self, data):

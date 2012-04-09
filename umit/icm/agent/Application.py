@@ -157,9 +157,9 @@ class Application(object):
             self.peer_info.save_to_db()
 
             if save_login:
-                g_db_helper.set_value('auto_login', True)
+                g_config.set('application', 'auto_login', True)
             else:
-                g_db_helper.set_value('auto_login', False)
+                g_config.set('application', 'auto_login', False)
 
             if self.use_gui:
                 self.gtk_main.set_login_status(True)
@@ -192,7 +192,7 @@ class Application(object):
         if self.use_gui:
             self.gtk_main.set_login_status(False)
 
-        g_db_helper.set_value('auto_login', False)
+        g_config.set('application', 'auto_login', False)
 
         return result
 

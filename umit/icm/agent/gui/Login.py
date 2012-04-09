@@ -50,6 +50,7 @@ class LoginDialog(HIGDialog):
 
         self.set_position(gtk.WIN_POS_CENTER_ALWAYS)
         self.set_default_response(gtk.RESPONSE_ACCEPT)
+        self.set_keep_above(True)
         #self.set_size_request(400, 200)
         self._create_widgets()
         self._pack_widgets()
