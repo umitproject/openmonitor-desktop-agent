@@ -40,6 +40,9 @@ class Application(object):
         pass
 
     def _init_components(self, aggregator):
+
+        from umit.icm.agent.KadRouting import kadcaller
+        kadcaller.NodeCreator();
         from umit.icm.agent.core.PeerInfo import PeerInfo
         self.peer_info = PeerInfo()
 
