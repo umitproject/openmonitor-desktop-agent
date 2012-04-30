@@ -1,0 +1,744 @@
+[33mcommit bf990577ce1820334b7fcb42ff7e87eedce81d05[m
+Author: Narendran Thangarajan <narendran.thangarajan@gmail.com>
+Date:   Mon Apr 30 21:51:09 2012 +0530
+
+    Added hooks to plug in maidsafe library
+
+[33mcommit 7047cad52f21cc89e69d2c651f1055e5efd6c736[m
+Author: Zhongjie Wang <wzj401@gmail.com>
+Date:   Tue Apr 10 01:33:17 2012 +0800
+
+    Fixed the unable to login bug after modified the config class.
+
+[33mcommit 3ac4bd248dbe44b064f852a608315bb82c2afda5[m
+Author: Adriano Marques <adriano@umitproject.org>
+Date:   Thu Feb 23 23:20:28 2012 +0800
+
+    removed the line for test
+
+[33mcommit 1b586139a1b66813d2c59a36ec61aa6572cb8637[m
+Author: Adriano Marques <adriano@umitproject.org>
+Date:   Thu Feb 23 23:17:05 2012 +0800
+
+    Merged the DB related classes into a db module.
+    Merged the configuration classes into a config module.
+    Added CreateConf to create the initial configuration if it doesn't exist.
+    Moved the g_logger to the logger module.
+    Added a importer mod for test use
+
+[33mcommit 733e27ee6a7cbd3306fb33a6a028ba4195eae06b[m
+Author: Adriano Marques <adriano@umitproject.org>
+Date:   Fri Feb 17 17:49:20 2012 -0800
+
+    Tray now working fine, connecting to alpha site fine also. Agent stands by checking for sites to send reports.
+
+[33mcommit 5c6d97d7652a8f914d9e1fb33cf29ca7f67bcee4[m
+Author: Adriano Marques <adriano@umitproject.org>
+Date:   Fri Feb 17 14:25:19 2012 -0800
+
+    Now pointing to the alpha. Also, tray menu is now working on ubuntu's unity.
+
+[33mcommit 1f8ddf4fee0c9dd8598b2505eb2b4c12949f2131[m
+Author: Adriano Marques <adriano@umitproject.org>
+Date:   Fri Feb 17 05:48:55 2012 -0800
+
+    More work on bans
+
+[33mcommit db158e2e345d0da6eee681a202e340c10da5f3c5[m
+Author: Adriano Marques <adriano@umitproject.org>
+Date:   Wed Feb 15 19:47:08 2012 -0800
+
+    More work on ban agents and networks
+
+[33mcommit 79576258d1029bd2a5a17a6092e7dd487f0abe23[m
+Author: Adriano Marques <adriano@umitproject.org>
+Date:   Fri Feb 10 07:11:42 2012 -0800
+
+    Further improvements to agent desktop
+
+[33mcommit 83a08439661882610e43c15a332902607baba42b[m
+Author: Adriano Marques <adriano@umitproject.org>
+Date:   Thu Feb 2 07:44:39 2012 -0800
+
+    Fixing submodules
+
+[33mcommit 9beb38f79e6525a6213cc539d34b222d20e29145[m
+Author: Adriano Marques <adriano@umitproject.org>
+Date:   Thu Feb 2 07:42:32 2012 -0800
+
+    Adding another table to db and changing submodules
+
+[33mcommit 2467ebe9c205de96bc8b5a05f48db9464a69ae6c[m
+Author: Adriano Marques <adriano@umitproject.org>
+Date:   Wed Feb 1 07:59:36 2012 -0800
+
+    Get netlist is now working, but we're not doing anything with these results yet.
+
+[33mcommit 638c082971ca302d901bf3d3096e64bfcd906936[m
+Author: Adriano Marques <adriano@umitproject.org>
+Date:   Tue Jan 31 11:17:45 2012 -0800
+
+    Further work on get net lists and ban lists
+
+[33mcommit 15bdb46ab0359e70d915a430062c77a143bf03e7[m
+Author: Adriano Marques <adriano@umitproject.org>
+Date:   Mon Jan 30 04:47:43 2012 -0800
+
+    Compiled new messages.
+
+[33mcommit 04eedcb169e366e20e393df640f94695f92187ff[m
+Author: Adriano Marques <adriano@umitproject.org>
+Date:   Mon Jan 30 04:38:03 2012 -0800
+
+    Several fixes and adding the handlers for get_netlist, get_banlist and get_bannets so we can proceed with network scanning for other peers and actually become a hybrid network.
+
+[33mcommit 03cd3ac6dcf17b7c8c27373b671235af4edc237f[m
+Author: Adriano Marques <adriano@umitproject.org>
+Date:   Fri Jan 27 08:51:38 2012 -0800
+
+    Now we can decide whether to just login and take no further actions during agent execution. This is useful for the bot to test the agent. Also, will register before login in case user isn't registered already.
+
+[33mcommit fce37841abadc97ed7d3766970caa941be78746f[m
+Author: Adriano Marques <adriano@umitproject.org>
+Date:   Fri Jan 27 08:01:39 2012 -0800
+
+    Send website and service suggestions are now working.
+
+[33mcommit 35224a7a9bc0d3692c4dab4ec264999bca3ded9a[m
+Author: Adriano Marques <adriano@umitproject.org>
+Date:   Fri Jan 27 04:41:15 2012 -0800
+
+    Send service report is now working.
+
+[33mcommit 9074f69e9dee32a600cf96d951460d5e88133a9f[m
+Author: Adriano Marques <adriano@umitproject.org>
+Date:   Fri Jan 27 04:12:37 2012 -0800
+
+    Added the port attribute to the service report details message.
+
+[33mcommit a8f2d582fb0ff704378d4e5f3fa89bcaba4f1e3d[m
+Author: Adriano Marques <adriano@umitproject.org>
+Date:   Fri Jan 27 04:06:22 2012 -0800
+
+    Send website report is now working while sending to the aggregator.
+
+[33mcommit e25e24e50e9ac4d390e554c14a8e16cd0614b458[m
+Author: Adriano Marques <adriano@umitproject.org>
+Date:   Wed Jan 25 20:28:32 2012 -0800
+
+    get events is now working
+
+[33mcommit df9c9b58019518b3f277b94f00737b6ec113863f[m
+Author: Adriano Marques <adriano@umitproject.org>
+Date:   Wed Jan 25 20:24:58 2012 -0800
+
+    Agents are now connecting to each other.
+
+[33mcommit 37ec5f16e01d18b37c222351e21344f3b29c3635[m
+Author: Adriano Marques <adriano@umitproject.org>
+Date:   Wed Jan 25 20:20:27 2012 -0800
+
+    Recompiled proto messages and implemented minor fixes on agentservice.py
+
+[33mcommit e7fa2010e14015c8e67bd4e90fb7b7a8d689b1a3[m
+Author: Adriano Marques <adriano@umitproject.org>
+Date:   Wed Jan 25 08:35:39 2012 -0800
+
+    Several fixes to get super peer list and get peer list methods.
+
+[33mcommit c6a1b946ae83ef0fc436fd887fe414526d8c3036[m
+Author: Adriano Marques <adriano@umitproject.org>
+Date:   Wed Jan 25 04:24:17 2012 -0800
+
+    Fixing registration and check_version.
+
+[33mcommit 29ff7c5afbce1dc4e9da1ca58306ab904f975658[m
+Author: Adriano Marques <adriano@umitproject.org>
+Date:   Tue Jan 24 16:14:18 2012 -0800
+
+    More fixes and improvements.
+
+[33mcommit ecb73d3ac50135f340f6c23c2c5dd10226a85e47[m
+Author: Adriano Marques <adriano@umitproject.org>
+Date:   Sat Jan 21 03:33:35 2012 -0800
+
+    Now we can decide whether to serve for other clients while running from bot.
+
+[33mcommit fcd72f63981427e7599765b00424e071a5e1f0d7[m
+Author: Adriano Marques <adriano@umitproject.org>
+Date:   Fri Jan 20 07:06:40 2012 -0800
+
+    Various fixes to allow for the agent to be manipulated by the ibot for tests. Registration tests executed by the ibot passed ok.
+
+[33mcommit 8f6a55c0631036ca9a9eafffe95335b1216d193d[m
+Author: Adriano Marques <adriano@umitproject.org>
+Date:   Sat Jan 7 12:19:23 2012 -0800
+
+    Updating remotes
+
+[33mcommit 537cec58550cc73b4a9e5b5ce362ae0cd173702b[m
+Author: Adriano Marques <adriano@umitproject.org>
+Date:   Sat Jan 7 12:12:57 2012 -0800
+
+    Merged local changes into master
+
+[33mcommit 7b381c006121277d69538dd9b30434cca3c1ad47[m
+Author: Zhongjie Wang <wzj401@gmail.com>
+Date:   Tue Oct 18 16:36:42 2011 +0800
+
+    Finished Registration and Login.
+
+[33mcommit 6ea93dcc34a18843288e79f0d1f899fa308dd9ac[m
+Author: Zhongjie Wang <wzj401@gmail.com>
+Date:   Mon Oct 17 00:56:45 2011 +0800
+
+    Finished aggregator RegisterAgent and Login processes.
+
+[33mcommit 97d94c47e791542dd2586fc93aeda9aa99358b4c[m
+Author: Luís A. Bastião Silva <luis.kop@gmail.com>
+Date:   Sun Oct 16 15:09:47 2011 +0100
+
+    Register is working now
+
+[33mcommit 0400a6fdc9bee87e834fbd21020e29433293bf6f[m
+Author: Zhongjie Wang <wzj401@gmail.com>
+Date:   Sat Oct 15 22:52:52 2011 +0800
+
+    Added CryptoLib
+
+[33mcommit a8307ee886ef3495d376f0cbb614534bc9943472[m
+Merge: 9f4f466 b4256be
+Author: Zhongjie Wang <wzj401@gmail.com>
+Date:   Sat Oct 15 22:43:57 2011 +0800
+
+    Merge branch 'master' of git.umitproject.org:/icm-agent
+
+[33mcommit 9f4f466842b96bf9f5e4410a5ebb503c04b31e28[m
+Author: Zhongjie Wang <wzj401@gmail.com>
+Date:   Sat Oct 15 22:42:58 2011 +0800
+
+    Updated the Key module
+
+[33mcommit b4256bec782a400a5ef392a4f00ef05b60f47f5f[m
+Author: Luís A. Bastião Silva <luis.kop@gmail.com>
+Date:   Sat Oct 15 12:28:47 2011 +0100
+
+    Register callbacks to Register Dialog and fixed call to RPC
+
+[33mcommit bb079e45ddf06ee1dec0211a89e3ba7d317fc850[m
+Author: Luís A. Bastião Silva <luis.kop@gmail.com>
+Date:   Wed Oct 12 22:34:13 2011 +0100
+
+    Added links to register/forget password
+
+[33mcommit c49784ae01164cf6583eca02b5946db4e56f1186[m
+Author: Luís A. Bastião Silva <luis.kop@gmail.com>
+Date:   Tue Oct 11 11:02:33 2011 +0100
+
+    Added Status to the table (until now it is not added) :-(
+
+[33mcommit 00c43d4dcf8c7253ebce5f248d72025b162350b9[m
+Author: Luís A. Bastião Silva <luis.kop@gmail.com>
+Date:   Tue Oct 11 11:00:32 2011 +0100
+
+    Fixed name of field status in peers table
+
+[33mcommit 2d0d4e4355efb29153e815f94758805b022ecd77[m
+Author: Zhongjie Wang <wzj401@gmail.com>
+Date:   Tue Oct 11 17:04:57 2011 +0800
+
+    Start looping call after login
+
+[33mcommit 65fec96cce56f28b96641fcb1aac46f23d2224ea[m
+Author: Zhongjie Wang <wzj401@gmail.com>
+Date:   Tue Oct 11 16:27:49 2011 +0800
+
+    Removed Chilkat from README
+
+[33mcommit c9ff030f89f9fc6f15fd7b8cde2b4ef23915030e[m
+Merge: 1e6f261 cb0fd2e
+Author: Zhongjie Wang <wzj401@gmail.com>
+Date:   Tue Oct 11 16:27:10 2011 +0800
+
+    Merge branch 'master' of git.umitproject.org:/icm-agent
+
+[33mcommit 1e6f261580068bcc1fd6544961d7439bfec489f1[m
+Author: Zhongjie Wang <wzj401@gmail.com>
+Date:   Tue Oct 11 16:26:15 2011 +0800
+
+    Updated aggregator module for authentication
+
+[33mcommit cb0fd2e80a99d3ed3e7c656421ee2dbe0f632000[m
+Author: Luís A. Bastião Silva <luis.kop@gmail.com>
+Date:   Tue Oct 11 00:25:37 2011 +0100
+
+    Added PyCrypto to dependences in README
+
+[33mcommit 957e260aa0790ad56d70e5093576506b4a2a55fe[m
+Author: Luís A. Bastião Silva <luis.kop@gmail.com>
+Date:   Tue Oct 11 00:03:00 2011 +0100
+
+    Fixed minor issue with create table script
+
+[33mcommit 7e0c169ba46acedc9876a9bf37a0f9e4c885d66b[m
+Author: Zhongjie Wang <wzj401@gmail.com>
+Date:   Thu Oct 6 15:10:16 2011 +0800
+
+    Modified the test module according to the changes in message proto.
+    Slightly modified the aggregator api module.
+    Added Email sender.
+
+[33mcommit ec18a62b41d19bb999c98e0e42450ccd8e397eeb[m
+Author: Zhongjie Wang <wzj401@gmail.com>
+Date:   Sat Oct 1 00:31:24 2011 +0800
+
+    Modified AggregatorAPI.
+    Changed behaviors in Login window. etc
+
+[33mcommit aab7a702f3e2bee00ccdf4312a086e1be3fa104e[m
+Author: Zhongjie Wang <wzj401@gmail.com>
+Date:   Wed Sep 28 16:57:39 2011 +0800
+
+    Added AES and RSA keys. Added ErrorHandler class
+
+[33mcommit 6142a0bd81ed1f202d5017f3af67b6c2e1862d75[m
+Author: Zhongjie Wang <wzj401@gmail.com>
+Date:   Wed Sep 21 10:11:57 2011 +0800
+
+    Modified Dashboard and Statistics
+
+[33mcommit 685f904d79ade1fb2f553b8b86712a6029ef0437[m
+Merge: 301598e db60891
+Author: Zhongjie Wang <wzj401@gmail.com>
+Date:   Wed Sep 21 00:51:51 2011 +0800
+
+    Merge branch 'master' of dev.umitproject.org:/icm-agent
+
+[33mcommit 301598e6859632d5da0e6c7953798b3b921252ec[m
+Author: Zhongjie Wang <wzj401@gmail.com>
+Date:   Wed Sep 21 00:50:48 2011 +0800
+
+    Modified Dashboard
+
+[33mcommit db608918e0f3d834acf6c525e3416c00d6b56f67[m
+Merge: 2b3ec93 e867eeb
+Author: Zhongjie Wang <wzj401@gmail.com>
+Date:   Sat Sep 10 17:39:34 2011 +0800
+
+    Merge branch 'master' of dev.umitproject.org:/icm-agent
+
+[33mcommit 2b3ec93d89d965cd7ce91a0b32fa86a3dbfcf0b1[m
+Author: Zhongjie Wang <wzj401@gmail.com>
+Date:   Sat Sep 10 17:38:19 2011 +0800
+
+    Added SMTP, POP3, IMAP tests
+
+[33mcommit e867eebc66939965f5e71fd4b49e5acaf68caa7a[m
+Author: Adriano Marques <adriano@umitproject.org>
+Date:   Fri Sep 9 08:05:30 2011 -0700
+
+    Removed test file
+
+[33mcommit bdd4aec034da1f6cf25ba299f857e42534d466d4[m
+Author: Adriano Marques <adriano@umitproject.org>
+Date:   Fri Sep 9 08:05:21 2011 -0700
+
+    Adding a test file
+
+[33mcommit 4bfb5d31db00a030dca16f2f4331ce5b9dc8058a[m
+Merge: 1d8f232 0b44e7a
+Author: Luís A. Bastião Silva <luis.kop@gmail.com>
+Date:   Mon Sep 5 11:50:26 2011 +0100
+
+    Merge branch 'master' of dev.umitproject.org:/icm-agent
+
+[33mcommit 1d8f2329118fb2b03523d61523bd3f1424323bc2[m
+Author: Luís A. Bastião Silva <luis.kop@gmail.com>
+Date:   Mon Sep 5 11:49:55 2011 +0100
+
+    Added install scripts
+
+[33mcommit 0b44e7acf4d92ec5427793c7abfa88ba88eea488[m
+Author: Zhongjie Wang <wzj401@gmail.com>
+Date:   Sun Sep 4 21:34:39 2011 +0800
+
+    Fix bug in Preference Window
+
+[33mcommit ae2225063ffb902ed9825da15f273475a86f7073[m
+Author: Zhongjie Wang <wzj401@gmail.com>
+Date:   Tue Aug 30 20:19:37 2011 +0800
+
+    Added FtpServiceTest
+
+[33mcommit 46e70b069acbc7e9a6f680140c9b7bac8ce2bd8a[m
+Author: Zhongjie Wang <wzj401@gmail.com>
+Date:   Thu Aug 25 00:50:59 2011 +0800
+
+    gitignore change
+
+[33mcommit dea9d5a477286c411c265b4e9b2097a7c4fbbb82[m
+Author: Zhongjie Wang <wzj401@gmail.com>
+Date:   Thu Aug 25 00:50:12 2011 +0800
+
+    refact
+
+[33mcommit d50262a205e861eeb758d16471f0b213a7ce03a6[m
+Author: Zhongjie Wang <wzj401@gmail.com>
+Date:   Wed Aug 24 23:27:39 2011 +0800
+
+    Bug Fix
+
+[33mcommit 95e298b7573ddc2f75c0c981480bab75c328b6a8[m
+Author: Zhongjie Wang <wzj401@gmail.com>
+Date:   Wed Aug 24 23:17:29 2011 +0800
+
+    Added script to generate a clean database.
+
+[33mcommit 1eb06204ec31bd44ec8ea0b30f2de885cef4ec17[m
+Author: Zhongjie Wang <wzj401@gmail.com>
+Date:   Tue Aug 23 22:36:56 2011 +0800
+
+    Bug Fix
+
+[33mcommit 73a51f516ec3fc61dad822ffc35492346725bd14[m
+Author: Zhongjie Wang <wzj401@gmail.com>
+Date:   Tue Aug 23 21:48:37 2011 +0800
+
+    Added Dashboard
+
+[33mcommit 31d489d0cfe429ee82b6989f53a5f9fcb6c35719[m
+Author: Zhongjie Wang <wzj401@gmail.com>
+Date:   Mon Aug 22 00:50:02 2011 +0800
+
+    Updated Event window.
+    A better way to get ip.
+    updated Test tab in Preference window.
+    Added Dashboard
+
+[33mcommit df363bdd98ac9d6016b9dfd8eaf0ffe1f784cb27[m
+Author: Zhongjie Wang <wzj401@gmail.com>
+Date:   Fri Aug 19 00:52:57 2011 +0800
+
+    Added EventManager class for managing events in memory and db.
+    Updated Preference window, Tests tab.
+
+[33mcommit 515d8aa06425a080ff2d8829351bae78a78b1662[m
+Author: Adriano Marques <adriano@umitproject.org>
+Date:   Wed Aug 17 14:27:37 2011 -0700
+
+    FIX TO BasePaths to create dirs in case they don't exist. Calling CreateDB if db is not present, increased test rate and added an err handler for website tests.
+
+[33mcommit 13ae162414bf42b610c0fb84109d3533a451c8a0[m
+Author: crowdSpring <crowdspring@ubuntu.(none)>
+Date:   Wed Aug 17 14:26:36 2011 -0700
+
+    FIX TO BasePaths to create dirs in case they don't exist. Calling CreateDB if db is not present, increased test rate and added an err handler for website tests.
+
+[33mcommit 0432a5e4551260d64a2f0a6e73cd156069cc041b[m
+Author: Zhongjie Wang <wzj401@gmail.com>
+Date:   Thu Aug 18 00:47:55 2011 +0800
+
+    Finished Log window.
+
+[33mcommit 54d01d15e3213c317647dcf4180de5d83260c762[m
+Author: unknown <Alan@.(none)>
+Date:   Wed Aug 17 00:24:30 2011 +0800
+
+    Added some functional code to the Preference window
+    Fixed bugs in MobileAgentService
+
+[33mcommit b10bea8c7bbfb0d95ce870632b1ffeef701db1e8[m
+Author: unknown <Alan@.(none)>
+Date:   Tue Aug 16 00:08:23 2011 +0800
+
+    Added EventList window and Logs window
+    Added functional codes to Preference window
+
+[33mcommit 856989feb708035012826b7fa60a6d7596e2ae48[m
+Author: unknown <Alan@.(none)>
+Date:   Mon Aug 15 20:44:46 2011 +0800
+
+    Added some GUI window
+
+[33mcommit 0a7010553b428345d7d57899848fb4aa44d01fde[m
+Author: Zhongjie Wang <wzj401@gmail.com>
+Date:   Fri Aug 12 20:23:33 2011 +0800
+
+    Added super agent forward
+    added splash window
+
+[33mcommit 26bfca1869b3e6096eb576c0447df391c6a7bda8[m
+Author: unknown <Alan@.(none)>
+Date:   Sat Aug 6 18:47:22 2011 +0800
+
+    Finished reports life-cycle
+    Checked communication interfaces between agent and aggregator
+
+[33mcommit f28591f6272cd147a26bd2e9901caf7d77ea1d05[m
+Author: unknown <Alan@.(none)>
+Date:   Tue Aug 2 22:17:18 2011 +0800
+
+    renamed update.py
+
+[33mcommit 78cc15c70c943c47f661bd32dfe67dd49a0c362e[m
+Author: unknown <Alan@.(none)>
+Date:   Tue Aug 2 22:16:42 2011 +0800
+
+    Fixed bugs in aggregator.py
+
+[33mcommit 47ff74c9fa3ad878c1a0feecd6fb6567555abac9[m
+Author: unknown <Alan@.(none)>
+Date:   Mon Aug 1 20:54:54 2011 +0800
+
+    Added Statistics mod.
+    Updated Update mod.
+
+[33mcommit 6a1a9bc1448f61f22dcee99249878f3a8a985f6b[m
+Author: Zhongjie Wang <wzj401@gmail.com>
+Date:   Thu Jul 28 01:36:37 2011 +0800
+
+    Modified self-update module.
+
+[33mcommit 082a125208b5245288c218a616bf0df9ecb8b738[m
+Author: Zhongjie Wang <wzj401@gmail.com>
+Date:   Tue Jul 26 00:09:16 2011 +0800
+
+    update - 7/26/2011
+
+[33mcommit 977721854f0a0769c31a0a6f0c39641b8a77c537[m
+Author: Zhongjie Wang <wzj401@gmail.com>
+Date:   Thu Jul 14 21:02:02 2011 +0800
+
+    Updated
+
+[33mcommit 6db76a39e5816fb5a69421e11428f3455bde10dd[m
+Author: Zhongjie Wang <wzj401@gmail.com>
+Date:   Wed Jul 13 01:05:45 2011 +0800
+
+    icm-agent Beta version.
+
+[33mcommit 55f0909fcc1e8f989c01c1e5ab2033a49082f2f1[m
+Author: Zhongjie Wang <wzj401@gmail.com>
+Date:   Mon Jul 11 01:31:35 2011 +0800
+
+    Improved PeerManager and cleaned some code.
+
+[33mcommit 4e1bd16cf05da490eaad1121308f430e27dbf232[m
+Author: Zhongjie Wang <wzj401@gmail.com>
+Date:   Wed Jul 6 23:15:22 2011 +0800
+
+    Changed function parameters to fixed ones
+    Changed MessageFactory encode & decode
+
+[33mcommit e47410868223cb2b3dc857267db4881413b08726[m
+Author: Zhongjie Wang <wzj401@gmail.com>
+Date:   Tue Jul 5 00:22:04 2011 +0800
+
+    Refined some message fields.
+    Bug fix.
+
+[33mcommit a66ac4d96f6631fa61ba27b9ffdc018e21476061[m
+Author: Zhongjie Wang <wzj401@gmail.com>
+Date:   Sun Jul 3 15:36:38 2011 +0800
+
+    Added communication functions to mobile agent
+    Merged all threads.
+
+[33mcommit afa42d050a357f9d5ae23644e7c85b87e6a21323[m
+Author: Zhongjie Wang <wzj401@gmail.com>
+Date:   Mon Jun 27 04:09:08 2011 +0800
+
+    Updated Agent update function
+
+[33mcommit e4a3445bd7a136286813af21e200ea8527770a27[m
+Author: Zhongjie Wang <wzj401@gmail.com>
+Date:   Sun Jun 26 14:02:21 2011 +0800
+
+    Added agent update and test mod update.
+    Agent update is not finished.
+
+[33mcommit 8824dfd66aff689adf79de3cd2735c7b5e789d13[m
+Author: Zhongjie Wang <wzj401@gmail.com>
+Date:   Thu Jun 23 00:05:08 2011 +0800
+
+    2011.6.23
+
+[33mcommit 1b9a99692124e924c85f72d69a2925050e2357ee[m
+Author: Zhongjie Wang <wzj401@gmail.com>
+Date:   Thu Jun 16 23:04:03 2011 +0800
+
+    rename
+
+[33mcommit e97d928edf2bcb030ebe2f86635d93a1f11eabbc[m
+Author: Zhongjie Wang <wzj401@gmail.com>
+Date:   Thu Jun 16 23:03:42 2011 +0800
+
+    rename
+
+[33mcommit f4a5430cac898fd7c87814e8ea1649adbb8c7a15[m
+Author: Zhongjie Wang <wzj401@gmail.com>
+Date:   Thu Jun 16 22:59:44 2011 +0800
+
+    Bundle
+
+[33mcommit c3db18b632cc5a18765c73b3478137878e1a9a56[m
+Author: Zhongjie Wang <wzj401@gmail.com>
+Date:   Tue Jun 14 01:14:44 2011 +0800
+
+    2011.6.14
+
+[33mcommit 8cf0ac99c9dd78a0b87f965f4ca14e30e6cd119b[m
+Author: Zhongjie Wang <wzj401@gmail.com>
+Date:   Mon Jun 6 00:12:08 2011 +0800
+
+    Finished TaskManager and TaskScheduler.
+
+[33mcommit e853000069ca7ae8ee568e429b22f285591d06df[m
+Author: Zhongjie Wang <wzj401@gmail.com>
+Date:   Sat Jun 4 19:10:15 2011 +0800
+
+    Temporary Upload
+
+[33mcommit fa5c17788eea6c435c82b60f5c727a9a4ad46ba3[m
+Author: Zhongjie Wang <wzj401@gmail.com>
+Date:   Sat Jun 4 17:30:03 2011 +0800
+
+    2011.6.4
+
+[33mcommit 246fffa9581cce5f08f239e58d8f21426cc402cf[m
+Author: Zhongjie Wang <wzj401@gmail.com>
+Date:   Sat Jun 4 12:37:56 2011 +0800
+
+    Added SQLite support and some others.
+
+[33mcommit 053d972de4b0d4693bbc40e5c5ee041500857e60[m
+Author: Zhongjie Wang <wzj401@gmail.com>
+Date:   Wed Jun 1 23:58:40 2011 +0800
+
+    2011.6.1 Refactor
+
+[33mcommit 86c2db4b8b02548533a7159b41095639f70f93b5[m
+Author: Zhongjie Wang <wzj401@gmail.com>
+Date:   Wed Jun 1 09:53:41 2011 +0800
+
+    Updated README.
+    Added bin/umit-agent.py.
+    Changed umit.icm to umit.icm.agent
+
+[33mcommit 0f788ae3bb11b2a3f04a2405848f0d97345d06d5[m
+Author: Zhongjie Wang <wzj401@gmail.com>
+Date:   Tue May 31 13:37:35 2011 +0800
+
+    Try to fix .gitmodules
+
+[33mcommit cc4fdb6a763bfdf2112cf4e1af55dc68ad2da332[m
+Author: Zhongjie Wang <wzj401@gmail.com>
+Date:   Mon May 30 05:10:08 2011 +0800
+
+    Rename
+
+[33mcommit 36e93a08a10dc05174510a0220716bd8ba1698ec[m
+Author: Zhongjie Wang <wzj401@gmail.com>
+Date:   Mon May 30 05:07:19 2011 +0800
+
+    Added AgentService and AssignTask responser.
+    Added utils package
+
+[33mcommit c43127ab9f4fa317621a4cb99c83c56fb7b4cf8c[m
+Author: Zhongjie Wang <wzj401@gmail.com>
+Date:   Mon May 30 00:13:09 2011 +0800
+
+    Added dep directory.
+    Imported UmitImporter
+    Integrated Twisted with PyGTK
+
+[33mcommit bc396e5b1731192b9f58ba1b82f77ec96515c1e7[m
+Author: Zhongjie Wang <wzj401@gmail.com>
+Date:   Sun May 29 03:13:39 2011 +0800
+
+    Added higwidgets, umit-common and icm-common submodule.
+
+[33mcommit e20f90392fc8a383db7676e8c294414a4760ad08[m
+Author: Zhongjie Wang <wzj401@gmail.com>
+Date:   Fri May 27 00:35:15 2011 +0800
+
+    Removed dependencies
+
+[33mcommit e35f5df25bc9fdd093175e5c45cb48c88bb0dc3d[m
+Author: Zhongjie Wang <wzj401@gmail.com>
+Date:   Thu May 26 14:47:35 2011 +0800
+
+    rename
+
+[33mcommit 5f28275ffeb7dd8a85d5321ee5260f55ca539fae[m
+Author: Zhongjie Wang <wzj401@gmail.com>
+Date:   Thu May 26 14:28:44 2011 +0800
+
+    comment in proto
+
+[33mcommit cb213a30bde07cfe84477755a3592f42edb28336[m
+Author: Zhongjie Wang <wzj401@gmail.com>
+Date:   Thu May 26 14:26:54 2011 +0800
+
+    indent
+
+[33mcommit 61355638b3bdfae0062aa0ca9dd04fbf9ad12f4d[m
+Author: Zhongjie Wang <wzj401@gmail.com>
+Date:   Thu May 26 14:22:35 2011 +0800
+
+    delete redundant report_pb2.py
+
+[33mcommit 47fd2419f54596bd739002c07acdd66c74293bf5[m
+Author: Zhongjie Wang <wzj401@gmail.com>
+Date:   Thu May 26 14:20:30 2011 +0800
+
+    proto added.
+
+[33mcommit 493854a4dbef84143163f334a32e66f25e8cd146[m
+Author: Zhongjie Wang <wzj401@gmail.com>
+Date:   Fri May 20 21:09:01 2011 +0800
+
+    Integrated with PyGTK
+    Added Main.py
+
+[33mcommit 47ea8fab5ccf710e41283e23ee919233b05d065d[m
+Author: Zhongjie Wang <wzj401@gmail.com>
+Date:   Wed May 18 23:01:17 2011 +0800
+
+    Finished WebsiteTest.py, added the common package to the project
+
+[33mcommit 2d746c3bdf64564de30be06dd586375fa92c2444[m
+Author: Zhongjie Wang <wzj401@gmail.com>
+Date:   Mon May 16 22:37:37 2011 +0800
+
+    replaced the source code
+
+[33mcommit 3e170943694b6e6ec120fbc50af3d717f654cc2c[m
+Author: Zhongjie Wang <wzj401@gmail.com>
+Date:   Sun May 15 00:14:38 2011 +0800
+
+     z
+
+[33mcommit 064d5d47f946dd34950b3d827add47ca2727ca3e[m
+Author: Zhongjie Wang <wzj401@gmail.com>
+Date:   Sun May 15 00:13:53 2011 +0800
+
+    Write a simple HTTPFetcher plugin
+
+[33mcommit 603e434c4f0a3cad8c41b649531197f02df0e863[m
+Author: Zhongjie Wang <wzj401@gmail.com>
+Date:   Sat May 14 17:55:33 2011 +0800
+
+    Added some empty files
+
+[33mcommit 5430072cfc35990fd718fabf2c4f607cfd1f0bd7[m
+Author: Zhongjie Wang <wzj401@gmail.com>
+Date:   Sat May 14 13:20:59 2011 +0800
+
+    init packages and some files
+
+[33mcommit 0773f43e46a4279fe03f4bf92814a7b85d397155[m
+Author: Adriano Marques <adriano@rubysco.com>
+Date:   Fri May 6 23:04:47 2011 -0300
+
+    Creating the icm-agent repository

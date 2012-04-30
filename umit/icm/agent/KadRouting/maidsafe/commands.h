@@ -35,11 +35,11 @@ THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "boost/date_time/posix_time/posix_time_types.hpp"
 #include "boost/thread/condition_variable.hpp"
 #include "boost/thread/mutex.hpp"
-/*
+
 #include "maidsafe/dht/config.h"
 #include "maidsafe/dht/node-api.h"
 #include "maidsafe/dht/node_container.h"
-*/
+
 namespace bptime = boost::posix_time;
 
 namespace maidsafe {
@@ -48,7 +48,7 @@ namespace dht {
 class NodeId;
 
 
-namespace peer {
+namespace demo {
 
 void PrintNodeInfo(const Contact &contact);
 

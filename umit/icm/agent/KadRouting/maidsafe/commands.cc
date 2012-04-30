@@ -25,7 +25,7 @@ TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
 THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-#include "commands.h"
+#include "maidsafe/dht/demo/commands.h"
 
 #include <iostream>  // NOLINT
 #include <sys/time.h>
@@ -41,7 +41,6 @@ THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #  pragma warning(pop)
 #endif
 #include "boost/lexical_cast.hpp"
-/*
 #include "maidsafe/common/crypto.h"
 #include "maidsafe/common/utils.h"
 
@@ -49,7 +48,7 @@ THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "maidsafe/dht/contact.h"
 #include "maidsafe/dht/node_id.h"
 #include "maidsafe/dht/node-api.h"
-*/
+
 namespace args = std::placeholders;
 namespace fs = boost::filesystem;
 
