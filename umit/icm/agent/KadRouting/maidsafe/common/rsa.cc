@@ -25,11 +25,11 @@ TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
 THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-#include "maidsafe/common/rsa.h"
+#include "rsa.h"
 
 #include <memory>
 
-#include "maidsafe/common/return_codes.h"
+#include "return_codes.h"
 
 #ifdef __MSVC__
 #  pragma warning(push, 1)
@@ -46,11 +46,11 @@ THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #  pragma warning(pop)
 #endif
 
-#include "maidsafe/common/platform_config.h"
-#include "maidsafe/common/crypto.h"
-#include "maidsafe/common/log.h"
-#include "maidsafe/common/utils.h"
-#include "maidsafe/common/safe_encrypt_pb.h"
+#include "platform_config.h"
+#include "crypto.h"
+#include "log.h"
+#include "utils.h"
+#include "safe_encrypt_pb.h"
 
 
 namespace maidsafe {

@@ -25,7 +25,7 @@ TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
 THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-#include "maidsafe/common/crypto.h"
+#include "crypto.h"
 #include <memory>
 #include <algorithm>
 #include <vector>
@@ -51,10 +51,10 @@ THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #endif
 #include "boost/thread/mutex.hpp"
 
-#include "maidsafe/common/log.h"
-#include "maidsafe/common/platform_config.h"
-#include "maidsafe/common/return_codes.h"
-#include "maidsafe/common/utils.h"
+#include "log.h"
+#include "platform_config.h"
+#include "return_codes.h"
+#include "utils.h"
 
 namespace maidsafe {
 
