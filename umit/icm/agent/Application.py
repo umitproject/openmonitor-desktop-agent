@@ -34,6 +34,15 @@ from umit.icm.agent.BasePaths import *
 from umit.icm.agent.Global import *
 from umit.icm.agent.Version import VERSION
 
+# Script found at http://www.py2exe.org/index.cgi/HowToDetermineIfRunningFromExe
+import imp
+frozen = (hasattr(sys, "frozen") or # new py2exe
+          hasattr(sys, "importers") # old py2exe
+          or imp.is_frozen("__main__")) # tools/freeze
+del(imp)
+
+def main_is_frozen():
+    return frozen
 
 class Application(object):
     def __init__(self):

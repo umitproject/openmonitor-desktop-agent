@@ -118,8 +118,8 @@ class LoginDialog(HIGDialog):
         self.forgot_password.connect('clicked', self._forgot_password)
 
     def _register(self, widget):
-        #registration_form = RegistrationDialog()
-        #registration_form.show_all()
+        registration_form = RegistrationDialog()
+        registration_form.show_all()
         webbrowser.open(theApp.aggregator.base_url + "/accounts/register/")
 
     def _forgot_password(self, widget):
@@ -148,7 +148,8 @@ if __name__ == "__main__":
     dialog = LoginDialog()
     dialog.connect("delete-event", lambda x, y: gtk.main_quit())
     dialog.show_all()
-
+    
     gtk.main()
+    
 
 
