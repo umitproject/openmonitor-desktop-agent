@@ -28,31 +28,33 @@ THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <signal.h>
 #include "boost/filesystem.hpp"
 #include "boost/program_options.hpp"
-
+/*
 #ifndef __APPLE__
   #include "maidsafe/common/breakpad.h"
 #endif
-#include "maidsafe/common/crypto.h"
-#include "maidsafe/common/utils.h"
+*/
+#include "common/crypto.h"
+#include "common/utils.h"
+
 
 #ifdef __MSVC__
 #  pragma warning(push)
 #  pragma warning(disable: 4127 4244 4267)
 #endif
-#include "maidsafe/dht/kademlia.pb.h"
+#include "dht/kademlia.pb.h"
 #ifdef __MSVC__
 #  pragma warning(pop)
 #endif
-#include "maidsafe/dht/config.h"
-#include "maidsafe/dht/contact.h"
-#include "maidsafe/dht/demo/commands.h"
-#include "maidsafe/dht/log.h"
-#include "maidsafe/dht/node-api.h"
-#include "maidsafe/dht/node_container.h"
-#include "maidsafe/dht/node_id.h"
-#include "maidsafe/dht/return_codes.h"
-#include "maidsafe/dht/utils.h"
-#include "maidsafe/dht/version.h"
+#include "dht/config.h"
+#include "dht/contact.h"
+#include "dht/demo/commands.h"
+#include "dht/log.h"
+#include "dht/node-api.h"
+#include "dht/node_container.h"
+#include "dht/node_id.h"
+#include "dht/return_codes.h"
+#include "dht/utils.h"
+#include "dht/version.h"
 
 
 namespace bptime = boost::posix_time;
@@ -166,8 +168,9 @@ void validate(boost::any& v, const std::vector<std::string>& values,
   v = port_range;
 }
 
-int main(int argc, char **argv) {
-  maidsafe::InitLogging(argv[0]);
+int PeerCreator(){
+  /*
+   maidsafe::InitLogging(argv[0]);
 #ifndef __APPLE__
   fs::path cur_path = fs::initial_path();
   maidsafe::crash_report::ProjectInfo current_project("MaidSafe-DHT",
@@ -185,7 +188,8 @@ int main(int argc, char **argv) {
                                         &current_project,
                                         true);
 #endif
-#endif
+#endif*/
+std::cout<<"Entering Peer Creation";
   try {
     PortRange port_range(8000, 65535);
     std::string logfile, bootstrap_file("bootstrap_contacts");
@@ -241,9 +245,9 @@ int main(int argc, char **argv) {
             "Average time between value refreshes (in minutes).");
 
     po::variables_map variables_map;
-    po::store(po::parse_command_line(argc, argv, options_description),
+    /*po::store(po::parse_command_line(argc, argv, options_description),
               variables_map);
-
+*/
 
     if (variables_map.count("help")) {
       std::cout << options_description << std::endl;
@@ -380,6 +384,7 @@ int main(int argc, char **argv) {
     demo_node->Stop(&bootstrap_contacts);
     ULOG(INFO) << "Node stopped successfully.";
   }
+
   catch(const std::exception &e) {
     ULOG(ERROR) << "Error: " << e.what();
     return mk::kGeneralError;

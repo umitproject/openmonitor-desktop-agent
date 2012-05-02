@@ -1,12 +1,11 @@
 #include <iostream>
-#include "maidsafe/peer.cpp"
+#include "maidsafe/demo_main.cc"
 
 void NodeCreator() {
 	//Start a new Peer
-	Peer peer; 
-	peer.PrintPeers();
+	PeerCreator();
 }
 
 int main(int argc, char **argv){
-	NodeCreator();
+	PeerCreator();
 }
