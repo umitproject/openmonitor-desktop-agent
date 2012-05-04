@@ -177,7 +177,7 @@ Umit:%s
             d = HIGAlertDialog(type=gtk.MESSAGE_ERROR,
                     message_format=_("Bug not reported"),
                     secondary_text=_("A critical error occourried during "
-                        "Umit execution, \nand it was not properly reported "
+                        "Open Monitor execution, \nand it was not properly reported "
                         "to our bug tracker. The crash description was saved "
                         "to: %s, so you can still report it on our bug "
                         "tracker.") % tempname)

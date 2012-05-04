@@ -23,6 +23,7 @@
 import gtk
 import gobject
 import webbrowser
+import os
 
 from higwidgets.higdialogs import HIGDialog, HIGAlertDialog
 from higwidgets.higlabels import HIGHintSectionLabel
@@ -43,9 +44,9 @@ def show_report(reuse_mainloop, bug_page):
     except: # XXX What exceptions should be caught here ?
         page_dialog = HIGAlertDialog(type=gtk.MESSAGE_ERROR,
                 message_format=_("Could not open default Web Browser"),
-                secondary_text=_("Umit was unable to open your default "
+                secondary_text=_("Open Monitor was unable to open your default "
                     "web browser to show the bug tracker page with the "
-                    "report status. Try visiting Umit's bug tracker "
+                    "report status. Try visiting Open Monitor's bug tracker "
                     "page to see if your bug was reported."))
         run_dialog(reuse_mainloop, page_dialog)
 
@@ -105,10 +106,10 @@ class BugReport(HIGDialog):
         # The following two lines are commented due to component deprecation
         #self.category_list.append(["umitCore","umitCore"])
         #self.category_list.append(["umitGUI","umitGUI"])
-        self.category_list.append(["Umit","Umit"])
+        self.category_list.append(["Open Monitor","Open Monitor"])
         self.category_list.append(["CrashReport","CrashReport"])
         self.category_list.append(["Documentation", "Documentation"])
-        self.category_list.append(["UmitWeb","UmitWeb"])
+        self.category_list.append(["Open MonitorWeb","Open MonitorWeb"])
         self.category_list.append(["InterfaceEditor", "InterfaceEditor"])
         self.category_list.append(["NetworkInventory", "NetworkInventory"])
         self.category_list.append(["website","website"])
@@ -142,8 +143,8 @@ class BugReport(HIGDialog):
         self.bug_icon = gtk.Image()
         self.bug_text = gtk.Label(_("This Bug Report dialog allows you "
             "to easily tell us about a problem that you may have found on "
-            "Umit. Doing so, you help us to help you, by fixing and "
-            "improving Umit faster than usual."))
+            "Open Monitor. Doing so, you help us to help you, by fixing and "
+            "improving Open Monitor faster than usual."))
         
         if self.crashreport:
             # Create a button to show details 
@@ -297,15 +298,19 @@ class BugReport(HIGDialog):
             ok_dialog = HIGAlertDialog(type=gtk.MESSAGE_INFO,
                 message_format=_("Bug sucessfully reported!"),
                 secondary_text=_("The bug description was sucessfully "
-                    "reported. A web page with detailed description about "
-                    "this report will be opened in your default web browser "
-                    "now."))
-            run_dialog(self._reuse_mainloop, ok_dialog,
-                    show_report, # callback
-                    self._reuse_mainloop, bug_page) # args
+                    "reported. Thanks for your report! Open Monitor Desktop"
+                    "Monitor will be restarted now."))
+            run_dialog(self._reuse_mainloop, ok_dialog)
+            #run_dialog(self._reuse_mainloop, ok_dialog,
+            #        show_report, # callback
+            #        self._reuse_mainloop, bug_page) # args
 
         # report sent successfully
         self.response(gtk.RESPONSE_DELETE_EVENT)
+        
+    
+
+        
 
     def get_category(self):
         return self.category_combo.child.get_text()
