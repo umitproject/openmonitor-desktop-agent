@@ -11,6 +11,7 @@ Dependencies:
 * Google Protocol Buffers 2.4.1
 * pygtkChart
 * PyCrypto
+* pyactiveresource
 
 Running ICM Desktop Agent:
   Execute bin/icm-agent.py. It will start the agent and read configuration from
