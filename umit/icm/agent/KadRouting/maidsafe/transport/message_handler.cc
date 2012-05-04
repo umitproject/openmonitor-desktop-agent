@@ -25,10 +25,10 @@ TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
 THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-#include "maidsafe/transport/message_handler.h"
+#include "message_handler.h"
 #include "boost/lexical_cast.hpp"
-#include "maidsafe/transport/log.h"
-#include "maidsafe/transport/transport_pb.h"
+#include "log.h"
+#include "transport_pb.h"
 
 namespace maidsafe {
 

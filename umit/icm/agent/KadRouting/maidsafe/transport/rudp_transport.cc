@@ -27,19 +27,19 @@ THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 // Author: Christopher M. Kohlhoff (chris at kohlhoff dot com)
 
-#include "maidsafe/transport/rudp_transport.h"
+#include "rudp_transport.h"
 
 #include <cassert>
 #include <functional>
 
-#include "maidsafe/transport/rudp_acceptor.h"
-#include "maidsafe/transport/rudp_connection.h"
-#include "maidsafe/transport/rudp_multiplexer.h"
-#include "maidsafe/transport/rudp_socket.h"
-#include "maidsafe/transport/log.h"
-#include "maidsafe/transport/contact.h"
-#include "maidsafe/transport/nat_detection.h"
-#include "maidsafe/transport/rudp_message_handler.h"
+#include "rudp_acceptor.h"
+#include "rudp_connection.h"
+#include "rudp_multiplexer.h"
+#include "rudp_socket.h"
+#include "log.h"
+#include "contact.h"
+#include "nat_detection.h"
+#include "rudp_message_handler.h"
 
 namespace asio = boost::asio;
 namespace bs = boost::system;

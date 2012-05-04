@@ -27,14 +27,14 @@ THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include <functional>
 
-#include "maidsafe/transport/tcp_transport.h"
+#include "tcp_transport.h"
 
-#include "maidsafe/transport/log.h"
+#include "log.h"
 
-#include "maidsafe/transport/message_handler.h"
-#include "maidsafe/transport/transport_pb.h"
-#include "maidsafe/transport/tcp_connection.h"
-#include "maidsafe/transport/utils.h"
+#include "message_handler.h"
+#include "transport_pb.h"
+#include "tcp_connection.h"
+#include "utils.h"
 
 namespace asio = boost::asio;
 namespace bs = boost::system;

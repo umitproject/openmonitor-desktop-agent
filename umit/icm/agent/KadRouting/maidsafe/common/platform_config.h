@@ -29,8 +29,12 @@ THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef MAIDSAFE_COMMON_PLATFORM_CONFIG_H_
 #define MAIDSAFE_COMMON_PLATFORM_CONFIG_H_
 
-#if defined(linux) || defined(__linux) || defined(__linux__) || \
-  defined(__FreeBSD__) || defined(__NetBSD__) || defined(__OpenBSD__) || \
+#if defined(linux) || defined(__linux) || defined(__linux__)
+#ifndef MAIDSAFE_LINUX
+#define MAIDSAFE_LINUX
+#endif
+
+#elif defined(__FreeBSD__) || defined(__NetBSD__) || defined(__OpenBSD__) || \
   defined(__DragonFly__) || defined(sun) || defined(__sun) || \
   defined(__sgi) || defined(__hpux) || defined(__BEOS__) || \
   defined(__IBMCPP__) || defined(_AIX) || defined(__QNXNTO__) || \

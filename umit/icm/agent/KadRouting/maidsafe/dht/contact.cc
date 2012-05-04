@@ -25,19 +25,19 @@ TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
 THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-#include "maidsafe/dht/contact.h"
+#include "contact.h"
 
 #include <string>
 #ifdef __MSVC__
 #  pragma warning(push)
 #  pragma warning(disable: 4127 4244 4267)
 #endif
-#include "maidsafe/dht/kademlia.pb.h"
+#include "kademlia.pb.h"
 #ifdef __MSVC__
 #  pragma warning(pop)
 #endif
-#include "maidsafe/dht/log.h"
-#include "maidsafe/dht/utils.h"
+#include "log.h"
+#include "utils.h"
 
 namespace maidsafe {
 

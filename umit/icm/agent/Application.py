@@ -43,6 +43,7 @@ class Application(object):
 
         from umit.icm.agent.KadRouting import kadcaller
         kadcaller.NodeCreator();
+        
         from umit.icm.agent.core.PeerInfo import PeerInfo
         self.peer_info = PeerInfo()
 

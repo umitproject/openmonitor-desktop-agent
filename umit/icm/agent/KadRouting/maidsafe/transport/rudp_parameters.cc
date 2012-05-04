@@ -26,7 +26,7 @@ THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
 #include "boost/thread.hpp"
-#include "maidsafe/transport/rudp_parameters.h"
+#include "rudp_parameters.h"
 
 namespace bptime = boost::posix_time;
 

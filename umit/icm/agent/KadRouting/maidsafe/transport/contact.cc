@@ -25,11 +25,11 @@ TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
 THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-#include "maidsafe/transport/contact.h"
+#include "contact.h"
 
 #include <string>
 
-#include "maidsafe/transport/transport_pb.h"
+#include "transport_pb.h"
 
 namespace maidsafe {
 

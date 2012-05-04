@@ -47,7 +47,7 @@ THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #endif
 #include "dht/config.h"
 #include "dht/contact.h"
-#include "dht/demo/commands.h"
+#include "dht/commands.h"
 #include "dht/log.h"
 #include "dht/node-api.h"
 #include "dht/node_container.h"

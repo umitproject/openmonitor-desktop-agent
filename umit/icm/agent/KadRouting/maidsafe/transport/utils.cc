@@ -25,9 +25,9 @@ TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
 THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-#include "maidsafe/transport/utils.h"
-#include "maidsafe/transport/log.h"
-#include "maidsafe/transport/network_interface.h"
+#include "utils.h"
+#include "log.h"
+#include "network_interface.h"
 
 namespace maidsafe {
 

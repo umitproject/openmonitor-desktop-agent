@@ -25,9 +25,9 @@ TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
 THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-#include "maidsafe/dht/node-api.h"
-#include "maidsafe/dht/node_impl.h"
-#include "maidsafe/dht/contact.h"
+#include "node-api.h"
+#include "node_impl.h"
+#include "contact.h"
 
 namespace maidsafe {
 

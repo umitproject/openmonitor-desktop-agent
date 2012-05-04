@@ -25,10 +25,10 @@ TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
 THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-#include "maidsafe/dht/node_id.h"
+#include "node_id.h"
 #include <bitset>
-#include "maidsafe/dht/log.h"
-#include "maidsafe/common/utils.h"
+#include "log.h"
+#include "../common/utils.h"
 
 namespace maidsafe {
 
