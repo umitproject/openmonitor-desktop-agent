@@ -42,7 +42,8 @@ class PeerSpawn(threading.Thread):
         threading.Thread.__init__(self)
 
     def run(self):
-        os.chdir("/home/sunshadow/Documents/git-repos/openmonitor/icm-agent/umit/icm/agent/KadRouting/maidsafe/MaidSafe-DHT/build/Linux/Release/")
+        path =str(os.getcwd())+"/umit/icm/agent/KadRouting/maidsafe/MaidSafe-DHT/build/Linux/Release/"
+        os.chdir(path)
         f = os.popen('./KademliaDemo -f')
         data = f.read()
         f.close()
