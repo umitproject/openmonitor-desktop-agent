@@ -25,6 +25,7 @@ import os
 import signal
 import sys
 import time
+import threading
 
 from twisted.internet import reactor
 from twisted.internet import task
@@ -34,6 +35,19 @@ from umit.icm.agent.BasePaths import *
 from umit.icm.agent.Global import *
 from umit.icm.agent.Version import VERSION
 
+class PeerSpawn(threading.Thread):
+    def __init__(self):
+        self.stdout = None
+        self.stderr = None
+        threading.Thread.__init__(self)
+
+    def run(self):
+        os.chdir("/home/sunshadow/Documents/git-repos/openmonitor/icm-agent/umit/icm/agent/KadRouting/maidsafe/MaidSafe-DHT/build/Linux/Release/")
+        f = os.popen('./KademliaDemo -f')
+        data = f.read()
+        f.close()
+        print data
+
 
 class Application(object):
     def __init__(self):
@@ -41,9 +55,8 @@ class Application(object):
 
     def _init_components(self, aggregator):
 
-        from umit.icm.agent.KadRouting import kadcaller
-        kadcaller.NodeCreator();
-        
+       
+            
         from umit.icm.agent.core.PeerInfo import PeerInfo
         self.peer_info = PeerInfo()
 
@@ -76,6 +89,7 @@ class Application(object):
         self.aggregator = AggregatorAPI(aggregator)
 
         self.quitting = False
+
 
     def _load_from_db(self):
         self.peer_info.load_from_db()
@@ -241,6 +255,9 @@ class Application(object):
 
 
 theApp = Application()
+
+peer = PeerSpawn()
+peer.start()
 
 
 if __name__ == "__main__":

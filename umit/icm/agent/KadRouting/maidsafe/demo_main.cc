@@ -168,7 +168,7 @@ void validate(boost::any& v, const std::vector<std::string>& values,
   v = port_range;
 }
 
-int PeerCreator(){
+int main(int argc, char **argv){
   /*
    maidsafe::InitLogging(argv[0]);
 #ifndef __APPLE__
@@ -189,7 +189,7 @@ int PeerCreator(){
                                         true);
 #endif
 #endif*/
-std::cout<<"Entering Peer Creation";
+std::cout<<"Entering Peer Creation\n";
   try {
     PortRange port_range(8000, 65535);
     std::string logfile, bootstrap_file("bootstrap_contacts");
@@ -243,7 +243,7 @@ std::cout<<"Entering Peer Creation";
         ("refresh_interval,r",
             po::value(&refresh_interval)->default_value(refresh_interval / 60),
             "Average time between value refreshes (in minutes).");
-
+    std::cout<<"Created options object\n";
     po::variables_map variables_map;
     /*po::store(po::parse_command_line(argc, argv, options_description),
               variables_map);
@@ -264,9 +264,9 @@ std::cout<<"Entering Peer Creation";
 //    ConflictingOptions(variables_map, "upnp", "port_fw");
     ConflictingOptions(variables_map, "client", "noconsole");
     ConflictingOptions(variables_map, "first_node", "bootstrap_file");
-
+    std::cout<<"Created Conflicting options\n";
     // Set up logging
-    if (variables_map["verbose"].as<bool>()) {
+    /*if (variables_map["verbose"].as<bool>()) {
       FLAGS_ms_logging_common = google::INFO;
       FLAGS_ms_logging_transport = google::INFO;
       FLAGS_ms_logging_dht = google::INFO;
@@ -301,8 +301,8 @@ std::cout<<"Entering Peer Creation";
       }
       google::SetLogDestination(google::INFO, log_path.string().c_str());
       FLAGS_alsologtostderr = true;
-    }
-
+    }*/
+    std::cout<<"Creating Demo Nodes\n";
     // Set up DemoNode
     bool first_node(variables_map["first_node"].as<bool>());
     fs::path bootstrap_file_path(bootstrap_file);
@@ -320,7 +320,7 @@ std::cout<<"Entering Peer Creation";
         return 1;
       }
     }
-
+    std::cout<<"Now finding number of threads\n";
     thread_count = variables_map["thread_count"].as<size_t>();
     if (thread_count > 100) {
       ULOG(WARNING) << "Too many threads.  Setting thread count to 3.";
@@ -335,7 +335,7 @@ std::cout<<"Entering Peer Creation";
 //      return 1;
 //    }
 
-
+    std::cout<<"Setting refresh interval\n";
     if (variables_map.count("refresh_interval")) {
       refresh_interval = variables_map["refresh_interval"].as<uint32_t>();
       refresh_interval = refresh_interval * 60;
@@ -366,6 +366,7 @@ std::cout<<"Entering Peer Creation";
       demo_node->Stop(nullptr);
       return result;
     }
+    std::cout<<"Node created succesfully\n";
 
     mk::demo::PrintNodeInfo(demo_node->node()->contact());
 

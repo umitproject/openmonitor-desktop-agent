@@ -6,6 +6,7 @@ void NodeCreator() {
 	PeerCreator();
 }
 
-int main(int argc, char **argv){
-	PeerCreator();
+int main(int argc, char **argv)
+{
+	NodeCreator();
 }
