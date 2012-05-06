@@ -31,6 +31,7 @@ from higwidgets.higlabels import HIGSectionLabel, HIGEntryLabel
 
 from umit.icm.agent.I18N import _
 from umit.icm.agent.Global import *
+from umit.icm.agent.BasePaths import LOG_DIR
 
 
 class LogsWindow(HIGWindow):
@@ -141,7 +142,10 @@ class LogsGUI(gtk.VBox):
         text = ""
         f = open(os.path.join(LOG_DIR, 'icm-desktop.log'))
         for line in f:
-            log_type = line.split()[0][1:-1]
+            words = line.split()
+            if len(words) == 0:
+                continue;
+            log_type = (words[0]).strip("[").strip("]")
             if log_type in self.log_mask:
                 text = text + line
         f.close()

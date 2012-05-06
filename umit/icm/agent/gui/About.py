@@ -28,6 +28,8 @@ from higwidgets.hignotebooks import HIGNotebook
 from higwidgets.higscrollers import HIGScrolledWindow
 from higwidgets.higtextviewers import HIGTextView
 
+from umit.icm.agent.BasePaths import IMAGES_DIR
+
 from umit.icm.agent.Global import *
 
 from umit.icm.agent.I18N import _
