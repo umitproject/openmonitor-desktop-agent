@@ -44,7 +44,7 @@ class PeerSpawn(threading.Thread):
     def run(self):
         path =str(os.getcwd())+"/umit/icm/agent/KadRouting/maidsafe/MaidSafe-DHT/build/Linux/Release/"
         os.chdir(path)
-        f = os.popen('./KademliaDemo -f')
+        f = os.popen('./KademliaDemo')
         data = f.read()
         f.close()
         print data
