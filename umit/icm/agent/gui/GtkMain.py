@@ -24,7 +24,7 @@ import os
 
 from twisted.internet import reactor
 
-from higwidgets import HIGWindow
+from higwidgets.higwindows import HIGWindow
 
 from umit.icm.agent.logger import g_logger
 from umit.icm.agent.Global import *
@@ -97,6 +97,11 @@ class GtkMain(object):
         menu_item.show()
         self.tray_menu_logged_in.append(menu_item)
 
+        menu_item = gtk.MenuItem(_("Software Update"))
+        menu_item.connect("activate", lambda w: self.show_software_update())
+        menu_item.show()
+        self.tray_menu_logged_in.append(menu_item)
+        
         menu_item = gtk.MenuItem(_("About"))
         menu_item.connect("activate", lambda w: self.show_about())
         menu_item.show()
@@ -189,6 +194,11 @@ class GtkMain(object):
     def show_preference(self):
         from umit.icm.agent.gui.Preference import PreferenceWindow
         wnd = PreferenceWindow()
+        wnd.show_all()
+        
+    def show_software_update(self):
+        from umit.icm.agent.gui.SoftwareUpdate import SoftwareUpdateDialog
+        wnd = SoftwareUpdateDialog()
         wnd.show_all()
 
     def show_about(self):

@@ -3,7 +3,7 @@
 # Copyright (C) 2011 Adriano Monteiro Marques
 #
 # Author:  Zhongjie Wang <wzj401@gmail.com>
-#          Tianwei Liu <liutianweidlut@gmail.com>     
+#          Tianwei Liu <liutianweaaidlut@gmail.com>     
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -39,6 +39,7 @@ from umit.icm.agent.I18N import _
 from umit.icm.agent.Global import *
 from umit.icm.agent.Application import theApp
 from umit.icm.agent.gui.Registration import RegistrationDialog
+from umit.icm.agent.gui.Settings import SettingsDialog
 from umit.icm.agent.BasePaths import IMAGES_DIR
 
 class LoginDialog(HIGDialog):
@@ -174,8 +175,8 @@ class LoginDialog(HIGDialog):
         '''
         configure settings: Server IP/Port: popup a new window
         '''
-        registration_form = RegistrationDialog()
-        registration_form.show_all()
+        settings_form = SettingsDialog()
+        settings_form.show_all()
         pass
 
 if __name__ == "__main__":

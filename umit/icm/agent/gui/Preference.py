@@ -4,6 +4,7 @@
 #
 # Author:  Paul Pei <paul.kdash@gmail.com>
 #          Alan Wang <wzj401@gmail.com>
+#          Tianwei Liu <liutianweidlut@gmail.com>
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -108,7 +109,9 @@ class PreferenceWindow(HIGWindow):
 
         aggregator_url = self.pref_page.cloudagg_entry.get_text()
         theApp.aggregator.base_url = aggregator_url
-        g_db_helper.set_value('aggregator_url', aggregator_url)
+        if aggregator_url != None and aggregator_url != "":
+            g_config.set('network', 'aggregator_url', aggregator_url)
+            g_db_helper.set_value('config','aggregator_url', aggregator_url)
         # Save test tab
         self.save_tests()
 
@@ -134,7 +137,7 @@ class PreferenceWindow(HIGWindow):
     def save_tests(self):
         SELECTED_TESTS = [ r[0] for r in self.test_page.subbox.\
                            tree_view_selected_tests.treestore ]
-        g_db_helper.set_value('selected_tests', SELECTED_TESTS)
+        g_db_helper.set_value('config','selected_tests', SELECTED_TESTS)
 
         auto_update_test = self.test_page.checkbtn.get_active()
         g_config.set('application', 'auto_update_test', str(auto_update_test))
@@ -190,7 +193,7 @@ class PreferencePage(HIGVBox):
 
         self.cloudagg_entry = gtk.Entry()
         self.cloudagg_button = HIGButton(_("Reset"))
-        self.cloudagg_button.connect('clicked', lambda w:
+        self.cloudagg_button.connect('clicked', lambda w:aggregator_url
                                           self.cloudagg_entry.set_text(
                                               'http://alpha.openmonitor.org/api'))
         self.cloudagg_button.set_size_request(80, 28)
