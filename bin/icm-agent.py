@@ -185,7 +185,7 @@ Umit:%s
             d.run()
             d.destroy()
 
-sys.excepthook = UmitExceptionHook()
+#sys.excepthook = UmitExceptionHook()
 def main(args):
     if useGTK:
         theApp.use_gui = True

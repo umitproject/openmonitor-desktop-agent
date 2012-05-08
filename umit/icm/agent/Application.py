@@ -3,6 +3,7 @@
 # Copyright (C) 2011 Adriano Monteiro Marques
 #
 # Author:  Zhongjie Wang <wzj401@gmail.com>
+#          Tianwei Liu <liutianweidlut@gmail.com> 
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -25,6 +26,7 @@ import os
 import signal
 import sys
 import time
+import gtk
 
 from twisted.internet import reactor
 from twisted.internet import task
@@ -33,6 +35,8 @@ from umit.icm.agent.logger import g_logger
 from umit.icm.agent.BasePaths import *
 from umit.icm.agent.Global import *
 from umit.icm.agent.Version import VERSION
+
+from umit.icm.agent.I18N import _
 
 # Script found at http://www.py2exe.org/index.cgi/HowToDetermineIfRunningFromExe
 import imp
@@ -89,14 +93,26 @@ class Application(object):
         self.report_manager.load_unsent_reports()
 
     def init_after_running(self, port=None, username=None, password=None, server_enabled=True):
-        # Create agent service
+        # Create agent service(need to add the port confilct)
         if server_enabled:
             self.listen_port = port if port is not None else g_config.getint('network', 'listen_port')
+            try:
+                from umit.icm.agent.rpc.AgentService import AgentFactory
+                self.factory = AgentFactory()
+                g_logger.info("Listening on port %d.", self.listen_port)
+                reactor.listenTCP(self.listen_port, self.factory)
+            except Exception,info:
+                #There can add more information
+                from higwidgets.higwindows import HIGAlertDialog
+                print 'The exception is %s'%(info)
+                alter = HIGAlertDialog(primary_text = _("The Listen Port has been used by other applications"),\
+                                       secondary_text = _("Please check the Port"))
+                alter.show_all()
+                result = alter.run()
+                
+                #cannot write return, if so the program cannot quit, and run in background              
+                self.terminate()
 
-            from umit.icm.agent.rpc.AgentService import AgentFactory
-            self.factory = AgentFactory()
-            g_logger.info("Listening on port %d.", self.listen_port)
-            reactor.listenTCP(self.listen_port, self.factory)
 
         # Create mobile agent service
         from umit.icm.agent.rpc.mobile import MobileAgentService
@@ -106,12 +122,13 @@ class Application(object):
             # Init GUI
             from umit.icm.agent.gui.GtkMain import GtkMain
             self.gtk_main = GtkMain()
-
+            
         if g_config.getboolean('application', 'auto_login'):
             # login with saved credentials
             self.login(username if username is not None else self.peer_info.Username,
                        password if password is not None else self.peer_info.Password, True)
         else:
+            self.gtk_main.show_login()
             g_logger.info("Auto-login is disabled. You need to manually login.")
 
     def register_agent(self, username, password):
@@ -227,6 +244,7 @@ class Application(object):
             reactor.run()
 
     def terminate(self):
+        print 'quit'
         reactor.callWhenRunning(reactor.stop)
 
     def on_quit(self):

@@ -106,6 +106,8 @@ class PreferenceWindow(HIGWindow):
         g_config.set('application', 'startup_on_boot', str(startup_on_boot))
         auto_update = self.pref_page.update_check.get_active()
         g_config.set('application', 'auto_update', str(auto_update))
+        auto_login = self.pref_page.login_ckeck.get_active()
+        g_config.set('application', 'auto_login', str(auto_login))
 
         aggregator_url = self.pref_page.cloudagg_entry.get_text()
         theApp.aggregator.base_url = aggregator_url
@@ -124,12 +126,20 @@ class PreferenceWindow(HIGWindow):
             self.pref_page.startup_check.set_active(True)
         else:
             self.pref_page.startup_check.set_active(False)
+        
         auto_update = g_config.getboolean('application', 'auto_update')
         if auto_update:
             self.pref_page.update_check.set_active(True)
         else:
             self.pref_page.update_check.set_active(False)
-
+        
+        #auto_login = g_config.getboolean('application', 'auto_login')
+        auto_login = False
+        if auto_login:
+            self.pref_page.login_ckeck.set_active(True)
+        else:
+            self.pref_page.login_ckeck.set_active(False)
+            
         self.pref_page.cloudagg_entry.set_text(theApp.aggregator.base_url)
         # load test tab
         self.load_tests()
@@ -190,12 +200,12 @@ class PreferencePage(HIGVBox):
         self.email_entry = gtk.Entry()
         self.startup_check = gtk.CheckButton(_("Startup on boot"))
         self.update_check = gtk.CheckButton(_("Automatically update"))
+        self.login_ckeck = gtk.CheckButton(_("Auto login"))
 
         self.cloudagg_entry = gtk.Entry()
         self.cloudagg_button = HIGButton(_("Reset"))
-        self.cloudagg_button.connect('clicked', lambda w:aggregator_url
-                                          self.cloudagg_entry.set_text(
-                                              'http://alpha.openmonitor.org/api'))
+        self.cloudagg_button.connect('clicked', lambda w:
+                                      self.cloudagg_entry.set_text('http://alpha.openmonitor.org/api'))
         self.cloudagg_button.set_size_request(80, 28)
 
         self.superpeers_entry = gtk.Entry()
@@ -235,7 +245,8 @@ class PreferencePage(HIGVBox):
         self.peerinfo_table.attach_entry(self.email_entry, 1, 2, 1, 2)
         self.peerinfo_table.attach_label(self.startup_check, 0, 2, 2, 3)
         self.peerinfo_table.attach_label(self.update_check, 0, 3, 3, 4)
-
+        self.peerinfo_table.attach_label(self.login_ckeck, 0, 4, 4, 5)
+        
         self.cloudagg_subhbox._pack_expand_fill(self.cloudagg_entry)
         self.cloudagg_subhbox._pack_noexpand_nofill(self.cloudagg_button)
         self.cloudagg_table.attach_entry(self.cloudagg_subhbox, 0, 1, 0, 1)

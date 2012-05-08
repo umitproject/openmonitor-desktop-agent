@@ -4,6 +4,7 @@
 #
 # Authors:  Zhongjie Wang <wzj401@gmail.com>
 #           Adriano Marques <adriano@umitproject.org>
+#           Tianwei Liu <liutianweidlut@gmail.com>
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -44,6 +45,8 @@ from umit.icm.agent.Errors import AggergatorError
 from umit.icm.agent.secure.Key import AESKey
 from umit.icm.agent.Version import VERSION_NUM
 from umit.icm.agent.test import TEST_PACKAGE_VERSION_NUM
+
+from umit.icm.agent.I18N import _
 
 aggregator_api_url = {
     'CheckAggregator': '/api/checkaggregator/',
@@ -603,6 +606,8 @@ class AggregatorAPI(object):
             if isinstance(err, Error):
                 g_logger.error(">>> The Aggregator had an Internal Error:")
                 g_logger.error(err.response)
+        
+        self._alter_informaiton(failure)
 
 
     def _decode_errback(self, failure):
@@ -610,7 +615,31 @@ class AggregatorAPI(object):
 
     def _handle_errback(self, failure):
         g_logger.error("Aggregator failure: %s" % str(failure))
+        
+    def _alter_informaiton(self,failure):
+        #Add the user-friendly information to the user to check the problem.
+        import gtk
+        from higwidgets.higwindows import HIGAlertDialog
+        
+        if 'error.NoRouteError' in str(failure):
+            failure_info_first  = _('Disconnect to Internet')
+            failure_info_second = _('Please check your network card connection!')
+        elif 'TimeoutError' in str(failure):
+            failure_info_first = _('Cloud Aggregator Server Connect Error')
+            failure_info_second = _('Please check your cloud aggregator URL')
+        elif 'Agent matching query does not exist' in str(failure) or\
+                            '500 Internal Server Error' in str(failure):
+            failure_info_first = _('Username/Password Error')
+            failure_info_second = _('Please check your username or password')            
+            
+        alter = HIGAlertDialog(primary_text = failure_info_first,\
+                                       secondary_text = failure_info_second)
+        alter.show()
+        alter.run()
 
+        #show login window again
+        theApp.gtk_main.show_login()
+        
 
 if __name__ == "__main__":
     import time

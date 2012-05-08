@@ -177,7 +177,6 @@ class LoginDialog(HIGDialog):
         '''
         settings_form = SettingsDialog()
         settings_form.show_all()
-        pass
 
 if __name__ == "__main__":
     dialog = LoginDialog()
