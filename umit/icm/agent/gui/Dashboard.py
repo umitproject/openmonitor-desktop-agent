@@ -3,6 +3,7 @@
 # Copyright (C) 2011 Adriano Monteiro Marques
 #
 # Author:  Paul Pei <paul.kdash@gmail.com>
+#          Tianwei Liu <liutainweidlut@gmail.com> 
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -70,15 +71,16 @@ class NavigationBox(HIGVBox):
     def on_cursor_changed(self, treeview):
         selection = self.treeview.get_selection()
         (model, iter) = selection.get_selected()
-        self.dashboard.cur_tab = self.treestore.get_value(iter, 0)
-        self.dashboard.refresh()
+        if iter != None:
+            self.dashboard.cur_tab = self.treestore.get_value(iter, 0)
+            self.dashboard.refresh()
 
 class DashboardWindow(HIGWindow):
     def __init__(self):
         HIGWindow.__init__(self, type=gtk.WINDOW_TOPLEVEL)
         self.set_title(_('Dashboard'))
         self.set_border_width(10)
-        self.set_size_request(640, 500)
+        #self.set_size_request(640, 500)
 
         self.__create_widgets()
         self.__pack_widgets()

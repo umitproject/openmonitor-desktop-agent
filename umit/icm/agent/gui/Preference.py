@@ -72,6 +72,9 @@ class PreferenceWindow(HIGWindow):
         # Feedback page
         self.feedback_page = FeedbackPage()
         self.notebook.append_page(self.feedback_page, gtk.Label(_("Feedback")))
+        # Update page
+        self.update_page = UpdatePage()
+        self.notebook.append_page(self.update_page, gtk.Label(_("Update")))
 
     def __pack_widgets(self):
         # Search Notebook
@@ -259,6 +262,71 @@ class PreferencePage(HIGVBox):
         self.superpeers_subhbox._pack_noexpand_nofill(self.btn_box)
         self.superpeers_table.attach_label(self.superpeers_subhbox, 0, 1, 0, 1)
 
+#---------------------------------------------------------------------
+class UpdatePage(HIGVBox):
+    """"""
+    def __init__(self):
+        """Constructor"""
+        HIGVBox.__init__(self)
+        self.__create_widgets()
+        self.__pack_widgets()
+        self.__load_list()
+        
+    def __create_widgets(self):
+        """"""
+        
+        self.update_switch_hbox = HIGHBox()
+        self.update_settings_hbox = HIGHBox()
+
+        self.update_switch_section = HIGSectionLabel(_("Update Module Switch"))        
+        self.update_switch_table = HIGTable()
+        self.update_settings_section = HIGSectionLabel(_("Update Settings"))        
+        self.update_settings_table = HIGTable()  
+        
+        self.update_switch_check = gtk.CheckButton(_("Software Update Switch"))
+        self.update_times_label = HIGEntryLabel(_("Auto detect update news"))
+        self.update_method_label = HIGEntryLabel(_("Update method"))       
+        
+        self.update_time_store = gtk.ListStore(str)
+        self.update_time_entry = gtk.ComboBoxEntry(self.update_time_store, 0)
+        self.update_method_store = gtk.ListStore(str)
+        self.update_methodh_entry = gtk.ComboBoxEntry(self.update_method_store, 0)        
+         
+    def __pack_widgets(self):
+        """"""
+        self.set_border_width(12) 
+        
+        self._pack_noexpand_nofill(self.update_switch_section)
+        self._pack_noexpand_nofill(self.update_switch_hbox)
+        self._pack_noexpand_nofill(hig_box_space_holder())
+        self._pack_noexpand_nofill(self.update_settings_section)
+        self._pack_noexpand_nofill(self.update_settings_hbox)
+        
+        self.update_switch_hbox._pack_noexpand_nofill(hig_box_space_holder())
+        self.update_switch_hbox._pack_expand_fill(self.update_switch_table)
+        self.update_settings_hbox._pack_noexpand_nofill(hig_box_space_holder())
+        self.update_settings_hbox._pack_expand_fill(self.update_settings_table)
+
+        self.update_switch_table.attach_label(self.update_switch_check, 0, 2, 0, 1)
+        self.update_settings_table.attach_label(self.update_times_label, 0, 1, 0, 1)
+        self.update_settings_table.attach_entry(self.update_time_entry, 1, 2, 0, 1 )   
+        self.update_settings_table.attach_label(self.update_method_label, 0, 1, 1, 2)
+        self.update_settings_table.attach_entry(self.update_methodh_entry, 1, 2, 1, 2 ) 
+
+    def __load_list(self):
+        """"""
+        update_time_str = [["Every day"],
+                                  ["Every Week"],
+                                  ["Every Two Weeks"],
+                                  ["Every Month"],
+                                  ["Never"]]
+        update_method_str = [["Show right now"],
+                                  ["Download"],
+                                  ["Download and Installation"]]
+        for s in update_time_str:
+            self.update_time_store.append(s)
+        for s in update_method_str:
+            self.update_method_store.append(s)
 #---------------------------------------------------------------------
 class TestPage(HIGVBox):
     """"""
