@@ -38,7 +38,7 @@ from umit.icm.agent.I18N import _
 class About(HIGWindow):
     def __init__(self):
         HIGWindow.__init__(self)
-        self.set_title("About ICM-Agent")
+        self.set_title("About Open Monitor Desktop")
         self.set_position(gtk.WIN_POS_CENTER)
 
         self.__create_widgets()

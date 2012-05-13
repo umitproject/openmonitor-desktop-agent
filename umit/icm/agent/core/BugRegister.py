@@ -30,7 +30,6 @@ from tempfile import mktemp
 #from umit.icm.agent.Version import VERSION
 
 redmine_site="http://dev.umitproject.org/"
-redmine_project=redmine_site + "projects/desktop-agent/"
 redmine_new_ticket=redmine_site + "newticket"
 redmine_submit=redmine_new_ticket
 

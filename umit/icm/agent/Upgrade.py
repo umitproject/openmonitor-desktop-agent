@@ -27,6 +27,7 @@ import subprocess
 
 from umit.icm.agent.logger import g_logger
 from umit.icm.agent.Global import *
+from umit.icm.agent.BasePaths import *
 
 def update_agent(result, *args, **kw):
     g_logger.info("Updating Desktop Agent...")
@@ -65,11 +66,15 @@ def restart_agent(path):
         os.path.join(ROOT_DIR, 'umit', 'icm', 'agent', 'running')):
         time.sleep(0.1)
     # Remove files
-    shutil.rmtree(os.path.join(ROOT_DIR, 'umit'))
+    #shutil.rmtree(os.path.join(ROOT_DIR, 'umit'))
     # Extract tarfile
     import tarfile
     t = tarfile.open(path)
-    t.extractall(ROOT_DIR)
+    #t.extractall(ROOT_DIR)
+    t.extractall(TMP_DIR)
+    restart_function()
+
+def restart_function():
     # Restart
     g_logger.info("Restarting Desktop Agent.")
     bin_path = os.path.join(ROOT_DIR, 'bin', 'icm-agent.py')

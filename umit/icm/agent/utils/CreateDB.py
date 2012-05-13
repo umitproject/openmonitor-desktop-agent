@@ -4,6 +4,7 @@
 #
 # Authors:  Zhongjie Wang <wzj401@gmail.com>
 #           Adriano Marques <adriano@umitproject.org>
+#           Tianwei liu <liutianweidlut@gmail.com>
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -148,7 +149,17 @@ def create(conn_str):
               "created_at INTEGER NOT NULL,"
               "updated_at INTEGER NOT NULL"
               ")")
-
+    #db table for software update
+    c.execute("CREATE TABLE updates ("
+              "version TEXT NOT NULL PRIMARY KEY,"
+              "news_date TEXT NOT NULL,"
+              "software_name TEXT,"
+              "description TEXT,"
+              "download_url TEXT NOT NULL,"
+              "is_update INTEGER NOT NULL,"
+              "check_code TEXT"
+               ")")
+    
     # Insert pre-defined values
     mod = 93740173714873692520486809225128030132198461438147249362129501889664779512410440220785650833428588898698591424963196756217514115251721698086685512592960422731696162410024157767288910468830028582731342024445624992243984053669314926468760439060317134193339836267660799899385710848833751883032635625332235630111L
     exp = 65537L
@@ -158,6 +169,7 @@ def create(conn_str):
     # Data for test
     c.execute("INSERT INTO peers VALUES(10004, 1, '202.206.64.11', 3128, '', '', "
               "'China', 'UNKNOWN', NULL)")
+
 
 
     conn.commit()

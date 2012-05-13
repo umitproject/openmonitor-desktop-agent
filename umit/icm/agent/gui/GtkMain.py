@@ -62,6 +62,7 @@ class GtkMain(object):
             self.tray_indicator.set_status(appindicator.STATUS_ACTIVE)
             self.tray_indicator.set_attention_icon("indicator-messages-new")
             self.tray_indicator.set_menu(self.tray_menu_logged_out)
+
         else:
             self.tray_icon = gtk.StatusIcon()
             self.tray_icon.connect('popup-menu', self.show_menu)
@@ -198,8 +199,8 @@ class GtkMain(object):
         
     def show_software_update(self):
         from umit.icm.agent.gui.SoftwareUpdate import SoftwareUpdateDialog
-        wnd = SoftwareUpdateDialog()
-        wnd.show_all()
+        self.update_dialog = SoftwareUpdateDialog()
+        self.update_dialog.show_all()
 
     def show_about(self):
         from umit.icm.agent.gui.About import About

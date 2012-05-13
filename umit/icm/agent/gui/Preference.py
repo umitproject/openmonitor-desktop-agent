@@ -38,6 +38,18 @@ from umit.icm.agent.Global import *
 from umit.icm.agent.test import test_name_by_id
 
 
+update_time_str = {
+                   "Every Start":1,
+                   #"Every Week":2,
+                   #"Every Two Weeks":3,
+                   #"Every Month":4,
+                   "Never":2
+                   }
+update_method_str = {
+                     "Show right now":1,
+                     "Download and Installation":2
+                     }
+
 class PreferenceWindow(HIGWindow):
     """
     User Preference
@@ -45,6 +57,8 @@ class PreferenceWindow(HIGWindow):
     def __init__(self):
         HIGWindow.__init__(self, type=gtk.WINDOW_TOPLEVEL)
         self.set_title(_('Preference'))
+        self.set_position(gtk.WIN_POS_CENTER_ALWAYS)
+                
         self.__create_widgets()
         self.__pack_widgets()
         self.load_preference()
@@ -119,6 +133,19 @@ class PreferenceWindow(HIGWindow):
             g_db_helper.set_value('config','aggregator_url', aggregator_url)
         # Save test tab
         self.save_tests()
+        
+        # Save update settings
+        update_time  = self.update_page.update_time_entry.get_active_text()
+        if update_time != "" and update_time != None :
+            g_config.set('update', 'update_time',update_time)
+        
+        update_method = self.update_page.update_methodh_entry.get_active_text()
+        if update_method != "" and update_method != None :
+            g_config.set('update', 'update_method',update_method)   
+            
+        update_detect = self.update_page.update_switch_check.get_active()
+        g_config.set('update', 'update_detect',str(update_detect))
+
 
     def load_preference(self):
         self.pref_page.peerid_label2.set_text(str(theApp.peer_info.ID))
@@ -137,16 +164,31 @@ class PreferenceWindow(HIGWindow):
             self.pref_page.update_check.set_active(False)
         
         #auto_login = g_config.getboolean('application', 'auto_login')
-        auto_login = False
+        auto_login = True
         if auto_login:
             self.pref_page.login_ckeck.set_active(True)
         else:
             self.pref_page.login_ckeck.set_active(False)
             
         self.pref_page.cloudagg_entry.set_text(theApp.aggregator.base_url)
+        
         # load test tab
         self.load_tests()
-
+        
+        #load update settings
+        update_time  = g_config.get('update', 'update_time')
+        if update_time != "" and update_time != None: 
+            self.update_page.update_time_entry.set_text_column(update_time_str[update_time])
+        update_method = g_config.get('update', 'update_method')
+        if update_method != "" and update_method != None:    
+            self.update_page.update_methodh_entry.set_text_column(update_method_str[update_method])
+        
+        update_detect = g_config.getboolean('update', 'update_detect')
+        if update_detect:
+            self.update_page.update_switch_check.set_active(True)
+        else:
+            self.update_page.update_switch_check.set_active(False)
+        
     def save_tests(self):
         SELECTED_TESTS = [ r[0] for r in self.test_page.subbox.\
                            tree_view_selected_tests.treestore ]
@@ -278,12 +320,12 @@ class UpdatePage(HIGVBox):
         self.update_switch_hbox = HIGHBox()
         self.update_settings_hbox = HIGHBox()
 
-        self.update_switch_section = HIGSectionLabel(_("Update Module Switch"))        
+        self.update_switch_section = HIGSectionLabel(_("Update News Detect"))        
         self.update_switch_table = HIGTable()
         self.update_settings_section = HIGSectionLabel(_("Update Settings"))        
         self.update_settings_table = HIGTable()  
         
-        self.update_switch_check = gtk.CheckButton(_("Software Update Switch"))
+        self.update_switch_check = gtk.CheckButton(_("Software Update Detect Switch"))
         self.update_times_label = HIGEntryLabel(_("Auto detect update news"))
         self.update_method_label = HIGEntryLabel(_("Update method"))       
         
@@ -315,18 +357,13 @@ class UpdatePage(HIGVBox):
 
     def __load_list(self):
         """"""
-        update_time_str = [["Every day"],
-                                  ["Every Week"],
-                                  ["Every Two Weeks"],
-                                  ["Every Month"],
-                                  ["Never"]]
-        update_method_str = [["Show right now"],
-                                  ["Download"],
-                                  ["Download and Installation"]]
-        for s in update_time_str:
-            self.update_time_store.append(s)
-        for s in update_method_str:
-            self.update_method_store.append(s)
+        for s in update_time_str.keys():
+            #print s
+            self.update_time_store.append([s])
+        for s in update_method_str.keys():
+            #print s
+            self.update_method_store.append([s])
+            
 #---------------------------------------------------------------------
 class TestPage(HIGVBox):
     """"""

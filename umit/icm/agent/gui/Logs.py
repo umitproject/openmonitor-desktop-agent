@@ -33,7 +33,6 @@ from umit.icm.agent.I18N import _
 from umit.icm.agent.Global import *
 from umit.icm.agent.BasePaths import LOG_DIR
 
-
 class LogsWindow(HIGWindow):
     """
     Logs Window
@@ -41,10 +40,14 @@ class LogsWindow(HIGWindow):
     def __init__(self):
         HIGWindow.__init__(self, type=gtk.WINDOW_TOPLEVEL)
         self.set_title(_('Logs'))
-        self.set_size_request(640, 400)
+        self.set_position(gtk.WIN_POS_CENTER_ALWAYS)
+        self.set_size_request(720,480)
         self.__create_widgets()
         self.__pack_widgets()
-
+        
+        #test
+        #from umit.icm.agent.gui.Notifications import *
+        #t = Notifications(mode=new_release_mode,text="test",timeout=10000)
 
     def __create_widgets(self):
         self.main_vbox = HIGVBox()

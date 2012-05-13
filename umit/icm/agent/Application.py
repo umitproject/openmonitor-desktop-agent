@@ -130,7 +130,20 @@ class Application(object):
         else:
             self.gtk_main.show_login()
             g_logger.info("Auto-login is disabled. You need to manually login.")
+            
+        #check the new software
+        self.check_software_auto()
 
+    def check_software_auto(self):
+        """
+        check software: according the time and other configurations
+        """
+        if g_config.getboolean('update', 'update_detect'):
+            from umit.icm.agent.gui.SoftwareUpdate import auto_check_update
+            #Here can set some update attributes
+            defer_ = auto_check_update()
+            return defer_
+        
     def register_agent(self, username, password):
         defer_ = self.aggregator.register(username, password)
         defer_.addCallback(self._handle_register)

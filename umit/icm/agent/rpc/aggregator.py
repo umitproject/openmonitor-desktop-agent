@@ -25,6 +25,7 @@ import os
 import sys
 import urllib
 import random
+import time
 
 from twisted.web import client
 from twisted.web.error import Error
@@ -386,6 +387,7 @@ class AggregatorAPI(object):
     """ Version """
     #----------------------------------------------------------------------
     def check_version(self):
+        self.check_message = {}
         request_msg = NewVersion()
         #self._make_request_header(request_msg.header)
         request_msg.agentVersionNo = VERSION_NUM
@@ -397,14 +399,31 @@ class AggregatorAPI(object):
         return defer_
 
     def _handle_check_version_response(self, message):
+        
         if message is None:
             return
-
-        return message
+        g_logger.info("Get check_version_response %s" % message) 
+        
+        #add the record into the Database
+        from umit.icm.agent.gui.SoftwareUpdate import *
+        check_message = {}
+        
+        check_message["download_url"] = message.downloadURL 
+        check_message["version"] = str(message.versionNo)   
+        check_message["news_date"] = time.strftime("%Y-%m-%d",time.localtime())
+        check_message["software_name"] = "OpenMonitor Desktop V" + str(message.versionNo)
+        check_message["is_update"] = no_updated
+        check_message["description"] = "Open Monitor Desktop Agent!" 
+        check_message["check_code"] = ""
+         
+        if not check_update_item_in_db(check_message["version"]):
+            insert_update_item_in_db(check_message)
+            g_logger.info("Write a new update record into DB :%s" % check_message) 
+          
+        return  message
 
     def check_tests(self):
         request_msg = NewTests()
-
         request_msg.currentTestVersionNo = TEST_PACKAGE_VERSION_NUM
 
         defer_ = self._send_message(request_msg, NewTestsResponse)
@@ -486,8 +505,6 @@ class AggregatorAPI(object):
         theApp.peer_manager.sync_bannets(message)
 
         return message
-
-
 
     """ Private """
     #----------------------------------------------------------------------

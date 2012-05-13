@@ -34,6 +34,7 @@ from higwidgets.higbuttons import HIGStockButton
 from umit.icm.agent.core.BugRegister import BugRegister
 from umit.icm.agent.Version import VERSION
 from umit.icm.agent.I18N import _
+from umit.icm.agent.Upgrade import *
 
 
 def show_report(reuse_mainloop, bug_page):
@@ -307,11 +308,9 @@ class BugReport(HIGDialog):
 
         # report sent successfully
         self.response(gtk.RESPONSE_DELETE_EVENT)
+        #restart 
+        restart_function()
         
-    
-
-        
-
     def get_category(self):
         return self.category_combo.child.get_text()
 
@@ -394,7 +393,6 @@ class BugReportDescription(HIGDialog):
         self.vbox.pack_start(self.bug_text, False, False)
         self.vbox.pack_start(self.description_scrolled)
        
-        
         
 if __name__ == "__main__":
     c = BugReport()

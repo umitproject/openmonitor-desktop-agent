@@ -38,6 +38,7 @@ class NavigationBox(HIGVBox):
         self.dashboard = dashboard
         self.set_size_request(180, 180)
         self.treestore = gtk.TreeStore(str)
+        
 
         piter = self.treestore.append(None, ['Reports'])
         self.treestore.append(piter, ['Reports Sent'])
@@ -81,7 +82,8 @@ class DashboardWindow(HIGWindow):
         self.set_title(_('Dashboard'))
         self.set_border_width(10)
         #self.set_size_request(640, 500)
-
+        self.set_position(gtk.WIN_POS_CENTER_ALWAYS)
+        
         self.__create_widgets()
         self.__pack_widgets()
 

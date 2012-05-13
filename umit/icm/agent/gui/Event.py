@@ -41,7 +41,8 @@ class EventWindow(HIGWindow):
         HIGWindow.__init__(self, type=gtk.WINDOW_TOPLEVEL)
         self.set_title(_('Event List'))
         self.set_size_request(640, 380)
-
+        self.set_position(gtk.WIN_POS_CENTER_ALWAYS)
+        
         self.__create_widgets()
         self.__load_events()
 
