@@ -7,3 +7,8 @@
 [submodule "deps/icm-common"]
 	path = deps/icm-common
 	url = ssh://umitgit@dev.umitproject.org:/icm-common.git
+[submodule "umit/icm/agent/libcage"]
+	path = umit/icm/agent/libcage
+	url = ssh://git@github.com:narendran/libcage.git
+		
+	
