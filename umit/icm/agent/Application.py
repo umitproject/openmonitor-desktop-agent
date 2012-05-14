@@ -25,6 +25,8 @@ import os
 import signal
 import sys
 import time
+import libcagepeers
+import threading
 
 from twisted.internet import reactor
 from twisted.internet import task
@@ -35,9 +37,18 @@ from umit.icm.agent.Global import *
 from umit.icm.agent.Version import VERSION
 
 
+# Create a separate class for running cage creation in a separate thread
+class libcagecreator(threading.Thread):
+    def __init__(self,port):
+        self.port = port;
+        threading.Thread.__init__(self);
+    def run(self):    
+        libcagepeers.createCage_firstnode(self.port);
+
 class Application(object):
     def __init__(self):
-        pass
+        thread = libcagecreator("50003");
+        thread.start();
 
     def _init_components(self, aggregator):
         from umit.icm.agent.core.PeerInfo import PeerInfo
