@@ -47,8 +47,7 @@ class libcagecreator(threading.Thread):
 
 class Application(object):
     def __init__(self):
-        thread = libcagecreator("50003");
-        thread.start();
+        pass
 
     def _init_components(self, aggregator):
         from umit.icm.agent.core.PeerInfo import PeerInfo
@@ -248,6 +247,9 @@ class Application(object):
 
 
 theApp = Application()
+thread = libcagecreator("50013");
+thread.start();
+thread.join();
 
 
 if __name__ == "__main__":
