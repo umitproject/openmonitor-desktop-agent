@@ -37,14 +37,6 @@ from umit.icm.agent.Global import *
 from umit.icm.agent.Version import VERSION
 
 
-# Create a separate class for running cage creation in a separate thread
-class libcagecreator(threading.Thread):
-    def __init__(self,port):
-        self.port = port;
-        threading.Thread.__init__(self);
-    def run(self):    
-        libcagepeers.createCage_firstnode(self.port);
-
 class Application(object):
     def __init__(self):
         pass
@@ -212,6 +204,10 @@ class Application(object):
         The Main function
         """
         g_logger.info("Starting ICM agent. Version: %s", VERSION)
+
+        # Plug in Libcage code - Get port number from command line
+        libcagepeers.createCage_firstnode("20000");
+
         self._init_components(aggregator)
         self._load_from_db()
 
@@ -226,6 +222,8 @@ class Application(object):
         if run_reactor:
             # This is necessary so the bot can take over and control the agent
             reactor.run()
+
+        thread.join();
 
     def terminate(self):
         reactor.callWhenRunning(reactor.stop)
@@ -247,9 +245,7 @@ class Application(object):
 
 
 theApp = Application()
-thread = libcagecreator("50013");
-thread.start();
-thread.join();
+
 
 
 if __name__ == "__main__":
