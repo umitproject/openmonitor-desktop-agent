@@ -1,0 +1,16 @@
+
+include README AUTHORS COPYING COPYING_HIGWIDGETS ChangeLog TODO
+
+include icmagent/bin/icm-agent
+include icmagent/conf/agent.cfg
+
+recursive-include icmagent/docs *
+recursive-include icmagent/log *.log
+recursive-include icmagent/share/db  *
+recursive-include icmagent/share/icons  *
+recursive-include icmagent/share/images  *
+recursive-include icmagent/share/locales  *
+recursive-include icmagent/tools *.py
+recursive-include icmagent/umit *.py
+recursive-include icmagent/install_scripts *
+

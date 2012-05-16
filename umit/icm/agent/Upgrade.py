@@ -3,6 +3,7 @@
 # Copyright (C) 2011 Adriano Monteiro Marques
 #
 # Author:  Zhongjie Wang <wzj401@gmail.com>
+#          Tianwei Liu <liutiawneidlut@gmail.com>
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -66,18 +67,21 @@ def restart_agent(path):
         os.path.join(ROOT_DIR, 'umit', 'icm', 'agent', 'running')):
         time.sleep(0.1)
     # Remove files
-    #shutil.rmtree(os.path.join(ROOT_DIR, 'umit'))
+    remove_files = ["umit","bin","conf","deps","docs","install_scripts",
+                    "share","tools"]
+    for folder in remove_files:
+        shutil.rmtree(os.path.join(ROOT_DIR, folder))
     # Extract tarfile
     import tarfile
     t = tarfile.open(path)
-    #t.extractall(ROOT_DIR)
-    t.extractall(TMP_DIR)
+    t.extractall(ROOT_DIR)
+    #t.extractall(TMP_DIR)
     restart_function()
 
 def restart_function():
     # Restart
     g_logger.info("Restarting Desktop Agent.")
-    bin_path = os.path.join(ROOT_DIR, 'bin', 'icm-agent.py')
+    bin_path = os.path.join(ROOT_DIR, 'bin', 'icm-agent')
     subprocess.Popen([sys.executable, bin_path] + sys.argv[1:])
     g_logger.info("Desktop Agent Updated.")
 

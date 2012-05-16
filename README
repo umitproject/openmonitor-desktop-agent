@@ -9,8 +9,8 @@ Dependencies:
 * PyGTK 2.24.0
 * pyOpenSSL 0.12
 * Google Protocol Buffers 2.4.1
-* pygtkChart
-* PyCrypto
+* pygtkChart Beta
+* PyCrypto 2.1.0
 * pyactiveresource
 
 Running ICM Desktop Agent:
