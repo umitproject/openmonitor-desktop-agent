@@ -405,7 +405,7 @@ class AggregatorAPI(object):
         g_logger.info("Get check_version_response %s" % message) 
         
         #add the record into the Database
-        from umit.icm.agent.gui.SoftwareUpdate import *
+        from umit.icm.agent.gui.SoftwareUpdate import check_update_item_in_db,insert_update_item_in_db,no_updated
         check_message = {}
         
         check_message["download_url"] = message.downloadURL 

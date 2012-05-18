@@ -29,18 +29,26 @@ import tempfile
 import cgitb
     
 # find root directory
-ROOT_DIR = os.path.abspath(os.path.dirname(__file__))
-while not os.path.exists(os.path.join(ROOT_DIR, 'umit')):
-    new_dir = os.path.abspath(os.path.join(ROOT_DIR, os.path.pardir))
-    if ROOT_DIR == new_dir:
-        raise Exception("Can't find root dir.")
-    ROOT_DIR = new_dir
-
-execfile(os.path.join(ROOT_DIR, 'deps', 'umit-common', 'utils', 'importer.py'))
-sys.path.insert(0, ROOT_DIR)
-sys.path.insert(0, os.path.join(ROOT_DIR, 'deps'))
-sys.path.insert(0, os.path.join(ROOT_DIR, 'deps', 'icm-common'))
-sys.path.insert(0, os.path.join(ROOT_DIR, 'deps', 'umit-common'))
+if not hasattr(sys,"frozen"):
+    ROOT_DIR = os.path.abspath(
+                        os.path.join(os.path.dirname(__file__),os.path.pardir))
+    if os.path.exists(os.path.join(ROOT_DIR,'umit')):
+         sys.path.insert(0, ROOT_DIR)
+         execfile(os.path.join(ROOT_DIR, 'deps', 'umit-common', 'utils', 'importer.py'))
+         sys.path.insert(0, os.path.join(ROOT_DIR, 'deps'))
+         sys.path.insert(0, os.path.join(ROOT_DIR, 'deps', 'icm-common'))
+         sys.path.insert(0, os.path.join(ROOT_DIR, 'deps', 'umit-common'))
+         sys.path.insert(0, os.path.join(ROOT_DIR, 'deps', 'higwidgets'))
+    else:
+         raise Exception("Can't find root dir.")
+else:
+    import pygtk
+    pygtk.require('2.0')
+    execfile(os.path.join('icmagent','deps', 'umit-common', 'utils', 'importer.py'))
+    sys.path.insert(0, os.path.join('icmagent','deps'))
+    sys.path.insert(0, os.path.join('icmagent','deps', 'icm-common'))
+    sys.path.insert(0, os.path.join('icmagent','deps', 'umit-common'))
+    sys.path.insert(0, os.path.join('icmagent','deps', 'higwidgets'))
 
 # check if there's GTK environment
 useGTK = True
@@ -187,7 +195,7 @@ Umit:%s
             d.run()
             d.destroy()
 
-#sys.excepthook = UmitExceptionHook()
+sys.excepthook = UmitExceptionHook()
 
 def main(args):
     if useGTK:

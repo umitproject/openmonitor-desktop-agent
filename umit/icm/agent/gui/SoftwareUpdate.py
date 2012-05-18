@@ -432,7 +432,7 @@ def handle_auto_check_update(message):
     
     if compare_version(str(message.versionNo),VERSION) == higher_version:
         g_logger.info("New version arrive in Check" )  
-        from umit.icm.agent.gui.Notifications import *
+        from umit.icm.agent.gui.Notifications import Notifications,new_release_mode,report_mode
         t = Notifications(mode=new_release_mode,text="test",timeout=15000)
     else:
         g_logger.info("Current version is the newest in Check" ) 

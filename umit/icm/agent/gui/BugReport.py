@@ -206,7 +206,6 @@ class BugReport(HIGDialog):
             self.action_area.reorder_child(spaceholder, 1)
         
         
-        
     def _connect_widgets(self):
         self.connect('response', self.check_response)
         if self.crashreport:
@@ -303,13 +302,13 @@ class BugReport(HIGDialog):
                     "Monitor will be restarted now."))
             run_dialog(self._reuse_mainloop, ok_dialog)
             #run_dialog(self._reuse_mainloop, ok_dialog,
-            #        show_report, # callback
-            #        self._reuse_mainloop, bug_page) # args
+                    #show_report, # callback
+                    #self._reuse_mainloop, bug_page) # args
 
         # report sent successfully
         self.response(gtk.RESPONSE_DELETE_EVENT)
         #restart 
-        restart_function()
+        #kill_restart_function()
         
     def get_category(self):
         return self.category_combo.child.get_text()

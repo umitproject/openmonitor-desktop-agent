@@ -49,7 +49,7 @@ class EventWindow(HIGWindow):
     def __create_widgets(self):
         #cell_data_funcs = (None, self.event_type, self.time,
                            #self.location, self.report)
-
+                           
         self.listmodel = gtk.ListStore(str, str, str, str, str)
 
         # create the TreeView
