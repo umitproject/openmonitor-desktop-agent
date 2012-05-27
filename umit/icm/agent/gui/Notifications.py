@@ -66,8 +66,12 @@ class Notifications(gtk.Window):
         screen = gtk.gdk.Screen()
         self.screen_x = gtk.gdk.Screen.get_width(screen)
         self.screen_y = gtk.gdk.Screen.get_height(screen) 
-                
-        self.move(self.screen_x - width- 30 ,30) 
+        
+        #win or linux different position
+        if os.name == "nt":
+            self.move(self.screen_x - width- 30 ,self.screen_y - 40 - height)  
+        else:
+            self.move(self.screen_x - width- 30 ,30) 
         self.set_app_paintable(True)
         self.set_size_request(width,height)
         self.set_resizable(False)

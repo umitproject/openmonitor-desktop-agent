@@ -133,7 +133,12 @@ class AggregatorAPI(object):
                       (message.agentID, message.publicKeyHash))
 
         return {'id': message.agentID, 'hash': message.publicKeyHash}
-
+    
+    def _handle_register_error_response(self,failure):
+        if failure is None:
+            g_logger.error("Error empty response while trying to register.")
+            return 
+        
     def login(self, username, password):
         request_msg = Login()
         request_msg.agentID = theApp.peer_info.ID
@@ -460,6 +465,7 @@ class AggregatorAPI(object):
                 theApp.peer_manager.add_normal_peer(node.agentID,
                                                     node.agentIP,
                                                     node.agentPort,
+                                                    node.token,
                                                     node.publicKey,
                                                     node.peerStatus,
                                                     id)
@@ -623,40 +629,56 @@ class AggregatorAPI(object):
             if isinstance(err, Error):
                 g_logger.error(">>> The Aggregator had an Internal Error:")
                 g_logger.error(err.response)
+                self._alter_network_informaiton(err.response)
         
-        self._alter_informaiton(failure)
-
-
+        #self._alter_network_informaiton(err.response)
+        
     def _decode_errback(self, failure):
         g_logger.error("[AggregatorAPI] - Failed to decode. %s" % failure)
 
     def _handle_errback(self, failure):
         g_logger.error("Aggregator failure: %s" % str(failure))
-        
-    def _alter_informaiton(self,failure):
+    
+    def _alter_show(self,primary_text,secondary_text):
         #Add the user-friendly information to the user to check the problem.
         import gtk
         from higwidgets.higwindows import HIGAlertDialog
+
+        alter = HIGAlertDialog(primary_text = primary_text,\
+                                       secondary_text = secondary_text)
         
-        if 'error.NoRouteError' in str(failure):
-            failure_info_first  = _('Disconnect to Internet')
-            failure_info_second = _('Please check your network card connection!')
-        elif 'TimeoutError' in str(failure):
-            failure_info_first = _('Cloud Aggregator Server Connect Error')
-            failure_info_second = _('Please check your cloud aggregator URL')
-        elif 'Agent matching query does not exist' in str(failure) or\
-                            '500 Internal Server Error' in str(failure):
-            failure_info_first = _('Username/Password Error')
-            failure_info_second = _('Please check your username or password')            
-            
-        alter = HIGAlertDialog(primary_text = failure_info_first,\
-                                       secondary_text = failure_info_second)
         alter.show()
         alter.run()
 
         #show login window again
-        theApp.gtk_main.show_login()
+        theApp.gtk_main.show_login()                
         
+    def _alter_network_informaiton(self,failure):
+        failure_info_first = None
+        failure_info_second = None
+        
+        if 'error.NoRouteError' in str(failure):
+            failure_info_first  = 'Disconnect to Internet'
+            failure_info_second = 'Please check your network card connection!'
+        elif 'TimeoutError' in str(failure):
+            failure_info_first = 'Cloud Aggregator Server Connect Error'
+            failure_info_second = 'Please check your cloud aggregator URL'         
+        elif 'Agent matching query does not exist' in str(failure) :# or\
+                           # '500 Internal Server Error' in str(failure) or\
+                           # '500 INTERNAL SERVER ERROR' in str(failure):
+            failure_info_first = _('Username/Password Error')
+            failure_info_second = _('Please check your username or password')
+            #clear username and password (there maybe some bugs here)
+            theApp.peer_info.clear_db()
+        else: 
+            print str(failure)
+            pass
+        
+        if failure_info_first == None and failure_info_second == None:
+            return
+        else:
+            self._alter_show(primary_text = failure_info_first,secondary_text =failure_info_second)    
+
 
 if __name__ == "__main__":
     import time

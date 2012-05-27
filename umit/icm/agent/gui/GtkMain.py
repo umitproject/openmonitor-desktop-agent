@@ -216,8 +216,8 @@ class GtkMain(object):
     def set_to_logging_in(self):
         if appindicator is None:
             self.tray_icon.set_tooltip("Logging in...")
-        self.tray_menu.children()[0].set_sensitive(False)
-
+        self.tray_menu.get_children()[0].set_sensitive(False)
+        #self.tray_menu.children()[0].set_sensitive(False)
 
 if __name__ == "__main__":
     #splash = gtk.Window()

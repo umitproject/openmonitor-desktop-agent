@@ -6,11 +6,11 @@ echo ########################################
 echo .
 
 echo Setting installation variables...
-set PythonEXE=C:\Python27\python.exe
+set PythonEXE=C:\Python26\python.exe
 set UmitOrig=.
-set UmitDir=G:\UmitTemp
+set UmitDir=G:\ICMTemp
 set DistDir=%UmitDir%\dist
-set GTKDir=C:\Python27\Lib\site-packages\gtk-2.0\runtime
+set GTKDir=C:\Python26\Lib\site-packages\gtk-2.0\runtime
 set WinInstallDir=%UmitDir%\icmagent\install_scripts\windows
 set Output=%UmitDir%\win_install.log
 set MakeNSIS="C:\Program Files (x86)\NSIS\makensis.exe"
@@ -55,8 +55,6 @@ xcopy %UmitOrig%\setup.py %UmitDir% /Y
 echo [6] Compiling Umit using py2exe...
 cd %UmitDir%
 %PythonEXE% -OO setup.py py2exe
-
-pause
 
 echo #######################
 echo # New Package Process#

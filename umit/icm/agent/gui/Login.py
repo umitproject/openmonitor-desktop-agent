@@ -159,18 +159,23 @@ class LoginDialog(HIGDialog):
             username = self.username_entry.get_text()
             password = self.password_entry.get_text()
             save_login = self.auto_login_checkbtn.get_active()
-            if not theApp.peer_info.is_registered:
-                defer_ = theApp.register_agent(username, password)
-                defer_.addCallback(
-                    lambda x: theApp.login(username, password, save_login))
-            else:
-                defer_ = theApp.login(username, password, save_login)
+            
+            #Bug in this: If the user go to this window, the theApp.peer_info cannot is_registered
+            
+            #if not theApp.peer_info.is_registered:
+            defer_ = theApp.login(username, password, save_login)   
+            #    defer_ = theApp.register_agent(username, password)
+            #    defer_.addCallback(
+            #        lambda x: theApp.login(username, password, save_login))
+            #else:
+            #    defer_ = theApp.login(username, password, save_login)
             self.destroy()
             theApp.gtk_main.login_dlg = None
         elif response_id in (gtk.RESPONSE_DELETE_EVENT, gtk.RESPONSE_CANCEL,
                 gtk.RESPONSE_NONE):
             self.destroy()
             theApp.gtk_main.login_dlg = None
+            
     def _settings(self,widget):
         '''
         configure settings: Server IP/Port: popup a new window

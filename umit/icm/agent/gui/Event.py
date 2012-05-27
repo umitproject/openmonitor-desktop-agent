@@ -47,6 +47,7 @@ class EventWindow(HIGWindow):
         self.__load_events()
 
     def __create_widgets(self):
+        #0/0
         #cell_data_funcs = (None, self.event_type, self.time,
                            #self.location, self.report)
                            

@@ -30,7 +30,21 @@ from umit.icm.agent.logger import g_logger
 from umit.icm.agent.Global import *
 from umit.icm.agent.BasePaths import *
 
+def onerror(func,path,exec_info):
+    """
+    shutil.rmtree callback(Attention:The rmtree cannot remove the readonly files in windows)
+    """
+    import stat
+    if not os.access(path, os.W_OK):
+        os.chmod(path, stat.S_IWUSR)
+        func(path)
+    else:
+        g_logger.debug("rm:path%s"%path)    #ignore errors
+
 def update_agent(result, *args, **kw):
+    """
+    update back
+    """
     g_logger.info("Updating Desktop Agent...")
     # args = ((version, check_code=0), {})
     version = args[0]
@@ -70,7 +84,10 @@ def restart_agent(path):
     remove_files = ["umit","bin","conf","deps","docs","install_scripts",
                     "share","tools"]
     for folder in remove_files:
-        shutil.rmtree(os.path.join(ROOT_DIR, folder))
+        if os.name == 'nt':     #rmtree cannot remove the readonly files
+            shutil.rmtree(os.path.join(ROOT_DIR, folder),onerror=onerror)
+        else:
+            shutil.rmtree(os.path.join(ROOT_DIR, folder))
     # Extract tarfile
     import tarfile
     t = tarfile.open(path)

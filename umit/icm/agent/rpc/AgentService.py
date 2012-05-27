@@ -68,7 +68,7 @@ class AgentProtocol(Protocol):
         g_logger.info("New connection #%d established. with Peer: %s" % (
                       self.factory.connectionNum, self.transport.getPeer()))
 
-        maxConnectionNum = g_config.getint('network', 'max_conns_num')
+        maxConnectionNum = g_config.getint('network', 'max_conn_num')
         if self.factory.connectionNum > maxConnectionNum:
             self.transport.write("Too many connections, try later")
             self.transport.loseConnection()

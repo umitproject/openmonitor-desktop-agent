@@ -86,17 +86,17 @@ print
 #########################################################################
 
 options = { 'py2exe': {
-						'compressed' : 1,  
-						'optimize': 2,
-						'bundle_files':2, 
-						'packages' : [ 'encodings', 'email','win32api','glib','twisted'],
-						'includes' : ['gobject', 'pickle', 'bz2'
-									,'twisted.internet','sqlite3','Crypto',
-									"cairo","gtk","gio","pango","pangocairo","atk",
-									'OpenSSL','pygtk_chart','glib','google.protobuf'],                          
-						'excludes': ['Tkinter', 'pdb',"pywin", "pywin.debugger"]
-					 }
-		 } 
+                        'compressed' : 1,  
+                        'optimize': 2,
+                        #'bundle_files':2, 
+                        'packages' : [ 'encodings', 'email','glib','twisted','google','xml.etree'],
+                        'includes' : ['gobject', 'pickle', 'bz2','xml.etree'
+                                    ,'twisted.internet','sqlite3','Crypto',
+                                    "cairo","gtk","gio","pango","pangocairo","atk",
+                                    'OpenSSL','pygtk_chart','glib','google','google.protobuf'],                          
+                        'excludes': ['Tkinter', 'pdb',"pywin", "pywin.debugger"]
+                     }
+         } 
 
 
 setup(
@@ -115,11 +115,12 @@ setup(
 		zipfile 	 = "lib/library.zip",
 		options = options,
 		data_files   = data_files,
-		scripts      = [os.path.join('icmagent','bin','icm-agent.py')],
+		scripts      = [os.path.join('icmagent','bin','icm-agent')],
 		
 		windows = [{
 			'dest_base': "icmagent",
-            'script': r'icmagent\bin\icm-agent.py',
+            'script': r'icmagent\bin\icm-agent',
+            'uac_info' : 'requireAdministrator',
             'icon_resources' :[(1,r'icmagent\share\images\icm-agent.ico') ]
             }],
 		packages     = ['icmagent',

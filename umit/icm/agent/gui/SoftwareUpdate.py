@@ -74,6 +74,7 @@ class SoftwareUpdateDialog(HIGWindow):
 
     
     def _create_record(self):
+        
         self.software_list_dict = {}
         self.software_details_dict ={
                                      "version":"",
@@ -324,6 +325,7 @@ class SoftwareUpdateDialog(HIGWindow):
         
         g_logger.debug("Finish check the software update.")
         self.progress_bar.set_value(100)
+        #self.progress_bar = gtk.ProgressBar(100)
         #show the record        
         self._load_updates()
         
