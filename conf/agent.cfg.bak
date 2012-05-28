@@ -1,7 +1,7 @@
 [application]
 auto_update_test_mod = True
 auto_update = True
-auto_login = False
+auto_login = True
 selected_tests = 
 startup_on_boot = False
 auto_update_test = True

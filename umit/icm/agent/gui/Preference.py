@@ -36,7 +36,7 @@ from umit.icm.agent.I18N import _
 from umit.icm.agent.Application import theApp
 from umit.icm.agent.Global import *
 from umit.icm.agent.test import test_name_by_id
-
+from umit.icm.agent.utils.Startup import StartUP
 
 update_time_str = {
                    "Every Start":1,
@@ -120,6 +120,7 @@ class PreferenceWindow(HIGWindow):
             theApp.peer_info.Email = user_email
 
         startup_on_boot = self.pref_page.startup_check.get_active()
+        self.pref_page.startup_set(startup_on_boot)
         g_config.set('application', 'startup_on_boot', str(startup_on_boot))
         auto_update = self.pref_page.update_check.get_active()
         g_config.set('application', 'auto_update', str(auto_update))
@@ -303,6 +304,14 @@ class PreferencePage(HIGVBox):
         self.superpeers_subhbox._pack_expand_fill(self.superpeers_entry)
         self.superpeers_subhbox._pack_noexpand_nofill(self.btn_box)
         self.superpeers_table.attach_label(self.superpeers_subhbox, 0, 1, 0, 1)
+        
+    def startup_set(self,is_start_up=True):
+        """"""
+        start = StartUP()
+        if is_start_up:
+            start.set_startup()
+        else:
+            start.clear_startup()
 
 #---------------------------------------------------------------------
 class UpdatePage(HIGVBox):
