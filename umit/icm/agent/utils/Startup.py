@@ -21,7 +21,7 @@
 Auto Starts: Windows(Regedit),Linux(Bash),OSX()
 """
 import os,sys,platform
-import _winreg as Regedit
+
 
 from umit.icm.agent.logger import g_logger
 from umit.icm.agent.BasePaths import *
@@ -39,7 +39,10 @@ class StartUP(object):
             self.exe_path = str(BIN_DIR)
             self.key_name = "icmagent"
         elif self.os_name == 'Linux':
-            pass
+            self.home_path = os.path.expanduser('~')
+            self.auto_sys_path = os.path.join(self.home_path,'.config/autostart/')
+            self.desktop_name = 'icm-agent.desktop'
+            self.auto_desktop_file = os.path.join(DESKTOP_DIR,self.desktop_name)
         elif self.os_name == 'Darwin':
             pass
         
@@ -60,6 +63,7 @@ class StartUP(object):
             self._mac_clear()
         
     def _win_set(self):
+        import _winreg as Regedit
         regedit = Regedit.ConnectRegistry(None,Regedit.HKEY_LOCAL_MACHINE)
         try:
             tag = self.regedit_path
@@ -81,6 +85,7 @@ class StartUP(object):
             Regedit.CloseKey(regedit)
             
     def _win_clear(self):
+        import _winreg as Regedit
         regedit = Regedit.ConnectRegistry(None,Regedit.HKEY_LOCAL_MACHINE)
         try:
             tag = self.regedit_path
@@ -99,9 +104,26 @@ class StartUP(object):
             Regedit.CloseKey(regedit)    
                 
     def _linux_set(self):
-        pass
+        import shutil
+        if  not os.path.exists(self.auto_sys_path):
+            os.mkdir(self.auto_sys_path)
+        try:
+            shutil.copy(self.auto_desktop_file, self.auto_sys_path+self.desktop_name)
+            g_logger.info("Auto StartUP icm-agent in Linux (%s,%s)" %(self.auto_desktop_file,self.auto_sys_path))
+        except Exception,e:
+            g_logger.error("[Failed]Auto StartUP icm-agent in Linux (%s,%s,%s)" % (self.auto_desktop_file,self.auto_sys_path,e) )
+                      
     def _linux_clear(self):
-        pass
+        file = self.auto_sys_path + self.desktop_name
+        if os.path.exists(file):
+            try:
+                os.remove(file)
+                g_logger.info("Cancel Auto StartUP icm-agent in Linux (%s)" %(file)) 
+            except Exception,e:
+                g_logger.error("[Failed] Cancel Auto StartUP icm-agent in Linux  (%s)" %(file)) 
+        else:
+            g_logger.info("There are not desktop file in auto folder %s" %(file)) 
+        
     def _mac_set(self):
         pass
     def _mac_clear(self):

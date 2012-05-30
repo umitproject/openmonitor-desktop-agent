@@ -25,7 +25,7 @@ import sys
 
 __all__ = ['ROOT_DIR', 'CONFIG_DIR', 'LOG_DIR', 'LOCALES_DIR', 'IMAGES_DIR',
            'ICONS_DIR', 'DB_DIR', 'TMP_DIR',
-           'CONFIG_PATH', 'DB_PATH','BIN_DIR']
+           'CONFIG_PATH', 'DB_PATH','BIN_DIR','DESKTOP_DIR']
 
 
 encoding = sys.getfilesystemencoding()
@@ -49,6 +49,7 @@ IMAGES_DIR = os.path.join(ROOT_DIR, 'share', 'images')
 ICONS_DIR = os.path.join(ROOT_DIR, 'share', 'icons')
 DB_DIR = os.path.join(ROOT_DIR, 'share', 'db')
 TMP_DIR = os.path.join(ROOT_DIR, 'tmp')
+DESKTOP_DIR = os.path.join(ROOT_DIR,'install_scripts','linux','ubuntu','debian')
 
 if not os.path.exists(CONFIG_DIR):
     os.mkdir(CONFIG_DIR)
