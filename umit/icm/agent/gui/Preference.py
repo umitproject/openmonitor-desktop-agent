@@ -36,6 +36,7 @@ from umit.icm.agent.I18N import _
 from umit.icm.agent.Application import theApp
 from umit.icm.agent.Global import *
 from umit.icm.agent.test import test_name_by_id
+from umit.icm.agent.test import ALL_TESTS
 from umit.icm.agent.utils.Startup import StartUP
 
 update_time_str = {
@@ -132,8 +133,10 @@ class PreferenceWindow(HIGWindow):
         if aggregator_url != None and aggregator_url != "":
             g_config.set('network', 'aggregator_url', aggregator_url)
             g_db_helper.set_value('config','aggregator_url', aggregator_url)
+        
         # Save test tab
         self.save_tests()
+        
         
         # Save update settings
         update_time  = self.update_page.update_time_entry.get_active_text()
@@ -191,20 +194,32 @@ class PreferenceWindow(HIGWindow):
             self.update_page.update_switch_check.set_active(False)
         
     def save_tests(self):
+        #The test should be stored into the DB
         SELECTED_TESTS = [ r[0] for r in self.test_page.subbox.\
                            tree_view_selected_tests.treestore ]
+
+        if ALL_TESTS[0] not in SELECTED_TESTS:
+            SELECTED_TESTS.append(ALL_TESTS[0])
+            
         g_db_helper.set_value('config','selected_tests', SELECTED_TESTS)
 
         auto_update_test = self.test_page.checkbtn.get_active()
         g_config.set('application', 'auto_update_test', str(auto_update_test))
+ 
+        load_http_throttled_test = self.test_page.checkbtn_throttled.get_active()
+        g_config.set('application', 'load_http_throttled_test',str(load_http_throttled_test))       
 
+        
     def load_tests(self):
-        from umit.icm.agent.test import ALL_TESTS
+
         ts = self.test_page.subbox.tree_view_installed_tests.treestore
         for tname in ALL_TESTS:
             ts.append(None, [tname])
 
-        SELECTED_TESTS = g_config.get('application', 'selected_tests')
+        #SELECTED_TESTS = g_config.get('application', 'selected_tests')
+        #Here, we use datebase to store the selected test
+        SELECTED_TESTS = g_db_helper.get_value('config','selected_tests')
+        
         if SELECTED_TESTS:
             ts = self.test_page.subbox.tree_view_selected_tests.treestore
             for tname in SELECTED_TESTS:
@@ -215,6 +230,14 @@ class PreferenceWindow(HIGWindow):
             self.test_page.checkbtn.set_active(True)
         else:
             self.test_page.checkbtn.set_active(False)
+            
+        load_http_throttled_test = g_config.getboolean('application', 'load_http_throttled_test')
+        if load_http_throttled_test:
+            self.test_page.checkbtn_throttled.set_active(True)
+        else:
+            self.test_page.checkbtn_throttled.set_active(False)        
+            
+        
 
 #---------------------------------------------------------------------
 class PreferencePage(HIGVBox):
@@ -390,6 +413,7 @@ class TestPage(HIGVBox):
         self.subbox = Tests()
         self.hbox1.add(self.subbox)
         self.checkbtn = gtk.CheckButton(_("Update tests module automatically"))
+        self.checkbtn_throttled = gtk.CheckButton(_("Load HTTP Throttled Test"))
 
     def __pack_widgets(self):
         #self.tests_hbox.set_border_width(12)
@@ -397,7 +421,9 @@ class TestPage(HIGVBox):
         self.pack_start(self.hbox2, True, True, 5)
 
         self.checkbtn.set_border_width(8)
+        self.checkbtn_throttled.set_border_width(8)
         self.hbox2.add(self.checkbtn)
+        self.hbox2.add(self.checkbtn_throttled)
 
 class Tests(gtk.VBox):
     def __init__(self):
@@ -465,12 +491,21 @@ class Tests(gtk.VBox):
 
     def remove_test(self):
         tree_selection = self.tree_view_selected_tests.treeview.get_selection()
+
+        #The user cannot delete the website test
+        selected_name = self.tree_view_selected_tests.treestore.\
+                    get_value(tree_selection.get_selected()[1],0)
+        print selected_name
+        if selected_name == ALL_TESTS[0]:
+            return
+        
         tree_iter = tree_selection.get_selected()[1]
         if tree_iter:
             self.tree_view_selected_tests.treestore.remove(tree_iter)
 
     def remove_all(self):
         self.tree_view_selected_tests.treestore.clear()
+        self.tree_view_selected_tests.treestore.append(None,[ALL_TESTS[0]])
 
     def update_test_mod(self):
         theApp.aggregator.check_tests()
