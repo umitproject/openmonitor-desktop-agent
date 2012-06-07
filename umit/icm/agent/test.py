@@ -3,6 +3,7 @@
 # Copyright (C) 2011 Adriano Monteiro Marques
 #
 # Author:  Zhongjie Wang <wzj401@gmail.com>
+#          Tianwei Liu <liutianweidlut@gmail.com>
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -18,12 +19,11 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
-try:
-    execfile("F:\\workspace\\PyWork\\icm-agent\\umit\\icm\\agent\\UmitImporter.py")
-except:
-    pass
+#single file test
+from utils.importertest import import_debug
+import_debug() 
 
-__all__ = ['test_by_id', 'test_name_by_id', 'WebsiteTest', 'ServiceTest']
+__all__ = ['test_by_id', 'test_name_by_id', 'WebsiteTest', 'ServiceTest','ThrottledTest']
 
 TEST_PACKAGE_VERSION = '1.0'
 TEST_PACKAGE_VERSION_NUM = 1
@@ -32,8 +32,10 @@ import hashlib
 import re
 import sys
 import time
+import struct
 
 from twisted.internet import reactor, ssl
+from twisted.internet import defer
 from twisted.internet.defer import Deferred
 from twisted.internet.protocol import Protocol, ClientCreator, ClientFactory
 from twisted.web.client import Agent, HTTPDownloader
@@ -86,6 +88,12 @@ class Test(object):
 ########################################################################
 # Website Test
 ########################################################################
+benchmark_url_list={
+                    1:'http://www.baidu.com/',
+                    2:'http://www.bing.com/',
+                    3:'http://www.google.com/',
+                    4:'http://www.sohu.com/',
+                    5:'http://www.yahoo.com/'}
 
 class WebsiteTest(Test):
     def __init__(self):
@@ -93,6 +101,7 @@ class WebsiteTest(Test):
         self.url = None
         self.status_code = 0
         self.pattern = None
+        self.benchmark_brandwidth = []  #benchmark speed
         self._agent = Agent(reactor)
 
     def prepare(self, param):
@@ -129,22 +138,35 @@ class WebsiteTest(Test):
         #print("Response time: %fs" % (self.response_time))
         #print(response.headers)
         report = self._generate_report()
-
         HTTP_SUCCESS_CODE = (200, 302)
         if response.code in HTTP_SUCCESS_CODE:
             task_done(self.__class__.__name__)
             #if self.pattern is not None:
                 #response.deliverBody(ContentExaminer(self.url,
                                                      #self.pattern))
+            #Here we can test the HTTP throttled 
+            report = self._throttled_http_test()
         else:
             task_failed(self.__class__.__name__)
         return report
 
+    def _throttled_http_test(self,report):
+        """
+        HTTP throttled test
+        """
+        throttled_test = g_config.getboolean('application', 'load_http_throttled_test')
+        if throttled_test:
+            #benchmark test
+            pass
+        
+        return report
+                
+        
     def _generate_report(self):
         report = WebsiteReport()
         report.header.agentID = theApp.peer_info.ID
-        report.header.timeUTC = int(time.time())
-        report.header.timeZone = 8
+        report.header.timeUTC = int(time.time())    #here should UTC clock?
+        report.header.timeZone =  -(time.timezone/3600)  #8
         report.header.testID = 1
         report.header.reportID = generate_report_id([report.header.agentID,
                                                      report.header.timeUTC,
@@ -177,6 +199,7 @@ class WebsiteTest(Test):
                     g_logger.info("Content changed.")
             else:
                 g_logger.error("The connection was broken. [%s]" % self.url)
+
 
 ########################################################################
 # Service Test
@@ -218,7 +241,7 @@ class ServiceTest(Test):
         return True
 
     def execute(self):
-        raise NotImplementedError
+        raise NotImplementedError('You need to implement this method')
 
     def _connectionFailed(self, failure):
         task_failed(self.__class__.__name__)
@@ -228,8 +251,8 @@ class ServiceTest(Test):
     def _generateReport(self, result):
         report = ServiceReport()
         report.header.agentID = theApp.peer_info.ID
-        report.header.timeUTC = int(time.time())
-        report.header.timeZone = 8
+        report.header.timeUTC = int(time.time())    #here should UTC clock?
+        report.header.timeZone = -(time.timezone/3600)  #8
         report.header.testID = 2
         report.header.reportID = generate_report_id([report.header.agentID,
                                                      report.header.timeUTC,
@@ -243,6 +266,25 @@ class ServiceTest(Test):
         theApp.statistics.reports_generated = \
               theApp.statistics.reports_generated + 1
         return report
+
+########################################################################
+# Throttling  Test
+########################################################################
+
+class ThrolledTest(Test):
+    """"""
+    def __init__(self):
+        """Constructor"""
+        self.service_name = None
+        self.host = None
+        self.port = None
+        self.website_url = None
+    
+    def prepare(self):
+        pass
+    
+    def execute(self):
+        raise NotImplementedError('You need to implement this method')
 
 ########################################################################
 # FTP Test
@@ -481,6 +523,163 @@ class IMAPTest(ServiceTest):
         self.time_end = 0
         return self.reportDeferred
 
+########################################################################
+# SSH Test
+########################################################################
+from twisted.conch.ssh.transport import SSHClientTransport
+from twisted.conch.ssh import userauth, connection, common, keys, channel,transport
+from getpass import getpass
+SSH_USER = 'umitgit'
+SSH_HOST = "dev.umitproject.org"
+
+class SSHTestProtocol(SSHClientTransport):
+    
+    def verifyHostKey(self,host_key,fingerprint=""):
+        g_logger.info("host key fingerprint %s" % fingerprint)
+        return defer.succeed(1)
+         
+    def connectionSecure(self):
+        self.requestService(SSHUserAuth(SSH_USER,SSHConnection()))
+
+class SSHUserAuth(userauth.SSHUserAuthClient):
+    def getPassword(self):
+        return defer.succeed( getpass("password: ") )    
+    def getPublicKey(self):
+        return #empty implement
+
+class SSHConnection(connection.SSHConnection):
+    def serviceStarted(self):
+        self.openChannel(TrueChannel(2**16, 2**15, self))
+
+class Channel(channel.SSHChannel):
+    name = 'session'    # needed for commands
+
+    def openFailed(self, reason):
+        print 'open channel failed', reason
+    
+    def channelOpen(self, ignoredData):
+        self.conn.sendRequest(self, 'exec', common.NS('true'))
+
+    def request_exit_status(self, data):
+        status = struct.unpack('>L', data)[0]
+        print 'true status was: %s' % status
+        self.loseConnection()
+        
+    def closed(self):
+        self.loseConnection()
+
+class SSHTest(ServiceTest):
+    def __init__(self):
+        """Constructor"""
+        ServiceTest.__init__(self)
+        self.service_name = 'ssh'
+        self.username = SSH_USER
+        self.host = SSH_HOST
+        self.port = 22
+        
+    def execute(self):
+        if not self.checkArgs():
+            return
+        self.reportDeferred = Deferred().addCallback(self._generateReport)
+        ClientCreator(reactor, SSHTestProtocol, self.reportDeferred, self)\
+                     .connectTCP(self.host, self.port)\
+                     .addErrback(self._ssh_failure_process)        
+        self.time_start = default_timer()
+        self.time_end = 0
+        return self.reportDeferred     
+    
+    #process the failure result: check the reason for SSH
+    def _ssh_failure_process(self,failure):
+        from twisted.internet import error as SSHError
+        #there may be some bugs in here, we should test it in different network environment
+        if isinstance(failure,SSHError.TimeoutError) or isinstance(failure,SSHError.DNSLookupError)  or\
+        isinstance(failure, SSHError.NoRouteError):
+            g_logger.info("SSH cannot access %s" % failure)
+            self._connectionFailed(failure)
+        else:
+            #we cannot provide the key, so we should check the failure to decide the result
+            if self.reportDeferred:
+                task_done(self.__class__.__name__)
+                result = {'status_code': 0, 'time_end': default_timer()}
+                self.reportDeferred.callback(result)
+            g_logger.info("SSH can access %s, some clues below:" % failure)  
+        
+########################################################################
+# IRC Test
+########################################################################
+from twisted.words.protocols.irc import IRCClient
+
+IRC_nickname = "icmagent_" + str(theApp.peer_info.ID)
+IRC_channel = "umit"
+IRC_host = "irc.freenode.net"
+
+class IRCTestProtocol(IRCClient):
+    """
+    An automatical IRC bot
+    """
+    test = None
+    reportDeferred = None        
+    
+    def __init__(self,reportDeferred = None ,test = None):
+        self.reportDeferred = reportDeferred
+        self.nick_name = test.username
+        self.channel = test.channel
+    
+    def connectionMade(self):
+        IRCClient.connectionMade(self)
+    
+    def connectionLost(self):
+        IRCClient.connectionLost(self,reason)    
+        
+    #callbacks for events
+    def signedOn(self):
+        """
+        call when irc bot has successfully signed on to server
+        """
+        if self.reportDeferred:
+            task_done(self.test.__class__.__name__)
+            result = {'status_code': 0, 'time_end': default_timer()}
+            self.reportDeferred.callback(result)
+        self.quit()
+    
+    def joined(self,channel):
+        g_logger.info("[ServiceTest:IRC]The icm-agent has joined:" % (channel))  
+      
+    #IRC callback    
+    def irc_NICK(self,prefix,params):
+        """
+        called when an IRC user changes their nickname
+        """
+        old_nick = prefix.split('!')[0]
+        new_nick = params[0]
+        g_logger.info("[ServiceTest:IRC]%s is now known as %s:" % (old_nick,new_nick))  
+                
+    def alterCollidedNick(self,nickname):
+        """
+        same nickname in irc server channel
+        """
+        return nickname + "^"
+
+class IRCTest(ServiceTest):
+    def __init__(self):
+       ServiceTest.__init__(self)
+       self.service_name = 'irc'
+       self.host = IRC_host
+       self.port = 6667
+       self.channel = IRC_channel
+       self.username = IRC_nickname
+        
+    def execute(self):
+        if not self.checkArgs():
+            return
+        self.reportDeferred = Deferred().addCallback(self._generateReport)
+        ClientCreator(reactor, IRCTestProtocol, self.reportDeferred, self)\
+                     .connectTCP(self.host, self.port)\
+                     .addErrback(self._connectionFailed)
+        self.time_start = default_timer()
+        self.time_end = 0
+        return self.reportDeferred
+
 
 test_by_id = {
     0: Test,
@@ -490,6 +689,10 @@ test_by_id = {
     4: SMTPTest,
     5: POP3Test,
     6: IMAPTest,
+    7: IRCTest,
+    8: SSHTest,
+    9: ThrolledTest,
+  #  10: HTTPThrottledTest,
 }
 
 test_name_by_id = {
@@ -500,15 +703,23 @@ test_name_by_id = {
     4: 'SMTPTest',
     5: 'POP3Test',
     6: 'IMAPTest',
+    7: 'IRCTest',
+    8: 'SSHTest',
+    9:'ThrolledTest',
+   # 10: 'HTTPThrottledTest',
 }
 
-ALL_TESTS = ['WebsiteTest', 'FTPTest', 'SMTPTest', 'POP3Test', 'IMAPTest']
-SUPPORTED_SERVICES = ['FTP', 'SMTP', 'POP3', 'IMAP']
+ALL_TESTS = ['WebsiteTest', 'FTPTest', 'SMTPTest', 'POP3Test', 'IMAPTest',
+             'IRCTest','SSHTest']
+SUPPORTED_SERVICES = ['FTP', 'SMTP', 'POP3', 'IMAP','IRC','SSH']
+SUPPORTED_THROTTLED = ['HTTP']
+
 #import inspect
 #clsmembers = inspect.getmembers(sys.modules[__name__], inspect.isclass)
 #for clsname,cls in clsmembers:
     #if clsname.endswith('Test') and clsname != 'Test':
         #ALL_TESTS.append(clsname)
+
 
 
 if __name__ == "__main__":

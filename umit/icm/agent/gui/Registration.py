@@ -43,6 +43,7 @@ class RegistrationDialog(HIGDialog):
                                     gtk.STOCK_CANCEL, gtk.RESPONSE_CANCEL))
 
         self.set_position(gtk.WIN_POS_CENTER_ALWAYS)
+        
         self._create_widgets()
         self._pack_widgets()
 

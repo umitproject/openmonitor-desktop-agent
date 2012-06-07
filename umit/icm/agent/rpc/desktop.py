@@ -3,6 +3,7 @@
 # Copyright (C) 2011 Adriano Monteiro Marques
 #
 # Author:  Zhongjie Wang <wzj401@gmail.com>
+#          Tianwei liu <liutianweidlut@gmail.com>
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -53,6 +54,8 @@ class DesktopAgentSession(Session):
         self._send_message(request_msg)
 
     def _handle_get_super_peer_list(self, message):
+        if message == None:
+            return
         chosen_peers = theApp.peer_manager.select_super_peers(message.count)
         response_msg = P2PGetSuperPeerListResponse()
         for speer in chosen_peers:
@@ -66,6 +69,8 @@ class DesktopAgentSession(Session):
         self._send_message(response_msg)
 
     def _handle_get_super_peer_list_response(self, message):
+        if message == None:
+            return
         for agent_data in message.peers:
             if self.remote_id != agent_data.agentID:
                 theApp.peer_manager.add_super_peer(agent_data.agentID,
@@ -181,7 +186,12 @@ class DesktopAgentSession(Session):
         length = struct.pack('!I', len(data))
         self._transport.write(length)
         self._transport.write(data)
-
+    
+    def _hanlde_new_version_response(self,message):
+        """
+        The auto check version response
+        """
+         
     def handle_message(self, message):
         if isinstance(message, P2PGetSuperPeerList):
             self._handle_get_super_peer_list(message)
@@ -197,6 +207,8 @@ class DesktopAgentSession(Session):
             self._handle_send_service_report(message)
         elif isinstance(message, SendReportResponse):
             self._handle_send_report_response(message)
+        elif isinstance(message,NewVersionResponse):
+            self._hanlde_new_version_response(message)         
         elif isinstance(message, AgentUpdateResponse):
             g_logger.info("Peer %s update agent to version %s: %S" %
                           (self.remote_id, message.version, message.result))
@@ -347,7 +359,7 @@ class DesktopSuperAgentSession(Session):
             else:
                 check_code = 0
             downloader.addCallback(update_agent, message.version,
-                                   message.checkCode)
+                                   check_code)
             downloader.start()
 
     def _handle_test_mod_update(self, message):

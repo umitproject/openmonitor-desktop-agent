@@ -49,6 +49,6 @@ exp = 65537L
 
 #print(ag_key.mod)
 #print(ag_key.exp)
-g_db_helper.set_value('aggregator_public_key', (mod, exp))
+g_db_helper.set_value('keys','aggregator_public_key', (mod, exp))
 
 

@@ -4,6 +4,7 @@
 #
 # Authors:  Zhongjie Wang <wzj401@gmail.com>
 #           Adriano Marques <adriano@umitproject.org>
+#           Tianwei Liu <liutianweidlut@gmail.com>
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -24,6 +25,7 @@ import os
 import sys
 import urllib
 import random
+import time
 
 from twisted.web import client
 from twisted.web.error import Error
@@ -44,6 +46,8 @@ from umit.icm.agent.Errors import AggergatorError
 from umit.icm.agent.secure.Key import AESKey
 from umit.icm.agent.Version import VERSION_NUM
 from umit.icm.agent.test import TEST_PACKAGE_VERSION_NUM
+
+from umit.icm.agent.I18N import _
 
 aggregator_api_url = {
     'CheckAggregator': '/api/checkaggregator/',
@@ -129,7 +133,12 @@ class AggregatorAPI(object):
                       (message.agentID, message.publicKeyHash))
 
         return {'id': message.agentID, 'hash': message.publicKeyHash}
-
+    
+    def _handle_register_error_response(self,failure):
+        if failure is None:
+            g_logger.error("Error empty response while trying to register.")
+            return 
+        
     def login(self, username, password):
         request_msg = Login()
         request_msg.agentID = theApp.peer_info.ID
@@ -383,6 +392,7 @@ class AggregatorAPI(object):
     """ Version """
     #----------------------------------------------------------------------
     def check_version(self):
+        self.check_message = {}
         request_msg = NewVersion()
         #self._make_request_header(request_msg.header)
         request_msg.agentVersionNo = VERSION_NUM
@@ -394,14 +404,31 @@ class AggregatorAPI(object):
         return defer_
 
     def _handle_check_version_response(self, message):
+        
         if message is None:
             return
-
-        return message
+        g_logger.info("Get check_version_response %s" % message) 
+        
+        #add the record into the Database
+        from umit.icm.agent.gui.SoftwareUpdate import check_update_item_in_db,insert_update_item_in_db,no_updated
+        check_message = {}
+        
+        check_message["download_url"] = message.downloadURL 
+        check_message["version"] = str(message.versionNo)   
+        check_message["news_date"] = time.strftime("%Y-%m-%d",time.localtime())
+        check_message["software_name"] = "OpenMonitor Desktop V" + str(message.versionNo)
+        check_message["is_update"] = no_updated
+        check_message["description"] = "Open Monitor Desktop Agent!" 
+        check_message["check_code"] = ""
+         
+        if not check_update_item_in_db(check_message["version"]):
+            insert_update_item_in_db(check_message)
+            g_logger.info("Write a new update record into DB :%s" % check_message) 
+          
+        return  message
 
     def check_tests(self):
         request_msg = NewTests()
-
         request_msg.currentTestVersionNo = TEST_PACKAGE_VERSION_NUM
 
         defer_ = self._send_message(request_msg, NewTestsResponse)
@@ -438,6 +465,7 @@ class AggregatorAPI(object):
                 theApp.peer_manager.add_normal_peer(node.agentID,
                                                     node.agentIP,
                                                     node.agentPort,
+                                                    node.token,
                                                     node.publicKey,
                                                     node.peerStatus,
                                                     id)
@@ -483,8 +511,6 @@ class AggregatorAPI(object):
         theApp.peer_manager.sync_bannets(message)
 
         return message
-
-
 
     """ Private """
     #----------------------------------------------------------------------
@@ -603,13 +629,55 @@ class AggregatorAPI(object):
             if isinstance(err, Error):
                 g_logger.error(">>> The Aggregator had an Internal Error:")
                 g_logger.error(err.response)
-
-
+                self._alter_network_informaiton(err.response)
+        
+        #self._alter_network_informaiton(err.response)
+        
     def _decode_errback(self, failure):
         g_logger.error("[AggregatorAPI] - Failed to decode. %s" % failure)
 
     def _handle_errback(self, failure):
         g_logger.error("Aggregator failure: %s" % str(failure))
+    
+    def _alter_show(self,primary_text,secondary_text):
+        #Add the user-friendly information to the user to check the problem.
+        import gtk
+        from higwidgets.higwindows import HIGAlertDialog
+
+        alter = HIGAlertDialog(primary_text = primary_text,\
+                                       secondary_text = secondary_text)
+        
+        alter.show()
+        alter.run()
+
+        #show login window again
+        theApp.gtk_main.show_login()                
+        
+    def _alter_network_informaiton(self,failure):
+        failure_info_first = None
+        failure_info_second = None
+        
+        if 'error.NoRouteError' in str(failure):
+            failure_info_first  = 'Disconnect to Internet'
+            failure_info_second = 'Please check your network card connection!'
+        elif 'TimeoutError' in str(failure):
+            failure_info_first = 'Cloud Aggregator Server Connect Error'
+            failure_info_second = 'Please check your cloud aggregator URL'         
+        elif 'Agent matching query does not exist' in str(failure) :# or\
+                           # '500 Internal Server Error' in str(failure) or\
+                           # '500 INTERNAL SERVER ERROR' in str(failure):
+            failure_info_first = _('Username/Password Error')
+            failure_info_second = _('Please check your username or password')
+            #clear username and password (there maybe some bugs here)
+            theApp.peer_info.clear_db()
+        else: 
+            print str(failure)
+            pass
+        
+        if failure_info_first == None and failure_info_second == None:
+            return
+        else:
+            self._alter_show(primary_text = failure_info_first,secondary_text =failure_info_second)    
 
 
 if __name__ == "__main__":

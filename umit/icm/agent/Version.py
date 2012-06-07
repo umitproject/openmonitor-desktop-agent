@@ -3,6 +3,7 @@
 # Copyright (C) 2011 Adriano Monteiro Marques
 #
 # Author:  Zhongjie Wang <wzj401@gmail.com>
+#               Tianwei Liu <liutianweidlut@gmail.com>
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -21,13 +22,36 @@
 VERSION = '1'
 VERSION_NUM = 1
 
+higher_version = 1
+lower_version  = -1
+equal_version  = 0
+
 def compare_version(ver1, ver2):
+    #filter meaningless '0' ‘.’
+    ver1 = ver1.rstrip('0').rstrip('.')
+    ver2 = ver2.rstrip('0').rstrip('.')   
+     
     array1 = ver1.split('.')
     array2 = ver2.split('.')
     i = 0
     for i in range(min(len(array1), len(array2))):
         if array1[i] > array2[i]:
-            return 1
+            return higher_version
         elif array1[i] < array2[i]:
-            return -1
-    return 0
+            return lower_version
+    
+    #Add '1' compare '1.1'
+    if len(array1) < len(array2):
+        return lower_version
+    elif len(array1) > len(array2):
+        return higher_version
+    else:
+        return equal_version
+
+if __name__ == "__main__":
+    print compare_version('1.0','1.1')
+    print compare_version('1','1.1')
+    print compare_version('1','0.9')
+    print compare_version('1','1')
+    print compare_version('1','1.0')
+    print compare_version('1.....','1....0')

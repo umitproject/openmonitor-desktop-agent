@@ -3,6 +3,7 @@
 # Copyright (C) 2011 Adriano Monteiro Marques
 #
 # Author:  Paul Pei <paul.kdash@gmail.com>
+#          Tianwei Liu <liutianweidl>
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -31,7 +32,7 @@ from higwidgets.higlabels import HIGSectionLabel, HIGEntryLabel
 
 from umit.icm.agent.I18N import _
 from umit.icm.agent.Global import *
-
+from umit.icm.agent.BasePaths import LOG_DIR
 
 class LogsWindow(HIGWindow):
     """
@@ -40,49 +41,67 @@ class LogsWindow(HIGWindow):
     def __init__(self):
         HIGWindow.__init__(self, type=gtk.WINDOW_TOPLEVEL)
         self.set_title(_('Logs'))
-        self.set_size_request(640, 400)
+        self.set_position(gtk.WIN_POS_CENTER_ALWAYS)
+        self.set_size_request(720,480)
+        self.set_border_width(10)
+        
         self.__create_widgets()
         self.__pack_widgets()
-
+        self.__connect_widgets()
+        
+        #test
+        #from umit.icm.agent.gui.Notifications import *
+        #t = Notifications(mode=new_release_mode,text="test",timeout=10000)
 
     def __create_widgets(self):
+        """"""
+        #box
         self.main_vbox = HIGVBox()
-        self.add(self.main_vbox)
         self.btn_box = gtk.HButtonBox()
+        self.LogsGUI_vbox = HIGHBox()        
+        
+        self.main_vbox.set_border_width(2)
+        #close button
         self.close_button = gtk.Button(stock=gtk.STOCK_CLOSE)
-        self.close_button.connect('clicked', lambda x: self.destroy())
 
-        self.LogsGUI_vbox = HIGVBox()
+        #log information box
         self.LogsGUI_hbox1 = HIGHBox()
         self.LogsGUI_hbox2 = HIGHBox()
         self.LogsGUI_subbox = LogsGUI()
-        self.LogsGUI_hbox1.add(self.LogsGUI_subbox)
+
 
     def __pack_widgets(self):
         self.main_vbox._pack_expand_fill(self.LogsGUI_vbox)
+        self.main_vbox._pack_noexpand_nofill(self.btn_box)
+                
+        self.LogsGUI_vbox._pack_expand_fill(self.LogsGUI_hbox1)
+        self.LogsGUI_vbox._pack_noexpand_nofill(self.LogsGUI_hbox2)
+        
+        self.LogsGUI_hbox1._pack_expand_fill(self.LogsGUI_subbox)
 
         self.btn_box.set_layout(gtk.BUTTONBOX_END)
-        self.btn_box.set_spacing(3)
+        self.btn_box.set_spacing(8)
         self.btn_box.pack_start(self.close_button)
-        self.main_vbox.pack_start(self.btn_box)
-        self.main_vbox.set_border_width(12)
-
-        self.LogsGUI_vbox.pack_start(self.LogsGUI_hbox1, True, True, 5)
-        self.LogsGUI_vbox.pack_start(self.LogsGUI_hbox2, True, True, 5)
-
+                
+        self.add(self.main_vbox)
+    
+    def __connect_widgets(self):
+        """"""    
+        self.close_button.connect('clicked', lambda x: self.destroy())
+         
 class LogsGUI(gtk.VBox):
     def __init__(self):
         super(LogsGUI, self).__init__()
         self.log_mask = ['DEBUG', 'INFO', 'WARNING', 'ERROR']
 
-        self.set_size_request(400, 300)
+        #self.set_size_request(400, 300)
         self.set_border_width(8)
 
         table = gtk.Table(8, 5, False)
         table.set_col_spacings(3)
 
         title = gtk.Label("""\
-<span size='12000'>Logs: \n</span>""")
+<span size='12000'>Open Monitor Desktop Agent Logs: \n</span>""")
 
         title.set_use_markup(True)
 
@@ -141,7 +160,10 @@ class LogsGUI(gtk.VBox):
         text = ""
         f = open(os.path.join(LOG_DIR, 'icm-desktop.log'))
         for line in f:
-            log_type = line.split()[0][1:-1]
+            words = line.split()
+            if len(words) == 0:
+                continue;
+            log_type = (words[0]).strip("[").strip("]")
             if log_type in self.log_mask:
                 text = text + line
         f.close()

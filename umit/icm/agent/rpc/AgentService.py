@@ -68,7 +68,7 @@ class AgentProtocol(Protocol):
         g_logger.info("New connection #%d established. with Peer: %s" % (
                       self.factory.connectionNum, self.transport.getPeer()))
 
-        maxConnectionNum = g_config.getint('network', 'max_conns_num')
+        maxConnectionNum = g_config.getint('network', 'max_conn_num')
         if self.factory.connectionNum > maxConnectionNum:
             self.transport.write("Too many connections, try later")
             self.transport.loseConnection()
@@ -79,6 +79,8 @@ class AgentProtocol(Protocol):
         self.remote_port = self.transport.getPeer().port
 
         # initiator send AuthenticatePeer message
+        #print "-----------------------------------------------"
+        #print self.local_port, theApp.listen_port
         if self.local_port != theApp.listen_port:
             self._session = self._send_auth_message()
 
@@ -156,7 +158,7 @@ class AgentProtocol(Protocol):
                     theApp.peer_manager.sessions[message.agentID] = self._session
                     g_logger.debug("Session %d created." % message.agentID)
                     #theApp.statistics.normal_agents_num = \
-                          #theApp.statistics.super_agents_num + 1
+                    #theApp.statistics.super_agents_num + 1
             elif self.remote_type == 3:  # mobile agent
                 if self.remote_id in theApp.peer_manager.mobile_peers:
                     theApp.peer_manager.mobile_peers[self.remote_id]\

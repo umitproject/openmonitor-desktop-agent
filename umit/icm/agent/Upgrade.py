@@ -3,6 +3,7 @@
 # Copyright (C) 2011 Adriano Monteiro Marques
 #
 # Author:  Zhongjie Wang <wzj401@gmail.com>
+#          Tianwei Liu <liutiawneidlut@gmail.com>
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -27,8 +28,23 @@ import subprocess
 
 from umit.icm.agent.logger import g_logger
 from umit.icm.agent.Global import *
+from umit.icm.agent.BasePaths import *
+
+def onerror(func,path,exec_info):
+    """
+    shutil.rmtree callback(Attention:The rmtree cannot remove the readonly files in windows)
+    """
+    import stat
+    if not os.access(path, os.W_OK):
+        os.chmod(path, stat.S_IWUSR)
+        func(path)
+    else:
+        g_logger.debug("rm:path%s"%path)    #ignore errors
 
 def update_agent(result, *args, **kw):
+    """
+    update back
+    """
     g_logger.info("Updating Desktop Agent...")
     # args = ((version, check_code=0), {})
     version = args[0]
@@ -65,14 +81,24 @@ def restart_agent(path):
         os.path.join(ROOT_DIR, 'umit', 'icm', 'agent', 'running')):
         time.sleep(0.1)
     # Remove files
-    shutil.rmtree(os.path.join(ROOT_DIR, 'umit'))
+    remove_files = ["umit","bin","conf","deps","docs","install_scripts",
+                    "share","tools"]
+    for folder in remove_files:
+        if os.name == 'nt':     #rmtree cannot remove the readonly files
+            shutil.rmtree(os.path.join(ROOT_DIR, folder),onerror=onerror)
+        else:
+            shutil.rmtree(os.path.join(ROOT_DIR, folder))
     # Extract tarfile
     import tarfile
     t = tarfile.open(path)
     t.extractall(ROOT_DIR)
+    #t.extractall(TMP_DIR)
+    restart_function()
+
+def restart_function():
     # Restart
     g_logger.info("Restarting Desktop Agent.")
-    bin_path = os.path.join(ROOT_DIR, 'bin', 'icm-agent.py')
+    bin_path = os.path.join(ROOT_DIR, 'bin', 'icm-agent')
     subprocess.Popen([sys.executable, bin_path] + sys.argv[1:])
     g_logger.info("Desktop Agent Updated.")
 

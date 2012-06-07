@@ -41,7 +41,6 @@ class EventEntry(object):
         self.WebsiteReport = None
         self.ServiceReport = None
 
-
 #---------------------------------------------------------------------
 class EventManager(object):
     """"""

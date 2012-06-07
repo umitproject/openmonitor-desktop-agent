@@ -24,7 +24,7 @@ import os
 
 from twisted.internet import reactor
 
-from higwidgets import HIGWindow
+from higwidgets.higwindows import HIGWindow
 
 from umit.icm.agent.logger import g_logger
 from umit.icm.agent.Global import *
@@ -62,6 +62,7 @@ class GtkMain(object):
             self.tray_indicator.set_status(appindicator.STATUS_ACTIVE)
             self.tray_indicator.set_attention_icon("indicator-messages-new")
             self.tray_indicator.set_menu(self.tray_menu_logged_out)
+
         else:
             self.tray_icon = gtk.StatusIcon()
             self.tray_icon.connect('popup-menu', self.show_menu)
@@ -97,6 +98,11 @@ class GtkMain(object):
         menu_item.show()
         self.tray_menu_logged_in.append(menu_item)
 
+        menu_item = gtk.MenuItem(_("Software Update"))
+        menu_item.connect("activate", lambda w: self.show_software_update())
+        menu_item.show()
+        self.tray_menu_logged_in.append(menu_item)
+        
         menu_item = gtk.MenuItem(_("About"))
         menu_item.connect("activate", lambda w: self.show_about())
         menu_item.show()
@@ -190,6 +196,11 @@ class GtkMain(object):
         from umit.icm.agent.gui.Preference import PreferenceWindow
         wnd = PreferenceWindow()
         wnd.show_all()
+        
+    def show_software_update(self):
+        from umit.icm.agent.gui.SoftwareUpdate import SoftwareUpdateDialog
+        self.update_dialog = SoftwareUpdateDialog()
+        self.update_dialog.show_all()
 
     def show_about(self):
         from umit.icm.agent.gui.About import About
@@ -205,8 +216,8 @@ class GtkMain(object):
     def set_to_logging_in(self):
         if appindicator is None:
             self.tray_icon.set_tooltip("Logging in...")
-        self.tray_menu.children()[0].set_sensitive(False)
-
+        self.tray_menu.get_children()[0].set_sensitive(False)
+        #self.tray_menu.children()[0].set_sensitive(False)
 
 if __name__ == "__main__":
     #splash = gtk.Window()

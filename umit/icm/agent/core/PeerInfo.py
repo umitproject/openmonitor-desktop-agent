@@ -62,16 +62,22 @@ class PeerInfo(object):
             self.Email = rs[0][3]
             self.CipheredPublicKeyHash = rs[0][4]
             self.Type = rs[0][5]
-            self.is_registered = True
+            self.is_registered = True  
 
     def save_to_db(self):
         if self.is_registered:
-            g_db_helper.execute("insert or replace into peer_info values " \
+            sql_str = "insert or replace into peer_info values " \
                             "(%d, '%s', '%s', '%s', '%s', %d)" % \
                             (self.ID, self.Username, self.Password, self.Email,
-                             self.CipheredPublicKeyHash, self.Type))
+                             self.CipheredPublicKeyHash, self.Type)
+            g_logger.info("[save_to_db]:save %s into DB"%sql_str)            
+            g_db_helper.execute(sql_str)
             g_db_helper.commit()
 
+    def clear_db(self):
+        g_db_helper.execute("delete from peer_info")
+        g_db_helper.commit()
+        
     def get_local_ip(self):
         from socket import socket, SOCK_DGRAM, AF_INET
         ip_urls = ["www.google.com", "www.baidu.com"]

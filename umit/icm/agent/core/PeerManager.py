@@ -4,6 +4,7 @@
 #
 # Authors:  Zhongjie Wang <wzj401@gmail.com>
 #           Adriano Marques <adriano@umitproject.org>
+#           Tianwei Liu <liutiawneidlut@gmail.com>
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -218,7 +219,7 @@ class PeerManager:
         return g_db_helper.network_is_banned(ip)
 
     def _super_peer_connected(self, peer_id, ip, port, ciphered_public_key=None,
-                             network_id=None):
+                             network_id=0):
         if self.agent_is_banned(peer_id) or self.network_is_banned(ip):
             g_logger.info("Super agent %d is banned or is running from "
                           "a banned network %s" % (peer_id, ip))
@@ -260,7 +261,7 @@ class PeerManager:
         return True
 
     def _normal_peer_connected(self, peer_id, ip, port, ciphered_public_key=None,
-                              network_id=None):
+                              network_id=0):
         if self.agent_is_banned(peer_id) or self.network_is_banned(ip):
             g_logger.info("Desktop agent %d is banned or is running from "
                           "a banned network %s" % (peer_id, ip))
@@ -300,8 +301,35 @@ class PeerManager:
         self.connected_peer_num = self.connected_peer_num - 1
         return True
 
+    def add_normal_peer(self, peer_id, ip, port, token =None ,ciphered_public_key=None,
+                        status='Disconnected', network_id=0):
+        '''if self.agent_is_banned(peer_id) or self.network_is_banned(ip):
+            g_logger.info("Desktop agent %d is banned or is running from a banned "
+                          "network %s" % (peer_id, ip))
+            
+            if peer_id in self.normal_peers:
+                self.remove_normal_peer(peer_id)
+
+            return
+
+        if peer_id in self.normal_peers:
+            g_logger.info("Peer id %d already exists in normal peer list." %
+                          peer_id)
+        else:
+            peer_entry = PeerEntry()
+            peer_entry.Type = 2
+            peer_entry.ID = peer_id
+            peer_entry.IP = ip
+            peer_entry.Port = port
+            peer_entry.Token = token
+            peer_entry.CipheredPublicKey = ciphered_public_key
+            peer_entry.status = status
+            peer_entry.network_id = network_id
+            self.normal_peers[peer_entry.ID] = peer_entry
+            self.normal_peer_num = self.normal_peer_num + 1       
+    '''
     def add_mobile_peer(self, peer_id, ip, port, ciphered_public_key=None,
-                        status='Disconnected', network_id=None):
+                        status='Disconnected', network_id=0):
         if self.agent_is_banned(peer_id) or self.network_is_banned(ip):
             g_logger.info("Mobile agent %d is banned or is running from a banned "
                           "network %s" % (peer_id, ip))

@@ -1,0 +1,9 @@
+[Desktop Entry]
+Name=Open Monitor Desktop Agent
+GenericName=icm-agent
+Comment=Internet Connectivity Monitor
+Icon=/usr/share/umit/icmagent/share/images/icm-agent.xpm
+Exec=/usr/share/umit/icmagent/bin/icm-agent
+Terminal=false
+Type=Application
+Categories=Network;

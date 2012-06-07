@@ -4,6 +4,7 @@
 #
 # Author:  Paul Pei <paul.kdash@gmail.com>
 #          Alan Wang <wzj401@gmail.com>
+#          Tianwei Liu <liutianweidlut@gmail.com>
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -35,7 +36,20 @@ from umit.icm.agent.I18N import _
 from umit.icm.agent.Application import theApp
 from umit.icm.agent.Global import *
 from umit.icm.agent.test import test_name_by_id
+from umit.icm.agent.test import ALL_TESTS
+from umit.icm.agent.utils.Startup import StartUP
 
+update_time_str = {
+                   "Every Start":1,
+                   #"Every Week":2,
+                   #"Every Two Weeks":3,
+                   #"Every Month":4,
+                   "Never":2
+                   }
+update_method_str = {
+                     "Show right now":1,
+                     "Download and Installation":2
+                     }
 
 class PreferenceWindow(HIGWindow):
     """
@@ -44,6 +58,8 @@ class PreferenceWindow(HIGWindow):
     def __init__(self):
         HIGWindow.__init__(self, type=gtk.WINDOW_TOPLEVEL)
         self.set_title(_('Preference'))
+        self.set_position(gtk.WIN_POS_CENTER_ALWAYS)
+                
         self.__create_widgets()
         self.__pack_widgets()
         self.load_preference()
@@ -71,6 +87,9 @@ class PreferenceWindow(HIGWindow):
         # Feedback page
         self.feedback_page = FeedbackPage()
         self.notebook.append_page(self.feedback_page, gtk.Label(_("Feedback")))
+        # Update page
+        self.update_page = UpdatePage()
+        self.notebook.append_page(self.update_page, gtk.Label(_("Update")))
 
     def __pack_widgets(self):
         # Search Notebook
@@ -102,15 +121,35 @@ class PreferenceWindow(HIGWindow):
             theApp.peer_info.Email = user_email
 
         startup_on_boot = self.pref_page.startup_check.get_active()
+        self.pref_page.startup_set(startup_on_boot)
         g_config.set('application', 'startup_on_boot', str(startup_on_boot))
         auto_update = self.pref_page.update_check.get_active()
         g_config.set('application', 'auto_update', str(auto_update))
+        auto_login = self.pref_page.login_ckeck.get_active()
+        g_config.set('application', 'auto_login', str(auto_login))
 
         aggregator_url = self.pref_page.cloudagg_entry.get_text()
         theApp.aggregator.base_url = aggregator_url
-        g_db_helper.set_value('aggregator_url', aggregator_url)
+        if aggregator_url != None and aggregator_url != "":
+            g_config.set('network', 'aggregator_url', aggregator_url)
+            g_db_helper.set_value('config','aggregator_url', aggregator_url)
+        
         # Save test tab
         self.save_tests()
+        
+        
+        # Save update settings
+        update_time  = self.update_page.update_time_entry.get_active_text()
+        if update_time != "" and update_time != None :
+            g_config.set('update', 'update_time',update_time)
+        
+        update_method = self.update_page.update_methodh_entry.get_active_text()
+        if update_method != "" and update_method != None :
+            g_config.set('update', 'update_method',update_method)   
+            
+        update_detect = self.update_page.update_switch_check.get_active()
+        g_config.set('update', 'update_detect',str(update_detect))
+
 
     def load_preference(self):
         self.pref_page.peerid_label2.set_text(str(theApp.peer_info.ID))
@@ -121,31 +160,66 @@ class PreferenceWindow(HIGWindow):
             self.pref_page.startup_check.set_active(True)
         else:
             self.pref_page.startup_check.set_active(False)
+        
         auto_update = g_config.getboolean('application', 'auto_update')
         if auto_update:
             self.pref_page.update_check.set_active(True)
         else:
             self.pref_page.update_check.set_active(False)
-
+        
+        #auto_login = g_config.getboolean('application', 'auto_login')
+        auto_login = True
+        if auto_login:
+            self.pref_page.login_ckeck.set_active(True)
+        else:
+            self.pref_page.login_ckeck.set_active(False)
+            
         self.pref_page.cloudagg_entry.set_text(theApp.aggregator.base_url)
+        
         # load test tab
         self.load_tests()
-
+        
+        #load update settings
+        update_time  = g_config.get('update', 'update_time')
+        if update_time != "" and update_time != None: 
+            self.update_page.update_time_entry.set_text_column(update_time_str[update_time])
+        update_method = g_config.get('update', 'update_method')
+        if update_method != "" and update_method != None:    
+            self.update_page.update_methodh_entry.set_text_column(update_method_str[update_method])
+        
+        update_detect = g_config.getboolean('update', 'update_detect')
+        if update_detect:
+            self.update_page.update_switch_check.set_active(True)
+        else:
+            self.update_page.update_switch_check.set_active(False)
+        
     def save_tests(self):
+        #The test should be stored into the DB
         SELECTED_TESTS = [ r[0] for r in self.test_page.subbox.\
                            tree_view_selected_tests.treestore ]
-        g_db_helper.set_value('selected_tests', SELECTED_TESTS)
+
+        if ALL_TESTS[0] not in SELECTED_TESTS:
+            SELECTED_TESTS.append(ALL_TESTS[0])
+            
+        g_db_helper.set_value('config','selected_tests', SELECTED_TESTS)
 
         auto_update_test = self.test_page.checkbtn.get_active()
         g_config.set('application', 'auto_update_test', str(auto_update_test))
+ 
+        load_http_throttled_test = self.test_page.checkbtn_throttled.get_active()
+        g_config.set('application', 'load_http_throttled_test',str(load_http_throttled_test))       
 
+        
     def load_tests(self):
-        from umit.icm.agent.test import ALL_TESTS
+
         ts = self.test_page.subbox.tree_view_installed_tests.treestore
         for tname in ALL_TESTS:
             ts.append(None, [tname])
 
-        SELECTED_TESTS = g_config.get('application', 'selected_tests')
+        #SELECTED_TESTS = g_config.get('application', 'selected_tests')
+        #Here, we use datebase to store the selected test
+        SELECTED_TESTS = g_db_helper.get_value('config','selected_tests')
+        
         if SELECTED_TESTS:
             ts = self.test_page.subbox.tree_view_selected_tests.treestore
             for tname in SELECTED_TESTS:
@@ -156,6 +230,14 @@ class PreferenceWindow(HIGWindow):
             self.test_page.checkbtn.set_active(True)
         else:
             self.test_page.checkbtn.set_active(False)
+            
+        load_http_throttled_test = g_config.getboolean('application', 'load_http_throttled_test')
+        if load_http_throttled_test:
+            self.test_page.checkbtn_throttled.set_active(True)
+        else:
+            self.test_page.checkbtn_throttled.set_active(False)        
+            
+        
 
 #---------------------------------------------------------------------
 class PreferencePage(HIGVBox):
@@ -187,12 +269,12 @@ class PreferencePage(HIGVBox):
         self.email_entry = gtk.Entry()
         self.startup_check = gtk.CheckButton(_("Startup on boot"))
         self.update_check = gtk.CheckButton(_("Automatically update"))
+        self.login_ckeck = gtk.CheckButton(_("Auto login"))
 
         self.cloudagg_entry = gtk.Entry()
         self.cloudagg_button = HIGButton(_("Reset"))
         self.cloudagg_button.connect('clicked', lambda w:
-                                          self.cloudagg_entry.set_text(
-                                              'http://alpha.openmonitor.org/api'))
+                                      self.cloudagg_entry.set_text('http://alpha.openmonitor.org/api'))
         self.cloudagg_button.set_size_request(80, 28)
 
         self.superpeers_entry = gtk.Entry()
@@ -232,7 +314,8 @@ class PreferencePage(HIGVBox):
         self.peerinfo_table.attach_entry(self.email_entry, 1, 2, 1, 2)
         self.peerinfo_table.attach_label(self.startup_check, 0, 2, 2, 3)
         self.peerinfo_table.attach_label(self.update_check, 0, 3, 3, 4)
-
+        self.peerinfo_table.attach_label(self.login_ckeck, 0, 4, 4, 5)
+        
         self.cloudagg_subhbox._pack_expand_fill(self.cloudagg_entry)
         self.cloudagg_subhbox._pack_noexpand_nofill(self.cloudagg_button)
         self.cloudagg_table.attach_entry(self.cloudagg_subhbox, 0, 1, 0, 1)
@@ -244,7 +327,75 @@ class PreferencePage(HIGVBox):
         self.superpeers_subhbox._pack_expand_fill(self.superpeers_entry)
         self.superpeers_subhbox._pack_noexpand_nofill(self.btn_box)
         self.superpeers_table.attach_label(self.superpeers_subhbox, 0, 1, 0, 1)
+        
+    def startup_set(self,is_start_up=True):
+        """"""
+        start = StartUP()
+        if is_start_up:
+            start.set_startup()
+        else:
+            start.clear_startup()
 
+#---------------------------------------------------------------------
+class UpdatePage(HIGVBox):
+    """"""
+    def __init__(self):
+        """Constructor"""
+        HIGVBox.__init__(self)
+        self.__create_widgets()
+        self.__pack_widgets()
+        self.__load_list()
+        
+    def __create_widgets(self):
+        """"""
+        
+        self.update_switch_hbox = HIGHBox()
+        self.update_settings_hbox = HIGHBox()
+
+        self.update_switch_section = HIGSectionLabel(_("Update News Detect"))        
+        self.update_switch_table = HIGTable()
+        self.update_settings_section = HIGSectionLabel(_("Update Settings"))        
+        self.update_settings_table = HIGTable()  
+        
+        self.update_switch_check = gtk.CheckButton(_("Software Update Detect Switch"))
+        self.update_times_label = HIGEntryLabel(_("Auto detect update news"))
+        self.update_method_label = HIGEntryLabel(_("Update method"))       
+        
+        self.update_time_store = gtk.ListStore(str)
+        self.update_time_entry = gtk.ComboBoxEntry(self.update_time_store, 0)
+        self.update_method_store = gtk.ListStore(str)
+        self.update_methodh_entry = gtk.ComboBoxEntry(self.update_method_store, 0)        
+         
+    def __pack_widgets(self):
+        """"""
+        self.set_border_width(12) 
+        
+        self._pack_noexpand_nofill(self.update_switch_section)
+        self._pack_noexpand_nofill(self.update_switch_hbox)
+        self._pack_noexpand_nofill(hig_box_space_holder())
+        self._pack_noexpand_nofill(self.update_settings_section)
+        self._pack_noexpand_nofill(self.update_settings_hbox)
+        
+        self.update_switch_hbox._pack_noexpand_nofill(hig_box_space_holder())
+        self.update_switch_hbox._pack_expand_fill(self.update_switch_table)
+        self.update_settings_hbox._pack_noexpand_nofill(hig_box_space_holder())
+        self.update_settings_hbox._pack_expand_fill(self.update_settings_table)
+
+        self.update_switch_table.attach_label(self.update_switch_check, 0, 2, 0, 1)
+        self.update_settings_table.attach_label(self.update_times_label, 0, 1, 0, 1)
+        self.update_settings_table.attach_entry(self.update_time_entry, 1, 2, 0, 1 )   
+        self.update_settings_table.attach_label(self.update_method_label, 0, 1, 1, 2)
+        self.update_settings_table.attach_entry(self.update_methodh_entry, 1, 2, 1, 2 ) 
+
+    def __load_list(self):
+        """"""
+        for s in update_time_str.keys():
+            #print s
+            self.update_time_store.append([s])
+        for s in update_method_str.keys():
+            #print s
+            self.update_method_store.append([s])
+            
 #---------------------------------------------------------------------
 class TestPage(HIGVBox):
     """"""
@@ -262,6 +413,7 @@ class TestPage(HIGVBox):
         self.subbox = Tests()
         self.hbox1.add(self.subbox)
         self.checkbtn = gtk.CheckButton(_("Update tests module automatically"))
+        self.checkbtn_throttled = gtk.CheckButton(_("Load HTTP Throttled Test"))
 
     def __pack_widgets(self):
         #self.tests_hbox.set_border_width(12)
@@ -269,7 +421,9 @@ class TestPage(HIGVBox):
         self.pack_start(self.hbox2, True, True, 5)
 
         self.checkbtn.set_border_width(8)
+        self.checkbtn_throttled.set_border_width(8)
         self.hbox2.add(self.checkbtn)
+        self.hbox2.add(self.checkbtn_throttled)
 
 class Tests(gtk.VBox):
     def __init__(self):
@@ -337,12 +491,21 @@ class Tests(gtk.VBox):
 
     def remove_test(self):
         tree_selection = self.tree_view_selected_tests.treeview.get_selection()
+
+        #The user cannot delete the website test
+        selected_name = self.tree_view_selected_tests.treestore.\
+                    get_value(tree_selection.get_selected()[1],0)
+        print selected_name
+        if selected_name == ALL_TESTS[0]:
+            return
+        
         tree_iter = tree_selection.get_selected()[1]
         if tree_iter:
             self.tree_view_selected_tests.treestore.remove(tree_iter)
 
     def remove_all(self):
         self.tree_view_selected_tests.treestore.clear()
+        self.tree_view_selected_tests.treestore.append(None,[ALL_TESTS[0]])
 
     def update_test_mod(self):
         theApp.aggregator.check_tests()
