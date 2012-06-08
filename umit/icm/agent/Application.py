@@ -87,6 +87,7 @@ class Application(object):
         self.quitting = False
         self.is_auto_login = True        
         self.is_successful_login = False #fix the login failure, save DB problem
+        
                             
     def _load_from_db(self):
 

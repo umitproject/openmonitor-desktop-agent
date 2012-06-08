@@ -51,7 +51,7 @@ class LogsWindow(HIGWindow):
         
         #test
         #from umit.icm.agent.gui.Notifications import *
-        #t = Notifications(mode=new_release_mode,text="test",timeout=10000)
+        #t = NotificationUpdate(mode=new_release_mode,text="test",timeout=10000)
 
     def __create_widgets(self):
         """"""

@@ -3,6 +3,7 @@
 # Copyright (C) 2011 Adriano Monteiro Marques
 #
 # Author:  Zhongjie Wang <wzj401@gmail.com>
+#          Tianwei Liu <liutianweidlut@gmail.com>
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -21,6 +22,7 @@
 import gtk
 import gobject
 import os
+
 
 from twisted.internet import reactor
 
@@ -50,6 +52,7 @@ class GtkMain(object):
         self.set_login_status(False)
 
     def _create_tray(self):
+        
         self.tray_menu_logged_in = gtk.Menu()
         self.tray_menu_logged_out = gtk.Menu()
 

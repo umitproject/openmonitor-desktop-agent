@@ -38,7 +38,7 @@ from twisted.internet import reactor, ssl
 from twisted.internet import defer
 from twisted.internet.defer import Deferred
 from twisted.internet.protocol import Protocol, ClientCreator, ClientFactory
-from twisted.web.client import Agent, HTTPDownloader
+from twisted.web.client import Agent, HTTPDownloader,downloadPage
 from twisted.web.http_headers import Headers
 from twisted.web._newclient import ResponseDone
 
@@ -88,22 +88,42 @@ class Test(object):
 ########################################################################
 # Website Test
 ########################################################################
-benchmark_url_list={
+import tempfile
+
+benchmark_url_dict={
                     1:'http://www.baidu.com/',
                     2:'http://www.bing.com/',
                     3:'http://www.google.com/',
                     4:'http://www.sohu.com/',
-                    5:'http://www.yahoo.com/'}
+                    5:'http://www.yahoo.com/',
+                    6:'http://www.people.com.cn/'}
 
-class WebsiteTest(Test):
+class WebsiteTest():
     def __init__(self):
         """Constructor"""
         self.url = None
         self.status_code = 0
         self.pattern = None
-        self.benchmark_brandwidth = []  #benchmark speed
+        self.benchmark_num = len(benchmark_url_dict)
+        self.benchmark_bandwidth = self.info_dict()  #benchmark speed
+        self.test_id = self.benchmark_num + 1
+        
+        self.bandwidth = 0
+        self.report = None
+        self.finished_num = 0
         self._agent = Agent(reactor)
 
+    def info_dict(self):
+        """"""
+        tmp_dict = {}
+        for i in range(1,self.benchmark_num+2):
+            tmp_dict[i] = {"start_time":0,
+                           "end_time":0,
+                           "size":0,
+                           "bandwidth":0}
+            
+        return tmp_dict
+    
     def prepare(self, param):
         """Prepare for the test"""
         self.url = param['url']
@@ -112,7 +132,8 @@ class WebsiteTest(Test):
 
     def execute(self):
         """Run the test"""
-        g_logger.info("Testing website: %s" % self.url)
+        g_logger.info("Testing website: %s" % self.url) 
+        
         defer_ = self._agent.request('GET',
                                     self.url,
                                     Headers({'User-Agent':
@@ -124,8 +145,15 @@ class WebsiteTest(Test):
         return defer_
 
     def _connectionFailed(self, failure):
+        
+        g_logger.error("[WebsiteTest]connection failed:%s"%failure)
+        
         task_failed(self.__class__.__name__)
+
         result = {'status_code': 1, 'time_end': default_timer()}
+        
+        self.status_code = 1
+        
         return self._generate_report(result)
 
     def _handle_response(self, response):
@@ -133,39 +161,94 @@ class WebsiteTest(Test):
         time_end = default_timer()
         self.status_code = response.code
         self.response_time = time_end - self.time_start
-        #print(self.url)
-        #print(str(self.status_code) + ' ' + response.phrase)
-        #print("Response time: %fs" % (self.response_time))
-        #print(response.headers)
-        report = self._generate_report()
-        HTTP_SUCCESS_CODE = (200, 302)
-        if response.code in HTTP_SUCCESS_CODE:
-            task_done(self.__class__.__name__)
+        
+        g_logger.debug(self.url)
+        g_logger.debug((str(self.status_code) + ' ' + response.phrase))
+        g_logger.debug("Response time: %f" % (self.response_time))
+        g_logger.debug(response.headers)
+        
+        result = {'status_code': 0, 'time_end': time_end}
+        
+        self.report = self._generate_report(result)
+        
+        HTTP_SUCCESS_CODE = (200,302)
+        if int(response.code) in HTTP_SUCCESS_CODE:
+            
+            g_logger.debug('task done %s'%response.code)
+            
             #if self.pattern is not None:
-                #response.deliverBody(ContentExaminer(self.url,
-                                                     #self.pattern))
+                #response.deliverBody(ContentExaminer(self.url,self.pattern))
+            
             #Here we can test the HTTP throttled 
-            report = self._throttled_http_test()
+            self._throttled_http_test()
         else:
             task_failed(self.__class__.__name__)
-        return report
+            g_logger.error("task failed!")
+            
+        return self.report
 
-    def _throttled_http_test(self,report):
+    def _throttled_http_test(self):
         """
         HTTP throttled test
         """
         throttled_test = g_config.getboolean('application', 'load_http_throttled_test')
         if throttled_test:
+            g_logger.info("start HTTP download throttled test!")
+            
             #benchmark test
-            pass
+            new_index = self.benchmark_num +1
+            benchmark_url_dict[new_index] = self.url
+            
+            for key in benchmark_url_dict.keys():
+                defer_ = self.download_page_to_tmp(key)
+                defer_.addCallback(self.store_bandwidth,key)
+                defer_.addCallback(self.handle_count)
+                defer_.addErrback(self.handler_err)
+            
+    def handle_count(self,result):
+        self.finished_num = self.finished_num + 1
+        if self.finished_num == self.test_id:
+            self.calculate_different()
+            
+    def store_bandwidth(self,result,key):
         
-        return report
-                
+        g_logger.debug('finish %s'%benchmark_url_dict[key])
         
-    def _generate_report(self):
+        start_time = self.benchmark_bandwidth[key]['start_time']
+        end_time = self.benchmark_bandwidth[key]['end_time']
+        size = self.benchmark_bandwidth[key]['size']
+        if size == 0 or size == None:
+            raise Exception("Error in filesize!!!")
+        
+        self.benchmark_bandwidth[key]['bandwidth'] =(float)((end_time - start_time) / size)
+        
+        g_logger.debug(key+':'+self.benchmark_bandwidth[key])
+        
+    
+    def calculate_different(self):
+        """
+        calculate the different http download: sum, average, variance
+        We can add more complicated algorithm
+        """
+        g_logger.debug("finish all benchmark http download throttled test")
+        
+        diff_value = 0
+        sum = 0
+        
+        for key in range(1,self.benchmark_num+1):
+            sum = sum + self.benchmark_bandwidth[key]['bandwidth']
+        
+        
+        diff_value = self.benchmark_bandwidth[self.test_id]['bandwidth'] - sum/(self.benchmark_num)
+        
+        self.report.report.bandwidth = diff_value
+        
+    def _generate_report(self,result):
+        """"""
+        
         report = WebsiteReport()
         report.header.agentID = theApp.peer_info.ID
-        report.header.timeUTC = int(time.time())    #here should UTC clock?
+        report.header.timeUTC = int(default_timer())    #here should UTC clock?
         report.header.timeZone =  -(time.timezone/3600)  #8
         report.header.testID = 1
         report.header.reportID = generate_report_id([report.header.agentID,
@@ -174,11 +257,43 @@ class WebsiteTest(Test):
         #report.header.traceroute
         report.report.websiteURL = self.url
         report.report.statusCode = self.status_code
-        report.report.responseTime = (int)(self.response_time * 1000)
+        
+        report.report.responseTime = \
+              int((result['time_end'] - self.time_start) * 1000)
+        
+        report.report.bandwidth = None
+              
         #...
         theApp.statistics.reports_generated = \
               theApp.statistics.reports_generated + 1
         return report
+    
+    def download_page_to_tmp(self,key):
+        """"""
+        url = benchmark_url_dict[key]
+        tmpfd,tmpname = tempfile.mkstemp()
+        os.close(tmpfd)
+        
+        self.benchmark_bandwidth[key]['start_time'] = time.time()
+        defer_ = client.downloadPage(url, tmpname)
+        defer_.addCallback(self.finish_page_download,key,tmpname)
+        defer_.addErrback(self.handler_err)
+        
+        return defer_
+    
+    def finish_page_download(self,result,key,filename):
+        
+        #end time
+        self.benchmark_bandwidth[key]['end_time'] = time.time() 
+        #calculate the file size
+        self.benchmark_bandwidth[key]['size'] = os.path.getsize(filename)
+        #delete the file
+        os.unlink(filename)
+        
+        return key
+        
+    def handler_err(self,failure):
+        g_logger.error("[WebsiteTest]bench handle failed:%s"%failure)        
 
     class ContentExaminer(Protocol):
         def __init__(self, url, pattern):
@@ -194,11 +309,11 @@ class WebsiteTest(Test):
             if reason.check(ResponseDone):
                 match = self.pattern.search(self.content)
                 if (match is not None):
-                    g_logger.info("Content unchanged.")
+                    print ("Content unchanged.")
                 else:
-                    g_logger.info("Content changed.")
+                    print ("Content changed.")
             else:
-                g_logger.error("The connection was broken. [%s]" % self.url)
+                print ("The connection was broken. [%s]" % self.url)
 
 
 ########################################################################
