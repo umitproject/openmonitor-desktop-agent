@@ -218,6 +218,7 @@ class AggregatorAPI(object):
 
     def _handle_get_super_peer_list_response(self, message):
         if message is None:
+            g_logger.info("No Super peers found in the message returned from Aggregator")
             return
         for speer in message.knownSuperPeers:
             theApp.peer_manager.add_super_peer(speer.agentID,
@@ -225,6 +226,7 @@ class AggregatorAPI(object):
                                                speer.agentPort,
                                                speer.token,
                                                speer.publicKey)
+            g_logger.info("\nConnecting to %d" % speer.agentID)
             theApp.peer_manager.connect_to_peer(speer.agentID)
 
         return message
@@ -420,10 +422,20 @@ class AggregatorAPI(object):
         check_message["is_update"] = no_updated
         check_message["description"] = "Open Monitor Desktop Agent!" 
         check_message["check_code"] = ""
-         
-        if not check_update_item_in_db(check_message["version"]):
+        try:
+            if not check_update_item_in_db(check_message["version"]):
+                insert_update_item_in_db(check_message)
+                g_logger.info("Write a new update record into DB :%s" % check_message) 
+
+        except Exception, e:
+            g_logger.debug("Exception was raised in the updating the updates db.")
             insert_update_item_in_db(check_message)
             g_logger.info("Write a new update record into DB :%s" % check_message) 
+        else:
+            pass
+        finally:
+            pass
+        
           
         return  message
 
@@ -553,10 +565,10 @@ class AggregatorAPI(object):
     def _decode(self, text, msg_type):
         if text is None:
             return
-
+        g_logger.info("Entered debug")
         message = msg_type()
         message.ParseFromString(base64.b64decode(text))
-
+        g_logger.info("Protobuf response parsed to Message - %s" % message)
         return message
 
     def _send_message(self, message, response_msg_type=None):
@@ -590,9 +602,12 @@ class AggregatorAPI(object):
 
         # decode message
         if response_msg_type is not None:
+            g_logger.info("Reponse message type is not none")
             if isinstance(message, CheckAggregator):
+                print "\nAggregator Checked"
                 defer_.addCallback(self._decode, response_msg_type)
             elif isinstance(message, Login) or isinstance(message, LoginStep2):
+                g_logger.info("Login checked")
                 defer_.addCallback(self._decode, response_msg_type)
             else:
                 defer_.addCallback(self._aes_decrypt, response_msg_type)

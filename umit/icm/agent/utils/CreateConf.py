@@ -47,7 +47,7 @@ def create_file_conf(conf_path):
     config.add_section('web')
     config.set('web', 'listen_port', 8080)
 
-    config.set('network', 'aggregator_url', 'http://alpha.openmonitor.org')
+    config.set('network', 'aggregator_url', 'http://127.0.0.1:8000/api')
     config.set('application', 'selected_tests', '')
 
     config.write(fp)
