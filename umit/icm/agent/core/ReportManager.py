@@ -3,6 +3,7 @@
 # Copyright (C) 2011 Adriano Monteiro Marques
 #
 # Author:  Zhongjie Wang <wzj401@gmail.com>
+#          Tianwei Liu <liutianweidlut@gmail.com>
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -67,6 +68,11 @@ class ReportManager(object):
         self.cached_reports = {}
 
     def add_report(self, report):
+        """
+        Task scheduler calls this callback 
+        """
+        g_logger.debug("call add report is%s"%report)
+        
         # check if in the cache
         if report is None:
             g_logger.critical("Received None as report. Please, investigate.")
@@ -128,6 +134,7 @@ class ReportManager(object):
 
     def load_reports_from_db(self, table_name):
         rs = g_db_helper.select("select * from %s" % table_name)
+        return rs
 
     def save_report_to_db(self, table_name, report_entry):
         sql_stmt = "insert into %s (report_id, test_id, time_gen, content, "\

@@ -45,6 +45,7 @@ from twisted.web._newclient import ResponseDone
 from umit.icm.agent.Application import theApp
 from umit.icm.agent.Global import *
 from umit.icm.agent.rpc.message import *
+from umit.icm.agent.logger import g_logger
 
 if sys.platform == "win32":
     # On Windows, the best timer is time.clock()
@@ -165,7 +166,7 @@ class WebsiteTest():
         g_logger.debug(self.url)
         g_logger.debug((str(self.status_code) + ' ' + response.phrase))
         g_logger.debug("Response time: %f" % (self.response_time))
-        g_logger.debug(response.headers)
+        #g_logger.debug(response.headers)
         
         result = {'status_code': 0, 'time_end': time_end}
         
@@ -261,7 +262,7 @@ class WebsiteTest():
         report.report.responseTime = \
               int((result['time_end'] - self.time_start) * 1000)
         
-        report.report.bandwidth = None
+        report.report.bandwidth = 0
               
         #...
         theApp.statistics.reports_generated = \

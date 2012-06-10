@@ -67,6 +67,7 @@ aggregator_api_url = {
     'GetNetlist': '/api/get_netlist/',
     'GetBanlist': '/api/get_banlist/',
     'GetBannets': '/api/get_bannets/',
+    'AssignTask':'/api/assigntask',
 }
 
 #---------------------------------------------------------------------
@@ -251,13 +252,40 @@ class AggregatorAPI(object):
             theApp.peer_manager.connect_to_peer(peer.agentID)
 
         return message
+    
+    """ Assign Task"""
+    #----------------------------------------------------------------------
+    def get_task(self):
+        url = self.base_url + "/gettasks/"
+        request_msg = AssignTask()
+        request_msg.header.agentID = theApp.peer_info.ID
+        defer_ = self._send_message(request_msg, AssignTaskResponse)
+        defer_.addCallback(self._handle_get_task_response)
+        defer_.addErrback(self._handle_errback)
+        
+        return defer_
+        
+    def _handle_get_task_response(self,message):
+        if message in None:
+            return 
+        
+        print message
+        print message.header
+        print message.tests
+        
+        g_logger.debug("We have got tasks from aggregator")  
+        
+        return message
+                
 
     """ Event """
     #----------------------------------------------------------------------
     def get_events(self):
         url = self.base_url + "/getevents/"
         request_msg = GetEvents()
-        #self._make_request_header(request_msg.header)
+        request_msg.locations.longitude = 0 # need to fix 
+        request_msg.locations.latitude  = 0
+
 
         defer_ = self._send_message(request_msg, GetEventsResponse)
         defer_.addCallback(self._handle_get_events_response)
@@ -268,6 +296,11 @@ class AggregatorAPI(object):
     def _handle_get_events_response(self, message):
         if message is None:
             return
+        
+        #print message
+        #print message.events
+        
+        g_logger.debug("We have got events from aggregator")
         for event in message.events:
             theApp.event_manager.add_event(event)
 
@@ -288,7 +321,6 @@ class AggregatorAPI(object):
     def send_website_report(self, report):
         url = self.base_url + "/sendwebsitereport/"
         request_msg = SendWebsiteReport()
-        #self._make_request_header(request_msg.header)
         request_msg.report.CopyFrom(report)
 
         defer_ = self._send_message(request_msg, SendReportResponse)
@@ -318,7 +350,6 @@ class AggregatorAPI(object):
     def send_service_report(self, report):
         url = self.base_url + "/sendservicereport/"
         request_msg = SendServiceReport()
-        #self._make_request_header(request_msg.header)
         request_msg.report.CopyFrom(report)
 
         defer_ = self._send_message(request_msg, SendReportResponse)
@@ -351,7 +382,7 @@ class AggregatorAPI(object):
     def send_website_suggestion(self, website_url):
         url = self.base_url + "/websitesuggestion/"
         request_msg = WebsiteSuggestion()
-        #self._make_request_header(request_msg.header)
+
         request_msg.websiteURL = website_url
 
         defer_ = self._send_message(request_msg, TestSuggestionResponse)
@@ -370,7 +401,7 @@ class AggregatorAPI(object):
     def send_service_suggestion(self, service_name, host_name, ip, port):
         url = self.base_url + "/servicesuggestion/"
         request_msg = ServiceSuggestion()
-        #self._make_request_header(request_msg.header)
+
         request_msg.serviceName = service_name
         request_msg.hostName = host_name
         request_msg.ip = ip
@@ -394,7 +425,7 @@ class AggregatorAPI(object):
     def check_version(self):
         self.check_message = {}
         request_msg = NewVersion()
-        #self._make_request_header(request_msg.header)
+
         request_msg.agentVersionNo = VERSION_NUM
         request_msg.agentType = 'DESKTOP'
 
@@ -442,6 +473,8 @@ class AggregatorAPI(object):
 
         return message
 
+    """ Other Informations """
+    #----------------------------------------------------------------------
     def get_netlist(self, count):
         request_msg = GetNetlist()
         request_msg.list = count
@@ -559,6 +592,9 @@ class AggregatorAPI(object):
 
         return message
 
+    """ utils """
+    #----------------------------------------------------------------------
+    
     def _send_message(self, message, response_msg_type=None):
         postdata = {}
 
@@ -578,7 +614,7 @@ class AggregatorAPI(object):
                 theApp.key_manager.aggregator_public_key.encrypt(
                     base64.b64encode(
                         theApp.key_manager.aggregator_aes_key.get_key())))
-            postdata['msg'] = self._aes_encrypt(message)
+            postdata['msg'] = self._aes_encrypt(message)            
         else:
             postdata['agentID'] = theApp.peer_info.ID
             postdata['msg'] = self._aes_encrypt(message)
@@ -639,6 +675,8 @@ class AggregatorAPI(object):
     def _handle_errback(self, failure):
         g_logger.error("Aggregator failure: %s" % str(failure))
     
+    """ alters """
+    #----------------------------------------------------------------------    
     def _alter_show(self,primary_text,secondary_text):
         #Add the user-friendly information to the user to check the problem.
         import gtk

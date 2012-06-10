@@ -53,6 +53,7 @@ class EventManager(object):
         self.load_events_from_db(from_time)
 
     def add_event(self, message):
+        
         event_entry = EventEntry()
         event_entry.TestType = message.testType
         event_entry.EventType = message.eventType
@@ -69,6 +70,7 @@ class EventManager(object):
 
         self.event_repository.append(event_entry)
         self.save_event_to_db(event_entry)
+        g_logger.debug("Add one message into database. Details:(%s,%s)"%(message.testType,message.eventType))
 
     def load_events_from_db(self, from_time):
         rs = g_db_helper.select("select * from events where time>%d" % from_time)

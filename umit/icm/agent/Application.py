@@ -18,6 +18,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
+
 """
 Entrance of ICM Desktop Agent
 """
@@ -75,6 +76,9 @@ class Application(object):
         self.task_scheduler = TaskScheduler(self.task_manager,
                                             self.report_manager)
 
+        from umit.icm.agent.core.TaskAssignFetch import TaskAssignFetch
+        self.task_assign = TaskAssignFetch(self.task_manager)
+        
         from umit.icm.agent.secure.KeyManager import KeyManager
         self.key_manager = KeyManager()
 
@@ -207,6 +211,7 @@ class Application(object):
             g_logger.info("Match the username and password, \
                            we will change the default credentials")
             g_logger.debug(rs[0])
+            
             self.peer_info.ID =  rs[0][0]
             self.peer_info.Username = rs[0][1]
             self.peer_info.Password = rs[0][2]
@@ -214,6 +219,7 @@ class Application(object):
             self.peer_info.CipheredPublicKeyHash = rs[0][4]
             self.peer_info.Type = rs[0][5]
             self.peer_info.is_registered = True   
+            
             return True                     
 
     def _login_after_register_callback(self, message, username,
@@ -260,12 +266,19 @@ class Application(object):
                 self.peer_maintain_lc.start(7200)
 
             if not hasattr(self, 'task_run_lc'):
+                g_logger.info("Starting task scheduler looping ")
                 self.task_run_lc = task.LoopingCall(self.task_scheduler.schedule)
                 self.task_run_lc.start(30)
 
             if not hasattr(self, 'report_proc_lc'):
+                g_logger.info("Starting report upload looping ")
                 self.report_proc_lc = task.LoopingCall(self.report_uploader.process)
                 self.report_proc_lc.start(30)
+                
+            if not hasattr(self,'task_assign_lc'):
+                g_logger.info("Starting get assigned task from Aggregator")
+                self.task_assgin_lc = task.LoopingCall(self.task_assign.fetch_task)
+                self.task_assgin_lc.start(30)
 
         return result
 
@@ -290,8 +303,9 @@ class Application(object):
         g_logger.info("Starting ICM agent. Version: %s", VERSION)
         self._init_components(aggregator)
 
-        #self.task_manager.add_test(1, '* * * * *', {'url':'http://icm-dev.appspot.com'}, 3)
-
+        #self.task_manager.add_test(1, '* * * * *', {'url':'http://www.baidu.com'}, 3)
+        #self.task_manager.add_test(1, '*/3 * * * *', {'url':'http://www.sina.com.cn'}, 2)
+   
         reactor.addSystemEventTrigger('before', 'shutdown', self.on_quit)
 
         if not managed_mode:
