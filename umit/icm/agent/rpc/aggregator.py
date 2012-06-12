@@ -57,6 +57,7 @@ aggregator_api_url = {
     'Logout': '/api/logoutagent/',
     'GetSuperPeerList': '/api/getsuperpeerlist/',
     'GetPeerList': '/api/getpeerlist/',
+    'GetPeerListResponse': '/api/addpeer/',
     'GetEvents': '/api/getevents/',
     'SendWebsiteReport': '/api/sendwebsitereport/',
     'SendServiceReport': '/api/sendservicereport/',
@@ -226,10 +227,33 @@ class AggregatorAPI(object):
                                                speer.agentPort,
                                                speer.token,
                                                speer.publicKey)
-            g_logger.info("\nConnecting to %d" % speer.agentID)
+            g_logger.info("The super peer list from the aggregator is %s" % message)
             theApp.peer_manager.connect_to_peer(speer.agentID)
 
         return message
+
+    def add_peer(self):
+        g_logger.info("REACHED ADD PEER AGGREGATOR METHOD")
+        url = self.base_url + "/addpeer/"
+        request_msg = GetPeerListResponse()
+        request_msg.header.currentVersionNo = 1
+        request_msg.header.currentTestVersionNo = 0
+        myKnownPeers = request_msg.knownPeers.add()
+        myKnownPeers.agentID = 1
+
+        # TODO Get these values dynamically from the client machine
+
+        myKnownPeers.agentIP = "128.0.0.1 "
+        myKnownPeers.agentPort = 8001
+        myKnownPeers.token = ""
+        myKnownPeers.publicKey.mod = "130689522542451997827613058560508081035591283840778176824940984638775757484551563783658589544334246939583656218087841857176041315532923338139534632626622740344922644067315525611442351636627041996720493652322753334163003124188922059325762054979414459769309500688279015359263325336655828041861371685243279146777"
+        myKnownPeers.publicKey.exp = "65537"
+        myKnownPeers.peerStatus = "ON"
+        
+        defer_ = self._send_message(request_msg,GetPeerListResponse)
+        defer_.addErrback(self._handle_errback)
+        g_logger.info("LEFT ADD PEER AGGREGATOR METHOD")  
+        return defer_
 
     def get_peer_list(self, count):
         url = self.base_url + "/getpeerlist/"
@@ -251,7 +275,7 @@ class AggregatorAPI(object):
                                                 peer.token,
                                                 peer.publicKey)
             theApp.peer_manager.connect_to_peer(peer.agentID)
-
+        g_logger.info("The peer list from the aggregator is %s" % message)
         return message
 
     """ Event """
@@ -617,6 +641,8 @@ class AggregatorAPI(object):
         return defer_
 
     def _send_request(self, method, uri, data="", mimeType=None):
+        if(uri==self.base_url + "/addpeer/"):
+            g_logger.info("REACHED THE FINAL PROTOBUF SENDER IN ADDPEER")
         g_logger.info("Sending message to aggregator at %s" % uri)
         headers = {}
         if mimeType:

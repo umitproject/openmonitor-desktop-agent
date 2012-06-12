@@ -212,6 +212,12 @@ class PeerManager:
         #
         #
 
+    def add_peer(self):
+        # delegate to aggregator
+        theApp.aggregator.add_peer()
+
+
+
     def agent_is_banned(self, agent_id):
         return g_db_helper.agent_is_banned(agent_id)
 

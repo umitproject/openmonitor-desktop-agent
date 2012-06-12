@@ -303,6 +303,9 @@ class Application(object):
             # This is necessary so the bot can take over and control the agent
             reactor.callWhenRunning(self.init_after_running)
 
+        # TODO IMPORTANT : This must be called only after successful GetPeerlist and successful completion of bootstrapping
+        self.peer_manager.add_peer()
+
         if run_reactor:
             # This is necessary so the bot can take over and control the agent
             reactor.run()
