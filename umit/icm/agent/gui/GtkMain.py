@@ -96,7 +96,7 @@ class GtkMain(object):
 
         self.tray_menu_logged_in.append(gtk.SeparatorMenuItem())
 
-        menu_item = gtk.MenuItem(_("Preference"))
+        menu_item = gtk.MenuItem(_("Preferences..."))
         menu_item.connect("activate", lambda w: self.show_preference())
         menu_item.show()
         self.tray_menu_logged_in.append(menu_item)

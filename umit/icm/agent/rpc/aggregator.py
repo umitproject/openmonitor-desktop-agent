@@ -67,7 +67,7 @@ aggregator_api_url = {
     'GetNetlist': '/api/get_netlist/',
     'GetBanlist': '/api/get_banlist/',
     'GetBannets': '/api/get_bannets/',
-    'AssignTask':'/api/assigntask',
+    'AssignTask':'/api/assign_task',
 }
 
 #---------------------------------------------------------------------
@@ -280,13 +280,16 @@ class AggregatorAPI(object):
 
     """ Event """
     #----------------------------------------------------------------------
-    def get_events(self):
+    def get_events(self,location_user):
         url = self.base_url + "/getevents/"
         request_msg = GetEvents()
-        request_msg.locations.longitude = 0 # need to fix 
-        request_msg.locations.latitude  = 0
-
-
+        
+        print location_user.latitude, location_user.longitude
+        #repeated 
+        location = request_msg.locations.add()
+        location.longitude = location_user.longitude
+        location.latitude  = location_user.latitude
+        
         defer_ = self._send_message(request_msg, GetEventsResponse)
         defer_.addCallback(self._handle_get_events_response)
         defer_.addErrback(self._handle_errback)

@@ -130,7 +130,7 @@ class Application(object):
             from umit.icm.agent.gui.GtkMain import GtkMain
             self.gtk_main = GtkMain()
         
-        self.is_auto_login = g_config.getboolean('application', 'auto_login')
+        self.is_auto_login = g_config.getboolean('application', 'auto_login_swittch')
            
         if  self.is_auto_login:
             #login with saved username or password, not credentials
@@ -241,9 +241,9 @@ class Application(object):
             self.peer_info.save_to_db()
             g_logger.debug("Login Successfully :%s@%s" % (username,password))
             if save_login:
-                g_config.set('application', 'auto_login', True)
+                g_config.set('application', 'auto_login_swittch', True)
             else:
-                g_config.set('application', 'auto_login', False)
+                g_config.set('application', 'auto_login_swittch', False)
 
             if self.use_gui:
                 self.gtk_main.set_login_status(True)
@@ -292,7 +292,7 @@ class Application(object):
         if self.use_gui:
             self.gtk_main.set_login_status(False)
 
-        g_config.set('application', 'auto_login', False)
+        g_config.set('application', 'auto_login_swittch', False)
 
         return result
 

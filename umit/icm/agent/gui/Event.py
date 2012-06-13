@@ -27,9 +27,16 @@ import gobject
 
 from higwidgets.higwindows import HIGWindow
 from deps.higwidgets.higboxes import HIGHBox, HIGVBox,hig_box_space_holder
+from higwidgets.higlabels import HIGLabel
+from higwidgets.higentries import HIGTextEntry, HIGPasswordEntry
 
 from umit.icm.agent.I18N import _
 from umit.icm.agent.Application import theApp
+
+from google.protobuf.text_format import MessageToString
+from umit.icm.agent.rpc.message import *
+from umit.icm.agent.rpc.MessageFactory import MessageFactory
+from umit.icm.agent.rpc import messages_pb2
 
 
 class EventWindow(HIGWindow):
@@ -41,6 +48,11 @@ class EventWindow(HIGWindow):
 
     def __init__(self):
         HIGWindow.__init__(self, type=gtk.WINDOW_TOPLEVEL)
+        
+        self.location_user = Location() #user location information
+        self.location_user.longitude = 0.0
+        self.location_user.latitude  = 0.0
+         
         self.set_title(_('Events List'))
         self.set_size_request(720, 580)
         self.set_position(gtk.WIN_POS_CENTER_ALWAYS)
@@ -60,8 +72,16 @@ class EventWindow(HIGWindow):
         
         #box
         self.all_box = HIGVBox()
+        self.input_box = HIGHBox()
         self.buttom_box = HIGHBox()
         self.check_btn_box = gtk.HButtonBox()
+        
+        #Add input
+        self.title_text = HIGLabel(_("Locations"))
+        self.longitude_text = HIGLabel(_("longitude:"))
+        self.longitude_entry = HIGTextEntry()
+        self.latitude_text = HIGLabel(_("latitude:"))
+        self.latitude_entry = HIGTextEntry()         
         
         #Add buttons
         self.get_event_btn = gtk.Button(_("Get Events"))
@@ -102,9 +122,16 @@ class EventWindow(HIGWindow):
         
     def __pack_widgets(self):
         
+        self.all_box._pack_noexpand_nofill(self.input_box)
         self.all_box._pack_expand_fill(self.scrolledwindow) 
         self.all_box._pack_noexpand_nofill(self.buttom_box)  
-        
+                
+        self.input_box.pack_start(self.title_text)
+        self.input_box.pack_start(self.longitude_text)
+        self.input_box.pack_start(self.longitude_entry)
+        self.input_box.pack_start(self.latitude_text)
+        self.input_box.pack_start(self.latitude_entry)
+       
         self.buttom_box.pack_start(self.statusbar,True,True,0)
         self.buttom_box.pack_end(self.check_btn_box,False,False,0)
         
@@ -137,7 +164,18 @@ class EventWindow(HIGWindow):
         """
         get events from aggregator by using Aggregator API:get_events
         """
-        defer_ = theApp.aggregator.get_events()
+        longtitude = self.longitude_entry.get_text()
+        latitude   = self.latitude_entry.get_text()
+        
+        if longtitude != "" and latitude != "":
+            self.location_user.longitude = float(longtitude)
+            self.location_user.latitude  = float(latitude)
+        else:
+            #There we should add user preference logitude
+            self.location_user.longitude = 0.0
+            self.location_user.latitude  = 0.0
+        
+        defer_ = theApp.aggregator.get_events(self.location_user)
         defer_.addCallback(self.finish_get_events)
         defer_.addErrback(self.handler_error)
     
