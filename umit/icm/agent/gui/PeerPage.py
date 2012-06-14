@@ -30,6 +30,8 @@ from higwidgets.higboxes import HIGSpacer, hig_box_space_holder
 from higwidgets.higlabels import HIGSectionLabel, HIGEntryLabel
 from higwidgets.higtables import HIGTable
 from higwidgets.higdialogs import HIGAlertDialog
+from higwidgets.higlabels import HIGLabel
+from higwidgets.higentries import HIGTextEntry, HIGPasswordEntry
 
 from umit.icm.agent.I18N import _
 from umit.icm.agent.Application import theApp
@@ -40,26 +42,31 @@ from umit.icm.agent.utils.Startup import StartUP
 
 from twisted.internet import reactor
 
-
 ###################################################
-#Preference basic setting Page in Preference Window
-class PreferencePage(HIGVBox):
+#Peer Information Page in Preference Window
+class PeerInfoPage(HIGVBox):
     """"""
-
+    
     #----------------------------------------------------------------------
     def __init__(self):
         """Constructor"""
         HIGVBox.__init__(self)
         self.__create_widgets()
         self.__pack_widgets()
-
+        
     def __create_widgets(self):
-        self.peerinfo_hbox = HIGHBox()
-        self.cloudagg_hbox = HIGHBox()
-        self.superpeers_hbox = HIGHBox()
+        """"""
+        self.peerinfo_hbox      = HIGHBox()
+        self.cloudagg_hbox      = HIGHBox()
+        self.superpeers_hbox    = HIGHBox()
+        self.pref_location_hbox = HIGHBox()
 
         self.peerinfo_section = HIGSectionLabel(_("Peer Info"))
         self.peerinfo_table = HIGTable()
+        
+        self.pref_location_section = HIGSectionLabel(_("Preferred Locations"))
+        self.pref_location_table = HIGTable()
+        
         self.cloudagg_section = HIGSectionLabel(_("Cloud Aggregator"))
         self.cloudagg_table = HIGTable()
         self.cloudagg_subhbox = HIGHBox()
@@ -67,12 +74,14 @@ class PreferencePage(HIGVBox):
         self.superpeers_table = HIGTable()
 
         self.peerid_label = HIGEntryLabel(_("Peer ID:"))
-        self.email_label = HIGEntryLabel(_("Email Address:"))
+        self.email_label = HIGEntryLabel(_("Email Address:")) 
         self.peerid_label2 = HIGEntryLabel()
         self.email_entry = gtk.Entry()
-        self.startup_check = gtk.CheckButton(_("Startup OpenMonitor on system startup"))
-        self.notification_check = gtk.CheckButton(_("Show Desktop Notifications"))
-        self.login_ckeck = gtk.CheckButton(_("Enable Auto login"))
+
+        self.longitude_label = HIGLabel(_("longitude:"))
+        self.longitude_entry = gtk.Entry()
+        self.latitude_label = HIGLabel(_("latitude:"))
+        self.latitude_entry = gtk.Entry()                  
 
         self.cloudagg_entry = gtk.Entry()
         self.cloudagg_button = HIGButton(_("Reset"))
@@ -96,6 +105,8 @@ class PreferencePage(HIGVBox):
 
         self._pack_noexpand_nofill(self.peerinfo_section)
         self._pack_noexpand_nofill(self.peerinfo_hbox)
+        self._pack_noexpand_nofill(self.pref_location_section)
+        self._pack_noexpand_nofill(self.pref_location_hbox)
         self._pack_noexpand_nofill(self.cloudagg_section)
         self._pack_noexpand_nofill(self.cloudagg_hbox)
         self._pack_noexpand_nofill(self.superpeers_section)
@@ -103,6 +114,8 @@ class PreferencePage(HIGVBox):
 
         self.peerinfo_hbox._pack_noexpand_nofill(hig_box_space_holder())
         self.peerinfo_hbox._pack_expand_fill(self.peerinfo_table)
+        self.pref_location_hbox._pack_noexpand_nofill(hig_box_space_holder())
+        self.pref_location_hbox._pack_expand_fill(self.pref_location_table)        
         self.cloudagg_hbox._pack_noexpand_nofill(hig_box_space_holder())
         self.cloudagg_hbox._pack_expand_fill(self.cloudagg_table)
         self.superpeers_hbox._pack_noexpand_nofill(hig_box_space_holder())
@@ -113,9 +126,11 @@ class PreferencePage(HIGVBox):
 
         self.peerinfo_table.attach_label(self.peerid_label2, 1, 2, 0, 1)
         self.peerinfo_table.attach_entry(self.email_entry, 1, 2, 1, 2)
-        self.peerinfo_table.attach_label(self.startup_check, 0, 2, 2, 3)
-        self.peerinfo_table.attach_label(self.notification_check, 0, 3, 3, 4)
-        self.peerinfo_table.attach_label(self.login_ckeck, 0, 4, 4, 5)
+
+        self.pref_location_table.attach(self.longitude_label,0,1,0,1)
+        self.pref_location_table.attach(self.longitude_entry,1,2,0,1)
+        self.pref_location_table.attach(self.latitude_label,2,3,0,1)
+        self.pref_location_table.attach(self.latitude_entry,3,4,0,1)
         
         self.cloudagg_subhbox._pack_expand_fill(self.cloudagg_entry)
         self.cloudagg_subhbox._pack_noexpand_nofill(self.cloudagg_button)
@@ -129,14 +144,7 @@ class PreferencePage(HIGVBox):
         self.superpeers_subhbox._pack_noexpand_nofill(self.btn_box)
         self.superpeers_table.attach_label(self.superpeers_subhbox, 0, 1, 0, 1)
         
-    def startup_set(self,is_start_up=True):
-        """"""
-        start = StartUP()
-        if is_start_up:
-            start.set_startup()
-        else:
-            start.clear_startup()
-    
+
     def add_superpeer(self):
         if self.superpeers_entry:
             return
@@ -146,5 +154,33 @@ class PreferencePage(HIGVBox):
         from umit.icm.agent.gui.SuperPeerSetting import SuperPeerListWindow,SuperPeersBox
         wnd = SuperPeerListWindow()
         wnd.show_all()
+    
 
-   
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

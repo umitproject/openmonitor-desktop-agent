@@ -268,17 +268,38 @@ class Application(object):
             if not hasattr(self, 'task_run_lc'):
                 g_logger.info("Starting task scheduler looping ")
                 self.task_run_lc = task.LoopingCall(self.task_scheduler.schedule)
-                self.task_run_lc.start(30)
+                
+                task_scheduler_text = g_config.get("Timer","task_scheduler_timer")
+                if task_scheduler_text != "":
+                    indival = float(task_scheduler_text)
+                else:
+                    indival = 30
+                
+                self.task_run_lc.start(indival)
 
             if not hasattr(self, 'report_proc_lc'):
                 g_logger.info("Starting report upload looping ")
                 self.report_proc_lc = task.LoopingCall(self.report_uploader.process)
-                self.report_proc_lc.start(30)
+                
+                report_uploade_text = g_config.get("Timer","send_report_timer")
+                if report_uploade_text != "":
+                    indival = float(report_uploade_text)
+                else:
+                    indival = 30                
+                
+                self.report_proc_lc.start(indival)
                 
             if not hasattr(self,'task_assign_lc'):
                 g_logger.info("Starting get assigned task from Aggregator")
                 self.task_assgin_lc = task.LoopingCall(self.task_assign.fetch_task)
-                self.task_assgin_lc.start(30)
+                
+                task_assign_text = g_config.get("Timer","task_assign_timer")
+                if task_assign_text != "":
+                    indival = float(task_assign_text)
+                else:
+                    indival = 30                
+                
+                self.task_assgin_lc.start(indival)
 
         return result
 
