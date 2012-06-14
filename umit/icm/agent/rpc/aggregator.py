@@ -27,6 +27,8 @@ import urllib
 import random
 import time
 
+import umit.icm.agent.libcagepeers as libcagepeers
+
 from twisted.web import client
 from twisted.web.error import Error
 from twisted.internet import error
@@ -57,7 +59,7 @@ aggregator_api_url = {
     'Logout': '/api/logoutagent/',
     'GetSuperPeerList': '/api/getsuperpeerlist/',
     'GetPeerList': '/api/getpeerlist/',
-    'GetPeerListResponse': '/api/addpeer/',
+    'AddPeer': '/api/addpeer/',
     'GetEvents': '/api/getevents/',
     'SendWebsiteReport': '/api/sendwebsitereport/',
     'SendServiceReport': '/api/sendservicereport/',
@@ -235,25 +237,32 @@ class AggregatorAPI(object):
     def add_peer(self):
         g_logger.info("REACHED ADD PEER AGGREGATOR METHOD")
         url = self.base_url + "/addpeer/"
-        request_msg = GetPeerListResponse()
-        request_msg.header.currentVersionNo = 1
-        request_msg.header.currentTestVersionNo = 0
-        myKnownPeers = request_msg.knownPeers.add()
-        myKnownPeers.agentID = 1
+        request_msg = AddPeer()
 
+        # TODO : Change the type of AgentID to string - 160 bit binary. Cannot be stored as an integer.
+        # request_msg.newPeer.agentID = libcagepeers.getID()
+        # g_logger.info("The Agent ID generated from libcage : %s" % request_msg.newPeer.agentID)
         # TODO Get these values dynamically from the client machine
-
-        myKnownPeers.agentIP = "128.0.0.1 "
-        myKnownPeers.agentPort = 8001
-        myKnownPeers.token = ""
-        myKnownPeers.publicKey.mod = "130689522542451997827613058560508081035591283840778176824940984638775757484551563783658589544334246939583656218087841857176041315532923338139534632626622740344922644067315525611442351636627041996720493652322753334163003124188922059325762054979414459769309500688279015359263325336655828041861371685243279146777"
-        myKnownPeers.publicKey.exp = "65537"
-        myKnownPeers.peerStatus = "ON"
+        request_msg.newPeer.agentID = 1
+        request_msg.newPeer.agentIP = "128.0.0.1"
+        request_msg.newPeer.agentPort = 8001
+        request_msg.newPeer.token = ""
+        request_msg.newPeer.publicKey.mod = "130689522542451997827613058560508081035591283840778176824940984638775757484551563783658589544334246939583656218087841857176041315532923338139534632626622740344922644067315525611442351636627041996720493652322753334163003124188922059325762054979414459769309500688279015359263325336655828041861371685243279146777"
+        request_msg.newPeer.publicKey.exp = "65537"
+        request_msg.newPeer.peerStatus = "ON"
         
-        defer_ = self._send_message(request_msg,GetPeerListResponse)
+        defer_ = self._send_message(request_msg,AddPeerResponse)
+        defer_.addCallback(self._handle_add_peer_response)
         defer_.addErrback(self._handle_errback)
         g_logger.info("LEFT ADD PEER AGGREGATOR METHOD")  
         return defer_
+
+    def _handle_add_peer_response(self,message):
+        g_logger.info("Message from the aggregator : %s" % message)
+        if message.response=="Success":
+            g_logger.info("Node successfully added to the aggregator's peer list")
+        else:
+            g_logger.debug("Node failed to join the aggregator's peer list")
 
     def get_peer_list(self, count):
         url = self.base_url + "/getpeerlist/"

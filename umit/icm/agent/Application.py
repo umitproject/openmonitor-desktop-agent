@@ -60,7 +60,7 @@ class Application(object):
 
         from umit.icm.agent.core.PeerManager import PeerManager
         self.peer_manager = PeerManager()
-
+        
         from umit.icm.agent.core.EventManager import EventManager
         self.event_manager = EventManager()
 
@@ -254,6 +254,10 @@ class Application(object):
             
             #mark login-successful
             self.is_successful_login = True
+
+            #First add this peer into the peerlist of aggregator
+            g_logger.info("ADDING THIS PEER INTO THE AGGREGATOR'S PEERLIST")
+            self.peer_manager.add_peer()
             
             # Add looping calls
             if not hasattr(self, 'peer_maintain_lc'):
@@ -290,10 +294,10 @@ class Application(object):
         """
         g_logger.info("Starting ICM agent. Version: %s", VERSION)
 
+        self._init_components(aggregator)
+
         # Plug in Libcage code - Get port number from command line
         libcagepeers.createCage_firstnode("20000");
-
-        self._init_components(aggregator)
 
         #self.task_manager.add_test(1, '* * * * *', {'url':'http://icm-dev.appspot.com'}, 3)
 
@@ -304,7 +308,6 @@ class Application(object):
             reactor.callWhenRunning(self.init_after_running)
 
         # TODO IMPORTANT : This must be called only after successful GetPeerlist and successful completion of bootstrapping
-        self.peer_manager.add_peer()
 
         if run_reactor:
             # This is necessary so the bot can take over and control the agent
