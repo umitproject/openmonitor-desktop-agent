@@ -23,22 +23,24 @@
 from utils.importertest import import_debug
 import_debug() 
 
-__all__ = ['test_by_id', 'test_name_by_id', 'WebsiteTest', 'ServiceTest','ThrottledTest']
+__all__ = ['test_by_id', 'test_name_by_id', 'WebsiteTest', 'ServiceTest','ThrottledTest','service_name_by_id']
 
 TEST_PACKAGE_VERSION = '1.0'
-TEST_PACKAGE_VERSION_NUM = 1
+TEST_PACKAGE_VERSION_NUM = 1        
 
 import hashlib
 import re
 import sys
 import time
 import struct
+import os
 
 from twisted.internet import reactor, ssl
 from twisted.internet import defer
 from twisted.internet.defer import Deferred
 from twisted.internet.protocol import Protocol, ClientCreator, ClientFactory
 from twisted.web.client import Agent, HTTPDownloader,downloadPage
+from twisted.web import client
 from twisted.web.http_headers import Headers
 from twisted.web._newclient import ResponseDone
 
@@ -131,6 +133,8 @@ class WebsiteTest():
         if 'pattern' in param:
             self.pattern = re.compile(param['pattern'])
 
+            
+
     def execute(self):
         """Run the test"""
         g_logger.info("Testing website: %s" % self.url) 
@@ -219,11 +223,12 @@ class WebsiteTest():
         end_time = self.benchmark_bandwidth[key]['end_time']
         size = self.benchmark_bandwidth[key]['size']
         if size == 0 or size == None:
-            raise Exception("Error in filesize!!!")
+            g_logger.error("Error in filesize!!!")
+            size = 1
         
         self.benchmark_bandwidth[key]['bandwidth'] =(float)((end_time - start_time) / size)
         
-        g_logger.debug(key+':'+self.benchmark_bandwidth[key])
+        g_logger.debug(str(key)+':'+str(self.benchmark_bandwidth[key]))
         
     
     def calculate_different(self):
@@ -242,7 +247,10 @@ class WebsiteTest():
         
         diff_value = self.benchmark_bandwidth[self.test_id]['bandwidth'] - sum/(self.benchmark_num)
         
-        self.report.report.bandwidth = diff_value
+        print diff_value
+        print diff_value*1000*1000
+        self.report.report.bandwidth = int(diff_value*1000*1000)
+        print self.report.report
         
     def _generate_report(self,result):
         """"""
@@ -375,6 +383,7 @@ class ServiceTest(Test):
                                                      report.header.testID])
         #report.header.traceroute
         report.report.serviceName = self.service_name
+        report.report.port = self.port
         report.report.statusCode = result['status_code']
         report.report.responseTime = \
               int((result['time_end'] - self.time_start) * 1000)
@@ -383,11 +392,12 @@ class ServiceTest(Test):
               theApp.statistics.reports_generated + 1
         return report
 
+
 ########################################################################
 # Throttling  Test
 ########################################################################
 
-class ThrolledTest(Test):
+class ThrottledTest(Test):
     """"""
     def __init__(self):
         """Constructor"""
@@ -401,6 +411,7 @@ class ThrolledTest(Test):
     
     def execute(self):
         raise NotImplementedError('You need to implement this method')
+
 
 ########################################################################
 # FTP Test
@@ -416,6 +427,7 @@ class FTPTestProtocol(FTPClient):
     def __init__(self, report_deferred=None, test=None):
         """Constructor"""
         FTPClient.__init__(self, test.username, test.password)
+        
         self.reportDeferred = report_deferred
         self.test = test
 
@@ -441,7 +453,7 @@ class FTPTest(ServiceTest):
     def __init__(self):
         """Constructor"""
         ServiceTest.__init__(self)
-        self.service = 'ftp'
+        self.service_name = "FTP"
         self.port = 21
         self.username = 'anonymous'
         self.password = 'icm-agent@umitproject.org'
@@ -456,6 +468,7 @@ class FTPTest(ServiceTest):
                      .addErrback(self._connectionFailed)
         self.time_start = default_timer()
         self.time_end = 0
+        print self.reportDeferred
         return self.reportDeferred
 
 ########################################################################
@@ -561,7 +574,7 @@ class POP3Test(ServiceTest):
     def __init__(self):
         """Constructor"""
         ServiceTest.__init__(self)
-        self.service = 'pop3'
+        self.service_name = 'pop3'
         self.port = 110
 
     def execute(self):
@@ -624,7 +637,7 @@ class IMAPTest(ServiceTest):
     def __init__(self):
         """Constructor"""
         ServiceTest.__init__(self)
-        self.service = 'imap'
+        self.service_name = 'imap'
         self.port = 143
 
     def execute(self):
@@ -807,7 +820,7 @@ test_by_id = {
     6: IMAPTest,
     7: IRCTest,
     8: SSHTest,
-    9: ThrolledTest,
+    9: ThrottledTest,
   #  10: HTTPThrottledTest,
 }
 
@@ -821,13 +834,23 @@ test_name_by_id = {
     6: 'IMAPTest',
     7: 'IRCTest',
     8: 'SSHTest',
-    9:'ThrolledTest',
+    9: 'ThrottledTest',
    # 10: 'HTTPThrottledTest',
 }
-
+#####################
+#Support Service Dict
+service_name_by_id = {
+    'FTP':3,
+    'SMTP':4,
+    'POP3':5,
+    'IMAP':6,
+    'IRC':7,
+    'SSH':8, 
+}
 ALL_TESTS = ['WebsiteTest', 'FTPTest', 'SMTPTest', 'POP3Test', 'IMAPTest',
              'IRCTest','SSHTest']
 SUPPORTED_SERVICES = ['FTP', 'SMTP', 'POP3', 'IMAP','IRC','SSH']
+
 SUPPORTED_THROTTLED = ['HTTP']
 
 #import inspect

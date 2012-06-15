@@ -75,8 +75,10 @@ class PeerInfoPage(HIGVBox):
 
         self.peerid_label = HIGEntryLabel(_("Peer ID:"))
         self.email_label = HIGEntryLabel(_("Email Address:")) 
+        self.test_version_label = HIGEntryLabel(_("Test Sets Version:")) 
         self.peerid_label2 = HIGEntryLabel()
         self.email_entry = gtk.Entry()
+        self.test_version_label2 = HIGEntryLabel()        
 
         self.longitude_label = HIGLabel(_("longitude:"))
         self.longitude_entry = gtk.Entry()
@@ -122,10 +124,13 @@ class PeerInfoPage(HIGVBox):
         self.superpeers_hbox._pack_expand_fill(self.superpeers_table)
 
         self.peerinfo_table.attach_label(self.peerid_label, 0, 1, 0, 1)
-        self.peerinfo_table.attach_label(self.email_label, 0, 1, 1, 2)
+        self.peerinfo_table.attach_label(self.email_label, 0, 1, 2, 3)
+
+        self.peerinfo_table.attach_label(self.test_version_label, 0, 1, 1, 2)
+        self.peerinfo_table.attach_label(self.test_version_label2, 1, 2, 1, 2)
 
         self.peerinfo_table.attach_label(self.peerid_label2, 1, 2, 0, 1)
-        self.peerinfo_table.attach_entry(self.email_entry, 1, 2, 1, 2)
+        self.peerinfo_table.attach_entry(self.email_entry, 1, 2, 2, 3)
 
         self.pref_location_table.attach(self.longitude_label,0,1,0,1)
         self.pref_location_table.attach(self.longitude_entry,1,2,0,1)

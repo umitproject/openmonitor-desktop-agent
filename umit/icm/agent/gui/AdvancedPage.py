@@ -71,10 +71,13 @@ class AdvancedPage(HIGVBox):
         self.task_assign_label      = HIGEntryLabel(_("Task Assign"))        
         self.task_scheduler_label   = HIGEntryLabel(_("Task Scheduler")) 
         self.report_uploader_label  = HIGEntryLabel(_("Report Uploader")) 
+        self.test_fetch_label  = HIGEntryLabel(_("Test sets Fetch"))         
+
         
         self.task_assign_entry      = gtk.Entry()
         self.task_scheduler_entry   = gtk.Entry()
-        self.report_uploader_entry  = gtk.Entry()     
+        self.report_uploader_entry  = gtk.Entry()
+        self.test_fetch_entry       = gtk.Entry()    
         
         self.language_label = HIGEntryLabel(_("Language"))
         self.language_store = gtk.ListStore(str)
@@ -100,6 +103,8 @@ class AdvancedPage(HIGVBox):
         self.timer_table.attach_label(self.task_scheduler_entry,1,3,1,2)     
         self.timer_table.attach_label(self.report_uploader_label,0,1,2,3)             
         self.timer_table.attach_label(self.report_uploader_entry,1,3,2,3) 
+        self.timer_table.attach_label(self.test_fetch_label,0,1,3,4)
+        self.timer_table.attach_label(self.test_fetch_entry,1,3,3,4)
 
         self.other_table.attach_label(self.language_label,0,2,0,1)
         self.other_table.attach_label(self.language_entry,2,4,0,1)

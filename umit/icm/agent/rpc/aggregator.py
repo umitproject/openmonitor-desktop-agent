@@ -67,7 +67,7 @@ aggregator_api_url = {
     'GetNetlist': '/api/get_netlist/',
     'GetBanlist': '/api/get_banlist/',
     'GetBannets': '/api/get_bannets/',
-    'AssignTask':'/api/assign_task',
+    #'AssignTask':'/api/assign_task',
 }
 
 #---------------------------------------------------------------------
@@ -353,6 +353,8 @@ class AggregatorAPI(object):
     def send_service_report(self, report):
         url = self.base_url + "/sendservicereport/"
         request_msg = SendServiceReport()
+        print '~__________________________'
+        print report
         request_msg.report.CopyFrom(report)
 
         defer_ = self._send_message(request_msg, SendReportResponse)
@@ -461,20 +463,42 @@ class AggregatorAPI(object):
           
         return  message
 
-    def check_tests(self):
+    
+    """ Test sets"""
+    #----------------------------------------------------------------------   
+    def check_tests(self,current_version):
         request_msg = NewTests()
-        request_msg.currentTestVersionNo = TEST_PACKAGE_VERSION_NUM
+        request_msg.currentTestVersionNo = int(current_version)  #Get current version from DB
 
         defer_ = self._send_message(request_msg, NewTestsResponse)
         defer_.addCallback(self._handle_check_tests_response)
-        defer_.addErrback(self._handle_errback)
+        defer_.addErrback(self._handle_check_tests_error)
         return defer_
 
     def _handle_check_tests_response(self, message):
         if message is None:
             return
-
+        
+        print message.header
+        print message.tests
+        print message.testVersionNo
+        g_logger.info("Receive Test Sets!")     
         return message
+    
+    def _handle_check_tests_error(self,failure):
+        g_logger.error("check tests error!%s"%str(failure))
+        print failure
+        
+    """Test Module"""
+    def check_test_moduler(self):
+        pass
+        
+    def _handle_check_test_moduler_response(self):
+        if message is None:
+            return 
+        
+        g_logger.info("Get Test Moduler Update")             
+        return messge
 
     """ Other Informations """
     #----------------------------------------------------------------------

@@ -79,6 +79,10 @@ class Application(object):
         from umit.icm.agent.core.TaskAssignFetch import TaskAssignFetch
         self.task_assign = TaskAssignFetch(self.task_manager)
         
+        from umit.icm.agent.core.TestSetsFetcher import TestSetsFetcher
+        self.test_sets = TestSetsFetcher(self.task_manager,
+                                         self.report_manager)
+        
         from umit.icm.agent.secure.KeyManager import KeyManager
         self.key_manager = KeyManager()
 
@@ -236,7 +240,7 @@ class Application(object):
         if result:
             self.peer_info.Username = username if username !="" and username != None else self.peer_info.Username
             self.peer_info.Password = password if password !="" and password != None else self.peer_info.Password
-            print self.peer_info.Username, self.peer_info.Password 
+            #print self.peer_info.Username, self.peer_info.Password 
             self.peer_info.is_logged_in = True
             self.peer_info.save_to_db()
             g_logger.debug("Login Successfully :%s@%s" % (username,password))
@@ -300,6 +304,19 @@ class Application(object):
                     indival = 30                
                 
                 self.task_assgin_lc.start(indival)
+ 
+            if not hasattr(self,'test_sets_fetch_lc'):
+                g_logger.info("Starting get test sets from Aggregator")
+                self.test_sets_fetch_lc = task.LoopingCall(self.test_sets.fetch_tests)
+                
+                test_fetch_text = g_config.get("Timer","test_fetch_timer")
+                if test_fetch_text != "":
+                    indival = float(test_fetch_text)
+                else:
+                    indival = 30                
+                
+                self.test_sets_fetch_lc.start(indival)               
+            
 
         return result
 
@@ -338,7 +355,7 @@ class Application(object):
             reactor.run()
 
     def terminate(self):
-        print 'quit'
+        #print 'quit'
         reactor.callWhenRunning(reactor.stop)
 
     def on_quit(self):
@@ -355,6 +372,9 @@ class Application(object):
         m = os.path.join(ROOT_DIR, 'umit', 'icm', 'agent', 'agent_restart_mark')
         if os.path.exists(m):
             os.remove(m)
+            
+        #store test_version id
+        self.test_sets.set_test_version(self.test_sets.current_test_version)
         
         self.quitting = True
         

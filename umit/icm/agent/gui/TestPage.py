@@ -151,7 +151,8 @@ class Tests(gtk.VBox):
         self.tree_view_selected_tests.treestore.append(None,[ALL_TESTS[0]])
 
     def update_test_mod(self):
-        theApp.aggregator.check_tests()
+        pass                        #It is a bug!!!
+        #theApp.aggregator.check_tests()
 
 class TestsView(HIGVBox):
 

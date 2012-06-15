@@ -161,6 +161,14 @@ class PreferenceWindow(HIGWindow):
         if aggregator_url != None and aggregator_url != "":
             g_config.set('network', 'aggregator_url', aggregator_url)
             g_db_helper.set_value('config','aggregator_url', aggregator_url)
+        
+        longitude_text = self.peer_page.longitude_entry.get_text()
+        if longitude_text != "":
+            g_config.set('Location', 'longitude', str(longitude_text))
+        
+        latitude_text = self.peer_page.latitude_entry.get_text()
+        if latitude_text != "":
+            g_config.set('Location', 'latitude', str(latitude_text))        
     
     def save_general(self):
         startup_on_boot = self.general_page.startup_check.get_active()
@@ -212,6 +220,12 @@ class PreferenceWindow(HIGWindow):
              g_config.set('Timer', 'send_report_timer', str(report_uploade_text))
              theApp.report_proc_lc.stop()
              theApp.report_proc_lc.start(float(report_uploade_text))
+             
+        test_fetch_text = self.advanced_page.test_fetch_entry.get_text()
+        if test_fetch_text != "":
+             g_config.set('Timer', 'test_fetch_timer', str(test_fetch_text))
+             theApp.test_sets_fetch_lc.stop()
+             theApp.test_sets_fetch_lc.start(float(test_fetch_text))        
                  
     def load_advanced(self):
         task_assign_text = g_config.get("Timer","task_assign_timer")
@@ -222,6 +236,9 @@ class PreferenceWindow(HIGWindow):
 
         report_uploade_text = g_config.get("Timer","send_report_timer")
         self.advanced_page.report_uploader_entry.set_text(report_uploade_text)        
+        
+        test_fetch_text = g_config.get("Timer","test_fetch_timer")
+        self.advanced_page.test_fetch_entry.set_text(test_fetch_text)   
     
         language_text = g_config.get("Language","current_language")
         #self.advanced_page.language_entry.set_text_column(1)
@@ -230,8 +247,15 @@ class PreferenceWindow(HIGWindow):
         """"""
         self.peer_page.peerid_label2.set_text(str(theApp.peer_info.ID))
         self.peer_page.email_entry.set_text(theApp.peer_info.Email)
-            
         self.peer_page.cloudagg_entry.set_text(theApp.aggregator.base_url)
+        self.peer_page.test_version_label2.set_text(str(theApp.test_sets.current_test_version))
+
+
+        longitude_text  = g_config.get('Location', 'longitude')
+        latitude_text  = g_config.get('Location', 'latitude')
+                
+        self.peer_page.longitude_entry.set_text(longitude_text)
+        self.peer_page.latitude_entry.set_text(latitude_text)
                 
     def save_updates(self):
         """"""
