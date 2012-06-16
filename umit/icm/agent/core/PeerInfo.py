@@ -54,15 +54,15 @@ class PeerInfo(object):
         else:
             if len(rs) > 1:
                 g_logger.warning("More than one record in user_info. " \
-                                 "Use the first one.")
-            g_logger.debug(rs[0])
-            self.ID = rs[0][0]
-            self.Username = rs[0][1]
-            self.Password = rs[0][2]
-            self.Email = rs[0][3]
-            self.CipheredPublicKeyHash = rs[0][4]
-            self.Type = rs[0][5]
-            self.is_registered = True  
+                                 "Use the last one.")
+            g_logger.debug(rs[-1])
+            self.ID = rs[-1][0]
+            self.Username = rs[-1][1]
+            self.Password = rs[-1][2]
+            self.Email = rs[-1][3]
+            self.CipheredPublicKeyHash = rs[-1][4]
+            self.Type = rs[-1][5]
+            self.is_registered = True
 
     def save_to_db(self):
         if self.is_registered:

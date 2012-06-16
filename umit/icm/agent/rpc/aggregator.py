@@ -244,8 +244,8 @@ class AggregatorAPI(object):
         # g_logger.info("The Agent ID generated from libcage : %s" % request_msg.newPeer.agentID)
         # TODO Get these values dynamically from the client machine
         request_msg.newPeer.agentID = 1
-        request_msg.newPeer.agentIP = "128.0.0.1"
-        request_msg.newPeer.agentPort = 8001
+        request_msg.newPeer.agentIP = theApp.peer_info.internet_ip
+        request_msg.newPeer.agentPort = 20000
         request_msg.newPeer.token = ""
         request_msg.newPeer.publicKey.mod = "130689522542451997827613058560508081035591283840778176824940984638775757484551563783658589544334246939583656218087841857176041315532923338139534632626622740344922644067315525611442351636627041996720493652322753334163003124188922059325762054979414459769309500688279015359263325336655828041861371685243279146777"
         request_msg.newPeer.publicKey.exp = "65537"
