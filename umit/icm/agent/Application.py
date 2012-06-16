@@ -255,11 +255,16 @@ class Application(object):
             #mark login-successful
             self.is_successful_login = True
 
-            #First add this peer into the peerlist of aggregator
-            g_logger.info("ADDING THIS PEER INTO THE AGGREGATOR'S PEERLIST")
-            self.peer_manager.add_peer()
-            
+
+            #After successful Login
+            # 1. Get peerlist
+            # 2. Bootstrap
+            # 3. Add Peer
+
+            g_logger.info("GETTING PEER AND SUPER PEER LIST FROM THE AGGREGATOR")
+
             # Add looping calls
+            # Maintain in Peermanager takes care of get_peer_list and get_super_peer_list
             if not hasattr(self, 'peer_maintain_lc'):
                 self.peer_maintain_lc = task.LoopingCall(self.peer_manager.maintain)
                 self.peer_maintain_lc.start(7200)
@@ -271,6 +276,26 @@ class Application(object):
             if not hasattr(self, 'report_proc_lc'):
                 self.report_proc_lc = task.LoopingCall(self.report_uploader.process)
                 self.report_proc_lc.start(30)
+
+            #Bootstrap
+            # Plug in Libcage code - Get port number from command line
+            g_logger.info("List of super peers from the Aggregator : %s" % self.peer_manager.super_peers)
+            g_logger.info("List of normal peers from the Aggregator : %s" % self.peer_manager.normal_peers)
+
+            g_logger.info("BOOTSTRAPPING LIBCAGE BASED ON THE LIST OF PEERS AND SUPER PEERS")
+            '''
+            if len(self.peer_manager.super_peers)==0:
+                if len(self.peer_manager.normal_peers==0):
+                    '''
+            libcagepeers.createCage_firstnode("20000");
+            '''
+                else 
+                    libcagepeers.createCage_joinnode()
+                    '''
+
+            # Add this peer into the peerlist of aggregator
+            g_logger.info("ADDING THIS PEER INTO THE AGGREGATOR'S PEERLIST")
+            self.peer_manager.add_peer()
 
         return result
 
@@ -296,8 +321,7 @@ class Application(object):
 
         self._init_components(aggregator)
 
-        # Plug in Libcage code - Get port number from command line
-        libcagepeers.createCage_firstnode("20000");
+        
 
         #self.task_manager.add_test(1, '* * * * *', {'url':'http://icm-dev.appspot.com'}, 3)
 

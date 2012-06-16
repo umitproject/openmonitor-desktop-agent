@@ -240,7 +240,7 @@ class AggregatorAPI(object):
         request_msg = AddPeer()
 
         # TODO : Change the type of AgentID to string - 160 bit binary. Cannot be stored as an integer.
-        # request_msg.newPeer.agentID = libcagepeers.getID()
+       
         # g_logger.info("The Agent ID generated from libcage : %s" % request_msg.newPeer.agentID)
         # TODO Get these values dynamically from the client machine
         request_msg.newPeer.agentID = 1
@@ -250,6 +250,8 @@ class AggregatorAPI(object):
         request_msg.newPeer.publicKey.mod = "130689522542451997827613058560508081035591283840778176824940984638775757484551563783658589544334246939583656218087841857176041315532923338139534632626622740344922644067315525611442351636627041996720493652322753334163003124188922059325762054979414459769309500688279015359263325336655828041861371685243279146777"
         request_msg.newPeer.publicKey.exp = "65537"
         request_msg.newPeer.peerStatus = "ON"
+        # All clients running icm-agent are either desktops or laptops. So they are capable of being a super-peer
+        request_msg.superPeer = True
         
         defer_ = self._send_message(request_msg,AddPeerResponse)
         defer_.addCallback(self._handle_add_peer_response)
