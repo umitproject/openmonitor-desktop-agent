@@ -41,9 +41,10 @@ from twisted.internet import reactor
 
 Language_store = {
                   "English(Default)":1,
-                  "Chinese":2,
-                  "Portuguese":3,
-                  "Japanese":4
+                  "中文(Chinese)":2,
+                  "Portuguese(Portuguese)":3,
+                  "日文(Japanese)":4,
+                  "System Language":5,
                  }
 
 ###################################################

@@ -59,7 +59,9 @@ class ReportUploader(object):
         if theApp.aggregator.send_report(report_entry.Report):
             report_entry.Status = ReportStatus.SENT_TO_AGGREGATOR
             send_status = True
-            
+        
+        #############################################
+        #We should add more mechanisms to send report    
         #elif DesktopSuperAgentRPC.sendReport(report_entry.Report):
         #    report_entry.Status = ReportStatus.SENT_TO_SUPER_AGENT
         #    send_status = True

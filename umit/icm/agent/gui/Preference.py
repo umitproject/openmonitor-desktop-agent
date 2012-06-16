@@ -171,6 +171,7 @@ class PreferenceWindow(HIGWindow):
             g_config.set('Location', 'latitude', str(latitude_text))        
     
     def save_general(self):
+        """"""
         startup_on_boot = self.general_page.startup_check.get_active()
         self.general_page.startup_set(startup_on_boot)
         g_config.set('application', 'startup_on_boot', str(startup_on_boot))
@@ -203,6 +204,7 @@ class PreferenceWindow(HIGWindow):
             self.general_page.login_ckeck.set_active(False)        
     
     def save_advanced(self):
+        """"""
         task_assign_text = self.advanced_page.task_assign_entry.get_text()
         if task_assign_text != "":
              g_config.set('Timer', 'task_assign_timer', str(task_assign_text))
@@ -225,9 +227,14 @@ class PreferenceWindow(HIGWindow):
         if test_fetch_text != "":
              g_config.set('Timer', 'test_fetch_timer', str(test_fetch_text))
              theApp.test_sets_fetch_lc.stop()
-             theApp.test_sets_fetch_lc.start(float(test_fetch_text))        
+             theApp.test_sets_fetch_lc.start(float(test_fetch_text))     
+             
+        language_text  = self.advanced_page.language_entry.get_active_text()
+        if language_text != "" and language_text != None :
+            g_config.set('Language', 'current_language',language_text)   
                  
     def load_advanced(self):
+        """"""
         task_assign_text = g_config.get("Timer","task_assign_timer")
         self.advanced_page.task_assign_entry.set_text(task_assign_text)
 
@@ -309,7 +316,8 @@ class PreferenceWindow(HIGWindow):
         g_config.set('application', 'auto_update_test', str(auto_update_test))
  
         load_http_throttled_test = self.test_page.checkbtn_throttled.get_active()
-        g_config.set('application', 'load_http_throttled_test',str(load_http_throttled_test))       
+        g_config.set('application', 'load_http_throttled_test',str(load_http_throttled_test))     
+          
   
     def load_tests(self):
         """"""
