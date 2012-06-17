@@ -47,6 +47,8 @@ class TestSetsFetcher(object):
         if message is None:
             return 
         
+        g_logger.debug("The received Test Sets are:%s"%str(message))
+        
         if message.testVersionNo > self.current_test_version:
             g_logger.info("[Higher Version]Start to execute the tests(%d > %d)"%(message.testVersionNo,self.current_test_version))
             self.set_test_version(message.testVersionNo)
@@ -143,7 +145,7 @@ class TestSetsFetcher(object):
         ##Website Task Parse
         if test.website and test.testType == "WEB":
             args = {
-                    'url':test.website.url
+                    'url':str(test.website.url)
                     }
             #crontime = self.random_cron_time(executeAtTimeUTC)
             #In test.py logical , we can call the according test functions

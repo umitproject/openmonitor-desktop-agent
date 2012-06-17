@@ -172,7 +172,7 @@ class Notification():
     def stop(self):
         self.notify.stop()
     
-import pynotify
+
 
 class notifyMessageMeta():
     """
@@ -189,6 +189,8 @@ class Notification_linux(NotificationBase):
     Text Notification for Linux
     """
     def __init__(self):
+        import pynotify
+        
         if not pynotify.init("ICM-agent notifier"):
             raise Exceprion("Could not initialize notification service")
         

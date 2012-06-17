@@ -284,7 +284,7 @@ class AggregatorAPI(object):
         url = self.base_url + "/getevents/"
         request_msg = GetEvents()
         
-        print location_user.latitude, location_user.longitude
+        #print location_user.latitude, location_user.longitude
         #repeated 
         location = request_msg.locations.add()
         location.longitude = location_user.longitude
@@ -353,8 +353,8 @@ class AggregatorAPI(object):
     def send_service_report(self, report):
         url = self.base_url + "/sendservicereport/"
         request_msg = SendServiceReport()
-        print '~__________________________'
-        print report
+        #print '~__________________________'
+        #print report
         request_msg.report.CopyFrom(report)
 
         defer_ = self._send_message(request_msg, SendReportResponse)
@@ -469,7 +469,7 @@ class AggregatorAPI(object):
     def check_tests(self,current_version):
         request_msg = NewTests()
         request_msg.currentTestVersionNo = int(current_version)  #Get current version from DB
-
+        #print 'test:',request_msg.currentTestVersionNo
         defer_ = self._send_message(request_msg, NewTestsResponse)
         defer_.addCallback(self._handle_check_tests_response)
         defer_.addErrback(self._handle_check_tests_error)
@@ -479,15 +479,15 @@ class AggregatorAPI(object):
         if message is None:
             return
         
-        print message.header
-        print message.tests
-        print message.testVersionNo
+        #print message.tests
+        #print message.testVersionNo
+        
         g_logger.info("Receive Test Sets!")     
         return message
     
     def _handle_check_tests_error(self,failure):
         g_logger.error("check tests error!%s"%str(failure))
-        print failure
+        #print failure
         
     """Test Module"""
     def check_test_moduler(self):

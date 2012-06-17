@@ -95,7 +95,7 @@ class SettingsDialog(HIGDialog):
     def _save_settings(self):
         """"""
         aggregator_url = self.aggregator_ip_entry.get_text()
-        print aggregator_url
+        #print aggregator_url
         if aggregator_url != None and aggregator_url != "":
             #http address check
             if 'http://' not in aggregator_url:

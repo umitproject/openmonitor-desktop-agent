@@ -55,7 +55,7 @@ class ReportUploader(object):
         
         send_status = False
         report_entry = self.report_manager.cached_reports[report_key]
-        print report_entry
+        #print report_entry
         if theApp.aggregator.send_report(report_entry.Report):
             report_entry.Status = ReportStatus.SENT_TO_AGGREGATOR
             send_status = True

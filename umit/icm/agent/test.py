@@ -247,8 +247,8 @@ class WebsiteTest():
         
         diff_value = self.benchmark_bandwidth[self.test_id]['bandwidth'] - sum/(self.benchmark_num)
         
-        print diff_value
-        print diff_value*1000*1000
+        #print diff_value
+        #print diff_value*1000*1000
         self.report.report.bandwidth = int(diff_value*1000*1000)
         print self.report.report
         
@@ -263,7 +263,11 @@ class WebsiteTest():
         report.header.reportID = generate_report_id([report.header.agentID,
                                                      report.header.timeUTC,
                                                      report.header.testID])
-        #report.header.traceroute
+        #We should fix this !!!! it is a tmp
+        report.header.traceroute.hops = 0
+        report.header.traceroute.target = "255.255.255.0"
+        report.header.traceroute.packetSize = 0
+        
         report.report.websiteURL = self.url
         report.report.statusCode = self.status_code
         
@@ -273,6 +277,7 @@ class WebsiteTest():
         report.report.bandwidth = 0
               
         #...
+        
         theApp.statistics.reports_generated = \
               theApp.statistics.reports_generated + 1
         return report
@@ -381,7 +386,12 @@ class ServiceTest(Test):
         report.header.reportID = generate_report_id([report.header.agentID,
                                                      report.header.timeUTC,
                                                      report.header.testID])
-        #report.header.traceroute
+        #We should fix this !!!! it is a tmp
+        report.header.traceroute.hops = 0
+        report.header.traceroute.target = "255.255.255.0"
+        report.header.traceroute.packetSize = 0
+        
+        
         report.report.serviceName = self.service_name
         report.report.port = self.port
         report.report.statusCode = result['status_code']
@@ -432,7 +442,7 @@ class FTPTestProtocol(FTPClient):
         self.test = test
 
     def lineReceived(self, line):
-        print(line)
+        g_logger.debug("[FTP Test]:%s"%str(line))
         FTPClient.lineReceived(self, line)
         if line.startswith('230'): # Logged in
             self.quit()
@@ -468,7 +478,7 @@ class FTPTest(ServiceTest):
                      .addErrback(self._connectionFailed)
         self.time_start = default_timer()
         self.time_end = 0
-        print self.reportDeferred
+        #print self.reportDeferred
         return self.reportDeferred
 
 ########################################################################

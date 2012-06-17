@@ -60,7 +60,8 @@ if ENC is None:
     ENC = "utf8"
 
 if LANG is None or LANG == "":
-    LANG = "en_US"        
+    LANG = "en_US"   
+       
 #####################
 #Install Language
 import gettext
