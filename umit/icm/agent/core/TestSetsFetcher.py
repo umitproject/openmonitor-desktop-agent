@@ -67,12 +67,12 @@ class TestSetsFetcher(object):
             g_logger.info("Fetching new test sets from aggregator")
             
             #The real check_tests by using check_tests Aggregator API
-            defer_ = theApp.aggregator.check_tests(self.current_test_version)
-            defer_.addCallback(self.execute_test)
-            defer_.addErrback(self._handler_error)
+            #defer_ = theApp.aggregator.check_tests(self.current_test_version)
+            #defer_.addCallback(self.execute_test)
+            #defer_.addErrback(self._handler_error)
             
             #Test by manual
-            #self.execute_test(self.test_by_manually())
+            self.execute_test(self.test_by_manually())
            
         else:
             g_logger.info("Cannot Fetching new test sets from aggregator") 
@@ -112,19 +112,44 @@ class TestSetsFetcher(object):
             tests_response.testVersionNo = tests_response.testVersionNo - 3000
                
         #website Test
-        test = tests_response.tests.add()
-        test.testID = 1
-        test.website.url = "http://www.baidu.com/"
-        test.testType = 'WEB'
+        #test = tests_response.tests.add()
+        #test.testID = 1
+        #test.website.url = "http://www.baidu.com/"
+        #test.testType = 'WEB'
         
         #Service Test:FTP
+        #test = tests_response.tests.add()
+        #test.testID = 2
+        #test.service.name = 'ftp'
+        #test.service.port = 21121
+        #test.service.ip   = '202.118.67.200'
+        #test.testType = 'Service'
+        
+        #Service Test:IRC,SSH
+        #test = tests_response.tests.add()
+        #test.testID = 4
+        #test.service.name = 'ssh'
+        #test.service.port = 23
+        #test.service.ip   = '192.168.24.129'
+        #test.testType = 'Service'   
+        
+        #Service Test: SMTP, POP3, IMAP
         test = tests_response.tests.add()
-        test.testID = 2
-        test.service.name = 'ftp'
-        test.service.port = 21
-        test.service.ip   = '192.168.2.112'
-        test.testType = 'Service'
-           
+        test.testID = 5
+        
+        #test.service.name = 'pop3'
+        #test.service.port = 111
+        #test.service.ip   = 'pop3.sohu.com'
+        
+        #test.service.name = 'smtp'
+        #test.service.port = 25
+        #test.service.ip   = 'smtp.sohu.com'
+        
+        test.service.name = 'imap'
+        test.service.port = 143
+        test.service.ip   = 'imap.163.com3'        
+        test.testType = 'Service' 
+             
         return tests_response
         
         
@@ -185,26 +210,7 @@ class TestSetsFetcher(object):
         
         return crontime
                                     
-         
-"""              
-message Test {
-    required int64 testID = 1;
-    optional Website website = 2;
-    optional Service service = 3;
-    optional int64 executeAtTimeUTC = 4;
-    required string testType = 5; // Identifier for the type of test taken (WEB or SERVICE for now)
-}    
-message Website {
-    required string url = 1;
-}
 
-message Service {
-    required string name = 1;
-    required int32 port = 2;
-    required string ip = 3;
-}    
-
-"""    
     
     
     

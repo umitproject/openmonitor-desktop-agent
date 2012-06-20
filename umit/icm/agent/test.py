@@ -133,7 +133,6 @@ class WebsiteTest():
         if 'pattern' in param:
             self.pattern = re.compile(param['pattern'])
 
-            
 
     def execute(self):
         """Run the test"""
@@ -331,6 +330,25 @@ class WebsiteTest():
 
 
 ########################################################################
+# Throttling  Test
+########################################################################
+
+class ThrottledTest(Test):
+    """"""
+    def __init__(self):
+        """Constructor"""
+        self.service_name = None
+        self.host = None
+        self.port = None
+        self.website_url = None
+    
+    def prepare(self):
+        pass
+    
+    def execute(self):
+        raise NotImplementedError('You need to implement this method')
+
+########################################################################
 # Service Test
 ########################################################################
 
@@ -362,9 +380,9 @@ class ServiceTest(Test):
                              self.service_name)
             return False
 
-        if not self.username or not self.password:
+        if not self.username and not self.password:
             g_logger.warning("%s test missing credentials. Host: %s, Port: %d" %
-                             self.service_name, self.host, self.port)
+                             (self.service_name, self.host, self.port))
             return False
 
         return True
@@ -391,7 +409,6 @@ class ServiceTest(Test):
         report.header.traceroute.target = "255.255.255.0"
         report.header.traceroute.packetSize = 0
         
-        
         report.report.serviceName = self.service_name
         report.report.port = self.port
         report.report.statusCode = result['status_code']
@@ -401,27 +418,6 @@ class ServiceTest(Test):
         theApp.statistics.reports_generated = \
               theApp.statistics.reports_generated + 1
         return report
-
-
-########################################################################
-# Throttling  Test
-########################################################################
-
-class ThrottledTest(Test):
-    """"""
-    def __init__(self):
-        """Constructor"""
-        self.service_name = None
-        self.host = None
-        self.port = None
-        self.website_url = None
-    
-    def prepare(self):
-        pass
-    
-    def execute(self):
-        raise NotImplementedError('You need to implement this method')
-
 
 ########################################################################
 # FTP Test
@@ -464,7 +460,6 @@ class FTPTest(ServiceTest):
         """Constructor"""
         ServiceTest.__init__(self)
         self.service_name = "FTP"
-        self.port = 21
         self.username = 'anonymous'
         self.password = 'icm-agent@umitproject.org'
 
@@ -477,8 +472,7 @@ class FTPTest(ServiceTest):
                      .connectTCP(self.host, self.port)\
                      .addErrback(self._connectionFailed)
         self.time_start = default_timer()
-        self.time_end = 0
-        #print self.reportDeferred
+        self.time_end = 0 
         return self.reportDeferred
 
 ########################################################################
@@ -512,9 +506,9 @@ class SMTPTestProtocol(ESMTPClient):
             self.reportDeferred = None
         self._disconnectFromServer()
 
-    #def lineReceived(self, line):
-        #print(line)
-        #ESMTPClient.lineReceived(self, line)
+    def lineReceived(self, line):
+        g_logger.debug("[SMTP Test]:%s"%str(line))
+        ESMTPClient.lineReceived(self, line)
 
 class SMTPTest(ServiceTest):
     """"""
@@ -524,7 +518,8 @@ class SMTPTest(ServiceTest):
         """Constructor"""
         ServiceTest.__init__(self)
         self.service_name = 'smtp'
-        self.port = 25
+        self.username = "anonymous"
+        self.password = "anonymous"        
 
     def execute(self):
         if not self.checkArgs():
@@ -556,26 +551,17 @@ class POP3TestProtocol(POP3Client):
 
     def serverGreeting(self, greeting):
         POP3Client.serverGreeting(self, greeting)
-        login = self.login(self.test.username, self.test.password)
-        login.addCallback(self._loggedIn)
-        login.addErrback(self._loginFailed)
-
-    def _loggedIn(self, res):
+        print greeting
         if self.reportDeferred:
             task_done(self.test.__class__.__name__)
             result = {'status_code': 0, 'time_end': default_timer()}
             self.reportDeferred.callback(result)
-        self.quit()
+        self.quit()        
 
-    def _loginFailed(self, failure):
-        if self.reportDeferred:
-            task_failed(self.test.__class__.__name__)
-            result = {'status_code': 1, 'time_end': default_timer()}
-            self.reportDeferred.callback(result)
-
-    #def lineReceived(self, line):
-        #print(line)
-        #POP3Client.lineReceived(self, line)
+    def lineReceived(self, line):
+        g_logger.debug("[POP3 Test]:%s"%str(line))
+        POP3Client.lineReceived(self, line)
+        
 
 class POP3Test(ServiceTest):
     """"""
@@ -585,7 +571,8 @@ class POP3Test(ServiceTest):
         """Constructor"""
         ServiceTest.__init__(self)
         self.service_name = 'pop3'
-        self.port = 110
+        self.username = "anonymous"
+        self.password = "anonymous"
 
     def execute(self):
         if not self.checkArgs():
@@ -612,33 +599,20 @@ class IMAPTestProtocol(IMAP4Client):
     #----------------------------------------------------------------------
     def __init__(self, report_deferred=None, test=None):
         IMAP4Client.__init__(self, ssl.ClientContextFactory())
-        self.username = username
-        self.password = password
         self.reportDeferred = report_deferred
         self.test = test
 
     def serverGreeting(self, caps):
         IMAP4Client.serverGreeting(self, caps)
-        login = self.login(self.test.username, self.test.password)
-        login.addCallback(self._loggedIn)
-        login.addErrback(self._loginFailed)
-
-    def _loggedIn(self, res):
         if self.reportDeferred:
             task_done(self.test.__class__.__name__)
             result = {'status_code': 0, 'time_end': default_timer()}
             self.reportDeferred.callback(result)
         self.logout()
 
-    def _loginFailed(self, failure):
-        if self.reportDeferred:
-            task_failed(self.test.__class__.__name__)
-            result = {'status_code': 1, 'time_end': default_timer()}
-            self.reportDeferred.callback(result)
-
-    #def lineReceived(self, line):
-        #print(line)
-        #IMAP4Client.lineReceived(self, line)
+    def lineReceived(self, line):
+        g_logger.debug("[IMAP Test]:%s"%str(line))
+        IMAP4Client.lineReceived(self, line)
 
 class IMAPTest(ServiceTest):
     """"""
@@ -648,8 +622,9 @@ class IMAPTest(ServiceTest):
         """Constructor"""
         ServiceTest.__init__(self)
         self.service_name = 'imap'
-        self.port = 143
-
+        self.username = "anonymous"
+        self.password = "anonymous"
+        
     def execute(self):
         if not self.checkArgs():
             return
@@ -668,21 +643,34 @@ class IMAPTest(ServiceTest):
 from twisted.conch.ssh.transport import SSHClientTransport
 from twisted.conch.ssh import userauth, connection, common, keys, channel,transport
 from getpass import getpass
-SSH_USER = 'umitgit'
-SSH_HOST = "dev.umitproject.org"
+
 
 class SSHTestProtocol(SSHClientTransport):
     
+    test = None
+    reportDeferred = None
+
+    def __init__(self, report_deferred=None, test=None):
+        self.reportDeferred = report_deferred
+        self.test = test
+        
     def verifyHostKey(self,host_key,fingerprint=""):
-        g_logger.info("host key fingerprint %s" % fingerprint)
+        g_logger.info("host key fingerprint %s" % fingerprint)  
+        #we cannot provide the key, so we should check the failure to decide the result
+        if self.reportDeferred:
+            task_done(self.__class__.__name__)
+            result = {'status_code': 0, 'time_end': default_timer()}
+            self.reportDeferred.callback(result)     
+        self.loseConnection()
         return defer.succeed(1)
          
     def connectionSecure(self):
-        self.requestService(SSHUserAuth(SSH_USER,SSHConnection()))
+        return 
+    #    self.requestService(SSHUserAuth(self.test.username,SSHConnection()))
 
 class SSHUserAuth(userauth.SSHUserAuthClient):
     def getPassword(self):
-        return defer.succeed( getpass("password: ") )    
+        return defer.succeed( getpass("password: %s"%("123456")) )    
     def getPublicKey(self):
         return #empty implement
 
@@ -712,45 +700,26 @@ class SSHTest(ServiceTest):
         """Constructor"""
         ServiceTest.__init__(self)
         self.service_name = 'ssh'
-        self.username = SSH_USER
-        self.host = SSH_HOST
-        self.port = 22
+        self.username = "anonymous"
+        self.password = "anonymous"
         
     def execute(self):
         if not self.checkArgs():
             return
-        self.reportDeferred = Deferred().addCallback(self._generateReport)
+
+        self.reportDeferred = Deferred().addCallback(self._generateReport)        
         ClientCreator(reactor, SSHTestProtocol, self.reportDeferred, self)\
-                     .connectTCP(self.host, self.port)\
-                     .addErrback(self._ssh_failure_process)        
+                     .connectTCP(host = self.host, port=self.port)\
+                     .addErrback(self._connectionFailed)       
         self.time_start = default_timer()
         self.time_end = 0
         return self.reportDeferred     
     
-    #process the failure result: check the reason for SSH
-    def _ssh_failure_process(self,failure):
-        from twisted.internet import error as SSHError
-        #there may be some bugs in here, we should test it in different network environment
-        if isinstance(failure,SSHError.TimeoutError) or isinstance(failure,SSHError.DNSLookupError)  or\
-        isinstance(failure, SSHError.NoRouteError):
-            g_logger.info("SSH cannot access %s" % failure)
-            self._connectionFailed(failure)
-        else:
-            #we cannot provide the key, so we should check the failure to decide the result
-            if self.reportDeferred:
-                task_done(self.__class__.__name__)
-                result = {'status_code': 0, 'time_end': default_timer()}
-                self.reportDeferred.callback(result)
-            g_logger.info("SSH can access %s, some clues below:" % failure)  
-        
 ########################################################################
 # IRC Test
 ########################################################################
 from twisted.words.protocols.irc import IRCClient
-
-IRC_nickname = "icmagent_" + str(theApp.peer_info.ID)
-IRC_channel = "umit"
-IRC_host = "irc.freenode.net"
+import uuid
 
 class IRCTestProtocol(IRCClient):
     """
@@ -761,8 +730,7 @@ class IRCTestProtocol(IRCClient):
     
     def __init__(self,reportDeferred = None ,test = None):
         self.reportDeferred = reportDeferred
-        self.nick_name = test.username
-        self.channel = test.channel
+        self.test = test
     
     def connectionMade(self):
         IRCClient.connectionMade(self)
@@ -803,14 +771,12 @@ class IRCTest(ServiceTest):
     def __init__(self):
        ServiceTest.__init__(self)
        self.service_name = 'irc'
-       self.host = IRC_host
-       self.port = 6667
-       self.channel = IRC_channel
-       self.username = IRC_nickname
-        
+       self.username = str(uuid.uuid1()) #cannot
+    
     def execute(self):
         if not self.checkArgs():
             return
+        print 'IRC Test'
         self.reportDeferred = Deferred().addCallback(self._generateReport)
         ClientCreator(reactor, IRCTestProtocol, self.reportDeferred, self)\
                      .connectTCP(self.host, self.port)\
