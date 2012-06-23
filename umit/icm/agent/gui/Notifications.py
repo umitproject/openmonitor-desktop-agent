@@ -32,6 +32,7 @@ from umit.icm.agent.I18N import _
 
 new_release_mode = 1
 report_mode = 2
+auto_upgrade_mode = 3
 
 URGENT_MSG      = "urgent"
 TASK_DOWN_MSG   = "task_download"
@@ -65,6 +66,10 @@ class NotificationUpdate(gtk.Window):
             self.image = gtk.gdk.pixbuf_new_from_file(os.path.join(IMAGES_DIR,'new_release.png'))
             self.pixmap, self.mask = self.image.render_pixmap_and_mask()
             width,height = self.pixmap.get_size()
+        elif self.mode == auto_upgrade_mode:
+            self.image = gtk.gdk.pixbuf_new_from_file(os.path.join(IMAGES_DIR,'auto_update.png'))
+            self.pixmap, self.mask = self.image.render_pixmap_and_mask()
+            width,height = self.pixmap.get_size()            
         else:
             width = 200
             height = 200
@@ -113,9 +118,7 @@ class NotificationUpdate(gtk.Window):
         self.connect("expose-event",self.set_background,self.mask,self.pixmap)
         self.connect("delete_event",self.destory)
         if self.mode == new_release_mode:
-            self.connect("button_press_event",self._navigator_to_update)
-        else:
-            self.connect("button_press_event",self.destory)            
+            self.connect("button_press_event",self._navigator_to_update)       
             
     def _navigator_to_update(self, widget, event, data=None):
         """"""

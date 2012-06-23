@@ -144,18 +144,24 @@ class Application(object):
             self.gtk_main.show_login()
             g_logger.info("Auto-login is disabled. You need to manually login.")
             
-
     def check_software_auto(self):
         """
         check software: according the time and other configurations
         """
-        if g_config.getboolean('update', 'update_detect'):
-            from umit.icm.agent.gui.SoftwareUpdate import auto_check_update
-            #Here can set some update attributes
-            defer_ = auto_check_update()
+        from umit.icm.agent.gui.SoftwareUpdate import auto_check_update
+        ##############################
+        #Software update automatically
+        if g_config.getboolean('application','auto_update'):
+            defer_ = auto_check_update(auto_upgrade=True)
             defer_.addErrback(self._handle_errback)
-            return defer_
-        
+        else:
+            ############################
+            #Detect update automatically
+            if g_config.getboolean('update', 'update_detect'):
+                #Here can set some update attributes
+                defer_ = auto_check_update(auto_upgrade=False)
+                defer_.addErrback(self._handle_errback)
+                    
     def register_agent(self, username, password):
         defer_ = self.aggregator.register(username, password)
         defer_.addCallback(self._handle_register)
@@ -258,67 +264,74 @@ class Application(object):
             #Load peers and reports from DB
             self._load_from_db()
             
+            #mark login-successful
+            self.is_successful_login = True
+            
             #check the new software(should appear after login successfully)
             self.check_software_auto()
             
             #mark login-successful
             self.is_successful_login = True
             
-            # Add looping calls
-            if not hasattr(self, 'peer_maintain_lc'):
-                self.peer_maintain_lc = task.LoopingCall(self.peer_manager.maintain)
-                self.peer_maintain_lc.start(7200)
-
-            if not hasattr(self, 'task_run_lc'):
-                g_logger.info("Starting task scheduler looping ")
-                self.task_run_lc = task.LoopingCall(self.task_scheduler.schedule)
-                
-                task_scheduler_text = g_config.get("Timer","task_scheduler_timer")
-                if task_scheduler_text != "":
-                    indival = float(task_scheduler_text)
-                else:
-                    indival = 30
-                
-                self.task_run_lc.start(indival)
-
-            if not hasattr(self, 'report_proc_lc'):
-                g_logger.info("Starting report upload looping ")
-                self.report_proc_lc = task.LoopingCall(self.report_uploader.process)
-                
-                report_uploade_text = g_config.get("Timer","send_report_timer")
-                if report_uploade_text != "":
-                    indival = float(report_uploade_text)
-                else:
-                    indival = 30                
-                
-                self.report_proc_lc.start(indival)
-                
-            if not hasattr(self,'task_assign_lc'):
-                g_logger.info("Starting get assigned task from Aggregator")
-                self.task_assgin_lc = task.LoopingCall(self.task_assign.fetch_task)
-                
-                task_assign_text = g_config.get("Timer","task_assign_timer")
-                if task_assign_text != "":
-                    indival = float(task_assign_text)
-                else:
-                    indival = 30                
-                
-                self.task_assgin_lc.start(indival)
- 
-            if not hasattr(self,'test_sets_fetch_lc'):
-                g_logger.info("Starting get test sets from Aggregator")
-                self.test_sets_fetch_lc = task.LoopingCall(self.test_sets.fetch_tests)
-                
-                test_fetch_text = g_config.get("Timer","test_fetch_timer")
-                if test_fetch_text != "":
-                    indival = float(test_fetch_text)
-                else:
-                    indival = 30                
-                
-                self.test_sets_fetch_lc.start(indival)               
+            #Task Looping manager
+            self.task_loop_manager()
             
-
         return result
+    
+    def task_loop_manager(self):
+        """"""
+        # Add looping calls
+        if not hasattr(self, 'peer_maintain_lc'):
+            self.peer_maintain_lc = task.LoopingCall(self.peer_manager.maintain)
+            self.peer_maintain_lc.start(7200)
+        
+        if not hasattr(self, 'task_run_lc'):
+            g_logger.info("Starting task scheduler looping ")
+            self.task_run_lc = task.LoopingCall(self.task_scheduler.schedule)
+            
+            task_scheduler_text = g_config.get("Timer","task_scheduler_timer")
+            if task_scheduler_text != "":
+                indival = float(task_scheduler_text)
+            else:
+                indival = 30
+            
+            self.task_run_lc.start(indival)
+        
+        if not hasattr(self, 'report_proc_lc'):
+            g_logger.info("Starting report upload looping ")
+            self.report_proc_lc = task.LoopingCall(self.report_uploader.process)
+            
+            report_uploade_text = g_config.get("Timer","send_report_timer")
+            if report_uploade_text != "":
+                indival = float(report_uploade_text)
+            else:
+                indival = 30                
+            
+            self.report_proc_lc.start(indival)
+            
+        if not hasattr(self,'task_assign_lc'):
+            g_logger.info("Starting get assigned task from Aggregator")
+            self.task_assgin_lc = task.LoopingCall(self.task_assign.fetch_task)
+            
+            task_assign_text = g_config.get("Timer","task_assign_timer")
+            if task_assign_text != "":
+                indival = float(task_assign_text)
+            else:
+                indival = 30                
+            
+            self.task_assgin_lc.start(indival)
+        
+        if not hasattr(self,'test_sets_fetch_lc'):
+            g_logger.info("Starting get test sets from Aggregator")
+            self.test_sets_fetch_lc = task.LoopingCall(self.test_sets.fetch_tests)
+            
+            test_fetch_text = g_config.get("Timer","test_fetch_timer")
+            if test_fetch_text != "":
+                indival = float(test_fetch_text)
+            else:
+                indival = 30                
+            
+            self.test_sets_fetch_lc.start(indival)             
 
     def logout(self):
         defer_ = self.aggregator.logout()
@@ -341,9 +354,6 @@ class Application(object):
         g_logger.info("Starting ICM agent. Version: %s", VERSION)
         self._init_components(aggregator)
 
-        #self.task_manager.add_test(1, '* * * * *', {'url':'http://www.baidu.com'}, 3)
-        #self.task_manager.add_test(1, '*/3 * * * *', {'url':'http://www.sina.com.cn'}, 2)
-   
         reactor.addSystemEventTrigger('before', 'shutdown', self.on_quit)
 
         if not managed_mode:
@@ -367,14 +377,15 @@ class Application(object):
         if hasattr(self, 'peer_manager') and self.is_successful_login:
             g_logger.info("[quit]:save peer_manager into DB")
             self.peer_manager.save_to_db()
-
-        #clear peer id
+            
+        if hasattr(self,'test_sets') and self.is_successful_login \
+            and os.path.exists(CONFIG_PATH):
+            #store test_version id
+            self.test_sets.set_test_version(self.test_sets.current_test_version)
+ 
         m = os.path.join(ROOT_DIR, 'umit', 'icm', 'agent', 'agent_restart_mark')
         if os.path.exists(m):
             os.remove(m)
-            
-        #store test_version id
-        self.test_sets.set_test_version(self.test_sets.current_test_version)
         
         self.quitting = True
         
