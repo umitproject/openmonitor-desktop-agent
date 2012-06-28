@@ -214,9 +214,11 @@ class PeerManager:
 
     def add_peer(self):
         # delegate to aggregator
+        g_logger.info("CALLING GET LOCATION")
+        theApp.aggregator.getlocation()
         theApp.aggregator.add_peer()
-
-
+        g_logger.info("END OF ADD PEER")
+        
 
     def agent_is_banned(self, agent_id):
         return g_db_helper.agent_is_banned(agent_id)

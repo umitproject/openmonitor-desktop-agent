@@ -151,6 +151,10 @@ class Application(object):
         
     def register_agent(self, username, password):
         defer_ = self.aggregator.register(username, password)
+        # Logging for verifying flow
+        g_logger.info("ENTER : register_agent since peer_info does not have username: Checking login flow")
+        g_logger.info("username : %s" % username)
+        g_logger.info("password : %s" % password)
         defer_.addCallback(self._handle_register)
         defer_.addErrback(self._handle_errback)
         return defer_
@@ -187,7 +191,7 @@ class Application(object):
                                                    password, save_login,
                                                    login_only)                
             else:
-                self.peer_info.clear_db()
+                #self.peer_info.clear_db()
                 deferred = self.register_agent(username, password)
                 deferred.addCallback(self._login_after_register_callback,
                                  username, password, save_login, login_only)

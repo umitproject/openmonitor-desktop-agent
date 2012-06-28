@@ -26,6 +26,7 @@ import sys
 import urllib
 import random
 import time
+import logging
 
 import umit.icm.agent.libcagepeers as libcagepeers
 
@@ -70,6 +71,7 @@ aggregator_api_url = {
     'GetNetlist': '/api/get_netlist/',
     'GetBanlist': '/api/get_banlist/',
     'GetBannets': '/api/get_bannets/',
+    'GetLocation' : '/api/get_location/',
 }
 
 #---------------------------------------------------------------------
@@ -265,6 +267,24 @@ class AggregatorAPI(object):
             g_logger.info("Node successfully added to the aggregator's peer list")
         else:
             g_logger.debug("Node failed to join the aggregator's peer list")
+
+    def getlocation(self):
+        g_logger.info("REACHED getlocation method - Calling Getlocation service")
+        url = self.base_url + "/get_location/"
+        request_msg = GetLocation()
+        request_msg.agentIP = theApp.peer_info.internet_ip
+        defer_ = self._send_message(request_msg,GetLocationResponse)
+        defer_.addCallback(self._handle_get_location_response)
+        defer_.addCallback(self._handle_errback)
+        g_logger.info("END OF GETLOCATION METHOD IN AGGREGATOR ACCESSOR")
+        return defer_
+
+    def _handle_get_location_response(self,message):
+        g_logger.info("Location response from the aggregator : %s",message)
+        if(message.location!=INVALID):
+            g_logger.info("Location is %s" % message)
+        else:
+            g_logger.info("Location is invalid. Please provide a valid IP Address. (This must be a problem while IP is detected. Could be a NAT problem)")
 
     def get_peer_list(self, count):
         url = self.base_url + "/getpeerlist/"
@@ -603,6 +623,7 @@ class AggregatorAPI(object):
         g_logger.info("Entered debug")
         message = msg_type()
         message.ParseFromString(base64.b64decode(text))
+        logging.info("Protobuf response parsed to Message - %s" % message)
         g_logger.info("Protobuf response parsed to Message - %s" % message)
         return message
 
@@ -633,6 +654,10 @@ class AggregatorAPI(object):
         # send message
         url = self.base_url + aggregator_api_url[message.DESCRIPTOR.name]
         data = urllib.urlencode(postdata)
+        # Loggin register message to check login flow
+        g_logger.info("INSIDE _send_message to check login flow")
+        g_logger.info("URL : %s" % url)
+        g_logger.info("Data : %s" % data)
         defer_ = self._send_request('POST', url, data)
 
         # decode message
