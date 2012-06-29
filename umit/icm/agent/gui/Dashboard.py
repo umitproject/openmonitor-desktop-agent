@@ -36,9 +36,8 @@ class NavigationBox(HIGVBox):
     def __init__(self, viewName, dashboard):
         HIGVBox.__init__(self)
         self.dashboard = dashboard
-        self.set_size_request(180, 180)
-        self.treestore = gtk.TreeStore(str)
         
+        self.treestore = gtk.TreeStore(str)
 
         piter = self.treestore.append(None, ['Reports'])
         self.treestore.append(piter, ['Reports Sent'])
@@ -81,7 +80,7 @@ class DashboardWindow(HIGWindow):
         HIGWindow.__init__(self, type=gtk.WINDOW_TOPLEVEL)
         self.set_title(_('Dashboard'))
         self.set_border_width(10)
-        #self.set_size_request(640, 500)
+        self.set_size_request(920, 720)
         self.set_position(gtk.WIN_POS_CENTER_ALWAYS)
         
         self.__create_widgets()
@@ -95,7 +94,7 @@ class DashboardWindow(HIGWindow):
 
         self.vpaned = gtk.VPaned()
         self.line_chart = LineChart()
-        self.graph = Graph("NewGraph", "Title", [(1,1),(2,2),(3,3)])
+        self.graph = Graph("NewGraph", "", [(1,1),(2,2),(3,3)])
         self.line_chart.set_xrange((0, 10))
         self.line_chart.set_yrange((0, 5))
         self.line_chart.add_graph(self.graph)

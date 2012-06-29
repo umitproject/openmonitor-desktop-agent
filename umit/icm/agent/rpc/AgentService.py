@@ -145,7 +145,7 @@ class AgentProtocol(Protocol):
                     self._session = DesktopSuperAgentSession(message.agentID,
                                                              self.transport)
                     theApp.peer_manager.sessions[message.agentID] = self._session
-                    g_logger.debug("Session %d created." % message.agentID)
+                    g_logger.debug("Session %s created." % str(message.agentID))
                     #theApp.statistics.super_agents_num = \
                         #theApp.statistics.super_agents_num + 1
             elif self.remote_type == 2:  # desktop agent
@@ -156,7 +156,7 @@ class AgentProtocol(Protocol):
                     self._session = DesktopAgentSession(message.agentID,
                                                         self.transport)
                     theApp.peer_manager.sessions[message.agentID] = self._session
-                    g_logger.debug("Session %d created." % message.agentID)
+                    g_logger.debug("Session %s created." % str(message.agentID))
                     #theApp.statistics.normal_agents_num = \
                     #theApp.statistics.super_agents_num + 1
             elif self.remote_type == 3:  # mobile agent
@@ -211,8 +211,8 @@ class AgentProtocol(Protocol):
             if message.header.agentID in theApp.peer_manager.mobile_peers:
                 theApp.ma_service.handle_message(message, self.transport)
             else:
-                g_logger.warning("Unauthenticated mobile agent. %d" %
-                                 message.header.agentID)
+                g_logger.warning("Unauthenticated mobile agent. %s" %
+                                 str(message.header.agentID))
         elif self._session is not None:
             self._session.handle_message(message)
         else:
@@ -231,7 +231,7 @@ class AgentProtocol(Protocol):
 
     def _send_auth_message(self):
         request_msg = AuthenticatePeer()
-        request_msg.agentID = theApp.peer_info.ID
+        request_msg.agentID = str(theApp.peer_info.ID)
         request_msg.agentType = theApp.peer_info.Type
         request_msg.agentPort = theApp.listen_port
         request_msg.cipheredPublicKey.mod = str(theApp.key_manager.public_key.mod)

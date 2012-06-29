@@ -40,16 +40,16 @@ class ReportEntry(object):
     def __init__(self):
         """Constructor"""
         self.ID = ''
-        self.SourceID = 0
+        self.SourceID = ''
         self.TimeGen = 0
-        self.TestID = 0
+        self.TestID = ''
         self.Report = ''
         self.SourceIP = ''
         self.Status = ReportStatus.UNSENT
 
     def __str__(self):
-        return "(id=%s, source_id=%d, time_gen='%s', test_id=%d, "\
-               "report='%s', source_ip=%s, status=%s)" % \
+        return "(id='%s', source_id='%s', time_gen='%s', test_id='%s', "\
+               "report='%s', source_ip='%s', status='%s')" % \
                (self.ID,
                 self.SourceID,
                 time.ctime(self.TimeGen),
@@ -139,7 +139,7 @@ class ReportManager(object):
     def save_report_to_db(self, table_name, report_entry):
         sql_stmt = "insert into %s (report_id, test_id, time_gen, content, "\
                    "source_id, source_ip, status) values "\
-                   "('%s', %d, %d, '%s', %d, '%s', '%s')" % \
+                   "('%s', '%s', %d, '%s', '%s', '%s', '%s')" % \
                    (table_name,
                     report_entry.ID,
                     report_entry.TestID,

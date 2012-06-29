@@ -130,7 +130,7 @@ class AggregatorAPI(object):
             g_logger.error("Empty response while trying to register.")
             return
 
-        g_logger.info("RegisterAgent response: (%d, %s)" %
+        g_logger.info("RegisterAgent response: (%s, %s)" %
                       (message.agentID, message.publicKeyHash))
 
         return {'id': message.agentID, 'hash': message.publicKeyHash}
@@ -142,7 +142,7 @@ class AggregatorAPI(object):
         
     def login(self, username, password):
         request_msg = Login()
-        request_msg.agentID = theApp.peer_info.ID
+        request_msg.agentID = str(theApp.peer_info.ID)
 
         self.challenge = str(random.random())
         request_msg.challenge = self.challenge
@@ -190,7 +190,7 @@ class AggregatorAPI(object):
 
     def logout(self):
         request_msg = Logout()
-        request_msg.agentID = theApp.peer_info.ID
+        request_msg.agentID = str(theApp.peer_info.ID)
         defer_ = self._send_message(request_msg)
         defer_.addCallback(self._handle_logout)
 
@@ -258,7 +258,7 @@ class AggregatorAPI(object):
     def get_task(self):
         url = self.base_url + "/gettasks/"
         request_msg = AssignTask()
-        request_msg.header.agentID = theApp.peer_info.ID
+        request_msg.header.agentID = str(theApp.peer_info.ID)
         defer_ = self._send_message(request_msg, AssignTaskResponse)
         defer_.addCallback(self._handle_get_task_response)
         defer_.addErrback(self._handle_errback)
@@ -643,7 +643,7 @@ class AggregatorAPI(object):
                         theApp.key_manager.aggregator_aes_key.get_key())))
             postdata['msg'] = self._aes_encrypt(message)            
         else:
-            postdata['agentID'] = theApp.peer_info.ID
+            postdata['agentID'] = str(theApp.peer_info.ID)
             postdata['msg'] = self._aes_encrypt(message)
 
         # send message
@@ -753,8 +753,8 @@ if __name__ == "__main__":
 
     report = WebsiteReport()
     report.header.reportID = 'xw384kkre'
-    report.header.agentID = 10000
-    report.header.testID = 1
+    report.header.agentID = '10000'
+    report.header.testID = '1'
     report.header.timeZone = 8
     report.header.timeUTC = int(time.time())
     report.report.websiteURL = 'http://www.baidu.com'

@@ -67,7 +67,7 @@ class PeerInfo(object):
     def save_to_db(self):
         if self.is_registered:
             sql_str = "insert or replace into peer_info values " \
-                            "(%d, '%s', '%s', '%s', '%s', %d)" % \
+                            "('%s', '%s', '%s', '%s', '%s', %d)" % \
                             (self.ID, self.Username, self.Password, self.Email,
                              self.CipheredPublicKeyHash, self.Type)
             g_logger.info("[save_to_db]:save %s into DB"%sql_str)            

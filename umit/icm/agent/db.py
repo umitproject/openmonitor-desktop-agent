@@ -244,17 +244,17 @@ class DBHelper(object):
         if agent:
             return agent
 
-        insert = self.db_conn.execute("INSERT INTO banlist VALUES (%d)" % \
+        insert = self.db_conn.execute("INSERT INTO banlist VALUES ('%s')" % \
                                       agent_id)
         self.db_conn.commit()
 
         return insert
 
     def get_peer(self, agent_id):
-        return self.select("SELECT * FROM peers WHERE id = %d" % agent_id)
+        return self.select("SELECT * FROM peers WHERE id = '%s'" % agent_id)
 
     def remove_peer(self, agent_id):
-        return self.execute("DELETE FROM peers WHERE id = %d" % agent_id)
+        return self.execute("DELETE FROM peers WHERE id = '%s'" % agent_id)
 
     def insert_banned_network(self, start_ip, end_ip, nodes_count, flag):
         bannet = self.get_banned_network(start_ip, end_ip)
@@ -269,7 +269,7 @@ class DBHelper(object):
             # Insert into db
             self.execute("INSERT INTO bannets (start_number, end_number, "
                          "nodes_count, flags, created_at, updated_at) VALUES "
-                         "(%s, %s, %s, %d, %d, %d)" % \
+                         "('%s', '%s', '%s', %d, %d, %d)" % \
                             (start_ip, end_ip, nodes_count, flag,
                              int(time.time()), int(time.time())))
 
@@ -288,7 +288,7 @@ class DBHelper(object):
 
     def get_banned_agent(self, agent_id):
         return self.db_conn.select("SELECT * FROM banlist WHERE "
-                                   "agent_id = %d" % agent_id)
+                                   "agent_id = '%s'" % agent_id)
 
     def agent_is_banned(self, agent_id):
         agent = self.get_banned_agent(agent_id)
