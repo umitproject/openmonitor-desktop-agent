@@ -135,7 +135,7 @@ class TestSetsFetcher(object):
         
         #Service Test: SMTP, POP3, IMAP
         test = tests_response.tests.add()
-        test.testID = str(5)
+        test.testID = '1186fe21-9099-4442-93ca-75705c33cb73'
         
         #test.service.name = 'pop3'
         #test.service.port = 111

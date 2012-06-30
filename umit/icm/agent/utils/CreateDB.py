@@ -44,7 +44,7 @@ def create(conn_str):
               ")")
 
     c.execute("CREATE TABLE events ("
-              "id INTEGER NOT NULL PRIMARY KEY, "
+              "id TEXT NOT NULL PRIMARY KEY, "
               "test_type TEXT NOT NULL, "
               "event_type TEXT NOT NULL, "
               "time INTEGER NOT NULL, "
@@ -55,7 +55,7 @@ def create(conn_str):
               ")")
 
     c.execute("CREATE TABLE peers ("
-              "id INTEGER NOT NULL PRIMARY KEY, "
+              "id TEXT NOT NULL PRIMARY KEY, "
               "type INTEGER NOT NULL, "
               "ip TEXT NOT NULL, "
               "port INTEGER NOT NULL, "
@@ -68,26 +68,26 @@ def create(conn_str):
 
     c.execute("CREATE TABLE reports ("
               "report_id TEXT NOT NULL PRIMARY KEY, "
-              "test_id INTEGER NOT NULL, "
+              "test_id TEXT NOT NULL, "
               "time_gen INTEGER NOT NULL, "
               "content BLOB NOT NULL, "
-              "source_id INTEGER NOT NULL, "
+              "source_id TEXT NOT NULL, "
               "source_ip TEXT DEFAULT (''), "
               "status TEXT DEFAULT ('')"
               ")")
 
     c.execute("CREATE TABLE unsent_reports ("
               "report_id TEXT NOT NULL, "
-              "test_id INTEGER NOT NULL, "
+              "test_id TEXT NOT NULL, "
               "time_gen INTEGER NOT NULL, "
               "content BLOB NOT NULL, "
-              "source_id INTEGER NOT NULL, "
+              "source_id TEXT NOT NULL, "
               "source_ip TEXT DEFAULT (''), "
               "status TEXT DEFAULT ('')"
               ")")
 
     c.execute("CREATE TABLE peer_info ("
-              "agent_id INTEGER PRIMARY KEY NOT NULL, "
+              "agent_id TEXT PRIMARY KEY NOT NULL, "
               "username TEXT NOT NULL, "
               "password TEXT NOT NULL, "
               "email TEXT, "
@@ -137,7 +137,7 @@ def create(conn_str):
               ")")
 
     c.execute("CREATE TABLE banlist ("
-              "agent_id INTEGER NOT NULL UNIQUE"
+              "agent_id TEXT NOT NULL UNIQUE"
               ")")
 
     c.execute("CREATE TABLE bannets ("
