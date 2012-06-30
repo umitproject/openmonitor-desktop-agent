@@ -29,6 +29,7 @@ import time
 import libcagepeers
 import threading
 import gtk
+import re
 
 from twisted.internet import reactor
 from twisted.internet import task
@@ -89,7 +90,7 @@ class Application(object):
         self.quitting = False
         self.is_auto_login = True        
         self.is_successful_login = False #fix the login failure, save DB problem
-                            
+
     def _load_from_db(self):
 
         self.peer_manager.load_from_db()
@@ -98,6 +99,7 @@ class Application(object):
 
     def init_after_running(self, port=None, username=None, password=None, server_enabled=True):
         # Create agent service(need to add the port confilct)
+        
         if server_enabled:
             self.listen_port = port if port is not None else g_config.getint('network', 'listen_port')
             try:
@@ -107,16 +109,24 @@ class Application(object):
                 reactor.listenTCP(self.listen_port, self.factory)
             except Exception,info:
                 #There can add more information
-                from higwidgets.higwindows import HIGAlertDialog
-                print 'The exception is %s'%(info)
-                alter = HIGAlertDialog(primary_text = _("The Listen Port has been used by other applications"),\
-                                       secondary_text = _("Please check the Port"))
-                alter.show_all()
-                result = alter.run()
                 
-                #cannot write return, if so the program cannot quit, and run in background              
-                self.terminate()
-
+                from higwidgets.higwindows import HIGAlertDialog
+                print 'Exception : %s'%(info)
+                if(re.findall("[Errno 98]",str(info))):
+                    print "Port ", self.listen_port," is already in use. Iterating to next available port.";
+                    self.listen_port = self.listen_port+1
+                    print "Agent is now binding to %d" % self.listen_port
+                    self.init_after_running(self.listen_port, username, password, server_enabled)
+                    return
+                # alter = HIGAlertDialog(primary_text = _("The Listen Port has been used by other applications"),\
+                #                        secondary_text = _("Please check the Port"))
+                # alter.show_all()
+                # result = alter.run()
+                
+                # #cannot write return, if so the program cannot quit, and run in background              
+                # if it is some other exception other than address conflict, then terminate
+                else:
+                    self.terminate()
 
         # Create mobile agent service
         from umit.icm.agent.rpc.mobile import MobileAgentService
@@ -287,10 +297,15 @@ class Application(object):
             g_logger.info("List of normal peers from the Aggregator : %s" % self.peer_manager.normal_peers)
 
             g_logger.info("BOOTSTRAPPING LIBCAGE BASED ON THE LIST OF PEERS AND SUPER PEERS")
-            '''
-            if len(self.peer_manager.super_peers)==0:
-                if len(self.peer_manager.normal_peers==0):
-                    '''
+            
+            g_logger.info("Info about super peers : ");
+            if len(self.peer_manager.super_peers)!=0:
+                for superPeer in self.peer_manager.super_peers.values():
+                    g_logger.info(superPeer.status, " and PeerID is ",superPeer.ID);
+
+
+            # if len(self.peer_manager.normal_peers==0):
+                    
             libcagepeers.createCage_firstnode("20000");
             '''
                 else 

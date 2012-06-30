@@ -105,6 +105,7 @@ class PeerManager:
         g_db_helper.commit()
 
     def load_from_db(self):
+        # Must change it to a LoopingCall so that the table is constantly updated with peers and superpeers from the aggregator
         result = g_db_helper.select("select * from peers")
         for row in result:
             peer_entry = PeerEntry()
@@ -218,7 +219,7 @@ class PeerManager:
         theApp.aggregator.getlocation()
         theApp.aggregator.add_peer()
         g_logger.info("END OF ADD PEER")
-        
+
 
     def agent_is_banned(self, agent_id):
         return g_db_helper.agent_is_banned(agent_id)
