@@ -1,0 +1,168 @@
+#!/bin/sh
+
+
+echo "########################################"
+echo "Open Monitor Desktop Agent Alpha"
+echo "Dependencies installed in your system:"
+echo ""
+
+#########
+##Python
+python -V > /dev/null 2> /dev/null
+if [ $? -eq 127 ]; then
+	echo "Python Failed!";
+   	exit;
+else
+   	python -V;
+fi
+
+#########
+##sqlite3
+sqlite3 -version > /dev/null 2> /dev/null
+if [ $? -eq 127 ]; then
+	echo "SQLite3 is installing...,Please waiting"
+	sudo apt-get install sqlite3 -y >> install.log
+	echo "Finish SQLite3 Installing"
+else
+	python -c "import sqlite3; print ' [ok] sqlite3 version: %s' % sqlite3.version";
+fi
+
+#####
+##gtk
+python -c "import gtk" > /dev/null 2> /dev/null
+if [ $? -eq 1 ]; then
+	echo "GTK installing...,Please waiting";
+	sudo apt-get install python-gtk2 -y >> install.log
+   	echo "Finish GTK Installing"
+else
+   	python -c "import gtk; print ' [ok] GTK version: %d.%d.%d' % gtk.gtk_version";
+fi 
+
+#######
+##pygtk
+python -c "import pygtk" > /dev/null 2> /dev/null
+if [ $? -eq 1 ]; then
+   	echo "PyGTK installing...,Please waiting";
+	sudo apt-get install build-essential -y >> install.log
+	sudo apt-get install gnome-core-devel -y  >> install.log
+	sudo apt-get install pkg-config -y >> install.log
+	echo "Finish PyGTK Installing"
+else
+   	python -c "import gtk; print ' [ok] PyGTK version: %d.%d.%d' % gtk.pygtk_version";
+fi 
+
+################
+##zope.interface
+python -c "import zope.interface" > /dev/null 2> /dev/null
+if [ $? -eq 1 ]; then
+	echo "zope.interface installing...,Please waiting";
+	sudo apt-get install python-zope.interface >> install.log
+	echo "Finish zope.interface Installing"
+else
+	echo " [ok] zope.interface"
+fi
+
+#########
+##twisted
+python -c "import twisted" > /dev/null 2> /dev/null
+if [ $? -eq 1 ]; then
+	echo "Twisted installing...,Please waiting";
+	sudo apt-get install python-twisted -y >> install.log
+	echo "Finish twisted Installing"
+else
+	python -c "import twisted; print ' [ok] Twisted version: %s' % twisted.version.base()";
+fi
+
+################
+##Python-OpenSSL
+python -c "import OpenSSL"
+if [ $? -eq 1 ]; then
+	echo "Python-OpenSSL installing...,Please waiting";
+	sudo apt-get install python-openssl -y >> install.log\
+	echo "Finish OpenSSL Installing"
+else
+	python -c "import OpenSSL; print ' [ok] Python-OpenSSL version: %s' % OpenSSL.version.__version__";
+fi
+
+###############
+##Python-Crypto
+python -c "import Crypto"
+if [ $? -eq 1 ]; then
+	echo "Python-Crypto installing...,Please waiting";
+	sudo apt-get install python-crypto -y >> install.log
+	echo "Finish Crypto  Installing"
+else
+	python -c "import Crypto; print ' [ok] Python-Crypto version: %d.%d.%d-%s-%d' % Crypto.version_info";
+fi
+
+#############
+##pygtk_chart
+python -c "import pygtk_chart"
+if [ $? -eq 1 ]; then
+	echo "Python-gtkChart installing...,Please waiting";
+	sudo apt-get install git git-core -y >> install.log
+	git clone https://github.com/notmyname/pygtkChart.git
+	cd pygtkChart
+	sudo python setup.py build && python setup.py install -y >> install.log
+	cd ..
+	echo "Finish pygtk_chart Installing"
+	sudo rm -rf pygtkChart
+else
+	python -c "import pygtk_chart; print ' [ok] Python-gtkChart version: %s' % pygtk_chart.__version__";
+fi	
+
+##################
+##google.protobuf
+python -c "import google.protobuf"
+if [ $? -eq 1 ]; then
+	echo "Google Protocol Buffer installing...,Please waiting";
+	wget http://protobuf.googlecode.com/files/protobuf-2.4.0a.tar.gz
+	echo "Finish Downloading"
+	tar -zxvf protobuf-2.4.0a.tar.gz
+	python protobuf-2.4.0a/python/setup.py build >> install.log
+	python protobuf-2.4.0a/python/setup.py test >> install.log
+	python protobuf-2.4.0a/python/setup.py install >> install.log
+	echo "Finish Installing"
+	sudo rm -rf protobuf-2.4.0a 
+	sudo rm protobuf-2.4.0a.tar.gz
+else
+	python -c "import google.protobuf; print ' [ok] ',google.protobuf.__name__";
+fi	
+
+##################
+##pyactiveresource
+python -c "import pyactiveresource"
+if [ $? -eq 1 ]; then
+	echo "pyactiveresource installing...,Please waiting"
+	wget http://pypi.python.org/packages/source/p/pyactiveresource/pyactiveresource-1.0.1.tar.gz#md5=1ff2ae61f53ee678f4fc4c15c644eaf9
+	echo "Finish Downloading"
+	tar -zxvf pyactiveresource-1.0.1.tar.gz
+	cd pyactiveresource-*
+	sudo python setup.py build && python setup.py install -y >> install.log
+	cd ..
+	echo "Finish pyactiveresource Installing"
+	sudo rm -rf pyactiveresource-*
+else
+	python -c "import pyactiveresource; print ' [ok] ',pyactiveresource.__name__ "	
+fi	
+	
+
+echo "########################################"
+echo ""
+echo "########################################"
+echo "Everything seens to work!"
+echo "Check and Install the following needed versions:"
+echo "    * Python 2.7 or greater"
+echo "    * GTK 2.6 or greater"
+echo "    * PyGTK 2.24 or greater"
+echo "    * SQLite3 2.6.0 or greater"
+echo "    * zope.interface 3.6.3 or greater"
+echo "    * Python-OpenSSL 0.12 or greater"
+echo "    * Python-Crypto 2.1.0 or greater"
+echo "    * Python-gtkChart Beta or greater"
+echo "    * Google Protocol Buffer 2.4.1 or greater"
+echo "    * Pyactiveresource 1.0.1 or greator"
+echo ""
+echo "If all the versions above are in agreement, you're ok to run OpenMonitor Desktop Agent now."
+echo "########################################"
+echo ""

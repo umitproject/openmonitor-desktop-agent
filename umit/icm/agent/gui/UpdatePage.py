@@ -61,17 +61,21 @@ class UpdatePage(HIGVBox):
         self.__pack_widgets()
         self.__load_list()
         self.__connect_widgets()
+        self.__init_db_text()
         
     def __create_widgets(self):
         """"""
         
         self.update_switch_hbox = HIGHBox()
         self.update_settings_hbox = HIGHBox()
+        self.update_db_hbox = HIGHBox()
 
         self.update_switch_section = HIGSectionLabel(_("Update News Detect"))        
         self.update_switch_table = HIGTable()
         self.update_settings_section = HIGSectionLabel(_("Update Settings"))        
         self.update_settings_table = HIGTable()  
+        self.update_db_section = HIGSectionLabel(_("Update Database"))        
+        self.update_db_table = HIGTable()
         
         self.update_check = gtk.CheckButton(_("Automatically update"))
         self.update_switch_check = gtk.CheckButton(_("Software Update Detect Switch"))
@@ -81,7 +85,10 @@ class UpdatePage(HIGVBox):
         self.update_time_store = gtk.ListStore(str)
         self.update_time_entry = gtk.ComboBoxEntry(self.update_time_store, 0)
         self.update_method_store = gtk.ListStore(str)
-        self.update_method_entry = gtk.ComboBoxEntry(self.update_method_store, 0)        
+        self.update_method_entry = gtk.ComboBoxEntry(self.update_method_store, 0)  
+        
+        self.update_db_label =  HIGEntryLabel()
+        self.update_db_clear_button = gtk.Button(_("Clear Update Information")) 
          
     def __pack_widgets(self):
         """"""
@@ -92,22 +99,44 @@ class UpdatePage(HIGVBox):
         self._pack_noexpand_nofill(hig_box_space_holder())
         self._pack_noexpand_nofill(self.update_settings_section)
         self._pack_noexpand_nofill(self.update_settings_hbox)
+        self._pack_noexpand_nofill(self.update_db_section)
+        self._pack_noexpand_nofill(self.update_db_hbox)        
+        
         
         self.update_switch_hbox._pack_noexpand_nofill(hig_box_space_holder())
         self.update_switch_hbox._pack_expand_fill(self.update_switch_table)
         self.update_settings_hbox._pack_noexpand_nofill(hig_box_space_holder())
         self.update_settings_hbox._pack_expand_fill(self.update_settings_table)
+        self.update_db_hbox._pack_noexpand_nofill(hig_box_space_holder())
+        self.update_db_hbox._pack_expand_fill(self.update_db_table)
         
         self.update_switch_table.attach_label(self.update_check, 0, 2, 0, 1)
         self.update_switch_table.attach_label(self.update_switch_check, 0, 2, 1, 2)
         self.update_settings_table.attach_label(self.update_times_label, 0, 1, 0, 1)
-        self.update_settings_table.attach_entry(self.update_time_entry, 1, 2, 0, 1 )   
+        self.update_settings_table.attach_entry(self.update_time_entry, 1, 2, 0, 1)   
         self.update_settings_table.attach_label(self.update_method_label, 0, 1, 1, 2)
-        self.update_settings_table.attach_entry(self.update_method_entry, 1, 2, 1, 2 ) 
+        self.update_settings_table.attach_entry(self.update_method_entry, 1, 2, 1, 2) 
+        
+        self.update_db_table.attach_label(self.update_db_label, 1, 3, 0, 1)
+        self.update_db_table.attach(self.update_db_clear_button, 0, 1, 0, 1)
+        
+    
+    def __init_db_text(self):
+        """"""
+        rs = g_db_helper.select("select * from updates")
+        count = len(rs)
+        self.update_db_label.set_text(str(_("%d records in update database now."%(count))))        
     
     def __connect_widgets(self):
         """"""
         self.update_check.connect('toggled',lambda w:self.__change_widgets_status()) 
+        self.update_db_clear_button.connect("clicked", lambda w:self.__clear_update_db())
+    
+    def __clear_update_db(self):
+        """"""
+        g_db_helper.execute("delete from updates")
+        g_db_helper.commit()
+        self.update_db_label.set_text(str(_("Clear software update database!")))
     
     def __change_widgets_status(self):
         """"""

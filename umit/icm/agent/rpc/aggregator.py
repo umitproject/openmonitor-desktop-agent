@@ -79,6 +79,7 @@ class AggregatorAPI(object):
         """Constructor"""
         self.base_url = g_config.get('network', 'aggregator_url') \
             if aggregator is None else aggregator
+        
         self.available = True
         self.pending_report_ids = []
 

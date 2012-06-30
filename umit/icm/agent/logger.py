@@ -21,8 +21,6 @@
 __all__ = ['g_logger']
 
 import os
-import sys
-import traceback
 
 from umit.icm.agent.BasePaths import LOG_DIR
 from umit.common.UmitLogging import Log
@@ -45,35 +43,5 @@ print LOG_DIR
 #    os.mkdir(LOG_DIR)
 log_path = os.path.join(LOG_DIR, 'icm-desktop.log')
 
-class ICMLog(Log):
-    """Extends Log class for custom changes.
-    """
-
-    def error(self, string, *args, **kwargs):
-        """Overrides method to add traceback if available.
-
-        Since we may not be on an exception stack, first we should test if
-        sys.exc_info() returns a traceback object.
-        """
-        exc_info = sys.exc_info()
-        print string
-        if exc_info:
-            tb = exc_info[-1]
-            traceback_string = "\n".join(
-                ["=FULL TRACEBACK=================="]  + \
-                traceback.format_tb(tb)                + \
-                ["=================================="]
-            )
-            string += "\n%s" % traceback_string
-
-        
-        return super(ICMLog, self).error(string, *args, **kwargs)
-
-
-
-
-        
-g_logger = ICMLog("ICM Desktop Agent", _levels[LOGLEVEL], log_path)
+g_logger = Log("ICM Desktop Agent", _levels[LOGLEVEL], log_path)
 open(log_path, 'w')
-
-

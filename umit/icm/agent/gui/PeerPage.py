@@ -87,8 +87,8 @@ class PeerInfoPage(HIGVBox):
 
         self.cloudagg_entry = gtk.Entry()
         self.cloudagg_button = HIGButton(_("Reset"))
-        self.cloudagg_button.connect('clicked', lambda w:
-                                      self.cloudagg_entry.set_text('http://alpha.openmonitor.org/api'))
+        self.cloudagg_button.connect('clicked', lambda w: self.reset_aggregator_url())
+                                      
         self.cloudagg_button.set_size_request(80, 28)
 
         self.superpeers_entry = gtk.Entry()
@@ -154,6 +154,17 @@ class PeerInfoPage(HIGVBox):
         if self.superpeers_entry:
             return
         
+    
+    def reset_aggregator_url(self):
+        """
+        """
+        aggregator_url = 'http://east1.openmonitor.org'
+        self.cloudagg_entry.set_text(aggregator_url)
+        theApp.aggregator.base_url = aggregator_url
+        g_config.set('network', 'aggregator_url', aggregator_url)
+        g_db_helper.set_value('config','aggregator_url', aggregator_url)
+        
+    
             
     def show_super_peer_list_window(self):
         from umit.icm.agent.gui.SuperPeerSetting import SuperPeerListWindow,SuperPeersBox
