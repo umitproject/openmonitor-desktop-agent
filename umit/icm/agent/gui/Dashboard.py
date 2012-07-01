@@ -31,33 +31,12 @@ from higwidgets.higwindows import HIGWindow
 from umit.icm.agent.I18N import _
 from umit.icm.agent.Application import theApp
 
-################
-#Task Definition
-TASK           = _("Tasks")
-TASK_ALL       = _("Tasks Details")
-TASK_SUCCESSED = _("Tasks Succeeded")
-TASK_FAILED    = _("Tasks Failed")
+from ReportsTab import ReportsTab,ReceiveDetailsTab,ReportDetailsTab
+from ConnectionTab import ConnectionsIndividualTab,ConnectionsTab
+from TaskTab import TaskTab,TaskDetailsTab,TaskExecuteTab
+from CapacityTab import CapacityTab,ThrottledTab,ServiceTab
 
-##################
-#Report Definition
-REPORT         = _("Reports")
-REPORT_SENT    = _("Sent Details")
-REPORT_UNSENT  = _("Unsent Details")
-REPORT_RECEIVED= _("Received Details")
-
-######################
-#Connection Definition
-CONNECTION    = _("Connections")
-CONN_AGG      = _("Aggregator") 
-CONN_SUPER    = _("Super Agent")
-CONN_NORMAL   = _("Normal Agent") 
-CONN_MOBILE   = _("Mobile Agent")
-
-####################
-#Capacity Definition
-CAPACITY      = _("Capacity")
-CAPA_THROTTLED= _("Network Throttled")
-CAPA_SERVICE  = _("Network Service")
+from DashboardListBase import  *
 
 class NavigationBox(HIGVBox):
 
@@ -116,12 +95,13 @@ class DashboardWindow(HIGWindow):
         HIGWindow.__init__(self, type=gtk.WINDOW_TOPLEVEL)
         self.set_title(_('OpenMonitor Dashboard'))
         self.set_border_width(10)
-        self.set_size_request(920, 720)
+        self.set_size_request(1080, 820)
         self.set_position(gtk.WIN_POS_CENTER_ALWAYS)
         
         self.switch_dict = {}
         self.conn_type = None
         self.task_type = None
+        self.create_tabs = False
         
         self.__create_widgets()
         self.__pack_widgets()
@@ -134,6 +114,7 @@ class DashboardWindow(HIGWindow):
         self.add(self.hpaned)
 
         self.navigation_box = NavigationBox(_('Dashboard Menu'), self)
+        self.navigation_box.treeview.do_cursor_changed(self)
 
         self.vpaned = gtk.VPaned()
         self.line_chart = LineChart()
@@ -144,29 +125,33 @@ class DashboardWindow(HIGWindow):
         self.line_chart.set_size_request(460, 320)
 
         self.detail_sw = gtk.ScrolledWindow()
+        
         self.detail_sw.set_size_request(450, 180)
+        
+        self.box_container = gtk.VBox()
 
-        self.detail_liststore = gtk.ListStore(str, str, str)
-        self.detail_treeview = gtk.TreeView(self.detail_liststore)
-
-        catacolumn = gtk.TreeViewColumn('Catagories')
-        timescolumn = gtk.TreeViewColumn('Times')
-
-        self.detail_treeview.append_column(catacolumn)
-        self.detail_treeview.append_column(timescolumn)
-
-        catacell = gtk.CellRendererText()
-        timecell = gtk.CellRendererText()
-
-        catacolumn.pack_start(catacell, True)
-        timescolumn.pack_start(timecell, True)
-
-        catacolumn.set_attributes(catacell, text=0)
-        timescolumn.set_attributes(timecell, text=2)
-        self.detail_treeview.set_search_column(0)
-        catacolumn.set_sort_column_id(0)
-        self.detail_treeview.set_reorderable(True)
-        self.detail_sw.add(self.detail_treeview)
+        #####
+        #Task 
+        self.task_tab = TaskTab()
+        self.task_details_tab = TaskDetailsTab()
+        self.task_execute_tab = TaskExecuteTab()
+        
+        ###########
+        #Connection
+        self.connections_tab = ConnectionsTab()
+        self.connections_individual_tab = ConnectionsIndividualTab()   
+        
+        ########
+        #Reports
+        self.report_tab = ReportsTab()
+        self.report_details_tab = ReportDetailsTab()
+        self.report_recv_details_tab = ReceiveDetailsTab() 
+        
+        #########
+        #Capacity
+        self.capacity_tab = CapacityTab()
+        self.throttled_tab = ThrottledTab()
+        self.service_tab = ServiceTab()
 
 
     def __pack_widgets(self):
@@ -177,62 +162,87 @@ class DashboardWindow(HIGWindow):
 
         self.vpaned.add1(self.line_chart)
         self.vpaned.add2(self.detail_sw)
+        
+        self.detail_sw.add(self.box_container)
+        
+        self.add_tabs()
+        self.box_container.hide_all()
+        
+        self.show_all()
 
+    def add_tabs(self):
+        """
+        """
+        self.box_container.add(self.task_tab)
+        self.box_container.add(self.task_details_tab)
+        self.box_container.add(self.task_execute_tab)
+        self.box_container.add(self.connections_tab)
+        self.box_container.add(self.connections_individual_tab)
+        self.box_container.add(self.report_tab)
+        self.box_container.add(self.report_details_tab)
+        self.box_container.add(self.report_recv_details_tab)
+        self.box_container.add(self.capacity_tab)
+        self.box_container.add(self.throttled_tab)
+        self.box_container.add(self.service_tab)
+    
+    def hide_all(self):
+        self.capacity_tab.set_visible(False)
+        self.throttled_tab.set_visible(False)
+        self.service_tab.set_visible(False)
+        self.report_tab.set_visible(False)
+        self.report_details_tab.set_visible(False)
+        self.report_recv_details_tab.set_visible(False)   
+        self.connections_tab.set_visible(False)
+        self.connections_individual_tab.set_visible(False)      
+        self.task_tab.set_visible(False)
+        self.task_details_tab.set_visible(False)
+        self.task_execute_tab.set_visible(False)
+        
+    def show_one(self,show_type=None):
+        """
+        """
+        self.hide_all()
+        if show_type == TASK:
+            self.task_tab.set_visible(True)
+        elif show_type == TASK_ALL :
+            self.task_details_tab.set_visible(True)
+        elif show_type == TASK_SUCCESSED or show_type == TASK_FAILED:
+            self.task_execute_tab.set_visible(True)
+        elif show_type == REPORT:
+            self.report_tab.set_visible(True)
+        elif show_type == REPORT_SENT or show_type == REPORT_UNSENT:
+            self.report_details_tab.set_visible(True)
+        elif show_type == REPORT_RECEIVED:
+            self.report_recv_details_tab.set_visible(True)
+        elif show_type == CONNECTION:
+            self.connections_tab.set_visible(True)
+        elif show_type == CONN_AGG or show_type == CONN_SUPER or show_type == CONN_NORMAL or show_type == CONN_MOBILE:
+            self.connections_individual_tab.set_visible(True) 
+        elif show_type == CAPACITY:
+            self.capacity_tab.set_visible(True)
+        elif show_type == CAPA_THROTTLED:
+            self.throttled_tab.set_visible(True)
+        elif show_type == CAPA_SERVICE:
+            self.service_tab.set_visible(True)
+        
     def refresh_task_statistics(self):
         """
         Task statistics: It will show the Task Done numbers and failed numbers
         """
-        self.detail_liststore.append(['Current Task Num', None,
-                                      theApp.statistics.tasks_current_num])
-        self.detail_liststore.append(['Tasks Done', None,
-                                      theApp.statistics.tasks_done])
-        self.detail_liststore.append(['Tasks Failed', None,
-                                      theApp.statistics.tasks_failed])
-    
+        pass
+        
     def refresh_task_details(self):
         """
         Task Details: The list store can show the different task details from database
         """
-        if self.task_type == TASK_ALL:
-            pass
-        elif self.task_type == TASK_SUCCESSED:
-            for key,value in theApp.statistics.tasks_done_by_type:
-                self.detail_liststore.append([key, None, value])
-        elif self.task_type == TASK_FAILED:
-            for key,value in theApp.statistics.tasks_failed_by_type:
-                self.detail_liststore.append([key, None, value])
-    
+        pass
+
     def refresh_reports_statistics(self):
         """
         Reports: It can show the report statistics
         """
-        self.detail_liststore.append(['Reports Total', None,
-                                      theApp.statistics.reports_total])
-        self.detail_liststore.append(['Reports In Queue', None,
-                                      theApp.statistics.reports_in_queue])
-        self.detail_liststore.append(['Reports Generated', None,
-                                      theApp.statistics.reports_generated])        
-        self.detail_liststore.append(['Reports Sent', None,
-                                      theApp.statistics.reports_sent])
-        self.detail_liststore.append(['Reports Sent To Aggregator', None,
-                                      theApp.statistics.reports_sent_to_aggregator])
-        self.detail_liststore.append(['Reports Sent To Super Agent', None,
-                                      theApp.statistics.reports_sent_to_super_agent])
-        self.detail_liststore.append(['Reports Sent To Normal Agent', None,
-                                      theApp.statistics.reports_sent_to_normal_agent])
-        self.detail_liststore.append(['Reports Sent To Mobile Agent', None,
-                                      theApp.statistics.reports_sent_to_mobile_agent]) 
-        self.detail_liststore.append(['Reports Received', None,
-                                      theApp.statistics.reports_received])
-        self.detail_liststore.append(['Reports Received From Aggregator', None,
-                                      theApp.statistics.reports_received_from_aggregator])
-        self.detail_liststore.append(['Reports Received From Super Agent', None,
-                                      theApp.statistics.reports_received_from_super_agent])
-        self.detail_liststore.append(['Reports Received From Normal Agent', None,
-                                      theApp.statistics.reports_received_from_normal_agent])
-        self.detail_liststore.append(['Reports Received From Mobile Agent', None,
-                                      theApp.statistics.reports_received_from_mobile_agent])   
-        
+        pass
+
     def refresh_report_details(self,report_type=None):
         """
         Report Details: The list store can show the different report details(sent,unsent,received) from database
@@ -243,39 +253,13 @@ class DashboardWindow(HIGWindow):
     def refresh_connection(self):
         """
         """
-        self.detail_liststore.append(['Aggregator Status', None,
-                                      theApp.aggregator.available])
-        self.detail_liststore.append(['Super Agent Connected', None,
-                                      theApp.statistics.super_agents_num])
-        self.detail_liststore.append(['Normal Agent Connected', None,
-                                      theApp.statistics.normal_agents_num])
-        self.detail_liststore.append(['Mobile Agent Connected', None,
-                                      theApp.statistics.mobile_agents_num])      
-        
+        pass
+
     def refresh_connection_dividual(self):
         """
         """
-        if self.conn_type == CONN_AGG:
-            self.detail_liststore.append(['Aggregator Status', None,
-                                          theApp.aggregator.available])
-            self.detail_liststore.append(['Aggregator Failure Times', None,
-                                          theApp.statistics.aggregator_fail_num])
-        elif self.conn_type == CONN_SUPER:
-            self.detail_liststore.append(['Super Agent Connected', None,
-                                          theApp.statistics.super_agents_num])
-            self.detail_liststore.append(['Super Agent Failure Times', None,
-                                          theApp.statistics.super_agents_fail_num])
-        elif self.conn_type == CONN_NORMAL:
-            self.detail_liststore.append(['Normal Agent Connected', None,
-                                          theApp.statistics.normal_agents_num])
-            self.detail_liststore.append(['Normal Agent Failure Times', None,
-                                          theApp.statistics.normal_agents_fail_num])
-        elif self.conn_type == CONN_MOBILE:
-            self.detail_liststore.append(['Mobile Agent Connected', None,
-                                          theApp.statistics.mobile_agents_num])
-            self.detail_liststore.append(['Mobile Agent Failure Times', None,
-                                          theApp.statistics.mobile_agents_fail_num])
-    
+        pass
+
     def refresh_capacity(self):
         """"""
         pass
@@ -286,7 +270,7 @@ class DashboardWindow(HIGWindow):
     
     def refresh_service(self):
         """"""
-        pass        
+        pass      
     
     def create_switch(self):
         """
@@ -325,11 +309,13 @@ class DashboardWindow(HIGWindow):
     def refresh(self):
         """
         """
-        self.detail_liststore.clear()
+        
         self.conn_type = self.cur_tab
         self.task_type = self.cur_tab
         result = self.switch_dict[self.cur_tab]()
-        
+        self.show_one(self.cur_tab)
+     
+   
 
 if __name__ == "__main__":
     wnd = DashboardWindow()
