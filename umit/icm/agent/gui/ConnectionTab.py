@@ -68,22 +68,22 @@ class ConnectionsIndividualTab(DashboardListBase):
         """
         self.detail_liststore.clear()
         
-        if conn_type == CONN_AGG:
+        if show_type == CONN_AGG:
             self.detail_liststore.append(['Aggregator Status', None,
                                           theApp.aggregator.available])
             self.detail_liststore.append(['Aggregator Failure Times', None,
                                           theApp.statistics.aggregator_fail_num])
-        elif conn_type == CONN_SUPER:
+        elif show_type == CONN_SUPER:
             self.detail_liststore.append(['Super Agent Connected', None,
                                           theApp.statistics.super_agents_num])
             self.detail_liststore.append(['Super Agent Failure Times', None,
                                           theApp.statistics.super_agents_fail_num])
-        elif conn_type == CONN_NORMAL:
+        elif show_type == CONN_NORMAL:
             self.detail_liststore.append(['Normal Agent Connected', None,
                                           theApp.statistics.normal_agents_num])
             self.detail_liststore.append(['Normal Agent Failure Times', None,
                                           theApp.statistics.normal_agents_fail_num])
-        elif conn_type == CONN_MOBILE:
+        elif show_type == CONN_MOBILE:
             self.detail_liststore.append(['Mobile Agent Connected', None,
                                           theApp.statistics.mobile_agents_num])
             self.detail_liststore.append(['Mobile Agent Failure Times', None,

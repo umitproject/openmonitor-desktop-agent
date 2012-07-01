@@ -183,7 +183,7 @@ class GtkMain(object):
     def show_dashboard(self):
         from umit.icm.agent.gui.Dashboard import DashboardWindow
         wnd = DashboardWindow()
-        wnd.show_all()
+        wnd.show_all_modify()
 
     def show_event_list(self):
         from umit.icm.agent.gui.Event import EventWindow

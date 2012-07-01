@@ -95,7 +95,7 @@ class DashboardWindow(HIGWindow):
         HIGWindow.__init__(self, type=gtk.WINDOW_TOPLEVEL)
         self.set_title(_('OpenMonitor Dashboard'))
         self.set_border_width(10)
-        self.set_size_request(1080, 820)
+        self.set_size_request(1280, 820)
         self.set_position(gtk.WIN_POS_CENTER_ALWAYS)
         
         self.switch_dict = {}
@@ -114,8 +114,7 @@ class DashboardWindow(HIGWindow):
         self.add(self.hpaned)
 
         self.navigation_box = NavigationBox(_('Dashboard Menu'), self)
-        self.navigation_box.treeview.do_cursor_changed(self)
-
+        
         self.vpaned = gtk.VPaned()
         self.line_chart = LineChart()
         self.graph = Graph("NewGraph", "", [(1,1),(2,2),(3,3)])
@@ -162,13 +161,18 @@ class DashboardWindow(HIGWindow):
 
         self.vpaned.add1(self.line_chart)
         self.vpaned.add2(self.detail_sw)
-        
-        self.detail_sw.add(self.box_container)
+
+        self.detail_sw.add_with_viewport(self.box_container)
         
         self.add_tabs()
+
         self.box_container.hide_all()
         
         self.show_all()
+        
+    def show_all_modify(self):
+        """"""
+        self.hide_all_tabs()
 
     def add_tabs(self):
         """
@@ -185,7 +189,7 @@ class DashboardWindow(HIGWindow):
         self.box_container.add(self.throttled_tab)
         self.box_container.add(self.service_tab)
     
-    def hide_all(self):
+    def hide_all_tabs(self):
         self.capacity_tab.set_visible(False)
         self.throttled_tab.set_visible(False)
         self.service_tab.set_visible(False)
@@ -201,7 +205,7 @@ class DashboardWindow(HIGWindow):
     def show_one(self,show_type=None):
         """
         """
-        self.hide_all()
+        self.hide_all_tabs()
         if show_type == TASK:
             self.task_tab.set_visible(True)
         elif show_type == TASK_ALL :
@@ -229,19 +233,19 @@ class DashboardWindow(HIGWindow):
         """
         Task statistics: It will show the Task Done numbers and failed numbers
         """
-        pass
+        self.task_tab.show()
         
     def refresh_task_details(self):
         """
         Task Details: The list store can show the different task details from database
         """
-        pass
+        self.task_details_tab.show(self.task_type)
 
     def refresh_reports_statistics(self):
         """
         Reports: It can show the report statistics
         """
-        pass
+        self.report_tab.show()
 
     def refresh_report_details(self,report_type=None):
         """
@@ -253,12 +257,12 @@ class DashboardWindow(HIGWindow):
     def refresh_connection(self):
         """
         """
-        pass
+        self.connections_tab.show()
 
     def refresh_connection_dividual(self):
         """
         """
-        pass
+        self.connections_individual_tab.show(self.conn_type)
 
     def refresh_capacity(self):
         """"""
@@ -309,13 +313,11 @@ class DashboardWindow(HIGWindow):
     def refresh(self):
         """
         """
-        
         self.conn_type = self.cur_tab
         self.task_type = self.cur_tab
         result = self.switch_dict[self.cur_tab]()
         self.show_one(self.cur_tab)
      
-   
 
 if __name__ == "__main__":
     wnd = DashboardWindow()
