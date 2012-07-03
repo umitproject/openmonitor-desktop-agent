@@ -51,12 +51,11 @@ class TimeLineGraphToolbar(gtk.Toolbar):
     def __packed_widgets(self):
         """"""
         self.insert(self.graph_mode(self.graph_mode),0) #Year,month,day and hour
-        self.insert(self.graph_time(),1)                #Time choice 
-        self.insert(self.graph_time_apply(),2)          #Apply button
-        self.insert(gtk.SeparatorToolItem(),3)          
-        self.insert(self.graph_kind(),4)                #Line or Area
-        self.insert(gtk.SeparatorToolItem(),5)
-        self.insert(self.graph_refresh(),6)             #Refresh Button
+        self.insert(self.graph_time_box(),1)                #Time choice 
+        self.insert(gtk.SeparatorToolItem(),2)          
+        self.insert(self.graph_kind(),3)                #Line or Area
+        self.insert(gtk.SeparatorToolItem(),4)
+        self.insert(self.graph_refresh(),5)             #Refresh Button
         
     def __connected_widgets(self):
         """"""
@@ -102,25 +101,15 @@ class TimeLineGraphToolbar(gtk.Toolbar):
         mode = view_mode_order[event.get_active()]
         self.connector.emit('data-changed',mode,None)
     
-    def graph_time(self):
+    def graph_time_box(self):
         """
+        Time Choice and Apply button
         """
-        pass
-    
-    def graph_time_apply(self):
-        """
-        """
-        apply_button = gtk.Button(_("Apply"))
-        apply_button.set_relief(gtk.RELIEF_NONE)
-        apply_button.connect('clicked',self.change_graph_time_apply)
+        self.time_box = TimeBox()
         
-        return self.packed(apply_button)
+        return self.packed(self.time_box)
+        
     
-    def change_graph_time_apply(self):
-        """
-        """
-        pass
-
     def graph_refresh(self):
         """
         Graph refreshing controller
