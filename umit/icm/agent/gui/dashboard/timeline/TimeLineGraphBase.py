@@ -53,6 +53,19 @@ xlabels = {
     "hourly": _("Minutes")
     }
 
+#Define the task,report,test
+changes_in_db = {
+        'successful': _("Successful"),      #Test
+        'failed': _("Failed"),              #Test
+        'done': _("Done"),                  #Task
+        'wait': _("Wait"),                  #Task
+        'sent': _("Sent"),                  #Report
+        'unsent': _("unsent")               #report
+        }
+categories = dict(changes_in_db)
+categories['changes_sum'] = _("Changes Sum")
+
+changes_list = changes_in_db.keys()
 
 def colors_from_file_gdk():
     """

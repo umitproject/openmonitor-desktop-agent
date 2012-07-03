@@ -2,7 +2,8 @@
 # -*- coding: utf-8 -*-
 # Copyright (C) 2011 Adriano Monteiro Marques
 #
-# Author:  Tianwei Liu <liutainweidlut@gmail.com> 
+# Authors: Guilherme Polo <ggpolo@gmail.com>
+#          Tianwei Liu <liutainweidlut@gmail.com> 
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
