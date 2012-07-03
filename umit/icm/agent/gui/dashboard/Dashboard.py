@@ -31,12 +31,14 @@ from higwidgets.higwindows import HIGWindow
 from umit.icm.agent.I18N import _
 from umit.icm.agent.Application import theApp
 
-from ReportsTab import ReportsTab,ReceiveDetailsTab,ReportDetailsTab
-from ConnectionTab import ConnectionsIndividualTab,ConnectionsTab
-from TaskTab import TaskTab,TaskDetailsTab,TaskExecuteTab
-from CapacityTab import CapacityTab,ThrottledTab,ServiceTab
+from umit.icm.agent.gui.dashboard.ReportsTab import ReportsTab,ReceiveDetailsTab,ReportDetailsTab
+from umit.icm.agent.gui.dashboard.ConnectionTab import ConnectionsIndividualTab,ConnectionsTab
+from umit.icm.agent.gui.dashboard.TaskTab import TaskTab,TaskDetailsTab,TaskExecuteTab
+from umit.icm.agent.gui.dashboard.CapacityTab import CapacityTab,ThrottledTab,ServiceTab
 
-from DashboardListBase import  *
+from umit.icm.agent.gui.dashboard.DashboardListBase import  *
+
+from umit.icm.agent.gui.dashboard.timeline.TimeLineGraphViewer import *
 
 class NavigationBox(HIGVBox):
 
@@ -116,13 +118,8 @@ class DashboardWindow(HIGWindow):
         self.navigation_box = NavigationBox(_('Dashboard Menu'), self)
         
         self.vpaned = gtk.VPaned()
-        self.line_chart = LineChart()
-        self.graph = Graph("NewGraph", "", [(1,1),(2,2),(3,3)])
-        self.line_chart.set_xrange((0, 10))
-        self.line_chart.set_yrange((0, 5))
-        self.line_chart.add_graph(self.graph)
-        self.line_chart.set_size_request(460, 320)
-
+        
+        self.timeline_viewer = TimeLineGraphViewer(self)
         self.detail_sw = gtk.ScrolledWindow()
         
         self.detail_sw.set_size_request(450, 180)
@@ -159,7 +156,7 @@ class DashboardWindow(HIGWindow):
         self.hpaned.add1(self.navigation_box)
         self.hpaned.add2(self.vpaned)
 
-        self.vpaned.add1(self.line_chart)
+        self.vpaned.add1(self.timeline_viewer)
         self.vpaned.add2(self.detail_sw)
 
         self.detail_sw.add_with_viewport(self.box_container)

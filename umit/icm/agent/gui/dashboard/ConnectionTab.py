@@ -27,7 +27,7 @@ from umit.icm.agent.I18N import _
 from umit.icm.agent.Application import theApp
 
 #from Dashboard import CONNECTION,CONN_AGG,CONN_SUPER,CONN_NORMAL,CONN_MOBILE
-from DashboardListBase import  *
+from umit.icm.agent.gui.dashboard.DashboardListBase import  *
 
 class ConnectionsTab(DashboardListBase):
     """

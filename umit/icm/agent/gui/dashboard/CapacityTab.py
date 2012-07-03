@@ -26,7 +26,7 @@ from umit.icm.agent.I18N import _
 from umit.icm.agent.Application import theApp
 
 #from Dashboard import CAPACITY,CAPA_THROTTLED,CAPA_SERVICE
-from DashboardListBase import  *
+from umit.icm.agent.gui.dashboard.DashboardListBase import  *
 
 class CapacityTab(gtk.VBox):
     """

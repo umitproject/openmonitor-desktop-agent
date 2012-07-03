@@ -181,7 +181,7 @@ class GtkMain(object):
         webbrowser.open(url)
 
     def show_dashboard(self):
-        from umit.icm.agent.gui.Dashboard import DashboardWindow
+        from umit.icm.agent.gui.dashboard.Dashboard import DashboardWindow
         wnd = DashboardWindow()
         wnd.show_all_modify()
 
