@@ -78,6 +78,7 @@ class PeerManager:
         self.connected_speer_num = 0
 
     def save_to_db(self):
+        g_logger.info("List of super peers is : %s" % self.super_peers.values())
         for peer_entry in self.super_peers.values():
             g_db_helper.execute(
                 "insert or replace into peers values" \
@@ -310,6 +311,35 @@ class PeerManager:
         self.connected_peer_num = self.connected_peer_num - 1
         return True
 
+    def add_super_peer(self, peer_id, ip, port, token =None ,ciphered_public_key=None,status='Disconnected', network_id=0):
+        if self.agent_is_banned(peer_id) or self.network_is_banned(ip):
+            g_logger.info("Super Peer agent %d is banned or is running from a banned "
+                          "network %s" % (peer_id, ip))
+            '''
+            if peer_id in self.super_peers:
+                self.remove_mobile_peer(peer_id)
+
+            return 
+            '''
+
+        if peer_id in self.super_peers:
+            g_logger.info("Peer id %d already exists in Super peer list." %
+                          peer_id)
+        else:
+            peer_entry = PeerEntry()
+            peer_entry.Type = 1
+            peer_entry.ID = peer_id
+            peer_entry.IP = ip
+            peer_entry.Port = port
+            peer_entry.CipheredPublicKey = ciphered_public_key
+            peer_entry.status = status
+            peer_entry.network_id = network_id
+            self.super_peers[peer_entry.ID] = peer_entry
+            self.super_peer_num = self.super_peer_num + 1
+
+        self.save_to_db()
+
+
     def add_normal_peer(self, peer_id, ip, port, token =None ,ciphered_public_key=None,
                         status='Disconnected', network_id=0):
         '''if self.agent_is_banned(peer_id) or self.network_is_banned(ip):
@@ -527,6 +557,10 @@ class PeerManager:
     Make the desktop agent connect to a certain number of super peers and \
     normal peers, also check the availability of the aggregator
     """
+
+    '''
+    Narendran - Each peer will have to maintain a constantly updated list of super peers. Choose the first from it and bootstrap.
+    '''
     def maintain(self):
         # check the availability of the aggregator
         if not theApp.aggregator.available:
@@ -538,9 +572,11 @@ class PeerManager:
             if peer.status == 'Disconnected':
                 self.connect_to_peer(peer.ID)
 
+        '''
         for peer in self.normal_peers.values():
             if peer.status == 'Disconnected':
                 self.connect_to_peer(peer.ID)
+        '''
 
         # examine the number of connected super peers
         if self.super_peer_num < self.max_speer_num:
@@ -548,15 +584,20 @@ class PeerManager:
             if theApp.aggregator.available:
                 g_logger.debug("Requiring %d super peers from the aggregator",
                                required_num)
-                theApp.aggregator.get_super_peer_list(required_num)
+
+                '''
+                Once the geolocation service is up, pass the country code and  get the super peers belonging to that country alone instead of count
+                '''
+                theApp.aggregator.get_super_peer_list(theApp.aggregator.getlocation())
             else:
                 for peer in self.super_peers.values():
                     if peer.status == 'Connected' and peer.ID in self.sessions:
-                        g_logger.debug("Requiring %d super peers from "
-                                       "super peer %d" % (required_num, peer.ID))
-                        self.sessions[peer.ID].get_super_peer_list(required_num)
+                        g_logger.debug("Requiring super peers from "
+                                       "super peer %d belonging to %s" % (peer.ID, theApp.peer_info.country_code))
+                        self.sessions[peer.ID].get_super_peer_list(theApp.peer_info.country_code)
 
 
+        '''
         if self.normal_peer_num < self.max_peer_num:
             required_num = self.max_peer_num - self.normal_peer_num
             if theApp.aggregator.available:
@@ -569,6 +610,6 @@ class PeerManager:
                         g_logger.debug("Requiring %d peers from "
                                        "super peer %d" % (required_num, peer.ID))
                         self.sessions[peer.ID].get_peer_list(required_num)
-
+        '''
 
 

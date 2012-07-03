@@ -212,10 +212,10 @@ class AggregatorAPI(object):
         #url = self.base_url + "/reportpeerinfo/"
         #result = self._send_request('POST', url, data)
 
-    def get_super_peer_list(self, count):
+    def get_super_peer_list(self, country_code):
         request_msg = GetSuperPeerList()
-        request_msg.count = count
-
+        request_msg.location = country_code
+        g_logger.debug("Requesting Super peers from the aggregator for country code %s" % request_msg.location)
         defer_ = self._send_message(request_msg, GetSuperPeerListResponse)
         defer_.addCallback(self._handle_get_super_peer_list_response)
         defer_.addErrback(self._handle_errback)

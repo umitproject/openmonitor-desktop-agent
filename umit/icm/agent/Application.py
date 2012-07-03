@@ -247,6 +247,7 @@ class Application(object):
             self.peer_info.Password = password if password !="" and password != None else self.peer_info.Password
             print self.peer_info.Username, self.peer_info.Password 
             self.peer_info.is_logged_in = True
+            self.peer_info.country_code = self.aggregator.getlocation()
             self.peer_info.save_to_db()
             g_logger.debug("Login Successfully :%s@%s" % (username,password))
             if save_login:
@@ -271,9 +272,10 @@ class Application(object):
 
 
             #After successful Login
-            # 1. Get peerlist
-            # 2. Bootstrap
-            # 3. Add Peer
+            # 1. Get super peer list from the aggregator
+            # 2. Bootstrap libcage using the first super peer.
+            # 3. After successful bootstrapping, add the current peer into the aggregator (Peer / Super peer flag in the request message). Geo location service should be up for this to work in production.
+            # 4. Sync "peers" table with libcage instance.
 
             g_logger.info("GETTING PEER AND SUPER PEER LIST FROM THE AGGREGATOR")
 

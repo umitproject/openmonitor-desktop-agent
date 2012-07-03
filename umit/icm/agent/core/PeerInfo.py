@@ -41,11 +41,16 @@ class PeerInfo(object):
         self.local_ip = ''
         self.internet_ip = ''
 
+
         self.is_registered = False
         self.is_logged_in = False
 
         self.get_local_ip()
         self.get_internet_ip()
+
+
+        self.country_code = '' 
+        
 
     def load_from_db(self):
         rs = g_db_helper.select('select * from peer_info')
@@ -67,9 +72,9 @@ class PeerInfo(object):
     def save_to_db(self):
         if self.is_registered:
             sql_str = "insert or replace into peer_info values " \
-                            "(%d, '%s', '%s', '%s', '%s', %d)" % \
+                            "(%d, '%s', '%s', '%s', '%s', %d, '%s')" % \
                             (self.ID, self.Username, self.Password, self.Email,
-                             self.CipheredPublicKeyHash, self.Type)
+                             self.CipheredPublicKeyHash, self.Type, self.country_code)
             g_logger.info("[save_to_db]:save %s into DB"%sql_str)            
             g_db_helper.execute(sql_str)
             g_db_helper.commit()
