@@ -109,7 +109,7 @@ def gradient_colors_from_file():
     return gradient
 
 
-class TLBase(CalendarManager, DataGrabber):
+class TimeLineBase(CalendarManager, DataGrabber):
     """
     This class does the necessary Timeline management.
     """
@@ -169,7 +169,7 @@ class TLBase(CalendarManager, DataGrabber):
         """
         Grab data for graph using current settings.
         """
-        return None         
+        return (None,None,None)         
     
     def update_grabber(self):
         """
