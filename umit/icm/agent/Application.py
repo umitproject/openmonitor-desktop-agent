@@ -95,8 +95,7 @@ class Application(object):
         self.quitting = False
         self.is_auto_login = True        
         self.is_successful_login = False #fix the login failure, save DB problem
-        
-                            
+                       
     def _load_from_db(self):
 
         self.peer_manager.load_from_db()
@@ -135,7 +134,12 @@ class Application(object):
             self.gtk_main = GtkMain()
         
         self.is_auto_login = g_config.getboolean('application', 'auto_login_swittch')
-           
+        
+        
+        #debug switch: It can show the gtkWindow without any authentication 
+        if g_config.getboolean('debug','debug_switch'):
+            self.login_simulate()
+        
         if  self.is_auto_login:
             #login with saved username or password, not credentials
             self.peer_info.load_from_db()
@@ -143,7 +147,7 @@ class Application(object):
         else:
             self.gtk_main.show_login()
             g_logger.info("Auto-login is disabled. You need to manually login.")
-            
+          
     def check_software_auto(self):
         """
         check software: according the time and other configurations
@@ -277,6 +281,16 @@ class Application(object):
             self.task_loop_manager()
             
         return result
+    
+    def login_simulate(self):
+        """
+        Only test GTK features
+        """
+        #GTK show
+        self.gtk_main.set_login_status(True)
+        #mark login-successful
+        self.is_successful_login = True 
+               
     
     def task_loop_manager(self):
         """"""
