@@ -3,6 +3,7 @@
 # Copyright (C) 2011 Adriano Monteiro Marques
 #
 # Author:  Zhongjie Wang <wzj401@gmail.com>
+#          Tianwei Liu <liutianweidlut@gmail.com>
 #         
 #
 # This program is free software; you can redistribute it and/or modify
@@ -27,7 +28,6 @@ from umit.icm.agent.logger import g_logger
 from umit.icm.agent.Application import theApp
 from umit.icm.agent.Global import *
 from umit.icm.agent.test import test_name_by_id, test_by_id
-
 
 class TestEntry(object):
     """"""

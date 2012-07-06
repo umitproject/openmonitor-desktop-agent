@@ -3,6 +3,7 @@
 # Copyright (C) 2011 Adriano Monteiro Marques
 #
 # Authors:  Zhongjie Wang <wzj401@gmail.com>
+#           Tianwei Liu <liutianweidlut@gmail.com>
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -320,6 +321,61 @@ class DBHelper(object):
     def get_aggregator_aes_key(self):
         return self.get_value('keys', 'aggregator_aes_key')
 
+    #####################################################
+    #Methods for Dashboard Window(Timeline or QueryFrame)
+    def get_task_sets(self,task_type = None):
+        """
+        Tasks (All, done, wait)for Dashboard Window
+        """
+        from umit.icm.agent.gui.dashboard.DashboardListBase import TASK_ALL,TASK_SUCCESSED,TASK_FAILED
+        from umit.icm.agent.test import TASK_STATUS_DONE,TASK_STATUS_FAILED
+        if task_type == TASK_ALL:
+            return self.db_conn.select("SELECT * from tasks")
+        elif task_type == TASK_SUCCESSED:
+            return self.db_conn.select("SELECT * from tasks where done_status = '%s' "%(TASK_STATUS_DONE))
+        elif task_type == TASK_FAILED:
+            return self.db_conn.select("SELECT * from tasks where done_status = '%s' "%(TASK_STATUS_FAILED))
+        else:
+            g_logger.error("Didn't input any legal task type for query :%s"%(task_type))
+            return None
+    
+    def get_report_sets(self,report_type = None):
+        """
+        Reports for Dashboar Window (sent, unsent, maybe received)
+        """
+        from umit.icm.agent.gui.dashboard.DashboardListBase import REPORT,REPORT_SENT,REPORT_UNSENT,REPORT_RECEIVED
+        if report_type == REPORT:
+            return None
+        elif report_type == REPORT_SENT:
+            return self.db_conn.select("SELECT * from reports")
+        elif report_type == REPORT_UNSENT:
+            return self.db_conn.select("SELECT * from unsent_reports")
+        elif report_type == REPORT_RECEIVED:
+            return None
+        else:
+            g_logger.error("Didn't input any legal report type for query :%s"%(report_type))
+            return None
+        
+    def get_test_sets(self,test_type = None):
+        """
+        Test sets for Dashboard Window(successful or failed)
+        """
+        from umit.icm.agent.gui.dashboard.DashboardListBase import CAPA_THROTTLED,CAPACITY,CAPA_SERVICE
+        from umit.icm.agent.test import TASK_STATUS_DONE,TASK_STATUS_FAILED
+        if test_type == CAPA_THROTTLED:
+            return self.db_conn.select("SELECT \
+                                    sequence,test_id,website_url,test_type,done_status,done_result,execute_time\
+                                     from tasks where test_type = 'WEB' ")
+        elif test_type == CAPACITY:
+            return None
+        elif test_type == CAPA_SERVICE:
+            return self.db_conn.select("SELECT \
+                                    sequence,test_id,service_name,service_port,service_ip,test_type,done_status,done_result,execute_time\
+                                     from tasks where test_type = 'Service' ")
+        else:
+            g_logger.error("Didn't input any legal test sets type for query :%s"%(test_type))
+            return None     
+        
 
 #---------------------------------------------------------------------
 class DBKVPHelper(object):

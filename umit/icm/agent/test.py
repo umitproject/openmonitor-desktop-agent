@@ -56,6 +56,12 @@ else:
     # On most other platforms the best timer is time.time()
     default_timer = time.time
 
+################
+#Task Definition
+
+TASK_STATUS_DONE   = "Success"
+TASK_STATUS_FAILED = "Failed"
+
 def task_done(name):
     theApp.statistics.tasks_done = theApp.statistics.tasks_done + 1
     theApp.statistics.tasks_done_by_type[name] = \
@@ -179,7 +185,7 @@ class WebsiteTest():
         if int(response.code) in HTTP_SUCCESS_CODE:
             
             g_logger.debug('task done %s'%response.code)
-            
+            task_done(self.__class__.__name__)
             #if self.pattern is not None:
                 #response.deliverBody(ContentExaminer(self.url,self.pattern))
             

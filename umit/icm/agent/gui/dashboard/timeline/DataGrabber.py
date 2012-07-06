@@ -20,16 +20,10 @@
 
 import datetime
 
-from umit.core.Paths import Path
-
 from umit.icm.agent.gui.dashboard.timeline.Calendar import mdays
 from umit.icm.agent.gui.dashboard.timeline.Calendar import isleap
 
-
-#from umit.db.Connection import ConnectDB
-#from umit.db.InventoryChanges import ChangesRetrieve
-
-umitdb = Path.umitdb_ng
+#TO DO: We should add DB operator for Timeline DataGrab
 
 DATA_GRAB_MODES = {
     "yearly_sum": "changes_in_year",
@@ -39,7 +33,7 @@ DATA_GRAB_MODES = {
     "category": "changes_by_category"
     }
 
-class DataGrabber(ConnectDB, ChangesRetrieve):
+class DataGrabber(ChangesRetrieve):
     """
     Grab data from Inventories or a single host for an Inventory, for a time
     range and format it to be used in Timeline.
