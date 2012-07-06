@@ -21,6 +21,9 @@
 import base64
 
 from Crypto.Cipher import AES
+from Crypto.Signature import PKCS1_v1_5
+from Crypto.Hash import SHA
+
 
 DEFAULT_BLOCK_SIZE = 32
 DEFAULT_PADDING = '{'
@@ -129,9 +132,11 @@ class RSAPrivateKey(RSAKey):
         self.mod = self.obj.n
         self.exp = self.obj.e
 
-    def sign(self, data):
-        signed_data = self.obj.sign(str(data), '')
-        return base64.b64encode(str(signed_data[0]))
+    def sign(self, message):
+        data = SHA.new(message)
+        signer = PKCS1_v1_5.new(self.obj)
+        signature = signer.sign(data)
+        return base64.b64encode(signature)
 
 
 if __name__ == "__main__":
