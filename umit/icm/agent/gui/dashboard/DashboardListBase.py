@@ -50,7 +50,7 @@ CONN_MOBILE   = _("Mobile Agent")
 ####################
 #Capacity Definition
 CAPACITY      = _("Capacity")
-CAPA_THROTTLED= _("Network Throttled")
+CAPA_THROTTLED= _("Network Websites")
 CAPA_SERVICE  = _("Network Service")
 
 

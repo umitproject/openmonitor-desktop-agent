@@ -23,7 +23,9 @@ pygtk.require('2.0')
 import gtk, gobject
 
 from umit.icm.agent.I18N import _
+from umit.icm.agent.Global import *
 from umit.icm.agent.Application import theApp
+from umit.icm.agent.logger import g_logger
 
 #from Dashboard import REPORT,REPORT_SENT,REPORT_UNSENT,REPORT_RECEIVED
 from umit.icm.agent.gui.dashboard.DashboardListBase import  *
@@ -79,26 +81,111 @@ class ReportDetailsTab(gtk.VBox):
         """
         """
         gtk.VBox.__init__(self)
-
+        
+        self.__create_record()
         self.__create_widgets()
         self.__pack_widgets()
         self.__connected_widgets()    
     
+    def __create_record(self):
+        """
+        """
+        self.report_list_dict = {}
+        self.report_details_dict = {
+                                     "report_id":"",
+                                     "test_id":"",
+                                     "time_gen":"",
+                                     "content":"",
+                                     "source_id":"",
+                                     "source_ip":"",
+                                     "status":""
+                                     }       
+    
     def __create_widgets(self):
         """
         """
-        pass
+        
+        self.column_names = ['ID','TestID','Time','Content',
+                             'SourceID','SourceIP','Status']
+        
+        self.store = gtk.ListStore(str,str,str,str,str,str,str)
+        self.treeview = gtk.TreeView()
+       
+        self.treeview.set_rules_hint(True)
+        self.treeview.set_sensitive(False)
+        
+        self.__create_columns()
     
     def __pack_widgets(self):   
         """
         """
-        pass
+        self.add(self.treeview)
     
     def __connected_widgets(self):
         """
         """
         pass   
     
+    def __create_columns(self):
+        """
+        """
+        for i in range(0,len(self.column_names)):
+            rendererText = gtk.CellRendererText()
+            column = gtk.TreeViewColumn(self.column_names[i],rendererText,text = i) #text attributes MUST!
+            column.set_sort_column_id(i)
+            self.treeview.append_column(column)  
+            
+    def show_details(self,report_type):
+        """
+        Report Details: Sent and unsent
+        """
+        self.report_list_dict = {}
+        cnt =0
+        
+        from umit.icm.agent.gui.dashboard.DashboardListBase import REPORT,REPORT_SENT,REPORT_UNSENT,REPORT_RECEIVED        
+        ###########################
+        #Get Report Details From DB
+        rs = g_db_helper.get_report_sets(report_type=report_type)
+        
+        if rs == None:
+            g_logger.info("Cannot load any reports from DB.")
+            self.treeview.set_sensitive(True)
+            self.store.clear()
+            self.treeview.set_model(self.store) #It must be after the store update
+            return 
+        
+        for record in rs:
+            self.report_list_dict[cnt] = {}
+            self.report_list_dict[cnt]["report_id"] = record[0]
+            self.report_list_dict[cnt]["test_id"]   = record[1]
+            self.report_list_dict[cnt]["time_gen"]  = record[2]
+            self.report_list_dict[cnt]["content"]   = record[3]
+            self.report_list_dict[cnt]["source_id"] = record[4]
+            self.report_list_dict[cnt]["source_ip"] = record[5]
+            self.report_list_dict[cnt]["status"]    = record[6] 
+            
+            cnt += 1
+        
+        g_logger.info("Loaded %d reports from DB." % len(rs)) 
+        
+        #####################
+        #Output in the Window
+        self.treeview.set_sensitive(True) 
+        self.store.clear()
+        
+        for line in self.report_list_dict.keys():
+                self.store.append(
+                                  [self.report_list_dict[line]["report_id"],
+                                   self.report_list_dict[line]["test_id"],
+                                   self.report_list_dict[line]["time_gen"],
+                                   self.report_list_dict[line]["content"],
+                                   self.report_list_dict[line]["source_id"],
+                                   self.report_list_dict[line]["source_ip"],
+                                   self.report_list_dict[line]["status"]])                                                                                          
+        
+        self.treeview.set_model(self.store) #It must be after the store update           
+                  
+
 class ReceiveDetailsTab(gtk.VBox): 
     """
     ReceiveDetailsTab: Show the received reports from other peers

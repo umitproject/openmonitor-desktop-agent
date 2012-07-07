@@ -364,14 +364,14 @@ class DBHelper(object):
         from umit.icm.agent.test import TASK_STATUS_DONE,TASK_STATUS_FAILED
         if test_type == CAPA_THROTTLED:
             return self.db_conn.select("SELECT \
-                                    sequence,test_id,website_url,test_type,done_status,done_result,execute_time\
-                                     from tasks where test_type = 'WEB' ")
+                                    sequence,test_id,website_url,test_type,done_status,done_result,execute_time \
+                                      from tasks where test_type = 'WEB' ")
         elif test_type == CAPACITY:
             return None
         elif test_type == CAPA_SERVICE:
             return self.db_conn.select("SELECT \
-                                    sequence,test_id,service_name,service_port,service_ip,test_type,done_status,done_result,execute_time\
-                                     from tasks where test_type = 'Service' ")
+                                    sequence,test_id,service_name,service_port,service_ip,test_type,done_status,done_result,execute_time \
+                                      from tasks where test_type = 'Service' ")
         else:
             g_logger.error("Didn't input any legal test sets type for query :%s"%(test_type))
             return None     

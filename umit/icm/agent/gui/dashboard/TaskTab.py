@@ -23,9 +23,10 @@ pygtk.require('2.0')
 import gtk, gobject
 
 from umit.icm.agent.I18N import _
+from umit.icm.agent.Global import *
 from umit.icm.agent.Application import theApp
+from umit.icm.agent.logger import g_logger
 
-#from Dashboard import TASK,TASK_ALL,TASK_SUCCESSED,TASK_FAILED
 from umit.icm.agent.gui.dashboard.DashboardListBase import  *
 
 class TaskTab(DashboardListBase):
@@ -86,7 +87,7 @@ class TaskExecuteTab(gtk.VBox):
         """
         gtk.VBox.__init__(self)
         
-        
+        self.__create_record()
         self.__create_widgets()
         self.__pack_widgets()
         self.__connected_widgets()          
@@ -94,21 +95,108 @@ class TaskExecuteTab(gtk.VBox):
     def __create_widgets(self):
         """
         """
-        pass
+        self.column_names = ['SEQUENCE','TestID','URL','Type',
+                             'Service_name','Service_ip','Service_port',
+                             'Status',"Result","Time"] 
+        
+        self.store = gtk.ListStore(str,str,str,str,str,str,str,str,str,str)
+        self.treeview = gtk.TreeView()
+       
+        self.treeview.set_rules_hint(True)
+        self.treeview.set_sensitive(False)
+        
+        self.__create_columns()               
     
     def __pack_widgets(self):   
         """
         """
-        pass
+        self.add(self.treeview)
     
     def __connected_widgets(self):
         """
         """
         pass
+    
+    def __create_record(self):
+        """
+        """
+        self.task_list_dict = {}
+        self.task_details_dict = {
+                                  "sequence":"",
+                                  "test_id":"",
+                                  "website_url":"",
+                                  "test_type":"",
+                                  "service_name":"",
+                                  "service_ip":"",
+                                  "service_port":"",
+                                  "done_status":"",
+                                  "done_result":"",
+                                  "execute_time":"",
+                                  }
+        
+    def __create_columns(self):
+        """
+        """
+        for i in range(0,len(self.column_names)):
+            rendererText = gtk.CellRendererText()
+            column = gtk.TreeViewColumn(self.column_names[i],rendererText,text = i) #text attributes MUST!
+            column.set_sort_column_id(i)
+            self.treeview.append_column(column) 
+            
+    def show_details(self,task_type):
+        """
+        """        
+        self.task_list_dict = {}
+        cnt = 0
 
-
-
-
+        from umit.icm.agent.gui.dashboard.DashboardListBase import TASK_ALL,TASK_SUCCESSED,TASK_FAILED        
+        #########################
+        #Get Task Details From DB
+        rs = g_db_helper.get_task_sets(task_type=task_type)
+        
+        if rs == None:
+            g_logger.info("Cannot load any Tasks from DB.")
+            self.treeview.set_sensitive(True)
+            self.store.clear()
+            self.treeview.set_model(self.store) #It must be after the store update
+            return
+        
+        for record in rs:
+            self.task_list_dict[cnt] = {}
+            self.task_list_dict[cnt]["sequence"]      = record[0]
+            self.task_list_dict[cnt]["test_id"]       = record[1]
+            self.task_list_dict[cnt]["website_url"]   = record[2]
+            self.task_list_dict[cnt]["test_type"]     = record[3]
+            self.task_list_dict[cnt]["service_name"]  = record[4]
+            self.task_list_dict[cnt]["service_ip"]    = record[5]
+            self.task_list_dict[cnt]["service_port"]  = record[6] 
+            self.task_list_dict[cnt]["done_status"]   = record[7]
+            self.task_list_dict[cnt]["done_result"]   = record[8]
+            self.task_list_dict[cnt]["execute_time"]  = record[9]             
+            cnt += 1
+        
+        g_logger.info("Loaded %d tasks from DB." % len(rs)) 
+        
+        #####################
+        #Output in the Window
+        self.treeview.set_sensitive(True) 
+        self.store.clear()
+        
+        for line in self.task_list_dict.keys():
+                self.store.append(
+                                  [self.task_list_dict[line]["sequence"],
+                                   self.task_list_dict[line]["test_id"],
+                                   self.task_list_dict[line]["website_url"],
+                                   self.task_list_dict[line]["test_type"],
+                                   self.task_list_dict[line]["service_name"],
+                                   self.task_list_dict[line]["service_ip"],
+                                   self.task_list_dict[line]["service_port"],
+                                   self.task_list_dict[line]["done_status"],
+                                   self.task_list_dict[line]["done_result"],
+                                   self.task_list_dict[line]["execute_time"]])                                                                                          
+        
+        self.treeview.set_model(self.store) #It must be after the store update           
+                                     
 
 
 

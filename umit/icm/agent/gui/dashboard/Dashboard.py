@@ -244,13 +244,18 @@ class DashboardWindow(HIGWindow):
         """
         self.report_tab.show()
 
-    def refresh_report_details(self,report_type=None):
+    def refresh_report_details(self):
         """
         Report Details: The list store can show the different report details(sent,unsent,received) from database
         """
-        pass
+        self.report_details_tab.show_details(self.report_type)
 
-
+    def refresh_task_execute_details(self):
+        """
+        Task Executed Details: The list store can show the successful and failed tasks
+        """
+        self.task_execute_tab.show_details(self.task_type)
+        
     def refresh_connection(self):
         """
         """
@@ -267,11 +272,11 @@ class DashboardWindow(HIGWindow):
     
     def refresh_throttled(self):
         """"""
-        pass
+        self.throttled_tab.show_details()
     
     def refresh_service(self):
         """"""
-        pass      
+        self.service_tab.show_details()      
     
     def create_switch(self):
         """
@@ -288,9 +293,9 @@ class DashboardWindow(HIGWindow):
                             #########
                             #Task tab
                             TASK            : self.refresh_task_statistics,
-                            TASK_SUCCESSED  : self.refresh_task_details,
-                            TASK_FAILED     : self.refresh_task_details,
-                            TASK_ALL        : self.refresh_task_details,
+                            TASK_SUCCESSED  : self.refresh_task_execute_details,
+                            TASK_FAILED     : self.refresh_task_execute_details,
+                            TASK_ALL        : self.refresh_task_execute_details,
                             
                             #############
                             #Capacity tab
@@ -310,6 +315,7 @@ class DashboardWindow(HIGWindow):
     def refresh(self):
         """
         """
+        self.report_type = self.cur_tab
         self.conn_type = self.cur_tab
         self.task_type = self.cur_tab
         result = self.switch_dict[self.cur_tab]()
