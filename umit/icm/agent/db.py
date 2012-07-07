@@ -380,7 +380,29 @@ class DBHelper(object):
         """
         This method helps datagrab get the basic data from database 
         """   
-        pass
+        from umit.icm.agent.gui.dashboard.DashboardListBase import CAPA_THROTTLED,CAPACITY,CAPA_SERVICE
+        from umit.icm.agent.gui.dashboard.DashboardListBase import REPORT,REPORT_SENT,REPORT_UNSENT,REPORT_RECEIVED
+        
+        if  choice_tab ==  REPORT_SENT:
+            return self.db_conn.select("SELECT * from reports "
+                            "WHERE time_gen >= ? AND time_gen < ? "
+                            "ORDER BY time_gen DESC", (start,end)).fetchall()
+        elif choice_tab ==  REPORT_UNSENT:
+            return self.db_conn.select("SELECT * from unsent_reports "
+                            "WHERE time_gen >= ? AND time_gen < ? "
+                            "ORDER BY time_gen DESC", (start,end)).fetchall()
+        elif choice_tab ==  REPORT_RECEIVED:
+            return 0
+        elif choice_tab ==  CAPA_THROTTLED:
+            return self.db_conn.select("SELECT * from tasks "
+                            "WHERE execute_time >= ? AND execute_time < ? "
+                            "ORDER BY time_gen DESC", (start,end)).fetchall()
+        elif choice_tab ==  CAPA_SERVICE:
+            return self.db_conn.select("SELECT * from tasks "
+                            "WHERE execute_time >= ? AND execute_time < ? "
+                            "ORDER BY time_gen DESC", (start,end)).fetchall()
+        else:
+            return 0       
 
 #---------------------------------------------------------------------
 class DBKVPHelper(object):
