@@ -42,6 +42,9 @@ class DataGrabber(object):
     """
     Grab data from Reports and Tasks in Database, for a time
     range and format it to be used in Timeline.
+    
+    The timestamp format is : 2013-01-01 00:00:00 
+    
     """
 
     def __init__(self, calendar):
@@ -49,18 +52,20 @@ class DataGrabber(object):
         """
         self.calendar = calendar
 
+
     def standard_sum_filter(self):
         """
         Standard filter to use when we are grabbing data in Changes Sum kind.
         """
         return {0: (True, 'changes_sum')}
-
+    
     def changes_by_category_in_range(self, choice_tab=None, *args):
         """
         Generic function for changes_anything 
         (choice_tab can provide report, task tab choice)
         (This method also received the range )
         """
+        
         if len(args) == 1: # yearly
             return self.changes_in_year(args[0], choice_tab)
         elif len(args) == 2: # monthly
@@ -72,6 +77,21 @@ class DataGrabber(object):
         else:
             raise Exception("Invalid number of parameters especified")
 
+    def timerange_changes_count_generic(self,start,end,choice_tab):
+        """
+        Selects what method to use to grab changes count.
+        """
+        
+        #start and end should always 
+        if not start or not end:
+            raise Exception("You should especify range start and range end")
+        
+        #check choice_tab
+        if not choice_tab:
+            raise Exception("You should especify choice_tab")
+        
+        #Call DB 
+        return g_db_helper.timerange_changes_count_generic(start,end,choice_tab)
 
     def changes_in_year(self, year, choice_tab=None):
         """
@@ -96,7 +116,7 @@ class DataGrabber(object):
             start = datetime.datetime(year - 1, 12, quarter + half)
             end = datetime.datetime(year, 1, 1)
 
-            start_value = g_db_helper.timerange_changes_count_generic(start,end,choice_tab)
+            start_value = self.timerange_changes_count_generic(start,end,choice_tab)
 
         # get events for year
         year_events = { }
@@ -132,7 +152,7 @@ class DataGrabber(object):
                 else:
                     end = datetime.datetime(year, m + 1, days[i + 1])
 
-                count = g_db_helper.timerange_changes_count_generic(start,end,choice_tab)
+                count = self.timerange_changes_count_generic(start,end,choice_tab)
 
                 mcount.append([count, ])
 
@@ -174,7 +194,7 @@ class DataGrabber(object):
         start = datetime.datetime(prev_year, prev_month, month_range, 12)
         end = datetime.datetime(year, month, 1)
 
-        start_value = g_db_helper.timerange_changes_count_generic(start,end,choice_tab)
+        start_value = self.timerange_changes_count_generic(start,end,choice_tab)
 
         for day in range(mdays[month]):
             day_count = [ ]
@@ -183,7 +203,7 @@ class DataGrabber(object):
             start = datetime.datetime(year, month, day + 1)
             end = datetime.datetime(year, month, day + 1, 12)
 
-            count1 = g_db_helper.timerange_changes_count_generic(start,end,choice_tab)
+            count1 = self.timerange_changes_count_generic(start,end,choice_tab)
 
             start = datetime.datetime(year, month, day + 1, 12)
 
@@ -209,7 +229,7 @@ class DataGrabber(object):
 
             end = datetime.datetime(dyear, dmonth, dday)
 
-            count2 = g_db_helper.timerange_changes_count_generic(start,end,choice_tab)
+            count2 = self.timerange_changes_count_generic(start,end,choice_tab)
 
             day_count.append([count1, ])
             day_count.append([count2, ])
@@ -248,7 +268,7 @@ class DataGrabber(object):
         start = datetime.datetime(prev_year, prev_month, prev_day, 23, 30)
         end = datetime.datetime(year, month, day)
 
-        start_value = g_db_helper.timerange_changes_count_generic(start,end,choice_tab)
+        start_value = self.timerange_changes_count_generic(start,end,choice_tab)
 
         # hour by hour
         for hour in range(24):
@@ -258,7 +278,7 @@ class DataGrabber(object):
             start = datetime.datetime(year, month, day, hour)
             end = datetime.datetime(year, month, day, hour, 30)
 
-            count1 = g_db_helper.timerange_changes_count_generic(start,end,choice_tab)
+            count1 = self.timerange_changes_count_generic(start,end,choice_tab)
 
             # other half
             start = datetime.datetime(year, month, day, hour, 30)
@@ -286,7 +306,7 @@ class DataGrabber(object):
             else:
                 end = datetime.datetime(year, month, day, hour + 1)
 
-            count2 = g_db_helper.timerange_changes_count_generic(start,end,choice_tab)
+            count2 = self.timerange_changes_count_generic(start,end,choice_tab)
 
             hour_count.append([count1])
             hour_count.append([count2])
@@ -327,7 +347,7 @@ class DataGrabber(object):
         start = datetime.datetime(prev_year, prev_month, prev_day, prev_hour,59)
         end = datetime.datetime(year, month, day, hour, 0)
 
-        start_value = g_db_helper.timerange_changes_count_generic(start,end,choice_tab)
+        start_value = self.timerange_changes_count_generic(start,end,choice_tab)
 
         # minute by minute
         for minute in range(60):
@@ -357,41 +377,10 @@ class DataGrabber(object):
             else:
                 end = datetime.datetime(year, month, day, hour, minute + 1)
 
-            count = g_db_helper.timerange_changes_count_generic(start, end,choice_tab)
+            count = self.timerange_changes_count_generic(start, end,choice_tab)
 
             hour_events[minute] = [[count, ]]
 
 
         return self.standard_sum_filter(), (start_value, ), hour_events
 
-
-
-if __name__ == "__main__":
-    #dg.count_changes_for_timerange(datetime.datetime(2007, 1, 1),
-    #                  datetime.datetime(2007, 1, 31, 23, 59, 59, 999))
-    #lfilter, max_v, start, evts = dg.changes_in_year(2007)
-    #print max_v, start, evts
-
-    # some methods from ChangesRetrieve
-    #print dg.get_categories_id_name()
-    #print dg.get_categories_name()
-    #print dg.get_category_id_by_name('Fingerprint')
-    #print dg.get_category_name_by_id(1)
-
-    #max_v, start, evts = dg.changes_for_categoryid(2007, 1)
-    #print max_v, start, evts
-
-    from umit.inventory.Calendar import startup_calendar_opts
-    from umit.inventory.Calendar import CalendarManager
-
-    start = startup_calendar_opts()
-    cal = CalendarManager(**start)
-
-    lfilter, max_v, start, evts = DataGrabber(cal).changes_in_year(2007)
-    print lfilter, max_v, start, evts[6]
-
-    #lfilter, max, start, evts = DataGrabber(cal).changes_by_category(2007, 7)
-    lfilter, max_v, start, evts = DataGrabber(cal).changes_in_month(2007, 7)
-
-    for key, value in evts.items():
-        print key, value

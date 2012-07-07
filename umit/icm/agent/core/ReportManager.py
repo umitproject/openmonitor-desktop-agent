@@ -20,7 +20,7 @@
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
 import base64
-import time
+import time,datetime
 
 from umit.icm.agent.logger import g_logger
 from umit.icm.agent.Application import theApp
@@ -41,7 +41,7 @@ class ReportEntry(object):
         """Constructor"""
         self.ID = ''
         self.SourceID = ''
-        self.TimeGen = 0
+        self.TimeGen = ''
         self.TestID = ''
         self.Report = ''
         self.SourceIP = ''
@@ -91,7 +91,7 @@ class ReportManager(object):
         report_entry = ReportEntry()
         # required fields
         report_entry.SourceID = report.header.agentID
-        report_entry.TimeGen = report.header.timeUTC
+        report_entry.TimeGen =  datetime.datetime.fromtimestamp(report.header.timeUTC)
         report_entry.TestID = report.header.testID
         report_entry.ID = report.header.reportID
         report_entry.Report = report
@@ -139,7 +139,7 @@ class ReportManager(object):
     def save_report_to_db(self, table_name, report_entry):
         sql_stmt = "insert into %s (report_id, test_id, time_gen, content, "\
                    "source_id, source_ip, status) values "\
-                   "('%s', '%s', %d, '%s', '%s', '%s', '%s')" % \
+                   "('%s', '%s', %s, '%s', '%s', '%s', '%s')" % \
                    (table_name,
                     report_entry.ID,
                     report_entry.TestID,

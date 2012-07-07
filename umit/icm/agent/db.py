@@ -380,7 +380,7 @@ class DBHelper(object):
         """
         This method helps datagrab get the basic data from database 
         """   
-        
+        pass
 
 #---------------------------------------------------------------------
 class DBKVPHelper(object):
