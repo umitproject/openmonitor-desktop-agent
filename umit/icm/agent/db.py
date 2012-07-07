@@ -374,7 +374,12 @@ class DBHelper(object):
                                       from tasks where test_type = 'Service' ")
         else:
             g_logger.error("Didn't input any legal test sets type for query :%s"%(test_type))
-            return None     
+            return None   
+          
+    def timerange_changes_count_generic(self,start,end,choice_tab):
+        """
+        This method helps datagrab get the basic data from database 
+        """   
         
 
 #---------------------------------------------------------------------

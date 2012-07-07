@@ -1,7 +1,6 @@
 # Copyright (C) 2007 Adriano Monteiro Marques
 #
-# Author:  Guilherme Polo <ggpolo@gmail.com>
-#          Tianwei Liu <liutianweidlut@gmail.com> 
+# Author:  Tianwei Liu <liutianweidlut@gmail.com> 
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -23,141 +22,58 @@ import datetime
 from umit.icm.agent.gui.dashboard.timeline.Calendar import mdays
 from umit.icm.agent.gui.dashboard.timeline.Calendar import isleap
 
-#TO DO: We should add DB operator for Timeline DataGrab
+from umit.icm.agent.I18N import _
+from umit.icm.agent.Global import *
+from umit.icm.agent.Application import theApp
+from umit.icm.agent.logger import g_logger
+
+from umit.icm.agent.gui.dashboard.DashboardListBase import  *
+
 
 DATA_GRAB_MODES = {
     "yearly_sum": "changes_in_year",
     "monthly_sum": "changes_in_month",
     "daily_sum": "changes_in_day",
     "hourly_sum": "changes_in_hour",
-    "category": "changes_by_category"
+    "category": "changes_by_category_in_range"
     }
 
-class DataGrabber(ChangesRetrieve):
+class DataGrabber(object):
     """
-    Grab data from Inventories or a single host for an Inventory, for a time
+    Grab data from Reports and Tasks in Database, for a time
     range and format it to be used in Timeline.
     """
 
-    def __init__(self, calendar, inventory=None, hostaddr=None):
-        ConnectDB.__init__(self, umitdb)
-        ChangesRetrieve.__init__(self, self.conn, self.cursor)
-
+    def __init__(self, calendar):
+        """
+        """
         self.calendar = calendar
-        self.inventory = inventory
-        self.hostaddr = hostaddr
-
-
-    def get_categories(self):
-        """
-        Get all changes categories in database.
-        """
-        categories = { }
-
-        self.use_dict_cursor()
-
-        # build categories dict
-        for category in self.get_categories_id_name():
-            categories[category['pk']] = (True, category['name'])
-
-        self.use_standard_cursor()
-
-        return categories
-
 
     def standard_sum_filter(self):
         """
         Standard filter to use when we are grabbing data in Changes Sum kind.
         """
-        #return {0: (True, view_kind["sum"])}
         return {0: (True, 'changes_sum')}
 
-
-    def load_changes_for_timerange(self, start, end):
+    def changes_by_category_in_range(self, choice_tab=None, *args):
         """
-        Load changes from database for a timerange.
-        """
-
-
-    def count_changes_for_timerange(self, start, end):
-        """
-        Return number of changes in a timerange.
-        """
-        count = self.timerange_changes_count(start, end)
-
-        return count
-
-
-    def changes_by_category(self, *args):
-        """
-        Generic function for changes_anything_by_category
-        """
-        start = [ ] # start points
-        changes = { } # changes in a range
-        categories = self.get_categories()
-
-        # grab data
-        for category in categories:
-            # unused is a filter that we will discard, it is a filter
-            # for Changes Sum, but we will return a filter by category.
-            #unused, cmax, cstart, \
-            (unused, cstart,
-            cevts) = self.changes_for_categoryid(category, *args)
-
-            # add new start point to start list
-            start.extend(cstart)
-
-            # if changes is empty, set initial values to it
-            if not changes:
-                changes = cevts
-                continue
-
-            # merge lists
-            for key, value in cevts.items():
-                cur_list = changes[key]
-                [cur_list[indx].extend(i) for indx, i in enumerate(value)]
-                changes[key] = cur_list
-
-        # decrement by one each key in categories dict, so it follows filter
-        # format used in other places. (0 .. n)
-        c_new = { }
-        for key, values in categories.items():
-            c_new[key - 1] = values
-
-        return c_new, start, changes
-
-
-    def changes_for_categoryid(self, category, *args):
-        """
-        Generic function for changes_anything_for_categoryid
-        """
-        return self.changes_in_range(category, *args)
-
-
-    def changes_in_range(self, category=None, *args):
-        """
-        Generic function for changes_anything
+        Generic function for changes_anything 
+        (choice_tab can provide report, task tab choice)
+        (This method also received the range )
         """
         if len(args) == 1: # yearly
-            return self.changes_in_year(args[0], category)
+            return self.changes_in_year(args[0], choice_tab)
         elif len(args) == 2: # monthly
-            return self.changes_in_month(args[0], args[1], category)
+            return self.changes_in_month(args[0], args[1], choice_tab)
         elif len(args) == 3: # daily
-            return self.changes_in_day(args[0], args[1], args[2], category)
+            return self.changes_in_day(args[0], args[1], args[2], choice_tab)
         elif len(args) == 4: # hourly
-            return self.changes_in_hour(args[0], args[1], args[2], args[3],
-                category)
+            return self.changes_in_hour(args[0], args[1], args[2], args[3],choice_tab)
         else:
             raise Exception("Invalid number of parameters especified")
 
 
-    """
-    Follows changes_in_range especific methods, I plan making them
-    generic too.
-    """
-
-
-    def changes_in_year(self, year, category=None):
+    def changes_in_year(self, year, choice_tab=None):
         """
         Gets changes per "week" in an entire year.
         """
@@ -180,8 +96,7 @@ class DataGrabber(ChangesRetrieve):
             start = datetime.datetime(year - 1, 12, quarter + half)
             end = datetime.datetime(year, 1, 1)
 
-            start_value = self.timerange_changes_count_generic(start, end,
-                category, self.inventory, self.hostaddr)
+            start_value = g_db_helper.timerange_changes_count_generic(start,end,choice_tab)
 
         # get events for year
         year_events = { }
@@ -217,8 +132,7 @@ class DataGrabber(ChangesRetrieve):
                 else:
                     end = datetime.datetime(year, m + 1, days[i + 1])
 
-                count = self.timerange_changes_count_generic(start, end,
-                    category, self.inventory, self.hostaddr)
+                count = g_db_helper.timerange_changes_count_generic(start,end,choice_tab)
 
                 mcount.append([count, ])
 
@@ -228,7 +142,7 @@ class DataGrabber(ChangesRetrieve):
         return self.standard_sum_filter(), (start_value, ), year_events
 
 
-    def changes_in_month(self, year, month, category=None):
+    def changes_in_month(self, year, month, choice_tab=None):
         """
         Get changes in a month.
         """
@@ -260,8 +174,7 @@ class DataGrabber(ChangesRetrieve):
         start = datetime.datetime(prev_year, prev_month, month_range, 12)
         end = datetime.datetime(year, month, 1)
 
-        start_value = self.timerange_changes_count_generic(start, end,
-            category, self.inventory, self.hostaddr)
+        start_value = g_db_helper.timerange_changes_count_generic(start,end,choice_tab)
 
         for day in range(mdays[month]):
             day_count = [ ]
@@ -270,8 +183,7 @@ class DataGrabber(ChangesRetrieve):
             start = datetime.datetime(year, month, day + 1)
             end = datetime.datetime(year, month, day + 1, 12)
 
-            count1 = self.timerange_changes_count_generic(start, end,
-                category, self.inventory, self.hostaddr)
+            count1 = g_db_helper.timerange_changes_count_generic(start,end,choice_tab)
 
             start = datetime.datetime(year, month, day + 1, 12)
 
@@ -297,8 +209,7 @@ class DataGrabber(ChangesRetrieve):
 
             end = datetime.datetime(dyear, dmonth, dday)
 
-            count2 = self.timerange_changes_count_generic(start, end,
-                category, self.inventory, self.hostaddr)
+            count2 = g_db_helper.timerange_changes_count_generic(start,end,choice_tab)
 
             day_count.append([count1, ])
             day_count.append([count2, ])
@@ -308,7 +219,7 @@ class DataGrabber(ChangesRetrieve):
         return self.standard_sum_filter(), (start_value, ), month_events
 
 
-    def changes_in_day(self, year, month, day, category=None):
+    def changes_in_day(self, year, month, day, choice_tab=None):
         """
         Get changes in a day.
         """
@@ -337,8 +248,7 @@ class DataGrabber(ChangesRetrieve):
         start = datetime.datetime(prev_year, prev_month, prev_day, 23, 30)
         end = datetime.datetime(year, month, day)
 
-        start_value = self.timerange_changes_count_generic(start, end,
-            category, self.inventory, self.hostaddr)
+        start_value = g_db_helper.timerange_changes_count_generic(start,end,choice_tab)
 
         # hour by hour
         for hour in range(24):
@@ -348,8 +258,7 @@ class DataGrabber(ChangesRetrieve):
             start = datetime.datetime(year, month, day, hour)
             end = datetime.datetime(year, month, day, hour, 30)
 
-            count1 = self.timerange_changes_count_generic(start, end,
-                category, self.inventory, self.hostaddr)
+            count1 = g_db_helper.timerange_changes_count_generic(start,end,choice_tab)
 
             # other half
             start = datetime.datetime(year, month, day, hour, 30)
@@ -377,8 +286,7 @@ class DataGrabber(ChangesRetrieve):
             else:
                 end = datetime.datetime(year, month, day, hour + 1)
 
-            count2 = self.timerange_changes_count_generic(start, end,
-                category, self.inventory, self.hostaddr)
+            count2 = g_db_helper.timerange_changes_count_generic(start,end,choice_tab)
 
             hour_count.append([count1])
             hour_count.append([count2])
@@ -389,7 +297,7 @@ class DataGrabber(ChangesRetrieve):
         return self.standard_sum_filter(), (start_value, ), day_events
 
 
-    def changes_in_hour(self, year, month, day, hour, category=None):
+    def changes_in_hour(self, year, month, day, hour, choice_tab=None):
         """
         Get changes in a especific hour.
         """
@@ -416,12 +324,10 @@ class DataGrabber(ChangesRetrieve):
                 prev_day = value
                 prev_hour = 23
 
-        start = datetime.datetime(prev_year, prev_month, prev_day, prev_hour,
-            59)
+        start = datetime.datetime(prev_year, prev_month, prev_day, prev_hour,59)
         end = datetime.datetime(year, month, day, hour, 0)
 
-        start_value = self.timerange_changes_count_generic(start, end,
-            category, self.inventory, self.hostaddr)
+        start_value = g_db_helper.timerange_changes_count_generic(start,end,choice_tab)
 
         # minute by minute
         for minute in range(60):
@@ -447,13 +353,11 @@ class DataGrabber(ChangesRetrieve):
                         next_day = value
                         next_hour = 0
 
-                end = datetime.datetime(next_year, next_month, next_day,
-                    next_hour)
+                end = datetime.datetime(next_year, next_month, next_day,next_hour)
             else:
                 end = datetime.datetime(year, month, day, hour, minute + 1)
 
-            count = self.timerange_changes_count_generic(start, end,
-                category, self.inventory, self.hostaddr)
+            count = g_db_helper.timerange_changes_count_generic(start, end,choice_tab)
 
             hour_events[minute] = [[count, ]]
 
