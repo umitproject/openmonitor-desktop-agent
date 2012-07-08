@@ -35,7 +35,7 @@ class Connector(gobject.GObject):
         
         #Timeline Graph emits this signal when a new selection is done, TimelineBase grabs it, 
         #handles it and stores selected timerange
-        'selection_changed':(gobject.SIGNAL_RUN_FIRST, gobject.TYPE_NONE,(object, object)),
+        'selection_changed':(gobject.SIGNAL_RUN_FIRST, gobject.TYPE_NONE,(object, )),
         
         # After TimeLineBase defines the timerange for selection, it emits  a selection-update, 
         # meaning that TimeLineBarDisplay now may use this range to grab data for display 

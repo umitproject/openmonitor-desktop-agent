@@ -121,7 +121,7 @@ class TimeLineBase(CalendarManager, DataGrabber):
     This class does the necessary Timeline management.
     """
     
-    def __init(self,connector):
+    def __init__(self,connector):
         # using current date at startup
         CalendarManager.__init__(self,**startup_calendar_opts())
         DataGrabber.__init__(self,self)        

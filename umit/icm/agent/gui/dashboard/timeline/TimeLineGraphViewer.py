@@ -27,6 +27,10 @@ import pygtk
 pygtk.require('2.0')
 import gtk, gobject
 
+from deps.higwidgets.higboxes import HIGHBox, HIGVBox,hig_box_space_holder
+
+from umit.icm.agent.gui.dashboard.timeline.TimeLine import TLHoder
+
 class TimeLineGraphViewer(gtk.VBox):
     
     def __init__(self,Dashboard = None):
@@ -42,28 +46,29 @@ class TimeLineGraphViewer(gtk.VBox):
         self.__connected_widgets()
         
     def __create_widgets(self):
-        """"""
-        ######
-        #graph 
+        """"""        
+        self.box = HIGVBox()
         
-        ########
-        #toolbar
-        pass
+        self.timeline = TLHoder()
+        self.timeline.show_all()
+        
+        self.test = gtk.Label("Timeline Graph Area")
         
         
     def __packed_widgets(self):
         """"""
-        pass
+        self.box._pack_noexpand_nofill(self.test)
+        #self.box._pack_noexpand_nofill(hig_box_space_holder())
+        self.box._pack_expand_fill(self.timeline)
+        
+        self.add(self.box)
+        
+        self.show_all()
+        
     def __connected_widgets(self):
         """"""
         pass
     
-    def _update_graph(self, obj, *args):
-        """
-        New graph data arrived
-        """
-        line_filter, start, evts, labels, xlabel, glabel, dlabel = args
-        
 
         
         

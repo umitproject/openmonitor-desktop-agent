@@ -120,9 +120,11 @@ class DashboardWindow(HIGWindow):
         self.vpaned = gtk.VPaned()
         
         self.timeline_viewer = TimeLineGraphViewer(self)
-        self.detail_sw = gtk.ScrolledWindow()
+        self.timeline_viewer.set_size_request(450,280)
+        self.timeline_viewer.set_visible(True)
         
-        self.detail_sw.set_size_request(450, 180)
+        self.detail_sw = gtk.ScrolledWindow()
+        self.detail_sw.set_size_request(450, 280)
         
         self.box_container = gtk.VBox()
 
@@ -169,6 +171,7 @@ class DashboardWindow(HIGWindow):
         
     def show_all_modify(self):
         """"""
+        self.timeline_viewer.show_all()
         self.hide_all_tabs()
 
     def add_tabs(self):
@@ -187,6 +190,8 @@ class DashboardWindow(HIGWindow):
         self.box_container.add(self.service_tab)
     
     def hide_all_tabs(self):
+        """
+        """        
         self.capacity_tab.set_visible(False)
         self.throttled_tab.set_visible(False)
         self.service_tab.set_visible(False)

@@ -29,17 +29,22 @@ import gtk, gobject
 
 from umit.icm.agent.I18N import _
 from umit.icm.agent.gui.dashboard.timeline.TimeLineGraphBase import view_mode,view_mode_order
+from umit.icm.agent.gui.dashboard.timeline.TimeLineGraphBase import view_kind,view_kind_order
+from umit.icm.agent.gui.dashboard.timeline.TimeLineGraphBase import view_mode_descr 
 
 class TimeLineGraphToolbar(gtk.Toolbar):
     """
     Build a Toolbar for controlling Interactive Timeline Graph
     """
-    def __init__(self,graph,connector,graph_mode=None):
+    def __init__(self,graph,connector,graph_mode=None, graph_kind=None,timeline_base=None):
         gtk.Toolbar.__init__(self)
         
         self.graph = graph
         self.connector = connector
         self.graph_mode = graph_mode    #Year,month,day and hour
+        self.graph_kind = graph_kind
+        
+        self.timeline_base = timeline_base
         
         self.__create_widgets()
         self.__packed_widgets()
@@ -51,10 +56,10 @@ class TimeLineGraphToolbar(gtk.Toolbar):
         
     def __packed_widgets(self):
         """"""
-        self.insert(self.graph_mode(self.graph_mode),0) #Year,month,day and hour
+        self.insert(self.graph_mode_ui(self.graph_mode),0) #Year,month,day and hour
         self.insert(self.graph_time_box(),1)                #Time choice 
         self.insert(gtk.SeparatorToolItem(),2)          
-        self.insert(self.graph_kind(),3)                #Line or Area
+        self.insert(self.graph_kind_ui(),3)                #Line or Area
         self.insert(gtk.SeparatorToolItem(),4)
         self.insert(self.graph_refresh(),5)             #Refresh Button
         
@@ -75,38 +80,39 @@ class TimeLineGraphToolbar(gtk.Toolbar):
         
         return item
     
-    def graph_mode(self,graph_mode = None):
+    def graph_mode_ui(self,graph_mode = None):
         """
         Graph Mode: Year, Month, Day, Hour viewing modes
         """
-        self.view_mode = gtk.combo_box_new_text()
+        self.combo_view_mode = gtk.combo_box_new_text()
         
         for mode in view_mode_order:
-            self.view_mode.append_text(view_mode[mode])
+            self.combo_view_mode.append_text(view_mode[mode])
             
         if graph_mode:
             option = view_mode_order.index(graph_mode)
         else:
             option = 0
             
-        self.view_mode.set_active(option)
+        self.combo_view_mode.set_active(option)
         
-        self.view_mode.connect('changed',self.change_graph_mode())
+        self.combo_view_mode.connect('changed',self.change_graph_mode)
         
-        return self.packed(self.view_mode)
+        
+        return self.packed(self.combo_view_mode)
 
     def change_graph_mode(self,event):
         """
         Viewing Mode Setting 
         """
         mode = view_mode_order[event.get_active()]
-        self.connector.emit('data-changed',mode,None)
+        self.connector.emit('data-changed',mode,'category')
     
     def graph_time_box(self):
         """
         Time Choice and Apply button
         """
-        self.time_box = TimeBox()
+        self.time_box = TimeBox(self.connector,self.timeline_base)
         
         return self.packed(self.time_box)
         
@@ -135,7 +141,7 @@ class TimeLineGraphToolbar(gtk.Toolbar):
         """
         self.connector.emit('data-changed',None,None)
     
-    def graph_kind(self):
+    def graph_kind_ui(self):
         """
         Graph kind: Line and Area
         """
@@ -164,6 +170,29 @@ class TimeLineGraphToolbar(gtk.Toolbar):
         Update graph after settings new options for it
         """
         self.graph.setup_new_graph()
+
+    def __set_graph_attr(self, (attr, value)):
+        """
+        Change some graph attribute.
+        """
+        setattr(self.graph, attr, value)
+
+    def __set_graph_mode(self, mode):
+        """
+        Change graph mode.
+        """
+        getattr(self.graph, mode)()
+
+    def graph_attr(self, attr):
+        """
+        Return some graph attribute.
+        """
+        return getattr(self.graph, attr)      
+      
+    # Properties
+    #change_graph_mode = property(fset=__set_graph_mode)
+    #change_graph_attr = property(fset=__set_graph_attr)  
+
 
 class TimeBox(gtk.HBox):
     """
@@ -223,7 +252,7 @@ class TimeBox(gtk.HBox):
         self.dateselect.set_range(values[0], values[1])
         self.dateselect.set_value(values[2])      
         
-      
+    
         
         
         

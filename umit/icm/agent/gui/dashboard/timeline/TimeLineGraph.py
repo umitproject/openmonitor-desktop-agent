@@ -1,7 +1,6 @@
 # Copyright (C) 2007 Adriano Monteiro Marques
 #
 # Authors: Guilherme Polo <ggpolo@gmail.com>
-#          Tianwei Liu <liutianweidlut@gmail.com>
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by

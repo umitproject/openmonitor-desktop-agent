@@ -29,7 +29,10 @@ from umit.icm.agent.gui.dashboard.timeline.TimeLineConnector import Connector
 from umit.icm.agent.gui.dashboard.timeline.TimeLineGraphToolbar import TimeLineGraphToolbar
 from umit.icm.agent.gui.dashboard.timeline.TimeLineGraphBase import TimeLineBase
 
+from deps.higwidgets.higboxes import HIGHBox, HIGVBox,hig_box_space_holder
+
 class TLHoder(gtk.VBox):
+    
     def __init__(self): #maybe import some kinds(report,task,connection,Throttled,Service)
         """
         Load timeline for every report(sent or unsent), test successful or failed (website or service)
@@ -42,6 +45,8 @@ class TLHoder(gtk.VBox):
         self.base = TimeLineBase(self.connector)    #Maybe add some items
         
         self.__create_widgets()
+        self.__packed_widgets()
+        self.__connect_widgets()
         
     def __create_widgets(self):
         """
@@ -52,6 +57,9 @@ class TLHoder(gtk.VBox):
         glabel = self.base.title_by_graphmode()
         dlabel = self.base.descr_by_graphmode()
         
+        #Box
+        self.box = HIGVBox()
+        
         #graph
         self.graph_box = gtk.HBox()
         self.graph = InteractiveGraph(evts, start, x_label=xlabel,
@@ -60,18 +68,23 @@ class TLHoder(gtk.VBox):
             line_filter=line_filter, connector=self.connector)
         
         #graph toolbar
-        self.graphtb = TimeLineGraphToolbar(self.graph, self.connector,
-                                            self.base.graph_mode)
+        #self.graphtb = TimeLineGraphToolbar(self.graph, self.connector,
+        #                                    self.base.graph_mode,self.base.graph_kind,
+        #                                    self.base)
         
         #TODO: Add Display Bar in the further
     
     def __packed_widgets(self):
         """
         """
-        self.graph_box.pack_start(elf.graph, True, True, 3)
+        self.graph_box.add(self.graph)
         
-        self.pack_start(self.graphtb, False, False, 0)
-        self.pack_start(self.graph_box, False, False, 3)
+        #self.box._pack_noexpand_nofill(self.graphtb)
+        self.box._pack_expand_fill(self.graph_box)
+        
+        self.add(self.box)
+                
+        self.show_all()
         
     def __connect_widgets(self):
         """
