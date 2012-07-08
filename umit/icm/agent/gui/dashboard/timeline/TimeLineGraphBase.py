@@ -140,9 +140,16 @@ class TimeLineBase(CalendarManager, DataGrabber):
         self.graph_mode = "daily"
         self.update_grabber()
         
-        self.connector.connect('selection-changed', self._handle_selection)
-        self.connector.connect('data-changed', self._update_graph_data)
-        self.connector.connect('date-update', self._update_date)
+        self.__conector_widgets()
+        
+    def __conector_widgets(self):
+        """
+        """
+        self.connector.connect('selection_changed', self._handle_selection)
+        self.connector.connect('data_changed', self._update_graph_data)
+        self.connector.connect('date_update', self._update_date) 
+
+    
         
     def _handle_selection(self,obj,selection):
         """
@@ -173,7 +180,7 @@ class TimeLineBase(CalendarManager, DataGrabber):
             
         self.selected_range = (start,end)
         
-        self.connector.emit('selection-update', start, end)                   
+        self.connector.emit('selection_update', start, end)                   
     
     def grab_data(self):
         """
@@ -316,10 +323,10 @@ class TimeLineBase(CalendarManager, DataGrabber):
         
         line_filter, start, evts = self.grab_data()
 
-        self.connector.emit('data-update', line_filter, start, evts,
+        self.connector.emit('data_update', line_filter, start, evts,
             self.labels, self.xlabel, glabel, dlabel)                        
         
-        self.connector.emit('date-changed')
+        self.connector.emit('date_changed')
     
     def _update_date(self,obj,arg):
         """
@@ -334,7 +341,7 @@ class TimeLineBase(CalendarManager, DataGrabber):
         if self.graph_mode in modes:
             setattr(self, modes[self.graph_mode], arg)
         
-        self.connector.emit('data-changed',None,None)
+        self.connector.emit('data_changed',None,None)
         
         
         

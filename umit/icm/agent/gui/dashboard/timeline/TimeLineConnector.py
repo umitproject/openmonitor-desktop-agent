@@ -47,6 +47,11 @@ class Connector(gobject.GObject):
         # and updates everything needed.
         'data_changed': (gobject.SIGNAL_RUN_FIRST, gobject.TYPE_NONE,(str, str)),   
         
+        # Tab-changed is used as a way to tell that graph needs a redraw, it is used at 
+        # Dashboard Left treeview current tab to update graph. TimeLineBase handles this 
+        # signal and updates everything neededs
+        'tab_changed': (gobject.SIGNAL_RUN_FIRST, gobject.TYPE_NONE,(str,)),
+        
         # After handling data-changed at TLBase, it emits a new signal:
         # data_update with new data. Timeline catches this signal and
         # requests graph update.

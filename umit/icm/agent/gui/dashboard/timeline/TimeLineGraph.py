@@ -491,7 +491,7 @@ class InteractiveGraph(gtk.Widget):
         if self.connector and not self.keep_selection:
             # if keep_selection is True, we shouldn't tell other widgets
             # that selection changed.
-            self.connector.emit('selection-changed', self.selection)
+            self.connector.emit('selection_changed', self.selection)
 
 
     def get_cairo_context(self):

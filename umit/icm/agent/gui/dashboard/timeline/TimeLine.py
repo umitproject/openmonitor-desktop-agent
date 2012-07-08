@@ -25,7 +25,6 @@ import gtk
 from umit.icm.agent.I18N import _
 
 from umit.icm.agent.gui.dashboard.timeline.TimeLineGraph import InteractiveGraph
-from umit.icm.agent.gui.dashboard.timeline.TimeLineConnector import Connector
 from umit.icm.agent.gui.dashboard.timeline.TimeLineGraphToolbar import TimeLineGraphToolbar
 from umit.icm.agent.gui.dashboard.timeline.TimeLineGraphBase import TimeLineBase
 
@@ -33,7 +32,7 @@ from deps.higwidgets.higboxes import HIGHBox, HIGVBox,hig_box_space_holder
 
 class TLHoder(gtk.VBox):
     
-    def __init__(self,dashboard): #maybe import some kinds(report,task,connection,Throttled,Service)
+    def __init__(self,dashboard,connector=None): #maybe import some kinds(report,task,connection,Throttled,Service)
         """
         Load timeline for every report(sent or unsent), test successful or failed (website or service)
         task (done or not), Throttled details(different charts)
@@ -41,7 +40,7 @@ class TLHoder(gtk.VBox):
         
         gtk.VBox.__init__(self)
         
-        self.connector = Connector()
+        self.connector = connector
         self.dashboard = dashboard
         
         self.base = TimeLineBase(self.connector,self.dashboard)    #Maybe add some items
@@ -92,7 +91,7 @@ class TLHoder(gtk.VBox):
         """
         Handle the connector signals
         """
-        self.connector.connect('data-update',self._update_graph)
+        self.connector.connect('data_update',self._update_graph)
         #TODO: we should add signals for the changes of left treeview
     
     def _update_graph(self,obj,*args):

@@ -31,15 +31,17 @@ from deps.higwidgets.higboxes import HIGHBox, HIGVBox,hig_box_space_holder
 
 from umit.icm.agent.gui.dashboard.timeline.TimeLine import TLHoder
 
+
 class TimeLineGraphViewer(gtk.VBox):
     
-    def __init__(self,Dashboard = None):
+    def __init__(self,dashboard = None,connector = None):
         """
         Load timeline for every tab in dashboard window
         """
         gtk.VBox.__init__(self)
         
-        self.dashboard = Dashboard
+        self.dashboard = dashboard
+        self.connector = connector
         
         self.__create_widgets()
         self.__packed_widgets()
@@ -49,16 +51,17 @@ class TimeLineGraphViewer(gtk.VBox):
         """"""        
         self.box = HIGVBox()
         
-        self.timeline = TLHoder(self.dashboard)
+        self.timeline = TLHoder(self.dashboard,self.connector)
         self.timeline.show_all()
         
-        self.test = gtk.Label("Timeline Graph Area")
-        
+        self.title = gtk.Label(
+            "<span size='15000' weight='heavy'>Timeline Graph Area</span>")        
+        self.title.set_use_markup(True)
+        self.title.set_selectable(False)        
         
     def __packed_widgets(self):
         """"""
-        self.box._pack_noexpand_nofill(self.test)
-        #self.box._pack_noexpand_nofill(hig_box_space_holder())
+        self.box._pack_noexpand_nofill(self.title)
         self.box._pack_expand_fill(self.timeline)
         
         self.add(self.box)

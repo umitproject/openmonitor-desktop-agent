@@ -64,7 +64,6 @@ class DataGrabber(object):
         (choice_tab can provide report, task tab choice)
         (This method also received the range )
         """
-        print "New:",args,choice_tab
         
         if len(args) == 1: # yearly
             return self.changes_in_year(args[0], choice_tab)
@@ -94,6 +93,7 @@ class DataGrabber(object):
         
         #Call DB 
         return g_db_helper.timerange_changes_count_generic(start,end,choice_tab)
+
 
     def changes_in_year(self, year, choice_tab=None):
         """

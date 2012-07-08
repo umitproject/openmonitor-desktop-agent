@@ -57,16 +57,15 @@ class TimeLineGraphToolbar(gtk.Toolbar):
         
     def __create_widgets(self):
         """"""
-        self.tooltips = gtk.Tooltips()
+        pass
         
     def __packed_widgets(self):
         """"""
         self.insert(self.graph_mode_ui(self.graph_mode),0) #Year,month,day and hour
-        self.insert(self.graph_time_box(),1)                #Time choice 
-        self.insert(gtk.SeparatorToolItem(),2)          
-        self.insert(self.graph_kind_ui(),3)                #Line or Area
-        self.insert(gtk.SeparatorToolItem(),4)
-        self.insert(self.graph_refresh(),5)             #Refresh Button
+        self.insert(gtk.SeparatorToolItem(),1)
+        self.insert(self.graph_kind_ui(),2)                #Line or Area        
+        self.insert(gtk.SeparatorToolItem(),3)                  
+        self.insert(self.graph_time_box(),4)                #Time choice 
         
     def __connected_widgets(self):
         """"""
@@ -112,7 +111,7 @@ class TimeLineGraphToolbar(gtk.Toolbar):
         Viewing Mode Setting 
         """
         mode = view_mode_order[event.get_active()]
-        self.connector.emit('data-changed',mode,'category')
+        self.connector.emit('data_changed',mode,'category')
     
     def graph_time_box(self):
         """
@@ -122,31 +121,7 @@ class TimeLineGraphToolbar(gtk.Toolbar):
         
         return self.packed(self.time_box)
         
-    
-    def graph_refresh(self):
-        """
-        Graph refreshing controller
-        """
-        refresh_button = gtk.Button()
-        refresh_button.set_relief(gtk.RELIEF_NONE)
-        self.tooltips.set_tip(refresh_button, _("Graph Refresh"))
         
-        img = gtk.Image()
-        img.set_from_stock(gtk.STOCK_REFRESH,gtk.ICON_SIZE_BUTTON)
-        box = gtk.HBox()
-        box.pack_start(img,False,False,0)
-        box.pack_end(gtk.Arrow(gtk.ARROW_DOWN, gtk.SHADOW_OUT), False, False, 0)
-        refresh_button.add(box)
-        refresh_button.connect("clicked",self.change_graph_refresh)
-        
-        return self.packed(refresh_button)
-    
-    def change_graph_refresh(self,event):
-        """
-        Refresh now
-        """
-        self.connector.emit('data-changed',None,None)
-    
     def graph_kind_ui(self):
         """
         Graph kind: Line and Area
@@ -195,10 +170,6 @@ class TimeLineGraphToolbar(gtk.Toolbar):
         """
         return getattr(self.graph, attr)      
       
-    # Properties
-    #change_graph_mode = property(fset=__set_graph_mode)
-    #change_graph_attr = property(fset=__set_graph_attr)  
-
 
 class TimeBox(gtk.HBox):
     """
@@ -226,9 +197,23 @@ class TimeBox(gtk.HBox):
         self.date_select = gtk.SpinButton(gtk.Adjustment(value=values[2],
             lower=values[0], upper=values[1], step_incr=1), 1)
         
+        ###############
+        #Refresh Button
         
-        self.apply_button = gtk.Button(stock=gtk.STOCK_APPLY)
-        self.apply_button.set_border_width(3)
+        self.tooltips = gtk.Tooltips()
+        
+        self.refresh_button = gtk.Button()
+        self.refresh_button.set_border_width(3)
+
+        self.refresh_button.set_relief(gtk.RELIEF_NONE)
+        
+        self.tooltips.set_tip(self.refresh_button, _("Graph Refresh"))
+        
+        img = gtk.Image()
+        img.set_from_stock(gtk.STOCK_REFRESH,gtk.ICON_SIZE_BUTTON)
+        box = gtk.HBox()
+        box.pack_start(img,False,False,0)
+        self.refresh_button.add(box)
 
         
     def __pack_widgets(self):
@@ -237,22 +222,21 @@ class TimeBox(gtk.HBox):
         """
         self.pack_start(self.select_label, False, False, 0)
         self.pack_start(self.date_select, False, False, 0)
-        self.pack_start(self.apply_button, False, False, 0)
+        self.pack_start(self.refresh_button, False, False, 0)
         
         
     def __connected_widgets(self):
         """
         """
-        self.connector.connect('date-changed', self._update_current_date)
-        self.apply_button.connect("clicked", self._date_change)
-        
+        self.connector.connect('date_changed', self._update_current_date)
+        self.refresh_button.connect("clicked", self._date_change)
+        self.connector.connect('tab_changed', self._update_tab)        
         
     def _date_change(self,event):
         """
         send new date
         """
-        self.connector.emit('date-update', self.date_select.get_value_as_int())
-
+        self.connector.emit('date_update', self.date_select.get_value_as_int())
 
     def _update_current_date(self, event):
         """
@@ -265,7 +249,11 @@ class TimeBox(gtk.HBox):
         self.date_select.set_range(values[0], values[1])
         self.date_select.set_value(values[2])      
         
-    
+    def _update_tab(self,obj,args):
+        """
+        When the user choice one tab in Dashboard, it will grab this signals
+        """
+        self.connector.emit('date_update', self.date_select.get_value_as_int())            
         
         
         

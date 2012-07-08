@@ -383,7 +383,7 @@ class DBHelper(object):
         from umit.icm.agent.gui.dashboard.DashboardListBase import CAPA_THROTTLED,CAPACITY,CAPA_SERVICE
         from umit.icm.agent.gui.dashboard.DashboardListBase import REPORT,REPORT_SENT,REPORT_UNSENT,REPORT_RECEIVED
         
-        g_logger.debug("Timeline Query:start:%s, end:%s, tab:%s"%(start,end,choice_tab))
+        #g_logger.debug("Timeline Query:start:%s, end:%s, tab:%s"%(start,end,choice_tab))
         
         if  choice_tab ==  REPORT_SENT:
             return len(self.db_conn.select("SELECT * from reports "

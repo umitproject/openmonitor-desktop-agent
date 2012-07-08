@@ -94,7 +94,7 @@ class TimeLineSelected(gtk.Widget):
     def __connected_widgets(self):
         """
         """
-        self.connector.connect('selection-update', self._update_graph)
+        self.connector.connect('selection_update', self._update_graph)
     
     def create_pango_layout(self):
         """

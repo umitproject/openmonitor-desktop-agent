@@ -36,6 +36,8 @@ from umit.icm.agent.gui.dashboard.ConnectionTab import ConnectionsIndividualTab,
 from umit.icm.agent.gui.dashboard.TaskTab import TaskTab,TaskDetailsTab,TaskExecuteTab
 from umit.icm.agent.gui.dashboard.CapacityTab import CapacityTab,ThrottledTab,ServiceTab
 
+from umit.icm.agent.gui.dashboard.timeline.TimeLineConnector import Connector
+
 from umit.icm.agent.gui.dashboard.DashboardListBase import  *
 
 from umit.icm.agent.gui.dashboard.timeline.TimeLineGraphViewer import *
@@ -90,6 +92,7 @@ class NavigationBox(HIGVBox):
             self.dashboard.cur_tab = self.treestore.get_value(iter, 0)
             self.dashboard.refresh()
 
+
 class DashboardWindow(HIGWindow):
     def __init__(self):
         """
@@ -107,6 +110,8 @@ class DashboardWindow(HIGWindow):
         self.task_type = None
         self.create_tabs = False
         
+        self.connector = Connector()
+        
         self.__create_widgets()
         self.__pack_widgets()
         self.create_switch()
@@ -121,7 +126,7 @@ class DashboardWindow(HIGWindow):
         
         self.vpaned = gtk.VPaned()
         
-        self.timeline_viewer = TimeLineGraphViewer(self)
+        self.timeline_viewer = TimeLineGraphViewer(self,self.connector)
         self.timeline_viewer.set_size_request(450,280)
         self.timeline_viewer.set_visible(True)
         
@@ -291,7 +296,7 @@ class DashboardWindow(HIGWindow):
     
     def refresh_service(self):
         """"""
-        self.service_tab.show_details()      
+        self.service_tab.show_details()  
     
     def create_switch(self):
         """
@@ -330,11 +335,25 @@ class DashboardWindow(HIGWindow):
     def refresh(self):
         """
         """
+        ####
+        #Tab 
         self.report_type = self.cur_tab
         self.conn_type = self.cur_tab
         self.task_type = self.cur_tab
+        
+        ##############
+        #Choice Method
         result = self.switch_dict[self.cur_tab]()
+        
+        #################################################
+        #Emit the tab_changed signal to TimelineGraphBase
+        self.connector.emit('tab_changed', self.cur_tab)    
+        
+        ######################
+        #Frame show controller
         self.show_one(self.cur_tab)
+        
+        
      
 
 if __name__ == "__main__":
