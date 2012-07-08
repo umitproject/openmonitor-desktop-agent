@@ -41,7 +41,7 @@ class ReportEntry(object):
         """Constructor"""
         self.ID = ''
         self.SourceID = ''
-        self.TimeGen = ''
+        self.TimeGen = 0
         self.TestID = ''
         self.Report = ''
         self.SourceIP = ''
@@ -91,7 +91,7 @@ class ReportManager(object):
         report_entry = ReportEntry()
         # required fields
         report_entry.SourceID = report.header.agentID
-        report_entry.TimeGen =  datetime.datetime.fromtimestamp(report.header.timeUTC)
+        report_entry.TimeGen =  report.header.timeUTC 
         report_entry.TestID = report.header.testID
         report_entry.ID = report.header.reportID
         report_entry.Report = report
@@ -123,7 +123,7 @@ class ReportManager(object):
             report_entry = ReportEntry()
             report_entry.ID = record[0]
             report_entry.TestID = record[1]
-            report_entry.TimeGen = record[2]
+            report_entry.TimeGen = int(time.mktime(time.strptime(record[2], "%Y-%m-%d %H:%M:%S")))
             report_entry.Report = MessageFactory.decode(base64.b64decode(record[3]))
             report_entry.SourceID = record[4]
             report_entry.SourceIP = record[5]
@@ -143,7 +143,7 @@ class ReportManager(object):
                    (table_name,
                     report_entry.ID,
                     report_entry.TestID,
-                    report_entry.TimeGen,
+                    datetime.datetime.fromtimestamp(report_entry.TimeGen),
                     base64.b64encode(MessageFactory.encode(report_entry.Report)),
                     report_entry.SourceID,
                     report_entry.SourceIP,
