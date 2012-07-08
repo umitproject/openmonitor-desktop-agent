@@ -65,6 +65,13 @@ changes_in_db = {
 categories = dict(changes_in_db)
 categories['changes_sum'] = _("Changes Sum")
 
+view_kind_order = ["sum", "category"]
+
+view_kind = {
+    "sum": _("Changes Sum"),
+    "category": _("By Category")
+    }
+
 changes_list = changes_in_db.keys()
 
 def colors_from_file_gdk():
@@ -116,8 +123,8 @@ class TimeLineBase(CalendarManager, DataGrabber):
     
     def __init(self,connector):
         # using current date at startup
-        CalendarManager.__init__(self)
-        DataGrabber.__init__(self)        
+        CalendarManager.__init__(self,**startup_calendar_opts())
+        DataGrabber.__init__(self,self)        
         
         self.connector = connector
         self.grabber_method = None
@@ -127,6 +134,7 @@ class TimeLineBase(CalendarManager, DataGrabber):
         
         self.selection = -1
         self.selected_range = (None, None)
+        self.graph_kind = "category"
         self.graph_mode = "daily"
         self.update_grabber()
         
@@ -169,12 +177,19 @@ class TimeLineBase(CalendarManager, DataGrabber):
         """
         Grab data for graph using current settings.
         """
-        return (None,None,None)         
+        return getattr(self, self.grabber_method)(*self.grabber_params)         
     
     def update_grabber(self):
         """
         Updates grabber method, params and graph vlabels.
         """
+        
+        if self.graph_kind == "sum":
+            grab_mode = self.graph_mode + "_" + self.graph_kind
+        else:
+            grab_mode = "category"
+
+        self.grabber_method = DATA_GRAB_MODES[grab_mode]        
         
         labels = [ ]
         if self.graph_mode == "yearly":
@@ -288,6 +303,19 @@ class TimeLineBase(CalendarManager, DataGrabber):
         """
         Received a request to perform graph data update
         """ 
+        if args[0] and args[1]:
+            self.graph_mode = args[0]
+            self.graph_kind = args[1]
+            
+        self.update_grabber()
+        
+        glabel = self.title_by_graphmode() # graph title
+        dlabel = self.descr_by_graphmode() # graph description
+        
+        line_filter, start, evts = self.grab_data()
+
+        self.connector.emit('data-update', line_filter, start, evts,
+            self.labels, self.xlabel, glabel, dlabel)                        
         
         self.connector.emit('data-changed')
     
@@ -301,8 +329,8 @@ class TimeLineBase(CalendarManager, DataGrabber):
             "daily": "day",
             "hourly": "hour" }
         
-        if self.graoh_mode in modes:
-            self.modes[self.graoh_mode] = arg
+        if self.graph_mode in modes:
+            setattr(self, modes[self.graph_mode], arg)
         
         self.connector.emit('data-changed',None,None)
         

@@ -52,7 +52,6 @@ class DataGrabber(object):
         """
         self.calendar = calendar
 
-
     def standard_sum_filter(self):
         """
         Standard filter to use when we are grabbing data in Changes Sum kind.

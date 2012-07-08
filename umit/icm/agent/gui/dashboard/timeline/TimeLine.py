@@ -78,9 +78,30 @@ class TLHoder(gtk.VBox):
         Handle the connector signals
         """
         self.connector.connect('data-update',self._update_graph)
-        
         #TODO: we should add signals for the changes of left treeview
-         
+    
+    def _update_graph(self,obj,*args):
+        """
+        New graph data arrived
+        """    
+        line_filter, start, evts, labels, xlabel, glabel, dlabel = args
+        
+        # new graph data
+        self.graph.start_pts_data = start
+        self.graph.graph_data = evts
+        
+        # find new max value
+        self.graph.find_max_value()
+        
+        # update graph labels
+        self.graph.xlabel = xlabel
+        self.graph.graph_label = glabel
+        self.graph.descr_label = dlabel
+        self.graph.vdiv_labels = labels
+        
+        # do graph animation with new data
+        self.graph.do_animation()                                        
+
         
         
         
