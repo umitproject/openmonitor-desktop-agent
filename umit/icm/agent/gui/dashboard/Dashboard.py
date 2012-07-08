@@ -251,9 +251,15 @@ class DashboardWindow(HIGWindow):
 
     def refresh_report_details(self):
         """
-        Report Details: The list store can show the different report details(sent,unsent,received) from database
+        Report Details: The list store can show the different report details(sent,unsent) from database
         """
         self.report_details_tab.show_details(self.report_type)
+
+    def refresh_received_report_detail(self):
+        """
+        Reports Received Details: The list store can show received reports from database
+        """
+        self.report_recv_details_tab.show_details(ReceiveDetailsTab)
 
     def refresh_task_execute_details(self):
         """
@@ -274,7 +280,9 @@ class DashboardWindow(HIGWindow):
     def refresh_capacity(self):
         """"""
         pass
-    
+        self.throttled_tab.show_details()
+        #TODO : We should add capacity information into this frame
+        
     def refresh_throttled(self):
         """"""
         self.throttled_tab.show_details()
@@ -293,7 +301,7 @@ class DashboardWindow(HIGWindow):
                             REPORT          : self.refresh_reports_statistics,
                             REPORT_SENT     : self.refresh_report_details,
                             REPORT_UNSENT   : self.refresh_report_details,
-                            REPORT_RECEIVED : self.refresh_report_details,
+                            REPORT_RECEIVED : self.refresh_received_report_detail,
                             
                             #########
                             #Task tab

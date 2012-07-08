@@ -351,7 +351,7 @@ class DBHelper(object):
         elif report_type == REPORT_UNSENT:
             return self.db_conn.select("SELECT * from unsent_reports")
         elif report_type == REPORT_RECEIVED:
-            return None
+            return self.db_conn.select("SELECT * from received_reports")
         else:
             g_logger.error("Didn't input any legal report type for query :%s"%(report_type))
             return None

@@ -68,9 +68,9 @@ class TLHoder(gtk.VBox):
             line_filter=line_filter, connector=self.connector)
         
         #graph toolbar
-        #self.graphtb = TimeLineGraphToolbar(self.graph, self.connector,
-        #                                    self.base.graph_mode,self.base.graph_kind,
-        #                                    self.base)
+        self.graphtb = TimeLineGraphToolbar(self.graph, self.connector,
+                                            self.base.graph_mode,self.base.graph_kind,
+                                            self.base)
         
         #TODO: Add Display Bar in the further
     
@@ -79,7 +79,7 @@ class TLHoder(gtk.VBox):
         """
         self.graph_box.add(self.graph)
         
-        #self.box._pack_noexpand_nofill(self.graphtb)
+        self.box._pack_noexpand_nofill(self.graphtb)
         self.box._pack_expand_fill(self.graph_box)
         
         self.add(self.box)
