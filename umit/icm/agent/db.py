@@ -383,24 +383,22 @@ class DBHelper(object):
         from umit.icm.agent.gui.dashboard.DashboardListBase import CAPA_THROTTLED,CAPACITY,CAPA_SERVICE
         from umit.icm.agent.gui.dashboard.DashboardListBase import REPORT,REPORT_SENT,REPORT_UNSENT,REPORT_RECEIVED
         
+        g_logger.debug("Timeline Query:start:%s, end:%s, tab:%s"%(start,end,choice_tab))
+        
         if  choice_tab ==  REPORT_SENT:
-            return self.db_conn.select("SELECT * from reports "
+            return len(self.db_conn.select("SELECT * from reports "
                             "WHERE time_gen >= ? AND time_gen < ? "
-                            "ORDER BY time_gen DESC", (start,end)).fetchall()
+                            "ORDER BY time_gen DESC", (start,end)))
         elif choice_tab ==  REPORT_UNSENT:
-            return self.db_conn.select("SELECT * from unsent_reports "
+            return len(self.db_conn.select("SELECT * from unsent_reports "
                             "WHERE time_gen >= ? AND time_gen < ? "
-                            "ORDER BY time_gen DESC", (start,end)).fetchall()
+                            "ORDER BY time_gen DESC", (start,end)))
         elif choice_tab ==  REPORT_RECEIVED:
             return 0
         elif choice_tab ==  CAPA_THROTTLED:
-            return self.db_conn.select("SELECT * from tasks "
-                            "WHERE execute_time >= ? AND execute_time < ? "
-                            "ORDER BY time_gen DESC", (start,end)).fetchall()
+            return len(self.db_conn.select("SELECT * from tasks WHERE execute_time >= ? AND execute_time < ? AND test_type = 'WEB' ",(start,end)))
         elif choice_tab ==  CAPA_SERVICE:
-            return self.db_conn.select("SELECT * from tasks "
-                            "WHERE execute_time >= ? AND execute_time < ? "
-                            "ORDER BY time_gen DESC", (start,end)).fetchall()
+            return len(self.db_conn.select("SELECT * from tasks WHERE execute_time >= ? AND execute_time < ? AND test_type = 'Service' ",(start,end)))
         else:
             return 0       
 

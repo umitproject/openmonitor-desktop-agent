@@ -33,7 +33,7 @@ from deps.higwidgets.higboxes import HIGHBox, HIGVBox,hig_box_space_holder
 
 class TLHoder(gtk.VBox):
     
-    def __init__(self): #maybe import some kinds(report,task,connection,Throttled,Service)
+    def __init__(self,dashboard): #maybe import some kinds(report,task,connection,Throttled,Service)
         """
         Load timeline for every report(sent or unsent), test successful or failed (website or service)
         task (done or not), Throttled details(different charts)
@@ -42,7 +42,9 @@ class TLHoder(gtk.VBox):
         gtk.VBox.__init__(self)
         
         self.connector = Connector()
-        self.base = TimeLineBase(self.connector)    #Maybe add some items
+        self.dashboard = dashboard
+        
+        self.base = TimeLineBase(self.connector,self.dashboard)    #Maybe add some items
         
         self.__create_widgets()
         self.__packed_widgets()

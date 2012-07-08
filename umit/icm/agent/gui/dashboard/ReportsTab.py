@@ -260,7 +260,7 @@ class ReceiveDetailsTab(gtk.VBox):
         from umit.icm.agent.gui.dashboard.DashboardListBase import REPORT,REPORT_SENT,REPORT_UNSENT,REPORT_RECEIVED        
         ###########################
         #Get Report Details From DB
-        rs = g_db_helper.get_report_sets(report_type=report_type)
+        rs = g_db_helper.get_report_sets(report_type)
         
         if rs == None:
             g_logger.info("Cannot load any reports from DB.")

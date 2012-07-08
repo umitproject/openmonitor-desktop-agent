@@ -58,12 +58,13 @@ class DataGrabber(object):
         """
         return {0: (True, 'changes_sum')}
     
-    def changes_by_category_in_range(self, choice_tab=None, *args):
+    def changes_by_category_in_range(self, args,choice_tab=None):
         """
         Generic function for changes_anything 
         (choice_tab can provide report, task tab choice)
         (This method also received the range )
         """
+        print "New:",args,choice_tab
         
         if len(args) == 1: # yearly
             return self.changes_in_year(args[0], choice_tab)
@@ -74,7 +75,7 @@ class DataGrabber(object):
         elif len(args) == 4: # hourly
             return self.changes_in_hour(args[0], args[1], args[2], args[3],choice_tab)
         else:
-            raise Exception("Invalid number of parameters especified")
+            g_logger.error("Invalid number of parameters specified")
 
     def timerange_changes_count_generic(self,start,end,choice_tab):
         """
@@ -83,11 +84,13 @@ class DataGrabber(object):
         
         #start and end should always 
         if not start or not end:
-            raise Exception("You should especify range start and range end")
+            g_logger.error("You should specify range start and range end")
+            return
         
         #check choice_tab
         if not choice_tab:
-            raise Exception("You should especify choice_tab")
+            g_logger.error("You should specify choice_tab")
+            return
         
         #Call DB 
         return g_db_helper.timerange_changes_count_generic(start,end,choice_tab)
@@ -157,7 +160,8 @@ class DataGrabber(object):
 
             year_events[m] = mcount
 
-
+        
+        g_logger.debug("Year Events: %d, %s"%(start_value,year_events))       
         return self.standard_sum_filter(), (start_value, ), year_events
 
 
@@ -234,7 +238,7 @@ class DataGrabber(object):
             day_count.append([count2, ])
             month_events[day] = day_count
 
-
+        g_logger.debug("Month Events: %d, %s"%(start_value,month_events)) 
         return self.standard_sum_filter(), (start_value, ), month_events
 
 
@@ -312,7 +316,7 @@ class DataGrabber(object):
 
             day_events[hour] = hour_count
 
-
+        g_logger.debug("Day Events: %d, %s"%(start_value,day_events)) 
         return self.standard_sum_filter(), (start_value, ), day_events
 
 
@@ -380,6 +384,6 @@ class DataGrabber(object):
 
             hour_events[minute] = [[count, ]]
 
-
+        g_logger.debug("Hour Events: %d, %s"%(start_value,hour_events)) 
         return self.standard_sum_filter(), (start_value, ), hour_events
 

@@ -121,12 +121,14 @@ class TimeLineBase(CalendarManager, DataGrabber):
     This class does the necessary Timeline management.
     """
     
-    def __init__(self,connector):
+    def __init__(self,connector,dashboard):
         # using current date at startup
         CalendarManager.__init__(self,**startup_calendar_opts())
         DataGrabber.__init__(self,self)        
         
         self.connector = connector
+        self.dashboard = dashboard
+        
         self.grabber_method = None
         self.grabber_params = None
         self.labels = None
@@ -176,8 +178,8 @@ class TimeLineBase(CalendarManager, DataGrabber):
     def grab_data(self):
         """
         Grab data for graph using current settings.
-        """
-        return getattr(self, self.grabber_method)(*self.grabber_params)         
+        """        
+        return getattr(self, self.grabber_method)(self.grabber_params,self.dashboard.cur_tab)         
     
     def update_grabber(self):
         """
@@ -317,7 +319,7 @@ class TimeLineBase(CalendarManager, DataGrabber):
         self.connector.emit('data-update', line_filter, start, evts,
             self.labels, self.xlabel, glabel, dlabel)                        
         
-        self.connector.emit('data-changed')
+        self.connector.emit('date-changed')
     
     def _update_date(self,obj,arg):
         """

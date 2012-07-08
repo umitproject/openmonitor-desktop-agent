@@ -100,6 +100,8 @@ class DashboardWindow(HIGWindow):
         self.set_size_request(1280, 820)
         self.set_position(gtk.WIN_POS_CENTER_ALWAYS)
         
+        self.cur_tab = CAPACITY
+        
         self.switch_dict = {}
         self.conn_type = None
         self.task_type = None
@@ -259,7 +261,7 @@ class DashboardWindow(HIGWindow):
         """
         Reports Received Details: The list store can show received reports from database
         """
-        self.report_recv_details_tab.show_details(ReceiveDetailsTab)
+        self.report_recv_details_tab.show_details(REPORT_RECEIVED)
 
     def refresh_task_execute_details(self):
         """

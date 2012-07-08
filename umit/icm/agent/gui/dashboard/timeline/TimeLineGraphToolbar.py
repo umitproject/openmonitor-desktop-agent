@@ -39,6 +39,11 @@ class TimeLineGraphToolbar(gtk.Toolbar):
     def __init__(self,graph,connector,graph_mode=None, graph_kind=None,timeline_base=None):
         gtk.Toolbar.__init__(self)
         
+        #################
+        #Toolbar settings
+        self.set_orientation(gtk.ORIENTATION_HORIZONTAL)
+        self.set_style(gtk.TOOLBAR_BOTH)
+        
         self.graph = graph
         self.connector = connector
         self.graph_mode = graph_mode    #Year,month,day and hour
@@ -72,6 +77,7 @@ class TimeLineGraphToolbar(gtk.Toolbar):
         Pack Widgets in a gtk.Hbox and return a gtk.ToolItem
         """
         box = gtk.HBox()
+        box.set_border_width(5)
         for w in widgets:
             box.pack_start(w,False,False,0)
             
@@ -157,7 +163,7 @@ class TimeLineGraphToolbar(gtk.Toolbar):
         
         return self.packed(self.combo_graph_kind)
         
-    def change_graph_kind(self,enent):
+    def change_graph_kind(self,event):
         """
         Display possible ways on how graph may grab changes
         """
@@ -208,16 +214,21 @@ class TimeBox(gtk.HBox):
         self.__pack_widgets()
         self.__connected_widgets()
         
+        
     def __create_widgets(self):
         """
         """
         cur_mode = view_mode_descr[self.timeline_base.graph_mode]
         self.select_label = gtk.Label(cur_mode)
+        
         values = self.timeline_base.bounds_by_graphmode()
+        
         self.date_select = gtk.SpinButton(gtk.Adjustment(value=values[2],
             lower=values[0], upper=values[1], step_incr=1), 1)
         
+        
         self.apply_button = gtk.Button(stock=gtk.STOCK_APPLY)
+        self.apply_button.set_border_width(3)
 
         
     def __pack_widgets(self):
@@ -235,22 +246,24 @@ class TimeBox(gtk.HBox):
         self.connector.connect('date-changed', self._update_current_date)
         self.apply_button.connect("clicked", self._date_change)
         
+        
     def _date_change(self,event):
         """
         send new date
         """
-        self.connector.emit('date-update', self.dateselect.get_value_as_int())
+        self.connector.emit('date-update', self.date_select.get_value_as_int())
+
 
     def _update_current_date(self, event):
         """
         Update spinbutton and values based on new date.
         """
-        cur_mode = view_mode_descr[self.tlbase.graph_mode]
+        cur_mode = view_mode_descr[self.timeline_base.graph_mode]
         self.select_label.set_label(cur_mode)
 
         values = self.timeline_base.bounds_by_graphmode()
-        self.dateselect.set_range(values[0], values[1])
-        self.dateselect.set_value(values[2])      
+        self.date_select.set_range(values[0], values[1])
+        self.date_select.set_value(values[2])      
         
     
         

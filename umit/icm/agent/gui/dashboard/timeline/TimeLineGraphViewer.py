@@ -49,7 +49,7 @@ class TimeLineGraphViewer(gtk.VBox):
         """"""        
         self.box = HIGVBox()
         
-        self.timeline = TLHoder()
+        self.timeline = TLHoder(self.dashboard)
         self.timeline.show_all()
         
         self.test = gtk.Label("Timeline Graph Area")
