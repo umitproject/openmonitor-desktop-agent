@@ -283,6 +283,7 @@ class AggregatorAPI(object):
         g_logger.info("Location response from the aggregator : %s",message)
         if(message.location!=INVALID):
             g_logger.info("Location is %s" % message)
+            self.get_super_peer_list(message.location);
         else:
             g_logger.info("Location is invalid. Please provide a valid IP Address. (This must be a problem while IP is detected. Could be a NAT problem)")
 

@@ -588,7 +588,7 @@ class PeerManager:
                 '''
                 Once the geolocation service is up, pass the country code and  get the super peers belonging to that country alone instead of count
                 '''
-                theApp.aggregator.get_super_peer_list(theApp.aggregator.getlocation())
+                #theApp.aggregator.get_super_peer_list(theApp.aggregator.getlocation())
             else:
                 for peer in self.super_peers.values():
                     if peer.status == 'Connected' and peer.ID in self.sessions:
