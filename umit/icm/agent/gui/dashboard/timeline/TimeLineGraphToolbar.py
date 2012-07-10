@@ -224,7 +224,6 @@ class TimeBox(gtk.HBox):
         self.pack_start(self.date_select, False, False, 0)
         self.pack_start(self.refresh_button, False, False, 0)
         
-        
     def __connected_widgets(self):
         """
         """

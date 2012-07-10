@@ -23,7 +23,6 @@ import pygtk
 pygtk.require('2.0')
 import gtk, gobject
 
-from pygtk_chart.line_chart import LineChart, Graph
 
 from higwidgets.higboxes import HIGVBox
 from higwidgets.higwindows import HIGWindow
