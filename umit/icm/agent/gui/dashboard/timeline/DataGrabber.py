@@ -161,7 +161,7 @@ class DataGrabber(object):
             year_events[m] = mcount
 
         
-        g_logger.debug("Year Events: %d, %s"%(start_value,year_events))       
+        #g_logger.debug("Year Events: %d, %s"%(start_value,year_events))       
         return self.standard_sum_filter(), (start_value, ), year_events
 
 
@@ -238,7 +238,7 @@ class DataGrabber(object):
             day_count.append([count2, ])
             month_events[day] = day_count
 
-        g_logger.debug("Month Events: %d, %s"%(start_value,month_events)) 
+        #g_logger.debug("Month Events: %d, %s"%(start_value,month_events)) 
         return self.standard_sum_filter(), (start_value, ), month_events
 
 
@@ -316,7 +316,7 @@ class DataGrabber(object):
 
             day_events[hour] = hour_count
 
-        g_logger.debug("Day Events: %d, %s"%(start_value,day_events)) 
+        #g_logger.debug("Day Events: %d, %s"%(start_value,day_events)) 
         return self.standard_sum_filter(), (start_value, ), day_events
 
 
@@ -384,6 +384,6 @@ class DataGrabber(object):
 
             hour_events[minute] = [[count, ]]
 
-        g_logger.debug("Hour Events: %d, %s"%(start_value,hour_events)) 
+        #g_logger.debug("Hour Events: %d, %s"%(start_value,hour_events)) 
         return self.standard_sum_filter(), (start_value, ), hour_events
 

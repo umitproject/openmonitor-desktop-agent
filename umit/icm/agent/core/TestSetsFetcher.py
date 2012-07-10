@@ -104,10 +104,7 @@ class TestSetsFetcher(object):
         from umit.icm.agent.rpc.message import *
         from umit.icm.agent.rpc.MessageFactory import MessageFactory
         from umit.icm.agent.rpc import messages_pb2
-        
-        #simulate the network delay
-        #time.sleep(2)
-        
+                
         #Generate NewTestsResponse(
         tests_response = NewTestsResponse()
         tests_response.testVersionNo = random.randint(1,10000)    #Random test version num 
@@ -115,14 +112,14 @@ class TestSetsFetcher(object):
             tests_response.testVersionNo = tests_response.testVersionNo - 3000
                
         #website Test
-        #test = tests_response.tests.add()
-        #test.testID = 1
-        #test.website.url = "http://www.baidu.com/"
-        #test.testType = 'WEB'
+        test = tests_response.tests.add()
+        test.testID = str("1186fe21-9099-4442-93ca-75705c33cb73")
+        test.website.url = "http://www.baidu.com/"
+        test.testType = 'WEB'
         
         #Service Test:FTP
         #test = tests_response.tests.add()
-        #test.testID = 2
+        #test.testID = str("1186fe21-9099-4442-93ca-75705c33cb73")
         #test.service.name = 'ftp'
         #test.service.port = 21121
         #test.service.ip   = '202.118.67.200'
@@ -130,7 +127,7 @@ class TestSetsFetcher(object):
         
         #Service Test:IRC,SSH
         #test = tests_response.tests.add()
-        #test.testID = 4
+        #test.testID = str("1186fe21-9099-4442-93ca-75705c33cb73")
         #test.service.name = 'ssh'
         #test.service.port = 23
         #test.service.ip   = '192.168.24.129'

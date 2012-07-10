@@ -139,7 +139,7 @@ class ReportManager(object):
     def save_report_to_db(self, table_name, report_entry):
         sql_stmt = "insert into %s (report_id, test_id, time_gen, content, "\
                    "source_id, source_ip, status) values "\
-                   "('%s', '%s', %s, '%s', '%s', '%s', '%s')" % \
+                   "('%s', '%s', '%s', '%s', '%s', '%s', '%s')" % \
                    (table_name,
                     report_entry.ID,
                     report_entry.TestID,

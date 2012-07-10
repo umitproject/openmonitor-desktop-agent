@@ -382,6 +382,7 @@ class DBHelper(object):
         """   
         from umit.icm.agent.gui.dashboard.DashboardListBase import CAPA_THROTTLED,CAPACITY,CAPA_SERVICE
         from umit.icm.agent.gui.dashboard.DashboardListBase import REPORT,REPORT_SENT,REPORT_UNSENT,REPORT_RECEIVED
+        from umit.icm.agent.gui.dashboard.DashboardListBase import TASK_SUCCESSED, TASK_FAILED,TASK_ALL,TASK
         
         #g_logger.debug("Timeline Query:start:%s, end:%s, tab:%s"%(start,end,choice_tab))
         
@@ -399,28 +400,37 @@ class DBHelper(object):
             return len(self.db_conn.select("SELECT * from tasks WHERE execute_time >= ? AND execute_time < ? AND test_type = 'WEB' ",(start,end)))
         elif choice_tab ==  CAPA_SERVICE:
             return len(self.db_conn.select("SELECT * from tasks WHERE execute_time >= ? AND execute_time < ? AND test_type = 'Service' ",(start,end)))
+        elif choice_tab == TASK_SUCCESSED:
+            return len(self.db_conn.select("SELECT * from tasks WHERE execute_time >= ? AND execute_time < ? AND done_status = 'Success' ",(start,end)))
+        elif choice_tab == TASK_FAILED:
+            return len(self.db_conn.select("SELECT * from tasks WHERE execute_time >= ? AND execute_time < ? AND done_status = 'Failed' ",(start,end)))
+        elif choice_tab == TASK_ALL or choice_tab == TASK:
+            return len(self.db_conn.select("SELECT * from tasks WHERE execute_time >= ? AND execute_time < ? ",(start,end)))
         else:
             return 0   
         
     def task_web(self,task_web_info):
         """
         """
-        self.execute("INSERT INTO tasks (test_id, website_url, "
-                     "test_type, done_status, done_result, execute_time) VALUES "
-                     "('%s', '%s', '%s', '%s', '%s', '%s')" % \
+        
+        self.execute("INSERT INTO tasks VALUES "
+                     "(NULL,'%s', '%s', '%s',NULL,NULL,NULL ,'%s', '%s', '%s')" % \
                         (task_web_info['test_id'], task_web_info['website_url'], task_web_info['test_type'], 
-                         task_web_info['done_status'],task_web_info['done_result'],task_web_info['execute_time']))        
-    
+                         task_web_info['done_status'],task_web_info['done_result'],str(task_web_info['execute_time'])))        
+        
+        g_logger.info("Store %s WebSite Test Task into Database"%(task_web_info['test_id']))
+        
     def task_service(self,task_service_info):
         """
         """
-        self.execute("INSERT INTO tasks (test_id, test_type, "
-                     "service_name,service_port,service_ip, done_status, done_result, execute_time) VALUES "
-                     "('%s', '%s', '%s', '%s', '%s', '%s','%s','%s')" % \
-                        (task_web_info['test_id'], task_web_info['test_type'], 
-                         task_web_info['service_name'], task_web_info['service_port'], task_web_info['service_ip'], 
-                         task_web_info['done_status'],task_web_info['done_result'],task_web_info['execute_time']))
-
+        self.execute("INSERT INTO tasks VALUES "
+                     "(NULL,'%s', NULL ,'%s', '%s', '%s', '%s', '%s','%s','%s')" % \
+                        (task_service_info['test_id'], task_service_info['test_type'], 
+                         task_service_info['service_name'], task_service_info['service_port'], task_service_info['service_ip'], 
+                         task_service_info['done_status'],task_service_info['done_result'],str(task_service_info['execute_time'])))
+        
+        g_logger.info("Store %s Service Test Task into Database"%(task_service_info['test_id']))
+        
 #---------------------------------------------------------------------
 class DBKVPHelper(object):
     """

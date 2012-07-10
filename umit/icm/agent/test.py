@@ -34,6 +34,7 @@ import sys
 import time
 import struct
 import os
+import datetime
 
 from twisted.internet import reactor, ssl
 from twisted.internet import defer
@@ -64,7 +65,7 @@ else:
 TASK_STATUS_DONE   = "Success"
 TASK_STATUS_FAILED = "Failed"
 
-def task_done(name,task_type=None,task_detail):
+def task_done(name,task_type=None,task_detail=None):
     """
     Task Done
     """
@@ -76,6 +77,7 @@ def task_done(name,task_type=None,task_detail):
         
     #################################
     #Write task details into database
+    now = (str(datetime.datetime.fromtimestamp(time.time()))).split('.')[0]
     if task_type == TEST_WEB_TYPE:
         
         task_web_info = {
@@ -84,30 +86,30 @@ def task_done(name,task_type=None,task_detail):
                          'test_type' : TEST_WEB_TYPE,
                          'done_status' : TASK_STATUS_DONE,
                          'done_result' : TASK_STATUS_DONE,
-                         'execute_time' : time.ctime(),
+                         'execute_time' : now,
                          }
         
-        g_logger.task_web(task_web_info)
+        g_db_helper.task_web(task_web_info)
         
     elif task_type == TEST_SERVICE_TYPE:
         
         task_service_info = {
                          'test_id': task_detail.unitied_test_id,
                          'service_name' :  task_detail.url,
-                         'host':task_detail.host,
-                         'port':task_detail.port,
+                         'service_ip':task_detail.host,
+                         'service_port':task_detail.port,
                          'test_type' : TEST_WEB_TYPE,
                          'done_status' : TASK_STATUS_DONE,
                          'done_result' : TASK_STATUS_DONE,
-                         'execute_time' : time.ctime(),
+                         'execute_time' : now,
                          }        
-        g_logger.task_service(task_service_info)   
+        g_db_helper.task_service(task_service_info)   
         
     else:
         g_logger.error("New Test Type, cannot recognize" ) 
         
         
-def task_failed(name):
+def task_failed(name,task_type=None,task_detail=None):
     """
     Task Failed
     """
@@ -119,6 +121,7 @@ def task_failed(name):
         
     #################################
     #Write task details into database
+    now = (str(datetime.datetime.fromtimestamp(time.time()))).split('.')[0]
     if task_type == TEST_WEB_TYPE:
         
         task_web_info = {
@@ -127,24 +130,24 @@ def task_failed(name):
                          'test_type' : TEST_WEB_TYPE,
                          'done_status' : TASK_STATUS_FAILED,
                          'done_result' : TASK_STATUS_FAILED,
-                         'execute_time' : time.ctime(),
+                         'execute_time' : now,
                          }
         
-        g_logger.task_web(task_web_info)
+        g_db_helper.task_web(task_web_info)
         
     elif task_type == TEST_SERVICE_TYPE:
         
         task_service_info = {
                          'test_id': task_detail.unitied_test_id,
-                         'service_name' :  task_detail.url,
-                         'host':task_detail.host,
-                         'port':task_detail.port,
+                         'service_name' :  task_detail.service_name,
+                         'service_ip':task_detail.host,
+                         'service_port':task_detail.port,
                          'test_type' : TEST_WEB_TYPE,
                          'done_status' : TASK_STATUS_FAILED,
                          'done_result' : TASK_STATUS_FAILED,
-                         'execute_time' : time.ctime(),
+                         'execute_time' : now,
                          }        
-        g_logger.task_service(task_service_info)       
+        g_db_helper.task_service(task_service_info)       
     
     else:
         g_logger.error("New Test Type, cannot recognize" ) 
@@ -238,7 +241,7 @@ class WebsiteTest():
         
         g_logger.error("[WebsiteTest]connection failed:%s"%failure)
         
-        task_failed(self.__class__.__name__, task_type = TEST_WEB_TYPE, self)
+        task_failed(self.__class__.__name__, TEST_WEB_TYPE, self)
 
         result = {'status_code': 1, 'time_end': default_timer()}
         
@@ -265,14 +268,14 @@ class WebsiteTest():
         if int(response.code) in HTTP_SUCCESS_CODE:
             
             g_logger.debug('task done %s'%response.code)
-            task_done(self.__class__.__name__,task_type = TEST_WEB_TYPE,self)
+            task_done(self.__class__.__name__,TEST_WEB_TYPE,self)
             #if self.pattern is not None:
                 #response.deliverBody(ContentExaminer(self.url,self.pattern))
             
             #Here we can test the HTTP throttled 
             self._throttled_http_test()
         else:
-            task_failed(self.__class__.__name__,task_type = TEST_WEB_TYPE,self)
+            task_failed(self.__class__.__name__,TEST_WEB_TYPE,self)
             g_logger.error("task failed!")
             
         return self.report
@@ -480,7 +483,7 @@ class ServiceTest(Test):
         raise NotImplementedError('You need to implement this method')
 
     def _connectionFailed(self, failure):
-        task_failed(self.__class__.__name__, task_type = TEST_SERVICE_TYPE, self)
+        task_failed(self.__class__.__name__,  TEST_SERVICE_TYPE, self)
         result = {'status_code': 1, 'time_end': default_timer()}
         self.reportDeferred.callback(result)
 
@@ -531,12 +534,12 @@ class FTPTestProtocol(FTPClient):
         FTPClient.lineReceived(self, line)
         if line.startswith('230'): # Logged in
             self.quit()
-            task_done(self.test.__class__.__name__, task_type = TEST_SERVICE_TYPE, self.test)
+            task_done(self.test.__class__.__name__,  TEST_SERVICE_TYPE, self.test)
             if self.reportDeferred:
                 result = {'status_code': 0, 'time_end': default_timer()}
                 self.reportDeferred.callback(result)
         elif line.startswith('530'): # Login failed
-            task_failed(self.test.__class__.__name__, task_type = TEST_SERVICE_TYPE, self.test)
+            task_failed(self.test.__class__.__name__, TEST_SERVICE_TYPE, self.test)
             if self.reportDeferred:
                 result = {'status_code': 1, 'time_end': default_timer()}
                 self.reportDeferred.callback(result)
@@ -589,7 +592,7 @@ class SMTPTestProtocol(ESMTPClient):
 
     def sentMail(self, code, resp, numOk, addresses, log):
         if self.reportDeferred:
-            task_done(self.test.__class__.__name__,task_type = TEST_SERVICE_TYPE, self.test)
+            task_done(self.test.__class__.__name__,TEST_SERVICE_TYPE, self.test)
             result = {'status_code': 0, 'time_end': default_timer()}
             self.reportDeferred.callback(result)
             self.reportDeferred = None
@@ -642,7 +645,7 @@ class POP3TestProtocol(POP3Client):
         POP3Client.serverGreeting(self, greeting)
         print greeting
         if self.reportDeferred:
-            task_done(self.test.__class__.__name__,task_type = TEST_SERVICE_TYPE, self.test)
+            task_done(self.test.__class__.__name__, TEST_SERVICE_TYPE, self.test)
             result = {'status_code': 0, 'time_end': default_timer()}
             self.reportDeferred.callback(result)
         self.quit()        
@@ -694,7 +697,7 @@ class IMAPTestProtocol(IMAP4Client):
     def serverGreeting(self, caps):
         IMAP4Client.serverGreeting(self, caps)
         if self.reportDeferred:
-            task_done(self.test.__class__.__name__,task_type = TEST_SERVICE_TYPE, self.test)
+            task_done(self.test.__class__.__name__, TEST_SERVICE_TYPE, self.test)
             result = {'status_code': 0, 'time_end': default_timer()}
             self.reportDeferred.callback(result)
         self.logout()
@@ -747,7 +750,7 @@ class SSHTestProtocol(SSHClientTransport):
         g_logger.info("host key fingerprint %s" % fingerprint)  
         #we cannot provide the key, so we should check the failure to decide the result
         if self.reportDeferred:
-            task_done(self.__class__.__name__,task_type = TEST_SERVICE_TYPE, self.test)
+            task_done(self.__class__.__name__, TEST_SERVICE_TYPE, self.test)
             result = {'status_code': 0, 'time_end': default_timer()}
             self.reportDeferred.callback(result)     
         self.loseConnection()
@@ -833,7 +836,7 @@ class IRCTestProtocol(IRCClient):
         call when irc bot has successfully signed on to server
         """
         if self.reportDeferred:
-            task_done(self.test.__class__.__name__,task_type = TEST_SERVICE_TYPE, self.test)
+            task_done(self.test.__class__.__name__, TEST_SERVICE_TYPE, self.test)
             result = {'status_code': 0, 'time_end': default_timer()}
             self.reportDeferred.callback(result)
         self.quit()

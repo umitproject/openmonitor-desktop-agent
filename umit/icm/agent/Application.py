@@ -183,10 +183,14 @@ class Application(object):
         return result
 
     def _handle_errback(self, failure):
+        """
+        """
         failure.printTraceback()
         g_logger.error(">>> Failure from Application: %s" % failure)
 
     def login(self, username, password, save_login=False, login_only=False):
+        """
+        """
         if self.use_gui:
             self.gtk_main.set_to_logging_in()
 
@@ -244,8 +248,9 @@ class Application(object):
 
         return defer_
 
-    def _handle_login(self, result, username, password, save_login,
-                      login_only=False):
+    def _handle_login(self, result, username, password, save_login,login_only=False):
+        """
+        """
         #login successfully
         if result:
             self.peer_info.Username = username if username !="" and username != None else self.peer_info.Username
@@ -290,7 +295,8 @@ class Application(object):
         self.gtk_main.set_login_status(True)
         #mark login-successful
         self.is_successful_login = True 
-               
+        #TASK LOOP
+        self.task_loop_manager()       
     
     def task_loop_manager(self):
         """"""
