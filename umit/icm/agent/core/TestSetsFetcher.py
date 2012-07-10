@@ -29,6 +29,9 @@ from umit.icm.agent.Global import *
 
 import random
 
+TEST_WEB_TYPE     = "WEB"
+TEST_SERVICE_TYPE = "SERVICE" 
+
 class TestSetsFetcher(object):
     """"""
   
@@ -168,9 +171,10 @@ class TestSetsFetcher(object):
         
         ####################
         ##Website Task Parse
-        if test.website and test.testType == "WEB":
+        if test.website and test.testType == TEST_WEB_TYPE:
             args = {
-                    'url':str(test.website.url)
+                    'url':str(test.website.url),
+                    'unitied_test_id':str(test.testID)
                     }
             #crontime = self.random_cron_time(executeAtTimeUTC)
             #In test.py logical , we can call the according test functions
@@ -184,11 +188,12 @@ class TestSetsFetcher(object):
     
         ####################
         ##Service Task Parse        
-        elif test.service and (test.testType).upper() == "SERVICE":
+        elif test.service and (test.testType).upper() == TEST_SERVICE_TYPE:
             args = {
                    #'service':test.service.name,
                     'host':test.service.ip,
                     'port':test.service.port,
+                    'unitied_test_id':test.testID,
                     }
             #crontime = self.random_cron_time(executeAtTimeUTC)
             #In test.py logical , we can call the according test functions

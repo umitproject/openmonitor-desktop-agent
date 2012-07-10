@@ -400,7 +400,26 @@ class DBHelper(object):
         elif choice_tab ==  CAPA_SERVICE:
             return len(self.db_conn.select("SELECT * from tasks WHERE execute_time >= ? AND execute_time < ? AND test_type = 'Service' ",(start,end)))
         else:
-            return 0       
+            return 0   
+        
+    def task_web(self,task_web_info):
+        """
+        """
+        self.execute("INSERT INTO tasks (test_id, website_url, "
+                     "test_type, done_status, done_result, execute_time) VALUES "
+                     "('%s', '%s', '%s', '%s', '%s', '%s')" % \
+                        (task_web_info['test_id'], task_web_info['website_url'], task_web_info['test_type'], 
+                         task_web_info['done_status'],task_web_info['done_result'],task_web_info['execute_time']))        
+    
+    def task_service(self,task_service_info):
+        """
+        """
+        self.execute("INSERT INTO tasks (test_id, test_type, "
+                     "service_name,service_port,service_ip, done_status, done_result, execute_time) VALUES "
+                     "('%s', '%s', '%s', '%s', '%s', '%s','%s','%s')" % \
+                        (task_web_info['test_id'], task_web_info['test_type'], 
+                         task_web_info['service_name'], task_web_info['service_port'], task_web_info['service_ip'], 
+                         task_web_info['done_status'],task_web_info['done_result'],task_web_info['execute_time']))
 
 #---------------------------------------------------------------------
 class DBKVPHelper(object):
