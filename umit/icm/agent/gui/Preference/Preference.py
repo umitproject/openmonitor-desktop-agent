@@ -40,13 +40,13 @@ from umit.icm.agent.test import test_name_by_id
 from umit.icm.agent.test import ALL_TESTS
 from umit.icm.agent.utils.Startup import StartUP
 
-from umit.icm.agent.gui.TestPage import TestPage,Tests,TestsView
-from umit.icm.agent.gui.SuperPeerSetting import SuperPeerListWindow,SuperPeersBox
-from umit.icm.agent.gui.GeneralPage import GeneralPage
-from umit.icm.agent.gui.UpdatePage import update_time_str,update_method_str,UpdatePage
-from umit.icm.agent.gui.FeedbackPage import FeedbackPage
-from umit.icm.agent.gui.PeerPage import PeerInfoPage
-from umit.icm.agent.gui.AdvancedPage import AdvancedPage
+from umit.icm.agent.gui.Preference.TestPage import TestPage,Tests,TestsView
+from umit.icm.agent.gui.Preference.SuperPeerSetting import SuperPeerListWindow,SuperPeersBox
+from umit.icm.agent.gui.Preference.GeneralPage import GeneralPage
+from umit.icm.agent.gui.Preference.UpdatePage import update_time_str,update_method_str,UpdatePage
+from umit.icm.agent.gui.Preference.FeedbackPage import FeedbackPage
+from umit.icm.agent.gui.Preference.PeerPage import PeerInfoPage
+from umit.icm.agent.gui.Preference.AdvancedPage import AdvancedPage
 
 class PreferenceWindow(HIGWindow):
     """

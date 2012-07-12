@@ -41,7 +41,7 @@ from umit.icm.agent.utils.Startup import StartUP
 
 ###################################################
 #SuperPeer Settings Page in Preference Window
-class SuperPeerListWindow(HIGWindow):
+class  vchbv(HIGWindow):
     def __init__(self):
         HIGWindow.__init__(self, type=gtk.WINDOW_TOPLEVEL)
         self.set_title(_('Super Peers List'))

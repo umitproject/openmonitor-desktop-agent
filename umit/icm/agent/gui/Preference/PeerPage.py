@@ -167,7 +167,7 @@ class PeerInfoPage(HIGVBox):
     
             
     def show_super_peer_list_window(self):
-        from umit.icm.agent.gui.SuperPeerSetting import SuperPeerListWindow,SuperPeersBox
+        from umit.icm.agent.gui.Preference.SuperPeerSetting import SuperPeerListWindow,SuperPeersBox
         wnd = SuperPeerListWindow()
         wnd.show_all()
     

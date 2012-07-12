@@ -20,24 +20,33 @@
 
 import pygtk
 pygtk.require('2.0')
-import gtk, gobject
+import gtk, gobject,os
 
 from umit.icm.agent.I18N import _
 from umit.icm.agent.Global import *
+from umit.icm.agent.BasePaths import *
 from umit.icm.agent.Application import theApp
 from umit.icm.agent.logger import g_logger
 
-#from Dashboard import CAPACITY,CAPA_THROTTLED,CAPA_SERVICE
+from higwidgets.higdialogs import HIGDialog
+from higwidgets.higlabels import HIGLabel
+from higwidgets.higentries import HIGTextEntry, HIGPasswordEntry
+from higwidgets.higtables import HIGTable
+from higwidgets.higboxes import HIGHBox, HIGVBox, hig_box_space_holder
+from higwidgets.higbuttons import HIGStockButton
+from higwidgets.higwindows import HIGWindow
+from higwidgets.higboxes import HIGSpacer, hig_box_space_holder
+
 from umit.icm.agent.gui.dashboard.DashboardListBase import  *
 
-class CapacityTab(gtk.VBox):
+class CapacityTab(gtk.HBox):
     """
     CapacityTab: show the network's Capacity  
     """
     def __init__(self):
         """
         """
-        gtk.VBox.__init__(self)
+        gtk.HBox.__init__(self)
 
         self.set_visible(False)
                 
@@ -47,18 +56,100 @@ class CapacityTab(gtk.VBox):
     
     def __create_widgets(self):
         """
-        """
-        pass
-    
+        """        
+        self.left_box = HIGVBox()
+        self.right_box = HIGVBox()
+        
+        ##########
+        #Grade Box
+        self.grade_box   = HIGVBox()
+        self.grade_title = gtk.Label(
+            "<span size='12500' weight='heavy'>Communication Grade</span>")
+        self.grade_title.set_use_markup(True)
+        self.grade_title.set_selectable(False)   
+        self.mark_box = gtk.HBox()
+        self.mark_image = [None] * 5
+        for i in range(0,5):
+            self.mark_image[i] = gtk.Image()
+            self.mark_image[i].set_from_file(os.path.join(IMAGES_DIR,'emptymark.png'))
+            self.mark_box.pack_start(self.mark_image[i])
+              
+        #########
+        #Type Box        
+        self.proprity_box = HIGVBox() 
+        self.proprity_title = gtk.Label(
+            "<span size='12500' weight='heavy'>Peer Type</span>") 
+        self.proprity_title.set_use_markup(True)
+        self.proprity_title.set_selectable(False)
+             
+        
+        #############
+        #Website Test
+        self.webtest_box = HIGVBox() 
+        self.webtest_title = gtk.Label(
+            "<span size='12500' weight='heavy'>Website Test</span>") 
+        self.webtest_title.set_use_markup(True)
+        self.webtest_title.set_selectable(False)     
+
+                    
+        ############
+        #Service Box
+        self.service_box  = HIGVBox()
+        self.service_title =  gtk.Label(
+            "<span size='12500' weight='heavy'>Service Statistics</span>") 
+        self.service_title.set_use_markup(True)
+        self.service_title.set_selectable(False)     
+        self.refresh_btn = gtk.Button(_("Refresh Button"))                 
+        
+               
     def __pack_widgets(self):   
         """
         """
-        pass
-    
+        ######
+        #BOXS
+        self.left_box._pack_expand_fill(self.grade_box)
+        self.left_box._pack_expand_fill(self.proprity_box)
+        self.left_box._pack_expand_fill(self.webtest_box)
+        self.right_box._pack_noexpand_nofill(self.refresh_btn)
+        self.right_box._pack_expand_fill(self.service_box)
+        
+        ##########
+        #Grade Box
+        self.grade_box._pack_noexpand_nofill(self.grade_title)
+        self.grade_box._pack_expand_fill(self.mark_box)
+        self.grade_box._pack_noexpand_nofill(hig_box_space_holder())                
+        #########
+        #Type Box 
+        self.proprity_box._pack_noexpand_nofill(self.proprity_title)
+        self.proprity_box._pack_noexpand_nofill(hig_box_space_holder()) 
+               
+        self.proprity_box._pack_noexpand_nofill(hig_box_space_holder())                 
+        #############
+        #Website Test
+        self.webtest_box._pack_noexpand_nofill(self.webtest_title)
+        
+        self.webtest_box._pack_noexpand_nofill(hig_box_space_holder())        
+        ############
+        #Service Box                
+        self.service_box._pack_noexpand_nofill(self.service_title)
+        self.service_box._pack_noexpand_nofill(hig_box_space_holder())
+        self.service_box._pack_noexpand_nofill(hig_box_space_holder())    
+        
+        
+        self.pack_start(self.left_box,True,False,4)
+        self.pack_start(self.right_box,True,True,2)   
+        self.show_all()
+        
     def __connected_widgets(self):
         """
         """
-        pass   
+        self.refresh_btn.connect("clicked",self._refresh)  
+    
+    def _refresh(self):
+        """
+        """
+        pass
+        
     
 class ThrottledTab(gtk.VBox):
     """

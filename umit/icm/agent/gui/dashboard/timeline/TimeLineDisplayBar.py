@@ -46,6 +46,8 @@ class TimeLineSelected(gtk.Widget):
     """
     
     def __init__(self,connector, datagrabber):
+        """
+        """
         gtk.Widget.__init__(self)
         
         self.connector = connector
@@ -55,11 +57,9 @@ class TimeLineSelected(gtk.Widget):
         self.__packed_widgets()
         self.__connected_widgets()
         
-        
     def __create_widgets(self):
         """
         """
-        
         #Title
         self.title = self.create_pango_layout('')
         self.title.set_alignment(pango.ALIGN_CENTER)
@@ -221,7 +221,6 @@ class TimeLineSelected(gtk.Widget):
         self.newselection = bars_height # set new selection, this will start
                                         # animation effect.
         
-    
     def _changes_sum_in_selection(self, datad):
         """
         Returns changes sum in datad.
@@ -568,13 +567,6 @@ class TimeLineSelected(gtk.Widget):
         self._draw_base(cr)
         self._pre_bar_draw(cr)
     
-    
     newselection = property(get_selection_data, set_selection_data)    
-    
-    
-    
-    
-    
-
 
 gobject.type_register(TimeLineSelected)

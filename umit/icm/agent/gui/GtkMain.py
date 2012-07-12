@@ -196,7 +196,7 @@ class GtkMain(object):
         wnd.show_all()
 
     def show_preference(self):
-        from umit.icm.agent.gui.Preference import PreferenceWindow
+        from umit.icm.agent.gui.Preference.Preference import PreferenceWindow
         wnd = PreferenceWindow()
         wnd.show_all()
         
