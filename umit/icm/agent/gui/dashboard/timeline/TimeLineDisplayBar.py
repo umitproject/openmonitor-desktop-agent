@@ -30,8 +30,10 @@ import gobject
 from umit.icm.agent.I18N import _
 from umit.icm.agent.test import service_name_by_id
 from umit.icm.agent.Global import *
+from umit.icm.agent.logger import g_logger
 
 services_list = service_name_by_id.keys()
+services_list.append("nothing")
 
 PI = 3.1415926535897931
 GOLDENRATIO = 1.618033989
@@ -75,6 +77,7 @@ class TimeLineDisplayBar(gtk.Widget):
         
         self.__create_widgets()
         self.__connected_widgets()
+
         
     def __create_widgets(self):
         """
@@ -103,12 +106,15 @@ class TimeLineDisplayBar(gtk.Widget):
         
         # bar drawing constants
         self.bar_draw = { }
-               
+        self._calculate_bar_sizes()   
+        
+        # Displaybar
+        self.area =  []            
     
     def __connected_widgets(self):
         """
         """
-        self.capacity_box.refresh_btn.connect('clicked', self._update_graph())
+        self.capacity_box.refresh_btn.connect('clicked', self._update_graph)
                 
     def emptygraph(self):
         """
@@ -136,18 +142,22 @@ class TimeLineDisplayBar(gtk.Widget):
 
         return False
     
-    def _update_graph(self):
+    def _update_graph(self,widget):
+        """
+        """
+        self.draw_logical()
+    
+    
+    def _update_graph_data(self):
         """
         click refresh button  
         """       
-        
         bars_height = { }
         self.percent = { }
         self.multiplier = { }
         
         for key in services_list:
             (success_cnt,total_cnt) = g_db_helper.service_choice_count(key)
-            
             #calculate bar height and percent based on their amount of task success
             if total_cnt == 0:
                 bars_height[key] = 0
@@ -174,6 +184,11 @@ class TimeLineDisplayBar(gtk.Widget):
         self.newcolor = (color_from, color_to)
         self.newselection = bars_height # set new selection, this will start
                                         # animation effect.
+                                        
+        #print "bars_height",bars_height
+        #print "percent",self.percent
+        #print "multiplier",self.multiplier
+        #print "newselection",self.newselection
         
     def _color_max_changes(self, datad):
         """
@@ -300,7 +315,7 @@ class TimeLineDisplayBar(gtk.Widget):
         Write text above or inside bar.
         """
         cr.save()
-        cr.select_font_face("Sans", cairo.FONT_SLANT_NORMAL,
+        cr.select_font_face("Sans", cairo.FONT_WEIGHT_BOLD,
             cairo.FONT_WEIGHT_BOLD)
 
         _, _, width, height, _, _ = cr.text_extents(text)
@@ -419,13 +434,14 @@ class TimeLineDisplayBar(gtk.Widget):
             bar_height = self._draw_bar(cr, self.currselection[item],
                 colors_from_file_bar[item], curr_x_pos)
 
-            self._write_bar_text(cr, "%.1f%%" % self.percent[item], bar_height,
+            self._write_bar_text(cr, "%s    %.1f%%" % (item,self.percent[item]), bar_height,
                 curr_x_pos)
 
     def _calculate_bar_sizes(self):
         """
         Calculates everything needed during bars drawing.
         """
+        
         self.bar_draw["start_x"] = 12
         self.bar_draw["end_x"] = self.allocation[2] - 12
         self.bar_draw["start_y"] = self.allocation[3] - 6
@@ -487,13 +503,23 @@ class TimeLineDisplayBar(gtk.Widget):
       
     def do_expose_event(self, event):
         """
+        """
+        if self.area == []:
+            self.area = event.area
+        self.draw_logical()
+ 
+    def draw_logical(self):
+        """
         Controls widget drawing.
         """
+        self._update_graph_data()
+        
         cr = self.window.cairo_create()
-        cr.rectangle(*event.area)
+        cr.rectangle(*self.area)
         cr.clip()
 
-        if self.currselection != self.newselection and not self.in_anim:
+        #if self.currselection != self.newselection and not self.in_anim:
+        if not self.in_anim:
             self.in_anim = True
             gobject.timeout_add(20, self._update_bars)
 
@@ -504,6 +530,5 @@ class TimeLineDisplayBar(gtk.Widget):
         self._paint_background(cr)
         self._write_title(cr)
         self._draw_base(cr)
-        self._pre_bar_draw(cr)
- 
+        self._pre_bar_draw(cr)        
 gobject.type_register(TimeLineDisplayBar)

@@ -148,13 +148,8 @@ class CapacityTab(gtk.HBox):
     def __connected_widgets(self):
         """
         """
-        self.refresh_btn.connect("clicked",self._refresh)  
-    
-    def _refresh(self):
-        """
-        """
         pass
-        
+    
     
 class ThrottledTab(gtk.VBox):
     """

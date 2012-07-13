@@ -434,8 +434,9 @@ class DBHelper(object):
     def service_choice_count(self,service_name):
         """
         """
-        success_cnt = len(self.db_conn.select("SELECT * from tasks WHERE service_name = ? AND done_status = 'Success' ",((service_name).upper())))
-        total_cnt = len(self.db_conn.select("SELECT * from tasks WHERE service_name = ?' ",((service_name).upper()))) 
+        service_name = service_name.upper()
+        success_cnt = len(self.db_conn.select("SELECT * from tasks WHERE service_name = '%s' AND done_status = 'Success' "%(service_name)))
+        total_cnt = len(self.db_conn.select("SELECT * from tasks WHERE service_name = '%s' "%(service_name)))
         
         return (success_cnt,total_cnt)
         
