@@ -609,7 +609,7 @@ class SMTPTest(ServiceTest):
     def __init__(self):
         """Constructor"""
         ServiceTest.__init__(self)
-        self.service_name = 'smtp'
+        self.service_name = 'SMTP'
         self.username = "anonymous"
         self.password = "anonymous"        
 
@@ -662,7 +662,7 @@ class POP3Test(ServiceTest):
     def __init__(self):
         """Constructor"""
         ServiceTest.__init__(self)
-        self.service_name = 'pop3'
+        self.service_name = 'POP3'
         self.username = "anonymous"
         self.password = "anonymous"
 
@@ -713,7 +713,7 @@ class IMAPTest(ServiceTest):
     def __init__(self):
         """Constructor"""
         ServiceTest.__init__(self)
-        self.service_name = 'imap'
+        self.service_name = 'IMAP'
         self.username = "anonymous"
         self.password = "anonymous"
         
@@ -791,7 +791,7 @@ class SSHTest(ServiceTest):
     def __init__(self):
         """Constructor"""
         ServiceTest.__init__(self)
-        self.service_name = 'ssh'
+        self.service_name = 'SSH'
         self.username = "anonymous"
         self.password = "anonymous"
         
@@ -862,7 +862,7 @@ class IRCTestProtocol(IRCClient):
 class IRCTest(ServiceTest):
     def __init__(self):
        ServiceTest.__init__(self)
-       self.service_name = 'irc'
+       self.service_name = 'IRC'
        self.username = str(uuid.uuid1()) #cannot
     
     def execute(self):

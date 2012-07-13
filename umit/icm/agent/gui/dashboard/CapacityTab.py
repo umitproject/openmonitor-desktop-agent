@@ -37,6 +37,8 @@ from higwidgets.higbuttons import HIGStockButton
 from higwidgets.higwindows import HIGWindow
 from higwidgets.higboxes import HIGSpacer, hig_box_space_holder
 
+from umit.icm.agent.gui.dashboard.timeline.TimeLineDisplayBar import TimeLineDisplayBar
+
 from umit.icm.agent.gui.dashboard.DashboardListBase import  *
 
 class CapacityTab(gtk.HBox):
@@ -95,11 +97,13 @@ class CapacityTab(gtk.HBox):
         ############
         #Service Box
         self.service_box  = HIGVBox()
-        self.service_title =  gtk.Label(
-            "<span size='12500' weight='heavy'>Service Statistics</span>") 
-        self.service_title.set_use_markup(True)
-        self.service_title.set_selectable(False)     
-        self.refresh_btn = gtk.Button(_("Refresh Button"))                 
+        #self.service_title =  gtk.Label(
+        #    "<span size='12500' weight='heavy'>Service Statistics</span>") 
+        #self.service_title.set_use_markup(True)
+        #self.service_title.set_selectable(False)     
+        self.refresh_btn = gtk.Button(_("Refresh Button")) 
+          
+        self.display_bar = TimeLineDisplayBar(self)              
         
                
     def __pack_widgets(self):   
@@ -131,9 +135,10 @@ class CapacityTab(gtk.HBox):
         self.webtest_box._pack_noexpand_nofill(hig_box_space_holder())        
         ############
         #Service Box                
-        self.service_box._pack_noexpand_nofill(self.service_title)
+        #self.service_box._pack_noexpand_nofill(self.service_title)
         self.service_box._pack_noexpand_nofill(hig_box_space_holder())
-        self.service_box._pack_noexpand_nofill(hig_box_space_holder())    
+        self.service_box._pack_expand_fill(self.display_bar)
+        self.service_box._pack_noexpand_nofill(hig_box_space_holder())         
         
         
         self.pack_start(self.left_box,True,False,4)

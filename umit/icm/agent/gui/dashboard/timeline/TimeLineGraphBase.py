@@ -101,20 +101,6 @@ def colors_from_file():
     
     return colors
 
-def gradient_colors_from_file():
-    """
-    Retrieve gradient from timeline settings file.
-    """
-    gradient = {
-                "inventory":[0.69, 0.859, 0.722] ,
-                "availability":[0.847, 0.57, 0.57],
-                "ports":[0.988, 0.949, 0.604],
-                "fingerprint":[0.588, 0.008, 0.549],
-                "several":[0.624, 0.737, 0.906],
-                "nothing":[0.784, 0.784, 0.784],
-                }
-    return gradient
-
 
 class TimeLineBase(CalendarManager, DataGrabber):
     """

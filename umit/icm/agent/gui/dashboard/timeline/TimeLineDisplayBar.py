@@ -20,7 +20,7 @@
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
 """
-Timeline graph Display Bar
+Timeline graph Display Bar: show the statistics about the services test
 """
 import gtk
 import cairo
@@ -28,8 +28,10 @@ import pango
 import gobject
 
 from umit.icm.agent.I18N import _
-from umit.icm.agent.gui.dashboard.timeline.TimeLineGraphBase import colors_from_file,gradient_colors_from_file
-from umit.icm.agent.gui.dashboard.timeline.TimeLineGraphBase import changes_list
+from umit.icm.agent.test import service_name_by_id
+from umit.icm.agent.Global import *
+
+services_list = service_name_by_id.keys()
 
 PI = 3.1415926535897931
 GOLDENRATIO = 1.618033989
@@ -38,23 +40,40 @@ GOLDENRADIUS = GOLDENRATIO ** 4 # my magical number
 EMPTY_COLOR =  ((0.3, 0.3, 0.3), (0, 0, 0))
 NOSELECTION = _("No Selection")
 NOCHANGES = _("No Changes")
-STATISTICS = _("Changes Statistics")
+STATISTICS = _("Success Statistics")
 
-class TimeLineSelected(gtk.Widget):
+colors_from_file_bar = {
+                        "FTP":[0.188, 0.659, 0.282],
+                        "SMTP":[0.847, 0.016, 0.016],
+                        "POP3":[0.988, 0.82, 0.157],
+                        "IMAP":[0.369, 0.008, 0.353],
+                        "IRC":[0.133, 0.361, 0.706],
+                        "SSH":[0.545, 0.502, 0.514],
+                        "nothing":[0.645, 0.602, 0.614],
+                        }
+gradient_colors_from_file_bar = {
+                        "FTP":[0.69, 0.859, 0.722],
+                        "SMTP":[0.847, 0.57, 0.57],
+                        "POP3":[0.988, 0.949, 0.604],
+                        "IMAP":[0.588, 0.008, 0.549],
+                        "IRC":[0.624, 0.737, 0.906],
+                        "SSH":[0.784, 0.784, 0.784],    
+                        "nothing":[0.645, 0.602, 0.614],                             
+                                 }
+
+class TimeLineDisplayBar(gtk.Widget):
     """
     A widget that shows statics based on Timeline Graph selection
     """
     
-    def __init__(self,connector, datagrabber):
+    def __init__(self,capacity_box):
         """
         """
         gtk.Widget.__init__(self)
         
-        self.connector = connector
-        self.datagrabber = datagrabber
+        self.capacity_box = capacity_box
         
         self.__create_widgets()
-        self.__packed_widgets()
         self.__connected_widgets()
         
     def __create_widgets(self):
@@ -64,14 +83,14 @@ class TimeLineSelected(gtk.Widget):
         self.title = self.create_pango_layout('')
         self.title.set_alignment(pango.ALIGN_CENTER)
         self.second_title = self.create_pango_layout('')
-        self.second_titleset_alignment(pango.ALIGN_CENTER)
+        self.second_title.set_alignment(pango.ALIGN_CENTER)
         
         #Empty Selection/colors
         self.percent, self.currselection = self.emptygraph()
         not_used, self.newselection = self.emptygraph() 
         self.currcolor = (list(EMPTY_COLOR[0]), list(EMPTY_COLOR[1]))
         self.newcolor = EMPTY_COLOR
-        self.noselection = True
+
         self.total = 0 # number of changes in selection
         self.multiplier = { }
         
@@ -85,37 +104,12 @@ class TimeLineSelected(gtk.Widget):
         # bar drawing constants
         self.bar_draw = { }
                
-        
-    def __packed_widgets(self):
-        """
-        """
-        pass
     
     def __connected_widgets(self):
         """
         """
-        self.connector.connect('selection_update', self._update_graph)
-    
-    def create_pango_layout(self):
-        """
-        """
-        pass       
-    
-    def get_selection_data(self):
-        """
-        Get current selection data.
-        """
-        return self.__seldata
-    
-    def set_selection_data(self, data):
-        """
-        Sets a dict containing changes for each category for current selection.
-        """
-        self.__seldata = data
-
-        if self.flags() & gtk.REALIZED:
-            self.queue_draw()        
-            
+        self.capacity_box.refresh_btn.connect('clicked', self._update_graph())
+                
     def emptygraph(self):
         """
         Return a dict where each category has 0 changes.
@@ -123,7 +117,7 @@ class TimeLineSelected(gtk.Widget):
         empty = { }
         percent = { }
 
-        for item in changes_list:
+        for item in services_list:
             empty[item] = 0
             percent[item] = 0.0
 
@@ -142,92 +136,46 @@ class TimeLineSelected(gtk.Widget):
 
         return False
     
-    def _update_graph(self,obj,range_start, range_end):
+    def _update_graph(self):
         """
-        New selection, grab changes for selection timerange and
-        do everything needed to draw new selection 
-        """
-        if range_start is None and range_end is None: # No Selection
-            self.noselection = True
-            self.total = self._changes_sum_in_selection(self.currselection)
-            self.multiplier = { }
-            for key, value in self.emptygraph()[0].items():
-                self.multiplier[key] = abs(value - self.currselection[key]) / \
-                                       self.piece_cut
-
-            self.newcolor = EMPTY_COLOR
-            self.percent, self.newselection = self.emptygraph()
-            return
+        click refresh button  
+        """       
         
-        #Any Selection
-        self.noselection = False
-
-        categories = self.datagrabber.get_categories()        
-        data = { } 
-        
-        # grab changes by category in current selection
-        for key in categories:
-            c = self.datagrabber.timerange_changes_count_generic(range_start,
-                range_end, key, self.datagrabber.inventory,
-                self.datagrabber.hostaddr)
-            data[categories[key][1]] = c
-
-        data_keys = data.keys()
-        for item in changes_list:
-            if item not in data_keys:
-                data[item] = 0                                          
-        
-        # changes sum
-        self.total = self._changes_sum_in_selection(data)        
-        
-        # calculate bars height based on their amount of changes
         bars_height = { }
-
-        for key, value in data.items():
-            if self.total == 0:
-                bars_height[key] = 0
-            else:
-                bars_height[key] = ((value * self.bar_draw["bars_y_area"]) / \
-                                    float(self.total))
-
-        if not self.total: # range without changes was selected
-            self.total = self._changes_sum_in_selection(self.currselection)
-
         self.percent = { }
         self.multiplier = { }
-
-        for key, value in data.items():
-            if not self.total: # present and previous selection have no changes
+        
+        for key in services_list:
+            (success_cnt,total_cnt) = g_db_helper.service_choice_count(key)
+            
+            #calculate bar height and percent based on their amount of task success
+            if total_cnt == 0:
+                bars_height[key] = 0
                 self.percent[key] = 0.0
             else:
-                self.percent[key] = (float(data[key])/self.total) * 100
-
+                bars_height[key] = ((success_cnt * self.bar_draw["bars_y_area"]) / float(total_cnt))
+                self.percent[key] = (float(success_cnt)/float(total_cnt)) * 100
+                
             # calculate increment needed to complete this bar animation
-            self.multiplier[key] = abs(bars_height[key] - \
-                                      self.currselection[key]) / self.piece_cut        
-    
+            self.multiplier[key] = abs(bars_height[key] - self.currselection[key] ) / self.piece_cut              
+        
+        
         # get new color
-        more_changes = self._category_with_more_changes(bars_height)
+        more_changes = self._color_max_changes(bars_height)
         if more_changes.values()[0] == 0: # no changes in current selection
             newcolor = EMPTY_COLOR
             color_from = newcolor[0]
             color_to = newcolor[1]
         else:
             color_name = more_changes.keys()[0]
-            color_from = colors_from_file()[color_name]
-            color_to = gradient_colors_from_file()[color_name]
+            color_from = colors_from_file_bar[color_name]
+            color_to = gradient_colors_from_file_bar[color_name]
 
         self.newcolor = (color_from, color_to)
         self.newselection = bars_height # set new selection, this will start
                                         # animation effect.
         
-    def _changes_sum_in_selection(self, datad):
-        """
-        Returns changes sum in datad.
-        """
-        return sum(v for v in datad.values())    
-    
-    def _category_with_more_changes(self, datad):
+    def _color_max_changes(self, datad):
         """
         Return {category: value} with more changes.
         """
@@ -280,13 +228,8 @@ class TimeLineSelected(gtk.Widget):
         """
         Tells _write_text to write widget title.
         """
-        if self.noselection:
-            self._write_text(cr, NOSELECTION, True)
-            self._write_text(cr, NOCHANGES, False)
-        else:
-            self._write_text(cr, self.datagrabber.title_by_graphmode(True),
-                True)
-            self._write_text(cr, STATISTICS, False)   
+        self._write_text(cr, "Service Tests Results",True)
+        self._write_text(cr, STATISTICS, False)   
    
     def _draw_base(self, cr):
         """
@@ -356,10 +299,6 @@ class TimeLineSelected(gtk.Widget):
         """
         Write text above or inside bar.
         """
-        if self.noselection:
-            # nothing to write
-            return
-
         cr.save()
         cr.select_font_face("Sans", cairo.FONT_SLANT_NORMAL,
             cairo.FONT_WEIGHT_BOLD)
@@ -472,13 +411,13 @@ class TimeLineSelected(gtk.Widget):
         Calculate where each bar will be draw, and then call _draw_bar to
         draw it.
         """
-        for multiplier, item in enumerate(changes_list):
+        for multiplier, item in enumerate(services_list):
             curr_x_pos = self.bar_draw["bars_distance"] + \
                          (self.bar_draw["bars_distance"] * multiplier) + \
                          (self.bar_draw["bar_width"] * multiplier)
 
             bar_height = self._draw_bar(cr, self.currselection[item],
-                colors_from_file()[item], curr_x_pos)
+                colors_from_file_bar[item], curr_x_pos)
 
             self._write_bar_text(cr, "%.1f%%" % self.percent[item], bar_height,
                 curr_x_pos)
@@ -495,7 +434,7 @@ class TimeLineSelected(gtk.Widget):
 
         bars_space = self.allocation[2] - (2 * self.bar_draw["start_x"]) - \
                      self.bar_draw["bars_distance"]
-        bar_width = (bars_space / float(len(changes_list))) - \
+        bar_width = (bars_space / float(len(services_list))) - \
                     self.bar_draw["bars_distance"]
 
         self.bar_draw["bar_width"] = bar_width    
@@ -566,7 +505,5 @@ class TimeLineSelected(gtk.Widget):
         self._write_title(cr)
         self._draw_base(cr)
         self._pre_bar_draw(cr)
-    
-    newselection = property(get_selection_data, set_selection_data)    
-
-gobject.type_register(TimeLineSelected)
+ 
+gobject.type_register(TimeLineDisplayBar)

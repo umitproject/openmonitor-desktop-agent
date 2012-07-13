@@ -430,6 +430,14 @@ class DBHelper(object):
                          task_service_info['done_status'],task_service_info['done_result'],str(task_service_info['execute_time'])))
         
         g_logger.info("Store %s Service Test Task into Database"%(task_service_info['test_id']))
+    
+    def service_choice_count(self,service_name):
+        """
+        """
+        success_cnt = len(self.db_conn.select("SELECT * from tasks WHERE service_name = ? AND done_status = 'Success' ",((service_name).upper())))
+        total_cnt = len(self.db_conn.select("SELECT * from tasks WHERE service_name = ?' ",((service_name).upper()))) 
+        
+        return (success_cnt,total_cnt)
         
 #---------------------------------------------------------------------
 class DBKVPHelper(object):
