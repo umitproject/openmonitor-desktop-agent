@@ -126,7 +126,7 @@ class DashboardWindow(HIGWindow):
         self.vpaned = gtk.VPaned()
         
         self.timeline_viewer = TimeLineGraphViewer(self,self.connector)
-        self.timeline_viewer.set_size_request(450,280)
+        self.timeline_viewer.set_size_request(450,380)
         self.timeline_viewer.set_visible(True)
         
         self.detail_sw = gtk.ScrolledWindow()

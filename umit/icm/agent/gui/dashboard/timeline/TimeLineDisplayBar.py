@@ -315,7 +315,7 @@ class TimeLineDisplayBar(gtk.Widget):
         Write text above or inside bar.
         """
         cr.save()
-        cr.select_font_face("Sans", cairo.FONT_WEIGHT_BOLD,
+        cr.select_font_face("Sans", cairo.FONT_SLANT_NORMAL,
             cairo.FONT_WEIGHT_BOLD)
 
         _, _, width, height, _, _ = cr.text_extents(text)
