@@ -20,13 +20,15 @@
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
 #single file test
+from umit.icm.agent.Global import *
 from utils.importertest import import_debug
 import_debug() 
 
+
 __all__ = ['test_by_id', 'test_name_by_id', 'WebsiteTest', 'ServiceTest','ThrottledTest','service_name_by_id']
 
-TEST_PACKAGE_VERSION = '1.0'
-TEST_PACKAGE_VERSION_NUM = 1        
+TEST_PACKAGE_VERSION = g_db_helper.get_information(key='test_version',default="Dev")
+TEST_PACKAGE_VERSION_NUM = int(g_db_helper.get_information(key='test_version_num',default="1"))        
 
 import hashlib
 import re

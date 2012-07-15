@@ -40,7 +40,6 @@ from umit.icm.agent.utils.Startup import StartUP
 
 from twisted.internet import reactor
 
-
 ###################################################
 #Preference basic setting Page in Preference Window
 class GeneralPage(HIGVBox):
@@ -52,11 +51,27 @@ class GeneralPage(HIGVBox):
         HIGVBox.__init__(self)
         self.__create_widgets()
         self.__pack_widgets()
+        self.__information_load()
 
     def __create_widgets(self):
         
-        self.general_hbox = HIGHBox()        
-
+        
+        self.general_hbox = HIGHBox()    
+        self.version_hbox = HIGHBox()
+        
+        ################
+        #Version Section
+        self.version_section = HIGSectionLabel(_("Version"))
+        self.version_table = HIGTable()
+        self.version_label  = HIGEntryLabel(_("Software Version:"))
+        self.version2_label = HIGEntryLabel()
+        self.testver_label  = HIGEntryLabel(_("Service Test Version:"))
+        self.testver2_label = HIGEntryLabel()
+        self.attribute_label = HIGEntryLabel(_("Agent Attribute:"))
+        self.attribute2_label = HIGEntryLabel()
+            
+        ################
+        #General Section
         self.general_section = HIGSectionLabel(_("General"))
         self.general_table = HIGTable()
                 
@@ -68,12 +83,26 @@ class GeneralPage(HIGVBox):
     def __pack_widgets(self):
         """"""
         self.set_border_width(12)
+        
+        self._pack_noexpand_nofill(self.version_section)
+        self._pack_noexpand_nofill(self.version_hbox)
+        
 
         self._pack_noexpand_nofill(self.general_section)
         self._pack_noexpand_nofill(self.general_hbox)
         
+        self.version_hbox._pack_noexpand_nofill(hig_box_space_holder())
+        self.version_hbox._pack_expand_fill(self.version_table)        
+                
         self.general_hbox._pack_noexpand_nofill(hig_box_space_holder())
         self.general_hbox._pack_expand_fill(self.general_table)
+        
+        self.version_table.attach_label(self.version_label, 0, 2, 0, 1)
+        self.version_table.attach_label(self.version2_label, 2, 4, 0, 1)
+        self.version_table.attach_label(self.testver_label, 0, 2, 1, 2)  
+        self.version_table.attach_label(self.testver2_label, 2, 4, 1, 2)
+        self.version_table.attach_label(self.attribute_label, 0, 2, 2, 3)
+        self.version_table.attach_label(self.attribute2_label, 2, 4, 2, 3)       
         
         self.general_table.attach_label(self.startup_check, 0, 2, 2, 3)
         self.general_table.attach_label(self.notification_check, 0, 3, 3, 4)
@@ -86,6 +115,20 @@ class GeneralPage(HIGVBox):
             start.set_startup()
         else:
             start.clear_startup()        
+        
+    def __information_load(self):
+        """
+        """
+        from umit.icm.agent.Version import VERSION
+        from umit.icm.agent.test import TEST_PACKAGE_VERSION
+        from umit.icm.agent.Global import *
+        
+        self.version2_label.set_text(str(VERSION))
+        self.testver2_label.set_text(str(TEST_PACKAGE_VERSION))
+        
+        peer_attribute = g_db_helper.get_information(key='peer',default="Desktop Agent")
+        
+        self.attribute2_label.set_text(peer_attribute)
         
         
         

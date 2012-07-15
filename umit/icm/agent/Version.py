@@ -3,7 +3,7 @@
 # Copyright (C) 2011 Adriano Monteiro Marques
 #
 # Author:  Zhongjie Wang <wzj401@gmail.com>
-#               Tianwei Liu <liutianweidlut@gmail.com>
+#          Tianwei Liu <liutianweidlut@gmail.com>
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -19,8 +19,10 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
-VERSION = '1'
-VERSION_NUM = 1
+from umit.icm.agent.Global import *
+
+VERSION = g_db_helper.get_information(key='version',default="Dev")
+VERSION_NUM = int(g_db_helper.get_information(key='version_num',default="1"))
 
 higher_version = 1
 lower_version  = -1

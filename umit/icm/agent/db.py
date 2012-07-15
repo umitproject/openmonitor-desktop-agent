@@ -447,9 +447,11 @@ class DBHelper(object):
         """
         self.execute("insert or replace into information values(?,?)",(key,value))
         
-    def get_information(self,key,default=None):
+    def get_information(self,key,default="0"):
+        
         try:
-            result = self.db_conn.select("select value from information where key=?",(key))
+            result = self.db_conn.select("select value from information where key=?",(key,))
+            return result[0]
         except:
             g_logger.warning("No value found for key '%s' in SET Information." % key)
             return default
