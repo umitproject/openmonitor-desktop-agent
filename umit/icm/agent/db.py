@@ -431,12 +431,16 @@ class DBHelper(object):
         
         g_logger.info("Store %s Service Test Task into Database"%(task_service_info['test_id']))
     
-    def service_choice_count(self,service_name):
+    def service_choice_count(self,service_name = None):
         """
         """
-        service_name = service_name.upper()
-        success_cnt = len(self.db_conn.select("SELECT * from tasks WHERE service_name = '%s' AND done_status = 'Success' "%(service_name)))
-        total_cnt = len(self.db_conn.select("SELECT * from tasks WHERE service_name = '%s' "%(service_name)))
+        if service_name != None:
+            service_name = service_name.upper()
+            success_cnt = len(self.db_conn.select("SELECT * from tasks WHERE service_name = '%s' AND done_status = 'Success' "%(service_name)))
+            total_cnt = len(self.db_conn.select("SELECT * from tasks WHERE service_name = '%s' "%(service_name)))
+        else:
+            success_cnt = len(self.db_conn.select("SELECT * from tasks WHERE done_status = 'Success' "))
+            total_cnt = len(self.db_conn.select("SELECT * from tasks "))            
         
         return (success_cnt,total_cnt)
   

@@ -55,6 +55,7 @@ class CapacityTab(gtk.HBox):
         self.__create_widgets()
         self.__pack_widgets()
         self.__connected_widgets()  
+        self.draw_grade_mark()
     
     def __create_widgets(self):
         """
@@ -145,10 +146,39 @@ class CapacityTab(gtk.HBox):
         self.pack_start(self.right_box,True,True,2)   
         self.show_all()
         
+    def draw_grade_mark(self):
+        """
+        """
+        success_cnt,total_cnt = g_db_helper.service_choice_count()
+        grade = (float(success_cnt) /  total_cnt)*100
+        
+
+        if 0.0 <= grade and grade < 20.0:
+            grade = 1
+        elif 20.0 <= grade and grade < 40.0:
+            grade = 2
+        elif 40.0 <= grade and grade < 60.0:
+            grade = 3
+        elif 60.0 <= grade and grade < 80.0:
+            grade = 4
+        else:
+            grade = 5
+
+        for i in range(0,5):
+            self.mark_image[i].set_from_file(os.path.join(IMAGES_DIR,'emptymark.png')) 
+                               
+        for i in range(0,grade):
+            self.mark_image[i].set_from_file(os.path.join(IMAGES_DIR,'okmark.png'))
+        
     def __connected_widgets(self):
         """
         """
-        pass
+        self.refresh_btn.connect('clicked', self.__update_capacity)
+        
+    def __update_capacity(self,widget):    
+        """
+        """
+        self.draw_grade_mark()    
     
     
 class ThrottledTab(gtk.VBox):
