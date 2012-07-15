@@ -439,7 +439,21 @@ class DBHelper(object):
         total_cnt = len(self.db_conn.select("SELECT * from tasks WHERE service_name = '%s' "%(service_name)))
         
         return (success_cnt,total_cnt)
+  
+    ##################################
+    #Basic Information about the agent
+    def set_information(self,key,value):
+        """
+        """
+        self.execute("insert or replace into information values(?,?)",(key,value))
         
+    def get_information(self,key,default=None):
+        try:
+            result = self.db_conn.select("select value from information where key=?",(key))
+        except:
+            g_logger.warning("No value found for key '%s' in SET Information." % key)
+            return default
+    
 #---------------------------------------------------------------------
 class DBKVPHelper(object):
     """
