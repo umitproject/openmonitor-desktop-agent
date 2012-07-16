@@ -134,16 +134,15 @@ class AggregatorAPI(object):
             g_logger.error("Empty response while trying to register.")
             return
 
-        g_logger.info("RegisterAgent response: (%d, %s)" %
-                      (message.agentID, message.publicKeyHash))
+        g_logger.info("RegisterAgent response: (%s, %s)" % (message.agentID, message.publicKeyHash))
 
         return {'id': message.agentID, 'hash': message.publicKeyHash}
     
     def _handle_register_error_response(self,failure):
         if failure is None:
             g_logger.error("Error empty response while trying to register.")
-            return 
-        
+            return
+
     def login(self, username, password):
         request_msg = Login()
         request_msg.agentID = theApp.peer_info.ID
@@ -245,7 +244,7 @@ class AggregatorAPI(object):
        
         # g_logger.info("The Agent ID generated from libcage : %s" % request_msg.newPeer.agentID)
         # TODO Get these values dynamically from the client machine
-        request_msg.newPeer.agentID = 1
+        request_msg.newPeer.agentID = theApp.peer_info.ID
         request_msg.newPeer.agentIP = theApp.peer_info.internet_ip
         request_msg.newPeer.agentPort = 20000
         request_msg.newPeer.token = ""
@@ -267,6 +266,8 @@ class AggregatorAPI(object):
             g_logger.info("Node successfully added to the aggregator's peer list")
         else:
             g_logger.debug("Node failed to join the aggregator's peer list")
+        theApp.peer_added = True
+
 
     def getlocation(self):
         g_logger.info("REACHED getlocation method - Calling Getlocation service")
@@ -621,7 +622,7 @@ class AggregatorAPI(object):
     def _decode(self, text, msg_type):
         if text is None:
             return
-        g_logger.info("Entered debug")
+        g_logger.info("Entered _decode")
         message = msg_type()
         message.ParseFromString(base64.b64decode(text))
         logging.info("Protobuf response parsed to Message - %s" % message)
@@ -669,6 +670,7 @@ class AggregatorAPI(object):
                 defer_.addCallback(self._decode, response_msg_type)
             elif isinstance(message, Login) or isinstance(message, LoginStep2):
                 g_logger.info("Login checked")
+
                 defer_.addCallback(self._decode, response_msg_type)
             else:
                 defer_.addCallback(self._aes_decrypt, response_msg_type)
@@ -681,6 +683,7 @@ class AggregatorAPI(object):
         if(uri==self.base_url + "/addpeer/"):
             g_logger.info("REACHED THE FINAL PROTOBUF SENDER IN ADDPEER")
         g_logger.info("Sending message to aggregator at %s" % uri)
+        g_logger.info("Data being posted to %s is %s" % (uri,data))
         headers = {}
         if mimeType:
             headers['Content-Type'] = mimeType
@@ -766,8 +769,8 @@ if __name__ == "__main__":
 
     report = WebsiteReport()
     report.header.reportID = 'xw384kkre'
-    report.header.agentID = 10000
-    report.header.testID = 1
+    report.header.agentID = '10000'
+    report.header.testID = '1'
     report.header.timeZone = 8
     report.header.timeUTC = int(time.time())
     report.report.websiteURL = 'http://www.baidu.com'

@@ -26,6 +26,7 @@ from umit.icm.agent.logger import g_logger
 from umit.icm.agent.Application import theApp
 from umit.icm.agent.Global import *
 from twisted.internet import reactor
+import umit.icm.agent.libcagepeers
 
 FAILURE_INCREASE_COUNT = 2
 SUCCESS_REDUCE_COUNT = 1
@@ -37,7 +38,7 @@ class PeerEntry(object):
     #----------------------------------------------------------------------
     def __init__(self):
         """Constructor"""
-        self.ID = 0          # integer
+        self.ID = ''          # string
         self.Type = 0        # integer
         self.IP = ''         # string
         self.Port = 0        # integer
@@ -82,7 +83,7 @@ class PeerManager:
         for peer_entry in self.super_peers.values():
             g_db_helper.execute(
                 "insert or replace into peers values" \
-                "(%d, %d, '%s', %d, '%s', '%s', '%s', '%s', %d)" % \
+                "('%s', %d, '%s', %d, '%s', '%s', '%s', '%s', %d)" % \
                 (peer_entry.ID, peer_entry.Type, peer_entry.IP,
                  peer_entry.Port, peer_entry.CipheredPublicKey,
                  peer_entry.Token, peer_entry.Geo, peer_entry.Status,
@@ -90,7 +91,7 @@ class PeerManager:
         for peer_entry in self.normal_peers.values():
             g_db_helper.execute(
                 "insert or replace into peers values" \
-                "(%d, %d, '%s', %d, '%s', '%s', '%s', '%s', %d)" % \
+                "('%s', %d, '%s', %d, '%s', '%s', '%s', '%s', %d)" % \
                 (peer_entry.ID, peer_entry.Type, peer_entry.IP,
                  peer_entry.Port, peer_entry.CipheredPublicKey,
                  peer_entry.Token, peer_entry.Geo, peer_entry.Status,
@@ -98,7 +99,7 @@ class PeerManager:
         for peer_entry in self.mobile_peers.values():
             g_db_helper.execute(
                 "insert or replace into peers values" \
-                "(%d, %d, '%s', %d, '%s', '%s', '%s', '%s', %d)" % \
+                "('%s', %d, '%s', %d, '%s', '%s', '%s', '%s', %d)" % \
                 (peer_entry.ID, peer_entry.Type, peer_entry.IP,
                  peer_entry.Port, peer_entry.CipheredPublicKey,
                  peer_entry.Token, peer_entry.Geo, peer_entry.Status,
@@ -231,7 +232,7 @@ class PeerManager:
     def _super_peer_connected(self, peer_id, ip, port, ciphered_public_key=None,
                              network_id=0):
         if self.agent_is_banned(peer_id) or self.network_is_banned(ip):
-            g_logger.info("Super agent %d is banned or is running from "
+            g_logger.info("Super agent %s is banned or is running from "
                           "a banned network %s" % (peer_id, ip))
             if peer_id in self.super_peers:
                 self.remove_super_peer(peer_id)
@@ -239,11 +240,11 @@ class PeerManager:
 
         if peer_id in self.super_peers and \
            self.super_peers[peer_id].status == 'Connected':
-            g_logger.warning("Peer %d already connected." % peer_id)
+            g_logger.warning("Peer %s already connected." % peer_id)
             return False
 
         if peer_id in self.super_peers:
-            g_logger.debug("Peer id %d already exists in super peer list." %
+            g_logger.debug("Peer id %s already exists in super peer list." %
                            peer_id)
             self.super_peers[peer_id].status = 'Connected'
         else:
@@ -262,7 +263,7 @@ class PeerManager:
 
     def _super_peer_disconnected(self, peer_id):
         if peer_id not in self.super_peers:
-            g_logger.warning("Peer id %d is not in super peer list." % \
+            g_logger.warning("Peer id %s is not in super peer list." % \
                              (peer_id, ip))
             return False
         # will not remove the peer entry from the list
@@ -273,7 +274,7 @@ class PeerManager:
     def _normal_peer_connected(self, peer_id, ip, port, ciphered_public_key=None,
                               network_id=0):
         if self.agent_is_banned(peer_id) or self.network_is_banned(ip):
-            g_logger.info("Desktop agent %d is banned or is running from "
+            g_logger.info("Desktop agent %s is banned or is running from "
                           "a banned network %s" % (peer_id, ip))
             if peer_id in self.normal_peers:
                 self.remove_normal_peer(peer_id)
@@ -281,11 +282,11 @@ class PeerManager:
 
         if peer_id in self.normal_peers and \
            self.normal_peers[peer_id].status == 'Connected':
-            g_logger.warning("Peer %d already connected." % peer_id)
+            g_logger.warning("Peer %s already connected." % peer_id)
             return False
 
         if peer_id in self.normal_peers:
-            g_logger.debug("Peer id %d already exists in normal peer list." %
+            g_logger.debug("Peer id %s already exists in normal peer list." %
                            peer_id)
             self.normal_peers[peer_id].status = 'Connected'
         else:
@@ -303,7 +304,7 @@ class PeerManager:
 
     def _normal_peer_disconnected(self, peer_id):
         if peer_id not in self.normal_peers:
-            g_logger.warning("Peer id %d is not in normal peer list." % \
+            g_logger.warning("Peer id %s is not in normal peer list." % \
                              (peer_id, ip))
             return False
         # will not remove the peer entry from the list
@@ -313,7 +314,7 @@ class PeerManager:
 
     def add_super_peer(self, peer_id, ip, port, token =None ,ciphered_public_key=None,status='Disconnected', network_id=0):
         if self.agent_is_banned(peer_id) or self.network_is_banned(ip):
-            g_logger.info("Super Peer agent %d is banned or is running from a banned "
+            g_logger.info("Super Peer agent %s is banned or is running from a banned "
                           "network %s" % (peer_id, ip))
             '''
             if peer_id in self.super_peers:
@@ -323,7 +324,7 @@ class PeerManager:
             '''
 
         if peer_id in self.super_peers:
-            g_logger.info("Peer id %d already exists in Super peer list." %
+            g_logger.info("Peer id %s already exists in Super peer list." %
                           peer_id)
         else:
             peer_entry = PeerEntry()
@@ -342,17 +343,18 @@ class PeerManager:
 
     def add_normal_peer(self, peer_id, ip, port, token =None ,ciphered_public_key=None,
                         status='Disconnected', network_id=0):
-        '''if self.agent_is_banned(peer_id) or self.network_is_banned(ip):
-            g_logger.info("Desktop agent %d is banned or is running from a banned "
-                          "network %s" % (peer_id, ip))
-            
-            if peer_id in self.normal_peers:
-                self.remove_normal_peer(peer_id)
 
-            return
+#        if self.agent_is_banned(peer_id) or self.network_is_banned(ip):
+#            g_logger.info("Desktop agent %s is banned or is running from a banned "
+#                          "network %s" % (peer_id, ip))
+            
+#        if peer_id in self.normal_peers:
+#            self.remove_normal_peer(peer_id)
+#
+#        return
 
         if peer_id in self.normal_peers:
-            g_logger.info("Peer id %d already exists in normal peer list." %
+            g_logger.info("Peer id %s already exists in normal peer list." %
                           peer_id)
         else:
             peer_entry = PeerEntry()
@@ -365,12 +367,13 @@ class PeerManager:
             peer_entry.status = status
             peer_entry.network_id = network_id
             self.normal_peers[peer_entry.ID] = peer_entry
-            self.normal_peer_num = self.normal_peer_num + 1       
-    '''
+            self.normal_peer_num = self.normal_peer_num + 1
+
+
     def add_mobile_peer(self, peer_id, ip, port, ciphered_public_key=None,
                         status='Disconnected', network_id=0):
         if self.agent_is_banned(peer_id) or self.network_is_banned(ip):
-            g_logger.info("Mobile agent %d is banned or is running from a banned "
+            g_logger.info("Mobile agent %s is banned or is running from a banned "
                           "network %s" % (peer_id, ip))
 
             if peer_id in self.mobile_peers:
@@ -379,7 +382,7 @@ class PeerManager:
             return
 
         if peer_id in self.mobile_peers:
-            g_logger.info("Peer id %d already exists in mobile peer list." %
+            g_logger.info("Peer id %s already exists in mobile peer list." %
                           peer_id)
         else:
             peer_entry = PeerEntry()
@@ -595,6 +598,24 @@ class PeerManager:
                         g_logger.debug("Requiring super peers from "
                                        "super peer %d belonging to %s" % (peer.ID, theApp.peer_info.country_code))
                         self.sessions[peer.ID].get_super_peer_list(theApp.peer_info.country_code)
+
+        g_logger.info("-----------------PEER SYNCUP----------------")
+        # Sync peers from libcage with peers table.
+        if(theApp.peer_added):
+            self.peers = []
+            self.peers = theApp.cage_instance.getPeers()
+            if(len(self.peers)==0):
+                g_logger.info("There are no peers in the cage instance. Wait for few seconds")
+            else:
+                g_logger.info("Syncing up the peer list with the peers table")
+                for peer in self.peers:
+                    g_logger.info("Peer from cage instance is %s" % str(peer))
+                    peer_arr = peer.rsplit(",")
+                    theApp.peer_manager.add_normal_peer(peer_arr[0],peer_arr[1],int(peer_arr[2]),None,None,"Connected",0);
+                    theApp.peer_manager.save_to_db()
+
+
+        
 
 
         '''

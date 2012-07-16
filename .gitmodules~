@@ -1,0 +1,25 @@
+<<<<<<< HEAD
+[submodule "deps/higwidgets"]
+	path = deps/higwidgets
+	url = git://github.com/umitproject/higwidgets.git
+[submodule "deps/umit-common"]
+	path = deps/umit-common
+	url = git://github.com/umitproject/umit-common.git
+[submodule "deps/icm-common"]
+	path = deps/icm-common
+	url = umitgit@git.umitproject.org:/icm-common.git
+[submodule "umit/icm/agent/libcage"]
+	path = umit/icm/agent/libcage
+	url = git://github.com/narendran/libcage.git
+
+=======
+[submodule "deps/higwidgets"]
+	path = deps/higwidgets
+	url = ssh://github.com/umitproject/higwidgets.git
+[submodule "deps/umit-common"]
+	path = deps/umit-common
+	url = ssh://github.com/umitproject/umit-common.git
+[submodule "deps/icm-common"]
+	path = deps/icm-common
+	url = ssh://umitgit@dev.umitproject.org:/icm-common.git
+>>>>>>> a052f1776b96a951a767c33e04412841dd61d1b5

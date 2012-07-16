@@ -53,6 +53,8 @@ def main_is_frozen():
 
 class Application(object):
     def __init__(self):
+        self.cage_instance = libcagepeers
+        self.peer_added = False
         pass
 
     def _init_components(self, aggregator):
@@ -165,6 +167,8 @@ class Application(object):
         g_logger.info("ENTER : register_agent since peer_info does not have username: Checking login flow")
         g_logger.info("username : %s" % username)
         g_logger.info("password : %s" % password)
+        self.peer_info.Username = username
+        self.peer_info.Password = password
         defer_.addCallback(self._handle_register)
         defer_.addErrback(self._handle_errback)
         return defer_
@@ -283,7 +287,7 @@ class Application(object):
             # Maintain in Peermanager takes care of get_peer_list and get_super_peer_list
             if not hasattr(self, 'peer_maintain_lc'):
                 self.peer_maintain_lc = task.LoopingCall(self.peer_manager.maintain)
-                self.peer_maintain_lc.start(7200)
+                self.peer_maintain_lc.start(10)
 
             if not hasattr(self, 'task_run_lc'):
                 self.task_run_lc = task.LoopingCall(self.task_scheduler.schedule)
@@ -299,7 +303,7 @@ class Application(object):
             g_logger.info("List of normal peers from the Aggregator : %s" % self.peer_manager.normal_peers)
 
             g_logger.info("BOOTSTRAPPING LIBCAGE BASED ON THE LIST OF PEERS AND SUPER PEERS")
-            
+
             g_logger.info("Info about super peers : ");
             if len(self.peer_manager.super_peers)!=0:
                 for superPeer in self.peer_manager.super_peers.values():
@@ -307,8 +311,9 @@ class Application(object):
 
 
             # if len(self.peer_manager.normal_peers==0):
-                    
-            libcagepeers.createCage_firstnode("20000");
+
+            #self.cage_instance.createCage_firstnode("20000");
+            self.cage_instance.createCage_joinnode("20001","127.0.0.1","20000");
             '''
                 else 
                     libcagepeers.createCage_joinnode()

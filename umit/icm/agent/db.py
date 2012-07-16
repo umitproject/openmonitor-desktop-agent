@@ -287,8 +287,7 @@ class DBHelper(object):
                                    (start_ip, end_ip))
 
     def get_banned_agent(self, agent_id):
-        return self.db_conn.select("SELECT * FROM banlist WHERE "
-                                   "agent_id = %s" % agent_id)
+        return self.db_conn.select("SELECT * FROM banlist WHERE agent_id = %s" % agent_id)
 
     def agent_is_banned(self, agent_id):
         agent = self.get_banned_agent(agent_id)
