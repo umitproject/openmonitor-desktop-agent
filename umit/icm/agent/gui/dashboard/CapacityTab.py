@@ -24,9 +24,11 @@ import gtk, gobject,os
 
 from umit.icm.agent.I18N import _
 from umit.icm.agent.Global import *
+from umit.icm.agent.Version import PEER_ATTRIBUTE
 from umit.icm.agent.BasePaths import *
 from umit.icm.agent.Application import theApp
 from umit.icm.agent.logger import g_logger
+
 
 from higwidgets.higdialogs import HIGDialog
 from higwidgets.higlabels import HIGLabel
@@ -41,6 +43,7 @@ from umit.icm.agent.gui.dashboard.timeline.TimeLineDisplayBar import TimeLineDis
 
 from umit.icm.agent.gui.dashboard.DashboardListBase import  *
 
+
 class CapacityTab(gtk.HBox):
     """
     CapacityTab: show the network's Capacity  
@@ -49,8 +52,6 @@ class CapacityTab(gtk.HBox):
         """
         """
         gtk.HBox.__init__(self)
-
-        self.set_visible(False)
                 
         self.__create_widgets()
         self.__pack_widgets()
@@ -67,7 +68,7 @@ class CapacityTab(gtk.HBox):
         #Grade Box
         self.grade_box   = HIGVBox()
         self.grade_title = gtk.Label(
-            "<span size='12500' weight='heavy'>Communication Grade</span>")
+            "<span size='18000' weight='heavy'>Communication Grade</span>")
         self.grade_title.set_use_markup(True)
         self.grade_title.set_selectable(False)   
         self.mark_box = gtk.HBox()
@@ -77,24 +78,27 @@ class CapacityTab(gtk.HBox):
             self.mark_image[i].set_from_file(os.path.join(IMAGES_DIR,'emptymark.png'))
             self.mark_box.pack_start(self.mark_image[i])
               
-        #########
-        #Type Box        
-        self.proprity_box = HIGVBox() 
-        self.proprity_title = gtk.Label(
-            "<span size='12500' weight='heavy'>Peer Type</span>") 
-        self.proprity_title.set_use_markup(True)
-        self.proprity_title.set_selectable(False)
-             
         
         #############
         #Website Test
         self.webtest_box = HIGVBox() 
         self.webtest_title = gtk.Label(
-            "<span size='12500' weight='heavy'>Website Test</span>") 
+            "<span size='18000' weight='heavy'>Website Test</span>") 
         self.webtest_title.set_use_markup(True)
-        self.webtest_title.set_selectable(False)     
-
-                    
+        self.webtest_title.set_selectable(False)   
+        
+        status_str = "--"
+        speed_str  = "--"
+        throtthled_str = "--"
+        self.webtest_status_label = gtk.Label("<span size='12500' weight='heavy'>Web Status: %s</span>" % (status_str))      
+        self.webtest_speed_label = gtk.Label("<span size='12500' weight='heavy'>Network Speed: %s</span>" % (speed_str)) 
+        self.webtest_throttled_label = gtk.Label("<span size='12500' weight='heavy'>Throttled Status: %s</span>" % (throtthled_str)) 
+        self.webtest_status_label.set_use_markup(True)
+        self.webtest_status_label.set_selectable(False) 
+        self.webtest_speed_label.set_use_markup(True)
+        self.webtest_speed_label.set_selectable(False) 
+        self.webtest_throttled_label.set_use_markup(True)
+        self.webtest_throttled_label.set_selectable(False)         
         ############
         #Service Box
         self.service_box  = HIGVBox()
@@ -102,7 +106,8 @@ class CapacityTab(gtk.HBox):
         #    "<span size='12500' weight='heavy'>Service Statistics</span>") 
         #self.service_title.set_use_markup(True)
         #self.service_title.set_selectable(False)     
-        self.refresh_btn = gtk.Button(_("Refresh Button")) 
+        self.refresh_btn = gtk.Button(_("Refresh Now!")) 
+        self.refresh_btn.set_size_request(108,72)
           
         self.display_bar = TimeLineDisplayBar(self)              
         
@@ -111,39 +116,35 @@ class CapacityTab(gtk.HBox):
         """
         """
         ######
-        #BOXS
-        self.left_box._pack_expand_fill(self.grade_box)
-        self.left_box._pack_expand_fill(self.proprity_box)
+        #BOXS     
+        self.left_box._pack_noexpand_nofill(self.grade_box)
         self.left_box._pack_expand_fill(self.webtest_box)
         self.right_box._pack_noexpand_nofill(self.refresh_btn)
         self.right_box._pack_expand_fill(self.service_box)
         
         ##########
         #Grade Box
+        self.grade_box._pack_noexpand_nofill(hig_box_space_holder()) 
         self.grade_box._pack_noexpand_nofill(self.grade_title)
-        self.grade_box._pack_expand_fill(self.mark_box)
-        self.grade_box._pack_noexpand_nofill(hig_box_space_holder())                
-        #########
-        #Type Box 
-        self.proprity_box._pack_noexpand_nofill(self.proprity_title)
-        self.proprity_box._pack_noexpand_nofill(hig_box_space_holder()) 
-               
-        self.proprity_box._pack_noexpand_nofill(hig_box_space_holder())                 
+        self.grade_box._pack_noexpand_nofill(hig_box_space_holder()) 
+        self.grade_box._pack_noexpand_nofill(self.mark_box) 
+        self.grade_box._pack_noexpand_nofill(hig_box_space_holder())      
+                           
         #############
         #Website Test
         self.webtest_box._pack_noexpand_nofill(self.webtest_title)
-        
-        self.webtest_box._pack_noexpand_nofill(hig_box_space_holder())        
+        self.webtest_box._pack_noexpand_nofill(hig_box_space_holder()) 
+        self.webtest_box._pack_noexpand_nofill(self.webtest_status_label)
+        self.webtest_box._pack_noexpand_nofill(self.webtest_speed_label)
+        self.webtest_box._pack_noexpand_nofill(self.webtest_throttled_label)                   
         ############
         #Service Box                
-        #self.service_box._pack_noexpand_nofill(self.service_title)
         self.service_box._pack_noexpand_nofill(hig_box_space_holder())
         self.service_box._pack_expand_fill(self.display_bar)
         self.service_box._pack_noexpand_nofill(hig_box_space_holder())         
         
-        
-        self.pack_start(self.left_box,True,False,4)
-        self.pack_start(self.right_box,True,True,2)   
+        self.pack_start(self.left_box,True,True,2)
+        self.pack_start(self.right_box,True,True,4)   
         self.show_all()
         
     def draw_grade_mark(self):
@@ -151,7 +152,6 @@ class CapacityTab(gtk.HBox):
         """
         success_cnt,total_cnt = g_db_helper.service_choice_count()
         grade = (float(success_cnt) /  total_cnt)*100
-        
 
         if 0.0 <= grade and grade < 20.0:
             grade = 1

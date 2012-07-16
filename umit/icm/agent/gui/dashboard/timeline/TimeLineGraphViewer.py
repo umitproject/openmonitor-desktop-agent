@@ -26,10 +26,13 @@ Time line Graph Viewer in Dashboard Window
 import pygtk
 pygtk.require('2.0')
 import gtk, gobject
+import os
 
 from deps.higwidgets.higboxes import HIGHBox, HIGVBox,hig_box_space_holder
-
+from umit.icm.agent.Version import PEER_ATTRIBUTE
 from umit.icm.agent.gui.dashboard.timeline.TimeLine import TLHoder
+from umit.icm.agent.BasePaths import *
+from deps.higwidgets.higtables import HIGTable
 
 
 class TimeLineGraphViewer(gtk.VBox):
@@ -49,20 +52,41 @@ class TimeLineGraphViewer(gtk.VBox):
         
     def __create_widgets(self):
         """"""        
+        #####
+        #Box
+        self.title_box = gtk.HBox()
         self.box = HIGVBox()
         
         self.timeline = TLHoder(self.dashboard,self.connector)
         self.timeline.show_all()
         
+        #######
+        #Title
         self.title = gtk.Label(
-            "<span size='15000' weight='heavy'>Timeline Graph Area</span>")        
+            "<span size='15000' weight='heavy'>\t\t\t\t Timeline Graph Area(%s) </span>"%(PEER_ATTRIBUTE))        
         self.title.set_use_markup(True)
-        self.title.set_selectable(False)        
+        self.title.set_selectable(False)      
+        
+        #########
+        #Type Pic
+        if "desktop" in PEER_ATTRIBUTE.lower():
+            peer_img_str = "normalpeer.png"
+        else:
+            peer_img_str = "superpeer.png"
+            
+        self.peer_img = gtk.Image()
+        self.peer_img.set_from_file(os.path.join(IMAGES_DIR,peer_img_str))        
+        
         
     def __packed_widgets(self):
         """"""
-        self.box._pack_noexpand_nofill(self.title)
+        self.box._pack_noexpand_nofill(self.title_box)
         self.box._pack_expand_fill(self.timeline)
+        
+        self.title_box.pack_end(self.peer_img)
+        self.title_box.pack_end(self.title)
+        
+
         
         self.add(self.box)
         

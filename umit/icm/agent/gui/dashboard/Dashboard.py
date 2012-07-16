@@ -179,7 +179,7 @@ class DashboardWindow(HIGWindow):
         """"""
         self.timeline_viewer.show_all()
         self.hide_all_tabs()
-
+        self.capacity_tab.set_visible(True)
     def add_tabs(self):
         """
         """

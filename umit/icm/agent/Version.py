@@ -23,6 +23,7 @@ from umit.icm.agent.Global import *
 
 VERSION = g_db_helper.get_information(key='version',default="Dev")
 VERSION_NUM = int(g_db_helper.get_information(key='version_num',default="1"))
+PEER_ATTRIBUTE = g_db_helper.get_information(key='peer',default="Desktop Agent")
 
 higher_version = 1
 lower_version  = -1
