@@ -135,9 +135,8 @@ class Application(object):
         
         self.is_auto_login = g_config.getboolean('application', 'auto_login_swittch')
         
-        
         #debug switch: It can show the gtkWindow without any authentication 
-        if g_config.getboolean('debug','debug_switch'):
+        if g_config.getboolean('debug','debug_switch') and self.use_gui:
             self.login_simulate()
         
         if  self.is_auto_login:
@@ -145,9 +144,20 @@ class Application(object):
             self.peer_info.load_from_db()
             self.login(self.peer_info.Username,self.peer_info.Password, True)
         else:
-            self.gtk_main.show_login()
+            if self.use_gui:
+                self.gtk_main.show_login()
+            else:
+                self.login_without_gui()
             g_logger.info("Auto-login is disabled. You need to manually login.")
-          
+     
+    def login_without_gui(self):
+        """
+        Users login without username or password
+        """      
+        username  = raw_input("User Name:")
+        password = raw_input("Password:")
+        self.login(username, password, save_login=True) 
+        
     def check_software_auto(self):
         """
         check software: according the time and other configurations
@@ -177,7 +187,7 @@ class Application(object):
             self.peer_info.ID = result['id']
             self.peer_info.CipheredPublicKeyHash = result['hash']
             self.peer_info.is_registered = True
-            self.peer_info.save_to_db()
+            #self.peer_info.save_to_db()
             g_logger.debug("Register to Aggregator: %s" % result['id'])
             
         return result

@@ -48,7 +48,8 @@ else:
 	 raise Exception("Can't find root dir.")
 
 # check if there's GTK environment
-useGTK = True
+from umit.icm.agent.Global import *
+useGTK = g_config.getboolean('debug','use_gui')
 if useGTK:
     if 'twisted.internet.reactor' in sys.modules:
         del sys.modules['twisted.internet.reactor']
@@ -192,7 +193,11 @@ Umit:%s
             d.run()
             d.destroy()
 
-#sys.excepthook = UmitExceptionHook()
+if useGTK:
+	pass
+	#sys.excepthook = UmitExceptionHook()
+else:
+	pass
 
 def main(args):
     if useGTK:
