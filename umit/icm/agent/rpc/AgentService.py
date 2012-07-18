@@ -3,6 +3,7 @@
 # Copyright (C) 2011 Adriano Monteiro Marques
 #
 # Author:  Zhongjie Wang <wzj401@gmail.com>
+#          Tianwei Liu <liutiawneidlut@gmail.com>
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -225,6 +226,7 @@ class AgentProtocol(Protocol):
             'GetSuperPeerList',
             'SendWebsiteReport',
             'SendServiceReport',
+            'GetEvents',
             ):
             return True
         return False

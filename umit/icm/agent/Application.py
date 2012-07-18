@@ -114,7 +114,7 @@ class Application(object):
             except Exception,info:
                 #There can add more information
                 from higwidgets.higwindows import HIGAlertDialog
-                print 'The exception is %s'%(info)
+                #print 'The exception is %s'%(info)
                 alter = HIGAlertDialog(primary_text = _("The Listen Port has been used by other applications"),\
                                        secondary_text = _("Please check the Port"))
                 alter.show_all()

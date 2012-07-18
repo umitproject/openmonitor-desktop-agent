@@ -119,7 +119,7 @@ class AggregatorAPI(object):
         request_msg.agentPublicKey.exp = str(theApp.key_manager.public_key.exp)
         if theApp.peer_info.internet_ip:
             request_msg.ip = theApp.peer_info.internet_ip
-        print request_msg
+        #print request_msg
         # send message
         defer_ = self._send_message(request_msg, RegisterAgentResponse)
         defer_.addCallback(self._handle_register_response)
@@ -159,14 +159,15 @@ class AggregatorAPI(object):
     def _handle_login_step1(self, message):
         if message is None:
             return
-
+        print "------------------login step1--------------"
+        print message
         if not theApp.key_manager.aggregator_public_key.verify(
             self.challenge, message.cipheredChallenge):
             g_logger.warning("Challenge doesn't match. Maybe something wrong "
                              "with aggregator public key or the current "
                              "aggregator is fake.")
             return
-
+        print "-----------------end------------------------"
         request_msg = LoginStep2()
         request_msg.processID = message.processID
         request_msg.cipheredChallenge = theApp.key_manager.private_key.sign(message.challenge)
