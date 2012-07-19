@@ -116,8 +116,9 @@ class Application(object):
                 reactor.listenTCP(self.listen_port, self.factory)
             except Exception,info:
                 #There can add more information
-                self.quit_window_in_wrong(self,primary_text = _("The Listen Port has been used by other applications"),
-                                          secondary_text = _("Please check the Port"))
+
+                self.quit_window_in_wrong(primary_text = _("The Listen Port has been used by other applications"), \
+                                          secondary_text = _("Please check the Port") )
                 
         # Create mobile agent service
         from umit.icm.agent.rpc.mobile import MobileAgentService
@@ -176,15 +177,15 @@ class Application(object):
             pass
         else:
             g_logger.info("Sorry! The desktop agent cannot be authenticated by aggregator ago!")
-            self.quit_window_in_wrong(self,primary_text = _("The desktop agent cannot be authenticated by aggregator ago"),
+            self.quit_window_in_wrong(primary_text = _("The desktop agent cannot be authenticated by aggregator ago"), \
                                       secondary_text = _("Please email to Open Monitor!"))            
 
     def check_peer_authentical(self):
         """
         Check the peer store the peer information in database
         """
-        
-        return True
+        return g_db_helper.check_peer_info() 
+
      
     def login_without_gui(self):
         """
@@ -441,8 +442,8 @@ class Application(object):
         #There can add more information
         from higwidgets.higwindows import HIGAlertDialog
         #print 'The exception is %s'%(info)
-        alter = HIGAlertDialog(primary_text = _("The Listen Port has been used by other applications"),\
-                               secondary_text = _("Please check the Port"))
+        alter = HIGAlertDialog(primary_text = primary_text,\
+                               secondary_text = secondary_text)
         alter.show_all()
         result = alter.run()
         

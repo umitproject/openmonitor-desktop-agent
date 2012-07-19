@@ -303,6 +303,16 @@ class DBHelper(object):
             return True
         return False
 
+    def check_peer_info(self):
+        """
+        """
+        result = len(self.db_conn.select("SELECT * from peer_info"))
+        if result != 0:
+            return True
+        else:
+            return False
+        
+    
     def get_aggregator_publickey(self):
         return self.get_value('keys', 'aggregator_publickey')
 
@@ -320,6 +330,8 @@ class DBHelper(object):
 
     def get_aggregator_aes_key(self):
         return self.get_value('keys', 'aggregator_aes_key')
+    
+    
 
     #####################################################
     #Methods for Dashboard Window(Timeline or QueryFrame)
