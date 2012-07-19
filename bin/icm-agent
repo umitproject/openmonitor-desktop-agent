@@ -107,7 +107,7 @@ class UmitExceptionHook(object):
 
         umit_version = VERSION
         #umitCore_version = getattr(umitCore, "__version__", "< 0.0.1")
-        #umitGUI_version = getattr(umitGUI, "__version__", "< 0.0.1")
+        #umitGUI_verxxsion = getattr(umitGUI, "__version__", "< 0.0.1")
 
         versions = _("""
 Versions:

@@ -30,12 +30,16 @@ import time
 from twisted.web import client
 from twisted.web.error import Error
 from twisted.internet import error
+from twisted.web.http_headers import Headers
+from twisted.web.client import Agent
+from twisted.internet import reactor
 
 from google.protobuf.text_format import MessageToString
 
 from umit.icm.agent.rpc.message import *
 from umit.icm.agent.rpc.MessageFactory import MessageFactory
 from umit.icm.agent.rpc import messages_pb2
+
 
 from umit.icm.agent.logger import g_logger
 from umit.icm.agent.Application import theApp
@@ -113,7 +117,7 @@ class AggregatorAPI(object):
         """
         g_logger.info("Testing Aggregator website: %s" % self.base_url)
         
-        defer_ = client.Request('GET',self.base_url,
+        defer_ = Agent(reactor).request('GET',self.base_url,
                                 Headers({'User-Agent':['ICM Website Test']}),
                                 None)
         defer_.addCallback(self._handle_check_aggregator_website)    

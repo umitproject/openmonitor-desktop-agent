@@ -116,17 +116,9 @@ class Application(object):
                 reactor.listenTCP(self.listen_port, self.factory)
             except Exception,info:
                 #There can add more information
-                from higwidgets.higwindows import HIGAlertDialog
-                #print 'The exception is %s'%(info)
-                alter = HIGAlertDialog(primary_text = _("The Listen Port has been used by other applications"),\
-                                       secondary_text = _("Please check the Port"))
-                alter.show_all()
-                result = alter.run()
+                self.quit_window_in_wrong(self,primary_text = _("The Listen Port has been used by other applications"),
+                                          secondary_text = _("Please check the Port"))
                 
-                #cannot write return, if so the program cannot quit, and run in background              
-                self.terminate()
-
-        #############################
         # Create mobile agent service
         from umit.icm.agent.rpc.mobile import MobileAgentService
         self.ma_service = MobileAgentService()
@@ -145,8 +137,22 @@ class Application(object):
         
         ######################################
         #check aggregator can be reached first
-        
+        defer_ = self.aggregator.check_aggregator_website()
+        defer_.addCallback(self.check_aggregator_success)
+        defer_.addErrback(self.check_aggregator_failed)
          
+    
+    def check_aggregator_success(self,response):
+        """
+        """
+        if response == True:
+            self.login_window_show()
+        else:
+            self.super_peer_communication()
+        
+    def login_window_show(self):       
+        """
+        """
         if  self.is_auto_login:
             #login with saved username or password, not credentials
             self.peer_info.load_from_db()
@@ -156,7 +162,29 @@ class Application(object):
                 self.gtk_main.show_login()
             else:
                 self.login_without_gui()
-            g_logger.info("Auto-login is disabled. You need to manually login.")
+            g_logger.info("Auto-login is disabled. You need to manually login.")        
+    
+    def check_aggregator_failed(self,message):
+        """
+        """
+        self.super_peer_communication()
+    
+    def super_peer_communication(self):
+        """
+        """
+        if self.check_peer_authentical() == True:
+            pass
+        else:
+            g_logger.info("Sorry! The desktop agent cannot be authenticated by aggregator ago!")
+            self.quit_window_in_wrong(self,primary_text = _("The desktop agent cannot be authenticated by aggregator ago"),
+                                      secondary_text = _("Please email to Open Monitor!"))            
+
+    def check_peer_authentical(self):
+        """
+        Check the peer store the peer information in database
+        """
+        
+        return True
      
     def login_without_gui(self):
         """
@@ -407,6 +435,20 @@ class Application(object):
             # This is necessary so the bot can take over and control the agent
             reactor.run()
 
+    def quit_window_in_wrong(self,primary_text = "",secondary_text = ""):
+        """
+        """
+        #There can add more information
+        from higwidgets.higwindows import HIGAlertDialog
+        #print 'The exception is %s'%(info)
+        alter = HIGAlertDialog(primary_text = _("The Listen Port has been used by other applications"),\
+                               secondary_text = _("Please check the Port"))
+        alter.show_all()
+        result = alter.run()
+        
+        #cannot write return, if so the program cannot quit, and run in background              
+        self.terminate()
+        
     def terminate(self):
         #print 'quit'
         reactor.callWhenRunning(reactor.stop)
@@ -433,6 +475,7 @@ class Application(object):
         self.quitting = True
         
         g_logger.info("ICM Agent quit.")
+        
 
 theApp = Application()
 
