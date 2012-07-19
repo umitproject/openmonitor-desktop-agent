@@ -219,6 +219,7 @@ class MobileAgentService(object):
         # send response
         response_msg = GetEventsResponse()
         pass
+        
         self._make_response_header(response_msg.header)
         self._send_message(response_msg, transport)                
     

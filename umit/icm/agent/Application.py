@@ -103,6 +103,9 @@ class Application(object):
         self.report_manager.load_unsent_reports()
 
     def init_after_running(self, port=None, username=None, password=None, server_enabled=True):
+        """
+        """
+        #####################################################
         # Create agent service(need to add the port confilct)
         if server_enabled:
             self.listen_port = port if port is not None else g_config.getint('network', 'listen_port')
@@ -123,7 +126,7 @@ class Application(object):
                 #cannot write return, if so the program cannot quit, and run in background              
                 self.terminate()
 
-
+        #############################
         # Create mobile agent service
         from umit.icm.agent.rpc.mobile import MobileAgentService
         self.ma_service = MobileAgentService()
@@ -135,10 +138,15 @@ class Application(object):
         
         self.is_auto_login = g_config.getboolean('application', 'auto_login_swittch')
         
+        ###################################################################
         #debug switch: It can show the gtkWindow without any authentication 
         if g_config.getboolean('debug','debug_switch') and self.use_gui:
             self.login_simulate()
         
+        ######################################
+        #check aggregator can be reached first
+        
+         
         if  self.is_auto_login:
             #login with saved username or password, not credentials
             self.peer_info.load_from_db()
@@ -255,9 +263,14 @@ class Application(object):
         defer_ = self.aggregator.login(username, password)
         defer_.addCallback(self._handle_login, username, password,
                            save_login, login_only)
-
+        defer_.addErrback(self._handle_login_errback)
         return defer_
 
+    def _handle_login_errback(self,failure):
+        """
+        """
+        print "------------------login failed!-------------------"
+             
     def _handle_login(self, result, username, password, save_login,login_only=False):
         """
         """

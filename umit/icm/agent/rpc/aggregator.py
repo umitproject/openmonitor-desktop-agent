@@ -80,6 +80,7 @@ class AggregatorAPI(object):
         self.base_url = g_config.get('network', 'aggregator_url') \
             if aggregator is None else aggregator
         
+        
         self.available = True
         self.pending_report_ids = []
 
@@ -105,6 +106,42 @@ class AggregatorAPI(object):
         g_logger.debug("Aggregator test version: %s" % message.header.currentTestVersionNo)
 
         return message
+
+    def check_aggregator_website(self):
+        """
+        Run aggregator website test
+        """
+        g_logger.info("Testing Aggregator website: %s" % self.base_url)
+        
+        defer_ = client.Request('GET',self.base_url,
+                                Headers({'User-Agent':['ICM Website Test']}),
+                                None)
+        defer_.addCallback(self._handle_check_aggregator_website)    
+        defer_.addErrback(self._handle_check_aggregator_website_err)
+        
+        return defer_
+        
+    def _handle_check_aggregator_website(self,message):
+        """
+        """
+        status_code = message.code
+        HTTP_SUCCESS_CODE = (200,302)
+        if int(status_code) in HTTP_SUCCESS_CODE:
+            g_logger.info("Testing Aggregator website: %s" % status_code)
+            self.available = True
+        else:
+            g_logger.info("Cannot connect Aggregator website: %s" % self.base_url)
+            self.available = False
+        
+        return self.available
+    
+    def _handle_check_aggregator_website_err(self,failure):
+        """
+        """
+        g_logger.info("Cannot connect Aggregator website: %s" % self.base_url)
+        self.available = False
+        
+        return self.available
 
     """ Peer """
     #----------------------------------------------------------------------
