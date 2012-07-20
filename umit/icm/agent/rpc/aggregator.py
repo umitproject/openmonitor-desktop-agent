@@ -199,15 +199,15 @@ class AggregatorAPI(object):
     def _handle_login_step1(self, message):
         if message is None:
             return
-        print "------------------login step1--------------"
-        print message
+        #print "------------------login step1--------------"
+        #print message
         if not theApp.key_manager.aggregator_public_key.verify(
             self.challenge, message.cipheredChallenge):
             g_logger.warning("Challenge doesn't match. Maybe something wrong "
                              "with aggregator public key or the current "
                              "aggregator is fake.")
             return
-        print "-----------------end------------------------"
+        #print "-----------------end------------------------"
         request_msg = LoginStep2()
         request_msg.processID = message.processID
         request_msg.cipheredChallenge = theApp.key_manager.private_key.sign(message.challenge)
@@ -263,7 +263,7 @@ class AggregatorAPI(object):
         if message is None:
             return
         
-        g_logger.info("Got %d super peers from aggregator!"%(len(message.knownSuperPeer)))        
+        g_logger.info("Got %d super peers from aggregator!"%(len(message.knownSuperPeers)))        
         
         for speer in message.knownSuperPeers:
             theApp.peer_manager.add_super_peer(speer.agentID,

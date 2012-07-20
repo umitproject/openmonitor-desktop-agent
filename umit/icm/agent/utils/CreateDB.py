@@ -160,6 +160,14 @@ def create(conn_str):
               "check_code TEXT"
                ")")
     
+    #db for super peer by manual
+    c.execute("CREATE TABLE super_peers_manual ("
+              "ip TEXT NOT NULL,"
+              "port INTEGER NOT NULL,"
+              "description TEXT,"
+              "constraint pk_super_peers_manual primary key (ip,port)")   
+    
+    
     # Insert pre-defined values
     mod = 93740173714873692520486809225128030132198461438147249362129501889664779512410440220785650833428588898698591424963196756217514115251721698086685512592960422731696162410024157767288910468830028582731342024445624992243984053669314926468760439060317134193339836267660799899385710848833751883032635625332235630111L
     exp = 65537L
