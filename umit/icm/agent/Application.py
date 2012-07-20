@@ -224,7 +224,6 @@ class Application(object):
             self.peer_info.ID = result['id']
             self.peer_info.CipheredPublicKeyHash = result['hash']
             self.peer_info.is_registered = True
-            #self.peer_info.save_to_db()
             g_logger.debug("Register to Aggregator: %s" % result['id'])
             
         return result
@@ -309,6 +308,7 @@ class Application(object):
             self.peer_info.Password = password if password !="" and password != None else self.peer_info.Password
             #print self.peer_info.Username, self.peer_info.Password 
             self.peer_info.is_logged_in = True
+            #self.peer_info.clear_db()
             self.peer_info.save_to_db()
             g_logger.debug("Login Successfully :%s@%s" % (username,password))
             if save_login:
