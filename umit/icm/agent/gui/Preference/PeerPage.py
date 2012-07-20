@@ -91,8 +91,13 @@ class PeerInfoPage(HIGVBox):
                                       
         self.cloudagg_button.set_size_request(80, 28)
 
-        self.superpeers_entry = gtk.Entry()
-        self.superpeers_entry.set_size_request(300, 26)
+        self.superpeers_ip_label = HIGLabel(_("IP:"))
+        self.superpeers_ip_entry = gtk.Entry()
+        self.superpeers_ip_entry.set_size_request(160, 26)
+        self.superpeers_port_label = HIGLabel(_("Port:"))
+        self.superpeers_port_entry = gtk.Entry()
+        self.superpeers_port_entry.set_size_request(80, 26)        
+        
         self.superpeers_subhbox = HIGHBox()
         self.btn_box = gtk.HButtonBox()
         self.superpeers_button1 = HIGButton(_("Add"))
@@ -145,15 +150,22 @@ class PeerInfoPage(HIGVBox):
         self.btn_box.set_spacing(8)
         self.btn_box.pack_start(self.superpeers_button1)
         self.btn_box.pack_start(self.superpeers_button2)
-        self.superpeers_subhbox._pack_expand_fill(self.superpeers_entry)
+        self.superpeers_subhbox._pack_expand_fill(self.superpeers_ip_label)
+        self.superpeers_subhbox._pack_expand_fill(self.superpeers_ip_entry)
+        self.superpeers_subhbox._pack_expand_fill(self.superpeers_port_label)
+        self.superpeers_subhbox._pack_expand_fill(self.superpeers_port_entry)
         self.superpeers_subhbox._pack_noexpand_nofill(self.btn_box)
         self.superpeers_table.attach_label(self.superpeers_subhbox, 0, 1, 0, 1)
         
 
     def add_superpeer(self):
-        if self.superpeers_entry:
-            return
+        """
+        Add Super Peer by manual into database
+        """
+        ip = self.superpeers_ip_entry.get_text()
+        port = self.superpeers_port_entry.get_text()
         
+        g_db_helper.set_super_peer_manual(ip,port)
     
     def reset_aggregator_url(self):
         """

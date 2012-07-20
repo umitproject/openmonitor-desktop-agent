@@ -331,8 +331,19 @@ class DBHelper(object):
     def get_aggregator_aes_key(self):
         return self.get_value('keys', 'aggregator_aes_key')
     
+    ###########
+    #Super Peer
+    def set_super_peer_manual(self,ip,port,description = ""):
+        """
+        add super peer information into super_peer_manual table
+        """
+        sql_str = "insert or replace into super_peers_manual values " \
+                        "('%s', '%s', '%s')" % \
+                        (ip,port,description)
+        g_logger.info("[save_to_db]:save %s into DB"%sql_str)            
+        self.execute(sql_str)
+#        self.commit()      
     
-
     #####################################################
     #Methods for Dashboard Window(Timeline or QueryFrame)
     def get_task_sets(self,task_type = None):
