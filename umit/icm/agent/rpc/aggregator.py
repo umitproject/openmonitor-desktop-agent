@@ -84,7 +84,6 @@ class AggregatorAPI(object):
         self.base_url = g_config.get('network', 'aggregator_url') \
             if aggregator is None else aggregator
         
-        
         self.available = True
         self.pending_report_ids = []
 
@@ -263,6 +262,9 @@ class AggregatorAPI(object):
     def _handle_get_super_peer_list_response(self, message):
         if message is None:
             return
+        
+        g_logger.info("Got %d super peers from aggregator!"%(len(message.knownSuperPeer)))        
+        
         for speer in message.knownSuperPeers:
             theApp.peer_manager.add_super_peer(speer.agentID,
                                                speer.agentIP,
@@ -270,7 +272,8 @@ class AggregatorAPI(object):
                                                speer.token,
                                                speer.publicKey)
             theApp.peer_manager.connect_to_peer(speer.agentID)
-
+        
+        
         return message
 
     def get_peer_list(self, count):
@@ -286,6 +289,9 @@ class AggregatorAPI(object):
     def _handle_get_peer_list_response(self, message):
         if message is None:
             return
+        
+        g_logger.info("Got %d normal peers from aggregator!"%(len(message.knownPeers))) 
+         
         for peer in message.knownPeers:
             theApp.peer_manager.add_normal_peer(peer.agentID,
                                                 peer.agentIP,
