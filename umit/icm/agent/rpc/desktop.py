@@ -50,7 +50,7 @@ class DesktopAgentSession(Session):
     def get_super_peer_list(self, count):
         g_logger.info("Send P2PGetSuperPeerList message to %s" % self.remote_ip)
         request_msg = P2PGetSuperPeerList()
-        request_msg.count = count
+        request_msg.count = int(count)
         self._send_message(request_msg)
 
     def _handle_get_super_peer_list(self, message):
@@ -82,7 +82,7 @@ class DesktopAgentSession(Session):
     def get_peer_list(self, count):
         g_logger.info("Send P2PGetPeerList message to %s" % self.remote_ip)
         request_msg = P2PGetPeerList()
-        request_msg.count = count
+        request_msg.count = int(count)
         self._send_message(request_msg)
 
     def _handle_get_peer_list(self, message):
@@ -235,7 +235,7 @@ class DesktopSuperAgentSession(Session):
     def get_super_peer_list(self, count):
         g_logger.info("Send P2PGetSuperPeerList message to %s" % self.remote_ip)
         request_msg = P2PGetSuperPeerList()
-        request_msg.count = count
+        request_msg.count = int(count)
         self._send_message(request_msg)
 
     def _handle_get_super_peer_list(self, message):
