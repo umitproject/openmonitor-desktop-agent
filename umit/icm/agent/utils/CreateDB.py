@@ -87,7 +87,7 @@ def create(conn_str):
               ")")
 
     c.execute("CREATE TABLE peer_info ("
-              "agent_id INTEGER PRIMARY KEY NOT NULL, "
+              "agent_id TEXT PRIMARY KEY NOT NULL, "
               "username TEXT NOT NULL, "
               "password TEXT NOT NULL, "
               "email TEXT, "
