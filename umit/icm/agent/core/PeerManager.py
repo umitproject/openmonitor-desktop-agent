@@ -553,7 +553,7 @@ class PeerManager:
             if theApp.aggregator.available:
                 g_logger.debug("Requiring %d peers from the aggregator",
                                required_num)
-                theApp.aggregator.get_peer_list(str(required_num))
+                theApp.aggregator.get_peer_list(int(required_num))
             else:
                 for peer in self.super_peers.values():
                     if peer.status == 'Connected' and peer.ID in self.sessions:
