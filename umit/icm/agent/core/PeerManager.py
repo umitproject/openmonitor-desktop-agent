@@ -608,9 +608,9 @@ class PeerManager:
                 g_logger.info("There are no peers in the cage instance. Wait for few seconds")
             else:
                 g_logger.info("Syncing up the peer list with the peers table")
-                for peer in self.peers:
-                    g_logger.info("Peer from cage instance is %s" % str(peer))
-                    peer_arr = peer.rsplit(",")
+                for i in range(len(self.peers)):
+                    g_logger.info("Peer from cage instance is %s" % str(self.peers[i]))
+                    peer_arr = self.peers[i].rsplit(",")
                     theApp.peer_manager.add_normal_peer(peer_arr[0],peer_arr[1],int(peer_arr[2]),None,None,"Connected",0);
                     theApp.peer_manager.save_to_db()
 

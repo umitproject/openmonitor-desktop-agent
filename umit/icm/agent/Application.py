@@ -312,8 +312,8 @@ class Application(object):
 
             # if len(self.peer_manager.normal_peers==0):
 
-            #self.cage_instance.createCage_firstnode("20000");
-            self.cage_instance.createCage_joinnode("20001","127.0.0.1","20000");
+            self.cage_instance.createCage_firstnode("20000");
+            #self.cage_instance.createCage_joinnode("20001","127.0.0.1","20000");
             '''
                 else 
                     libcagepeers.createCage_joinnode()
