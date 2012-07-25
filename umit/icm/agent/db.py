@@ -483,6 +483,23 @@ class DBHelper(object):
             g_logger.warning("No value found for key '%s' in SET Information." % key)
             return default
     
+    #####################
+    #Stats table operator
+    def set_status(self,key,value):
+        """
+        """
+        self.execute("insert or replace into stats values(?,?)", (key,value))
+        
+    def get_status(self,key,default = "-1"):
+        """
+        """
+        try:
+            result = self.db_conn.select("select value from stats where key=?",(key,))
+            return result[0]
+        except:
+            g_logger.warning("No value found for key '%s' in SET stats." % key)
+            return default
+    
 #---------------------------------------------------------------------
 class DBKVPHelper(object):
     """
