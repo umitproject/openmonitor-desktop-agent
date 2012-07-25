@@ -81,6 +81,7 @@ class AggregatorAPI(object):
     #----------------------------------------------------------------------
     def __init__(self, aggregator=None):
         """Constructor"""
+        self.cage_instance = libcagepeers
         self.base_url = g_config.get('network', 'aggregator_url') \
             if aggregator is None else aggregator
         self.available = True
@@ -211,6 +212,27 @@ class AggregatorAPI(object):
         #url = self.base_url + "/reportpeerinfo/"
         #result = self._send_request('POST', url, data)
 
+    def get_bootstrapping_peers(self,country_code):
+        request_msg = GetSuperPeerList()
+        request_msg.location = str(country_code)
+        g_logger.debug("Requesting bootstrapping peers from the aggregator for country code %s" % request_msg.location)
+        defer_ = self._send_message(request_msg, GetSuperPeerListResponse)
+        defer_.addCallback(self._handle_get_bootstrapping_peer_list_response)
+        defer_.addErrback(self._handle_errback)
+        return defer_
+
+    def _handle_get_bootstrapping_peer_list_response(self,message):
+        g_logger.info("BOOTStRAP RESPONSE RECEIVED : %s" % message)
+        if len(message.knownSuperPeers)==0:
+            g_logger.info("No bootstrapping peers found in the message returned from Aggregator. Node creates the first node in the network")
+            self.cage_instance.createCage_firstnode("20000");
+        else:
+            for speer in message.knownSuperPeers:
+                g_logger.info("Bootstrapping peers from aggregator received. Bootstrapping.")
+                self.cage_instance.createCage_joinnode("20000",str(speer.agentIP),str(speer.agentPort));
+        theApp.bootstrap();
+        return message
+
     def get_super_peer_list(self, country_code):
         request_msg = GetSuperPeerList()
         request_msg.location = country_code
@@ -232,7 +254,6 @@ class AggregatorAPI(object):
                                                speer.publicKey)
             g_logger.info("The super peer list from the aggregator is %s" % message)
             theApp.peer_manager.connect_to_peer(speer.agentID)
-
         return message
 
     def add_peer(self):
@@ -253,11 +274,11 @@ class AggregatorAPI(object):
         request_msg.newPeer.peerStatus = "ON"
         # All clients running icm-agent are either desktops or laptops. So they are capable of being a super-peer
         request_msg.superPeer = True
-        
+
         defer_ = self._send_message(request_msg,AddPeerResponse)
         defer_.addCallback(self._handle_add_peer_response)
         defer_.addErrback(self._handle_errback)
-        g_logger.info("LEFT ADD PEER AGGREGATOR METHOD")  
+        g_logger.info("LEFT ADD PEER AGGREGATOR METHOD")
         return defer_
 
     def _handle_add_peer_response(self,message):
@@ -282,9 +303,10 @@ class AggregatorAPI(object):
 
     def _handle_get_location_response(self,message):
         g_logger.info("Location response from the aggregator : %s",message)
-        if(message.location!=INVALID):
+        if(message.location!="INVALID"):
             g_logger.info("Location is %s" % message)
-            self.get_super_peer_list(message.location);
+            theApp.peer_info.country_code = message.location
+            #self.get_super_peer_list(message.location);
         else:
             g_logger.info("Location is invalid. Please provide a valid IP Address. (This must be a problem while IP is detected. Could be a NAT problem)")
 

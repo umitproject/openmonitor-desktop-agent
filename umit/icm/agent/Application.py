@@ -251,7 +251,7 @@ class Application(object):
             self.peer_info.Password = password if password !="" and password != None else self.peer_info.Password
             print self.peer_info.Username, self.peer_info.Password 
             self.peer_info.is_logged_in = True
-            self.peer_info.country_code = self.aggregator.getlocation()
+            self.aggregator.getlocation()
             self.peer_info.save_to_db()
             g_logger.debug("Login Successfully :%s@%s" % (username,password))
             if save_login:
@@ -281,49 +281,57 @@ class Application(object):
             # 3. After successful bootstrapping, add the current peer into the aggregator (Peer / Super peer flag in the request message). Geo location service should be up for this to work in production.
             # 4. Sync "peers" table with libcage instance.
 
-            g_logger.info("GETTING PEER AND SUPER PEER LIST FROM THE AGGREGATOR")
+            g_logger.info("GETTING BOOTSTRAP PEERS FROM AGGREGATOR")
+            if not re.match("^[A-Za-z]+$",self.peer_info.country_code):
+                self.peer_info.country_code='UN';
+            self.aggregator.get_bootstrapping_peers(self.peer_info.country_code)
 
-            # Add looping calls
-            # Maintain in Peermanager takes care of get_peer_list and get_super_peer_list
-            if not hasattr(self, 'peer_maintain_lc'):
-                self.peer_maintain_lc = task.LoopingCall(self.peer_manager.maintain)
-                self.peer_maintain_lc.start(10)
-
-            if not hasattr(self, 'task_run_lc'):
-                self.task_run_lc = task.LoopingCall(self.task_scheduler.schedule)
-                self.task_run_lc.start(30)
-
-            if not hasattr(self, 'report_proc_lc'):
-                self.report_proc_lc = task.LoopingCall(self.report_uploader.process)
-                self.report_proc_lc.start(30)
-
-            #Bootstrap
-            # Plug in Libcage code - Get port number from command line
-            g_logger.info("List of super peers from the Aggregator : %s" % self.peer_manager.super_peers)
-            g_logger.info("List of normal peers from the Aggregator : %s" % self.peer_manager.normal_peers)
-
-            g_logger.info("BOOTSTRAPPING LIBCAGE BASED ON THE LIST OF PEERS AND SUPER PEERS")
-
-            g_logger.info("Info about super peers : ");
-            if len(self.peer_manager.super_peers)!=0:
-                for superPeer in self.peer_manager.super_peers.values():
-                    g_logger.info(superPeer.status, " and PeerID is ",superPeer.ID);
-
-
-            # if len(self.peer_manager.normal_peers==0):
-
-            self.cage_instance.createCage_firstnode("20000");
-            #self.cage_instance.createCage_joinnode("20001","127.0.0.1","20000");
-            '''
-                else 
-                    libcagepeers.createCage_joinnode()
-                    '''
-
-            # Add this peer into the peerlist of aggregator
-            g_logger.info("ADDING THIS PEER INTO THE AGGREGATOR'S PEERLIST")
-            self.peer_manager.add_peer()
 
         return result
+
+    def bootstrap(self):
+        g_logger.info("VALUE OF CAGE INSTANCE IS : %s" % self.cage_instance)
+        g_logger.info("GETTING PEER AND SUPER PEER LIST FROM THE AGGREGATOR")
+
+        # Add looping calls
+        # Maintain in Peermanager takes care of get_peer_list and get_super_peer_list
+        if not hasattr(self, 'peer_maintain_lc'):
+            self.peer_maintain_lc = task.LoopingCall(self.peer_manager.maintain)
+            self.peer_maintain_lc.start(10)
+
+        if not hasattr(self, 'task_run_lc'):
+            self.task_run_lc = task.LoopingCall(self.task_scheduler.schedule)
+            self.task_run_lc.start(30)
+
+        if not hasattr(self, 'report_proc_lc'):
+            self.report_proc_lc = task.LoopingCall(self.report_uploader.process)
+            self.report_proc_lc.start(30)
+
+        #Bootstrap
+        # Plug in Libcage code - Get port number from command line
+        g_logger.info("List of super peers from the Aggregator : %s" % self.peer_manager.super_peers)
+        g_logger.info("List of normal peers from the Aggregator : %s" % self.peer_manager.normal_peers)
+
+        g_logger.info("BOOTSTRAPPING LIBCAGE BASED ON THE LIST OF PEERS AND SUPER PEERS")
+
+        g_logger.info("Info about super peers : ");
+        if len(self.peer_manager.super_peers)!=0:
+            for superPeer in self.peer_manager.super_peers.values():
+                g_logger.info(superPeer.status, " and PeerID is ",superPeer.ID);
+
+
+        # if len(self.peer_manager.normal_peers==0):
+
+        #self.cage_instance.createCage_firstnode("20000");
+        #self.cage_instance.createCage_joinnode("20001","127.0.0.1","20000");
+        '''
+        else
+            libcagepeers.createCage_joinnode()
+        '''
+
+        # Add this peer into the peerlist of aggregator
+        g_logger.info("ADDING THIS PEER INTO THE AGGREGATOR'S PEERLIST")
+        self.peer_manager.add_peer()
 
     def logout(self):
         defer_ = self.aggregator.logout()

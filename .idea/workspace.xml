@@ -2,14 +2,32 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="73735d93-ff74-4be8-96f7-f9d58d9581c5" name="Default" comment="">
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/../aggregator/media/js/jquery-scrollbarwidth.js" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/../aggregator/templates/v2/404.html" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/../aggregator/templates/v2/500.html" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/../aggregator/templates/v2/gui/manifesto.html" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/../aggregator/icm-common/proto/messages.proto" afterPath="$PROJECT_DIR$/../aggregator/icm-common/proto/messages.proto" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/../aggregator/icm-common" afterPath="$PROJECT_DIR$/../aggregator/icm-common" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/deps/icm-common/proto/messages.proto" afterPath="$PROJECT_DIR$/deps/icm-common/proto/messages.proto" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/deps/icm-common" afterPath="$PROJECT_DIR$/deps/icm-common" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/umit/icm/agent/libcage" afterPath="$PROJECT_DIR$/umit/icm/agent/libcage" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/../aggregator/api/handlers.py" afterPath="$PROJECT_DIR$/../aggregator/api/handlers.py" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/../aggregator/geoip/lookups.py" afterPath="$PROJECT_DIR$/../aggregator/geoip/lookups.py" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/../aggregator/geoip/models.py" afterPath="$PROJECT_DIR$/../aggregator/geoip/models.py" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/../aggregator/gui/views.py" afterPath="$PROJECT_DIR$/../aggregator/gui/views.py" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/../aggregator/icm_tests/models.py" afterPath="$PROJECT_DIR$/../aggregator/icm_tests/models.py" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/../aggregator/media/js/common.js" afterPath="$PROJECT_DIR$/../aggregator/media/js/common.js" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/../aggregator/messages/messages_pb2.py" afterPath="$PROJECT_DIR$/../aggregator/messages/messages_pb2.py" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/../aggregator/piston/resource.py" afterPath="$PROJECT_DIR$/../aggregator/piston/resource.py" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/../aggregator/settings.py" afterPath="$PROJECT_DIR$/../aggregator/settings.py" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/../aggregator/templates/v2/base.html" afterPath="$PROJECT_DIR$/../aggregator/templates/v2/base.html" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/../aggregator/templates/v2/gui/suggest_service.html" afterPath="$PROJECT_DIR$/../aggregator/templates/v2/gui/suggest_service.html" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/../aggregator/templates/v2/gui/suggest_website.html" afterPath="$PROJECT_DIR$/../aggregator/templates/v2/gui/suggest_website.html" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/../aggregator/urls.py" afterPath="$PROJECT_DIR$/../aggregator/urls.py" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/umit/icm/agent/Application.py" afterPath="$PROJECT_DIR$/umit/icm/agent/Application.py" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/umit/icm/agent/core/PeerManager.py" afterPath="$PROJECT_DIR$/umit/icm/agent/core/PeerManager.py" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/umit/icm/agent/rpc/aggregator.py" afterPath="$PROJECT_DIR$/umit/icm/agent/rpc/aggregator.py" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/umit/icm/agent/rpc/messages_pb2.py" afterPath="$PROJECT_DIR$/umit/icm/agent/rpc/messages_pb2.py" />
     </list>
     <ignored path="icm-agent.iws" />
     <ignored path=".idea/workspace.xml" />
@@ -35,10 +53,19 @@
   </component>
   <component name="FileEditorManager">
     <leaf>
-      <file leaf-file-name="models.py" pinned="false" current="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/../aggregator/api/models.py">
+      <file leaf-file-name="aggregator.py" pinned="false" current="true" current-in-tab="true">
+        <entry file="file://$PROJECT_DIR$/umit/icm/agent/rpc/aggregator.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="0" column="0" selection-start="0" selection-end="0" vertical-scroll-proportion="0.0">
+            <state line="268" column="66" selection-start="10575" selection-end="10575" vertical-scroll-proportion="0.053667262">
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="handlers.py" pinned="false" current="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/../aggregator/api/handlers.py">
+          <provider selected="true" editor-type-id="text-editor">
+            <state line="122" column="28" selection-start="4370" selection-end="4372" vertical-scroll-proportion="-6.2">
               <folding />
             </state>
           </provider>
@@ -47,16 +74,16 @@
       <file leaf-file-name="models.py" pinned="false" current="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/../aggregator/agents/models.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="446" column="19" selection-start="15926" selection-end="15926" vertical-scroll-proportion="0.0">
+            <state line="273" column="57" selection-start="9687" selection-end="9687" vertical-scroll-proportion="-16.333334">
               <folding />
             </state>
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="aggregator.py" pinned="false" current="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/umit/icm/agent/rpc/aggregator.py">
+      <file leaf-file-name="messages_pb2.py" pinned="false" current="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/umit/icm/agent/rpc/messages_pb2.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="268" column="32" selection-start="10666" selection-end="10666" vertical-scroll-proportion="0.0">
+            <state line="2972" column="6" selection-start="113177" selection-end="113177" vertical-scroll-proportion="0.0">
               <folding />
             </state>
           </provider>
@@ -65,28 +92,17 @@
       <file leaf-file-name="PeerManager.py" pinned="false" current="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/umit/icm/agent/core/PeerManager.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="610" column="20" selection-start="24002" selection-end="24002" vertical-scroll-proportion="0.0">
+            <state line="590" column="16" selection-start="22820" selection-end="22820" vertical-scroll-proportion="0.0">
               <folding />
             </state>
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="Global.py" pinned="false" current="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/umit/icm/agent/Global.py">
-          <provider selected="true" editor-type-id="text-editor">
-            <state line="50" column="26" selection-start="1664" selection-end="1672" vertical-scroll-proportion="0.0">
-              <folding />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="Application.py" pinned="false" current="true" current-in-tab="true">
+      <file leaf-file-name="Application.py" pinned="false" current="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/umit/icm/agent/Application.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="341" column="24" selection-start="14139" selection-end="14139" vertical-scroll-proportion="0.7989691">
-              <folding>
-                <element signature="e#933#942#0" expanded="true" />
-              </folding>
+            <state line="390" column="45" selection-start="15713" selection-end="15715" vertical-scroll-proportion="-8.633333">
+              <folding />
             </state>
           </provider>
         </entry>
@@ -94,7 +110,7 @@
       <file leaf-file-name="PeerInfo.py" pinned="false" current="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/umit/icm/agent/core/PeerInfo.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="75" column="34" selection-start="2395" selection-end="2395" vertical-scroll-proportion="0.0">
+            <state line="106" column="29" selection-start="3591" selection-end="3594" vertical-scroll-proportion="-15.5">
               <folding />
             </state>
           </provider>
@@ -141,12 +157,12 @@
     <option name="changedFiles">
       <list>
         <option value="$PROJECT_DIR$/umit/icm/agent/core/PeerInfo.py" />
-        <option value="$PROJECT_DIR$/../aggregator/api/handlers.py" />
         <option value="$PROJECT_DIR$/../aggregator/agents/models.py" />
-        <option value="$PROJECT_DIR$/umit/icm/agent/rpc/aggregator.py" />
         <option value="$PROJECT_DIR$/umit/icm/agent/db.py" />
         <option value="$PROJECT_DIR$/umit/icm/agent/core/PeerManager.py" />
+        <option value="$PROJECT_DIR$/../aggregator/api/handlers.py" />
         <option value="$PROJECT_DIR$/umit/icm/agent/Application.py" />
+        <option value="$PROJECT_DIR$/umit/icm/agent/rpc/aggregator.py" />
       </list>
     </option>
   </component>
@@ -182,16 +198,6 @@
       <sortByType />
     </navigator>
     <panes>
-      <pane id="Scope">
-        <subPane subId="Project Files">
-          <PATH>
-            <PATH_ELEMENT USER_OBJECT="Root">
-              <option name="myItemId" value="" />
-              <option name="myItemType" value="" />
-            </PATH_ELEMENT>
-          </PATH>
-        </subPane>
-      </pane>
       <pane id="ProjectPane">
         <subPane>
           <PATH>
@@ -207,6 +213,20 @@
             </PATH_ELEMENT>
             <PATH_ELEMENT>
               <option name="myItemId" value="aggregator" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+          </PATH>
+          <PATH>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="icm-agent" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="aggregator" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="api" />
               <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
             </PATH_ELEMENT>
           </PATH>
@@ -330,6 +350,16 @@
           </PATH>
         </subPane>
       </pane>
+      <pane id="Scope">
+        <subPane subId="Project Files">
+          <PATH>
+            <PATH_ELEMENT USER_OBJECT="Root">
+              <option name="myItemId" value="" />
+              <option name="myItemType" value="" />
+            </PATH_ELEMENT>
+          </PATH>
+        </subPane>
+      </pane>
     </panes>
   </component>
   <component name="PropertiesComponent">
@@ -378,7 +408,7 @@
       <option name="SDK_HOME" value="" />
       <option name="WORKING_DIRECTORY" value="" />
       <option name="IS_MODULE_SDK" value="false" />
-      <module name="aggregator" />
+      <module name="icm-agent" />
       <EXTENSION ID="PythonCoverageRunConfigurationExtension" enabled="false" sample_coverage="true" runner="coverage.py" />
       <option name="SCRIPT_NAME" value="" />
       <option name="PARAMETERS" value="" />
@@ -392,7 +422,7 @@
       <option name="SDK_HOME" value="" />
       <option name="WORKING_DIRECTORY" value="" />
       <option name="IS_MODULE_SDK" value="false" />
-      <module name="aggregator" />
+      <module name="icm-agent" />
       <EXTENSION ID="PythonCoverageRunConfigurationExtension" enabled="false" sample_coverage="true" runner="coverage.py" />
       <option name="SCRIPT_NAME" value="" />
       <option name="CLASS_NAME" value="" />
@@ -454,14 +484,14 @@
     <servers />
   </component>
   <component name="ToolWindowManager">
-    <frame x="-1" y="-4" width="1282" height="805" extended-state="7" />
+    <frame x="-1" y="-4" width="1282" height="805" extended-state="0" />
     <editor active="true" />
     <layout>
       <window_info id="Data Sources" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.3292683" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
       <window_info id="Changes" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
       <window_info id="TODO" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="6" side_tool="false" content_ui="tabs" />
       <window_info id="Structure" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.25" sideWeight="0.5" order="1" side_tool="true" content_ui="tabs" />
-      <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.3203252" sideWeight="0.6712963" order="0" side_tool="false" content_ui="combo" />
+      <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.3262987" sideWeight="0.6712963" order="0" side_tool="false" content_ui="combo" />
       <window_info id="Debug" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.39969134" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
       <window_info id="Favorites" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="2" side_tool="true" content_ui="tabs" />
       <window_info id="Event Log" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.3287037" sideWeight="0.5" order="7" side_tool="true" content_ui="tabs" />
@@ -537,11 +567,6 @@
         <state line="332" column="8" selection-start="11415" selection-end="11415" vertical-scroll-proportion="0.0" />
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/umit/icm/agent/rpc/messages_pb2.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="2911" column="6" selection-start="110918" selection-end="110923" vertical-scroll-proportion="0.33333334" />
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/../aggregator/icm-common/umit/proto/messages_pb2.py">
       <provider selected="true" editor-type-id="text-editor">
         <state line="2422" column="6" selection-start="0" selection-end="102420" vertical-scroll-proportion="0.33333334" />
@@ -557,9 +582,9 @@
         <state line="36" column="0" selection-start="981" selection-end="981" vertical-scroll-proportion="0.0" />
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/../aggregator/api/handlers.py">
+    <entry file="file://$PROJECT_DIR$/umit/icm/agent/Global.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="100" column="31" selection-start="3574" selection-end="3574" vertical-scroll-proportion="0.0" />
+        <state line="50" column="26" selection-start="1664" selection-end="1672" vertical-scroll-proportion="0.0" />
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/../aggregator/api/models.py">
@@ -567,29 +592,14 @@
         <state line="0" column="0" selection-start="0" selection-end="0" vertical-scroll-proportion="0.0" />
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/../aggregator/agents/models.py">
+    <entry file="file://$PROJECT_DIR$/umit/icm/agent/rpc/messages_pb2.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="446" column="19" selection-start="15926" selection-end="15926" vertical-scroll-proportion="0.0" />
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/umit/icm/agent/rpc/aggregator.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="268" column="32" selection-start="10666" selection-end="10666" vertical-scroll-proportion="0.0" />
+        <state line="2972" column="6" selection-start="113177" selection-end="113177" vertical-scroll-proportion="0.0" />
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/umit/icm/agent/core/PeerManager.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="610" column="20" selection-start="24002" selection-end="24002" vertical-scroll-proportion="0.0" />
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/umit/icm/agent/Global.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="50" column="26" selection-start="1664" selection-end="1672" vertical-scroll-proportion="0.0" />
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/umit/icm/agent/core/PeerInfo.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="75" column="34" selection-start="2395" selection-end="2395" vertical-scroll-proportion="0.0" />
+        <state line="590" column="16" selection-start="22820" selection-end="22820" vertical-scroll-proportion="0.0" />
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/../aggregator/django/core/management/base.py">
@@ -607,12 +617,38 @@
         <state line="165" column="33" selection-start="6962" selection-end="6967" vertical-scroll-proportion="0.0" />
       </provider>
     </entry>
+    <entry file="file://$PROJECT_DIR$/umit/icm/agent/core/PeerInfo.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="106" column="29" selection-start="3591" selection-end="3594" vertical-scroll-proportion="-15.5">
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/../aggregator/agents/models.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="273" column="57" selection-start="9687" selection-end="9687" vertical-scroll-proportion="-16.333334">
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/../aggregator/api/handlers.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="122" column="28" selection-start="4370" selection-end="4372" vertical-scroll-proportion="-6.2">
+          <folding />
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/umit/icm/agent/Application.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="341" column="24" selection-start="14139" selection-end="14139" vertical-scroll-proportion="0.7989691">
-          <folding>
-            <element signature="e#933#942#0" expanded="true" />
-          </folding>
+        <state line="390" column="45" selection-start="15713" selection-end="15715" vertical-scroll-proportion="-8.633333">
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/umit/icm/agent/rpc/aggregator.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="268" column="66" selection-start="10575" selection-end="10575" vertical-scroll-proportion="0.053667262">
+          <folding />
         </state>
       </provider>
     </entry>
