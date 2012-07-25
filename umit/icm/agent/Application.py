@@ -101,6 +101,8 @@ class Application(object):
         self.peer_manager.load_from_db()
         # restore unsent reports
         self.report_manager.load_unsent_reports()
+        # desktop agent stats saving
+        self.statistics.load_from_db()
 
     def init_after_running(self, port=None, username=None, password=None, server_enabled=True):
         """
@@ -464,6 +466,10 @@ class Application(object):
             g_logger.info("[quit]:save peer_manager into DB")
             self.peer_manager.save_to_db()
             
+        if hasattr(self, 'statistics') and  self.is_successful_login:
+            g_logger.info("[quit]:save statistics into DB") 
+            self.statistics.save_to_db()           
+        
         if hasattr(self,'test_sets') and self.is_successful_login \
             and os.path.exists(CONFIG_PATH):
             #store test_version id
