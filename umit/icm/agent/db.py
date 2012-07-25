@@ -490,7 +490,7 @@ class DBHelper(object):
         """
         self.execute("insert or replace into stats values(?,?)", (key,value))
         
-    def get_status(self,key,default = "-1"):
+    def get_status(self,key,default = "0"):
         """
         """
         try:
