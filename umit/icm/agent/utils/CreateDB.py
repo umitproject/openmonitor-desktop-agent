@@ -169,7 +169,7 @@ def create(conn_str):
               "ip TEXT NOT NULL,"
               "port INTEGER NOT NULL,"
               "description TEXT,"
-              "constraint pk_super_peers_manual primary key (ip,port)")   
+              "constraint pk_super_peers_manual primary key (ip,port))")
     
     
     # Insert pre-defined values
