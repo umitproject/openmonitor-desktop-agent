@@ -104,7 +104,8 @@ class Application(object):
         # desktop agent stats saving
         self.statistics.load_from_db()
 
-    def init_after_running(self, port=None, username=None, password=None, server_enabled=True):
+    def init_after_running(self, port=None, username=None, password=None,
+                           server_enabled=True, skip_server_check=False):
         """
         """
         #####################################################
@@ -140,9 +141,10 @@ class Application(object):
         
         ######################################
         #check aggregator can be reached first
-        defer_ = self.aggregator.check_aggregator_website()
-        defer_.addCallback(self.check_aggregator_success)
-        defer_.addErrback(self.check_aggregator_failed)
+        if not skip_server_check:
+            defer_ = self.aggregator.check_aggregator_website()
+            defer_.addCallback(self.check_aggregator_success)
+            defer_.addErrback(self.check_aggregator_failed)
          
     
     def check_aggregator_success(self,response):
@@ -482,9 +484,10 @@ class Application(object):
         self.quitting = True
         
         g_logger.info("ICM Agent quit.")
-        
+
 
 theApp = Application()
+
 
 if __name__ == "__main__":
     #theApp.start()
