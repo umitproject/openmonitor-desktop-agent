@@ -320,18 +320,9 @@ class Application(object):
                 g_logger.info(superPeer.status, " and PeerID is ",superPeer.ID);
 
 
-        # if len(self.peer_manager.normal_peers==0):
-
-        #self.cage_instance.createCage_firstnode("20000");
-        #self.cage_instance.createCage_joinnode("20001","127.0.0.1","20000");
-        '''
-        else
-            libcagepeers.createCage_joinnode()
-        '''
-
         # Add this peer into the peerlist of aggregator
         g_logger.info("ADDING THIS PEER INTO THE AGGREGATOR'S PEERLIST")
-        self.peer_manager.add_peer()
+        #self.peer_manager.add_peer()
 
     def logout(self):
         defer_ = self.aggregator.logout()
