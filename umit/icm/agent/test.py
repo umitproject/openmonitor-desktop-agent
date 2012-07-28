@@ -52,7 +52,7 @@ from umit.icm.agent.Global import *
 from umit.icm.agent.rpc.message import *
 from umit.icm.agent.logger import g_logger
 
-from umit.icm.agent.utils import traceroute
+from umit.icm.agent.utils.traceroute import tracerouteInfomation
 
 from umit.icm.agent.core.TestSetsFetcher import TEST_WEB_TYPE,TEST_SERVICE_TYPE
 
@@ -162,11 +162,10 @@ def generate_report_id(list_):
     report_id = m.hexdigest()
     return report_id
 
-def parse_traceroute(traceroute_dict):
+def parse_traceroute(traceroute_dict,traceroute):
     """
     Parse the traceroute result from traceroute.py
     """
-    traceroute = TraceRoute()
     traceroute.target =  traceroute_dict["target"]
     traceroute.hops =  traceroute_dict["hops"]
     traceroute.packetSize =  traceroute_dict["packetsize"]
@@ -179,7 +178,7 @@ def parse_traceroute(traceroute_dict):
             packetsTiming = trace.packetsTiming.add()
             packetsTiming = item_time
     
-    print traceroute
+    #print traceroute
     return traceroute
     
 
@@ -245,7 +244,6 @@ class WebsiteTest():
         
         if 'pattern' in param:
             self.pattern = re.compile(param['pattern'])
-
 
     def execute(self):
         """Run the test"""
@@ -372,21 +370,23 @@ class WebsiteTest():
         report.header.timeUTC = int(default_timer())    #here should UTC clock?
         report.header.timeZone =  -(time.timezone/3600)  #8
         report.header.testID = '1'
-        report.header.reportID = generate_report_id([report.header.agentID,
-                                                     report.header.timeUTC,
-                                                     report.header.testID])
-        #We should fix this !!!! it is a tmp
-        report.header.traceroute.hops = 0
-        report.header.traceroute.target = "255.255.255.0"
-        report.header.traceroute.packetSize = 0
+        report.header.reportID = 0#generate_report_id([report.header.agentID,
+                                 #                    report.header.timeUTC,
+                                 #                    report.header.testID])
         
         report.report.websiteURL = self.url
         report.report.statusCode = self.status_code
         
         if self.status_code == 1:     #Failed
+            print "traceroute"
             t = tracerouteInfomation()
             trace_result_dict = t.traceroute_system(target_name = self.url)
-            report.header.traceroute = parse_traceroute(trace_result_dict)
+            parse_traceroute(trace_result_dict,report.header.traceroute)
+            print report.header.traceroute
+        else:
+            report.header.traceroute.hops = 0
+            report.header.traceroute.target = "255.255.255.0"
+            report.header.traceroute.packetSize = 0            
         
         report.report.responseTime = \
               int((result['time_end'] - self.time_start) * 1000)

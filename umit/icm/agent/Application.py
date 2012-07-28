@@ -28,6 +28,7 @@ import signal
 import sys
 import time
 import gtk
+import socket
 
 from twisted.internet import reactor
 from twisted.internet import task
@@ -36,6 +37,8 @@ from umit.icm.agent.logger import g_logger
 from umit.icm.agent.BasePaths import *
 from umit.icm.agent.Global import *
 from umit.icm.agent.Version import VERSION
+from umit.icm.agent.rpc.message import *
+from umit.icm.agent.rpc.MessageFactory import MessageFactory
 
 from umit.icm.agent.I18N import _
 
@@ -97,7 +100,8 @@ class Application(object):
         self.is_successful_login = False #fix the login failure, save DB problem
                        
     def _load_from_db(self):
-
+        """
+        """
         self.peer_manager.load_from_db()
         # restore unsent reports
         self.report_manager.load_unsent_reports()
@@ -178,12 +182,22 @@ class Application(object):
         """
         """
         if self.check_peer_authentical() == True:
-            pass
+            g_logger.info("Now, the desktop agent will try to connect the super peer")
+            self.login_simulate()
+            
         else:
             g_logger.info("Sorry! The desktop agent cannot be authenticated by aggregator ago!")
             self.quit_window_in_wrong(primary_text = _("The desktop agent cannot be authenticated by aggregator ago"), \
                                       secondary_text = _("Please email to Open Monitor!"))            
-
+    def build_super_connection(self,host,port):
+        """
+        """
+        s  = socket.socket(socket.AF_INET, socket.SOCK_STREAM, socket.IPPROTO_TCP)
+        s.connect((hosp,port))
+        request_msg = AuthenticatePeer()
+        request_msg.agentID = 
+        
+        
     def check_peer_authentical(self):
         """
         Check the peer store the peer information in database
@@ -349,6 +363,8 @@ class Application(object):
         """
         #GTK show
         self.gtk_main.set_login_status(True)
+        #Basic Information
+        self._load_from_db()
         #mark login-successful
         self.is_successful_login = True 
         #TASK LOOP

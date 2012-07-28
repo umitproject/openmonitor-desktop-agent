@@ -31,7 +31,7 @@ class PeerInfo(object):
     #----------------------------------------------------------------------
     def __init__(self):
         """Constructor"""
-        self.ID = 0
+        self.ID = None
         self.Type = 2  # normal peer by default
         self.Username = ''
         self.Password = ''

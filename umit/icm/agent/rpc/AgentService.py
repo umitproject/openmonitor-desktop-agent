@@ -56,7 +56,7 @@ class AgentProtocol(Protocol):
         self.remote_ip = None
         self.remote_port = 0
 
-        self.remote_id = 0
+        self.remote_id = None
         self.remote_type = 0
 
         self._session = None
@@ -153,6 +153,7 @@ class AgentProtocol(Protocol):
                 res = theApp.peer_manager._normal_peer_connected(
                     self.remote_id, self.remote_ip, serve_port,
                     message.cipheredPublicKey)
+                print "test"
                 if res:
                     self._session = DesktopAgentSession(message.agentID,
                                                         self.transport)
