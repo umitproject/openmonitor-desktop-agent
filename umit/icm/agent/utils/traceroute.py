@@ -185,7 +185,7 @@ class tracerouteInfomation():
         #result statistics
         result["hops"] = ttl if ttl <= max_hops else max_hops         
         
-        g_logger.debug("[Traceroute]" + result)
+        g_logger.debug(result)
         return result
     
     
