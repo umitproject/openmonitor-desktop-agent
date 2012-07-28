@@ -52,6 +52,8 @@ from umit.icm.agent.Global import *
 from umit.icm.agent.rpc.message import *
 from umit.icm.agent.logger import g_logger
 
+from umit.icm.agent.utils import traceroute
+
 from umit.icm.agent.core.TestSetsFetcher import TEST_WEB_TYPE,TEST_SERVICE_TYPE
 
 if sys.platform == "win32":
@@ -110,7 +112,6 @@ def task_done(name,task_type=None,task_detail=None):
     else:
         g_logger.error("New Test Type, cannot recognize" ) 
         
-        
 def task_failed(name,task_type=None,task_detail=None):
     """
     Task Failed
@@ -160,6 +161,24 @@ def generate_report_id(list_):
         m.update(str(item))
     report_id = m.hexdigest()
     return report_id
+
+def parse_traceroute(traceroute_dict):
+    """
+    Parse the traceroute result from traceroute.py
+    """
+    traceroute = TraceRoute()
+    traceroute.target =  traceroute_dict["target"]
+    traceroute.hops =  traceroute_dict["hops"]
+    traceroute.packetSize =  traceroute_dict["packetsize"]
+    
+    for item in traceroute_dict["trace"]:
+        trace = traceroute.traces.add()
+        trace.hop = item["hop"]
+        trace.ip  = item["ip"]
+        trace.packetsTiming = item[]
+    
+    return 
+    
 
 #---------------------------------------------------------------------
 class Test(object):

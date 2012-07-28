@@ -163,27 +163,29 @@ class tracerouteInfomation():
                 
             ###############
             #Get time in ms
-            curr_time = re.findall("(\d)(\.){0,1}(\d*) ms",line)
+            curr_time = re.findall("(\d+)(\.){0,1}(\d*) ms",line)
+            if curr_time == []:
+                curr_time = [(0,),(0,),(0,)]
             print curr_time
-            if curr_time != []:
-                curr_time = int(curr_time[0][0])
-            else:
-                curr_time = None
-            
             #################
             #store the result
             trace = {}
             trace["hop"] = ttl
             trace["ip"] = str(curr_addr if curr_addr !=None else "")
-            trace["packetsTiming"] = int(curr_time if curr_time !=None else 0)
+            trace["packetsTiming"] = []
             
-            print trace
+            for item in curr_time:
+                trace["packetsTiming"].append(int(item[0]))
+            
             result["trace"].append(trace)
-            
             
         p.wait()
          
-        print "finish Traceroute"
+        ##################
+        #result statistics
+        result["hops"] = ttl if ttl <= max_hops else max_hops         
+        
+        return result
     
     
 if __name__ == "__main__":
