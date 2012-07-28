@@ -382,6 +382,11 @@ class WebsiteTest():
         report.report.websiteURL = self.url
         report.report.statusCode = self.status_code
         
+        if self.status_code == "1":     #Failed
+            t = tracerouteInfomation()
+            trace_result_dict = t.traceroute_system(target_name = self.url)
+            report.header.traceroute = parse_traceroute(trace_result_dict)
+        
         report.report.responseTime = \
               int((result['time_end'] - self.time_start) * 1000)
         
