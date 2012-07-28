@@ -29,8 +29,9 @@ from umit.icm.agent.Global import *
 
 import random
 
-TEST_WEB_TYPE     = "WEB"
-TEST_SERVICE_TYPE = "SERVICE" 
+TEST_WEB_TYPE     = 0#"WEB"
+TEST_SERVICE_TYPE = 1#"SERVICE"
+ 
 
 class TestSetsFetcher(object):
     """"""
@@ -70,12 +71,12 @@ class TestSetsFetcher(object):
             g_logger.info("Fetching new test sets from aggregator")
             
             #The real check_tests by using check_tests Aggregator API
-            defer_ = theApp.aggregator.check_tests(self.current_test_version)
-            defer_.addCallback(self.execute_test)
-            defer_.addErrback(self._handler_error)
+            #defer_ = theApp.aggregator.check_tests(self.current_test_version)
+            #defer_.addCallback(self.execute_test)
+            #defer_.addErrback(self._handler_error)
             
             #Test by manual
-            #self.execute_test(self.test_by_manually())
+            self.execute_test(self.test_by_manually())
            
         else:
             g_logger.info("Cannot Fetching new test sets from aggregator") 
@@ -114,8 +115,8 @@ class TestSetsFetcher(object):
         #website Test
         test = tests_response.tests.add()
         test.testID = str("1186fe21-9099-4442-93ca-75705c33cb73")
-        test.website.url = "http://www.baidu.com/"
-        test.testType = 'WEB'
+        test.website.url = "http://www.facebook.com/"
+        test.testType = TEST_WEB_TYPE
         
         #Service Test:FTP
         #test = tests_response.tests.add()
@@ -134,8 +135,8 @@ class TestSetsFetcher(object):
         #test.testType = 'Service'   
         
         #Service Test: SMTP, POP3, IMAP
-        test = tests_response.tests.add()
-        test.testID = str("1186fe21-9099-4442-93ca-75705c33cb73")
+        #test = tests_response.tests.add()
+        #test.testID = str("1186fe21-9099-4442-93ca-75705c33cb73")
         
         #test.service.name = 'pop3'
         #test.service.port = 111
@@ -145,10 +146,10 @@ class TestSetsFetcher(object):
         #test.service.port = 25
         #test.service.ip   = 'smtp.sohu.com'
         
-        test.service.name = 'imap'
-        test.service.port = 143
-        test.service.ip   = 'imap.163.com3'        
-        test.testType = 'Service' 
+        #test.service.name = 'imap'
+        #test.service.port = 143
+        #test.service.ip   = 'imap.163.com3'        
+        #test.testType = TEST_SERVICE_TYPE 
              
         return tests_response
         
@@ -185,7 +186,8 @@ class TestSetsFetcher(object):
     
         ####################
         ##Service Task Parse        
-        elif test.service and (test.testType).upper() == TEST_SERVICE_TYPE:
+        #elif test.service and (test.testType).upper() == TEST_SERVICE_TYPE:
+        elif test.service and (test.testType) == TEST_SERVICE_TYPE:
             args = {
                    #'service':test.service.name,
                     'host':test.service.ip,

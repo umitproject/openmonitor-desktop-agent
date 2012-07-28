@@ -24,6 +24,7 @@ import time
 import socket
 import re
 import platform
+from umit.icm.agent.logger import g_logger
 
 class tracerouteInfomation():
     """
@@ -143,8 +144,7 @@ class tracerouteInfomation():
             if not line:
                 break
             
-            #get 
-            print "-->",line
+            g_logger.debug("[Traceroute]" + line)
             
             #######################
             #get first number: hops
@@ -185,6 +185,7 @@ class tracerouteInfomation():
         #result statistics
         result["hops"] = ttl if ttl <= max_hops else max_hops         
         
+        g_logger.debug("[Traceroute]" + result)
         return result
     
     
