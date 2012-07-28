@@ -21,30 +21,26 @@
 import os,sys
 import subprocess
 import time
-import re
 import socket
-import struct
+import re
+import platform
 
-def tracerouteInfomation(object):
+class tracerouteInfomation():
     """
     """
     def __init__(self):
         """
         """
-        self.randrom_port = 0
-        self.recv_bytes = 512
-        
-        self.icmp = socket.getprotobyname('icmp')
-        self.udp  = socket.getprotobyname('udp')
-        
+        self.os_name = platform.system()
+
     def create_sockets(self,ttl):
         """
         Simulate the traceroute and tracert process
         We should need a receiving socket and a sending socket in every request        
         """
-        recv_socket = socket.socket(socket.AF_INET, socket.SOCK_RAW, self.icmp)
         send_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM, self.udp)
-        send_socket.setsockopt(socket.SOL_IP, socket.IP_TTL, ttl)
+        recv_socket = socket.socket(socket.AF_INET, socket.SOCK_RAW, self.icmp)
+        send_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, ttl)
         
         return recv_socket, send_socket
     
@@ -58,6 +54,15 @@ def tracerouteInfomation(object):
         result["packetsize"] = 60       #in default
         result["trace"] = []
         
+        #####
+        #Init 
+        self.randrom_port = 0
+        self.recv_bytes = 16
+        
+        self.icmp = socket.getprotobyname('icmp')
+        self.udp  = socket.getprotobyname('udp')
+        
+        ###########################################
         #simulate the traceroute or tracert process
         try: 
             dest_addr = socket.gethostbyname(target_name)
@@ -68,12 +73,13 @@ def tracerouteInfomation(object):
         ttl = 1     #We will set the ttl from 1 -> max_hops (default: 1 -30)
         
         while True:
+            print "start: --> "
             ############
             #socket init
-            start_time = time.clock()
+            start_time = time.time()
             recv_socket, send_socket = self.create_sockets(ttl)
-            recv_socket.bind(("",self.randrom_port))
-            send_socket.sendto("",(target_name,self.randrom_port))
+            recv_socket.bind(("",port))
+            send_socket.sendto("",(target_name,port))
             curr_addr = None
             
             try:
@@ -85,14 +91,14 @@ def tracerouteInfomation(object):
                 recv_socket.close()
                 send_socket.close()   
             
-            end_time = time.clock()
+            end_time = time.time()
             
             #################
             #store the result
             trace = {}
             trace["hop"] = int(ttl)
             trace["ip"] = str(curr_addr if curr_addr !=None else "")
-            trace["packetsTiming"] = int((end_time - start_time)*1000)   #ms 
+            trace["packetsTiming"] = int((end_time - start_time)*1000.0)   #ms 
             
             print trace
             result["trace"].append(trace)
@@ -104,28 +110,75 @@ def tracerouteInfomation(object):
         
         ##################
         #result statistics
-        result["hops"] = ttl if ttl <= max_hops else max_hops  
+        result["hops"] = (ttl-1) if ttl <= max_hops else max_hops  
                     
         return result
         
         
-    def traceroute_system(self,target):
+    def traceroute_system(self,target_name,max_hops = 30):
         """
         Get traceroute inforamtion in Linux and Mac Platform
         """
         result = {}
-        result["target"] = target
-        result["hops"] = 30         #in default
-        result[""]
+        result["target"] = target_name
+        result["hops"] = max_hops        
+        result["packetsize"] = 60   #in default
+        result["trace"] = []
         
-        p = subprocess.Popen(["traceroute",target],
-                             stdout = subprocess.PIPE,
+        ttl = 1
+        
+        if self.os_name == "Windows":
+            command_name = "tracert"
+        elif self.os_name == "Linux" or  self.os_name == "Darwin":
+            command_name = "traceroute"
+        else:
+            print "Sorry, the current desktop agent cannot support this platform!"
+        
+        p = subprocess.Popen([command_name,target_name],\
+                             stdout = subprocess.PIPE,\
                              stderr = subprocess.STDOUT)
+        
         while True:
             line = p.stdout.readline()
             if not line:
                 break
+            
+            #get 
             print "-->",line
+            
+            #######################
+            #get first number: hops
+            try:
+                ttl = int(line.strip(" ").split(" ")[0])
+            except:
+                continue
+            
+            ###############
+            #get ip address
+            curr_addr = re.findall("(?:\d{1,3}\.){3}\d{1,3}", line)
+            if curr_addr != []:
+                curr_addr = curr_addr[0]
+            else:
+                curr_addr = None
+                
+            ###############
+            #Get time in ms
+            curr_time = re.findall("(\d)(\.){0,1}(\d*) ms",line)
+            print curr_time
+            if curr_time != []:
+                curr_time = int(curr_time[0][0])
+            else:
+                curr_time = None
+            
+            #################
+            #store the result
+            trace = {}
+            trace["hop"] = ttl
+            trace["ip"] = str(curr_addr if curr_addr !=None else "")
+            trace["packetsTiming"] = int(curr_time if curr_time !=None else 0)
+            
+            print trace
+            result["trace"].append(trace)
             
             
         p.wait()
@@ -135,6 +188,6 @@ def tracerouteInfomation(object):
     
 if __name__ == "__main__":
     t = tracerouteInfomation()
-    result = t.traceroute(target ="www.baidu.com")
+    result = t.traceroute_system(target_name ="www.google.com")
     print result
     
