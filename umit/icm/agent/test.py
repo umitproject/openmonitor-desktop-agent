@@ -175,9 +175,11 @@ def parse_traceroute(traceroute_dict):
         trace = traceroute.traces.add()
         trace.hop = item["hop"]
         trace.ip  = item["ip"]
-        trace.packetsTiming = item[]
-    
-    return 
+        for item_time in item["packetsTiming"]:
+            packetsTiming = trace.packetsTiming.add()
+            packetsTiming = item_time
+        
+    return traceroute
     
 
 #---------------------------------------------------------------------
