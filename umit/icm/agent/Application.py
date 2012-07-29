@@ -184,7 +184,7 @@ class Application(object):
         if self.check_peer_authentical() == True:
             g_logger.info("Now, the desktop agent will try to connect the super peer")
             self.login_simulate()
-            
+            self.build_super_connection("127.0.0.1",10000)
         else:
             g_logger.info("Sorry! The desktop agent cannot be authenticated by aggregator ago!")
             self.quit_window_in_wrong(primary_text = _("The desktop agent cannot be authenticated by aggregator ago"), \
@@ -192,11 +192,25 @@ class Application(object):
     def build_super_connection(self,host,port):
         """
         """
-        s  = socket.socket(socket.AF_INET, socket.SOCK_STREAM, socket.IPPROTO_TCP)
-        s.connect((hosp,port))
-        request_msg = AuthenticatePeer()
-        request_msg.agentID = 
+        from umit.icm.agent.utils.CreateDB import mod,exp 
         
+        s  = socket.socket(socket.AF_INET, socket.SOCK_STREAM, socket.IPPROTO_TCP)
+        s.connect((host,port))
+        request_msg = AuthenticatePeer()
+        request_msg.agentID = theApp.peer_info.ID
+        request_msg.agentType = 2
+        request_msg.agentPort = 5898
+        request_msg.cipheredPublicKey.mod = str(mod)
+        request_msg.cipheredPublicKey.exp = str(exp)
+        data = MessageFactory.encode(request_msg)
+        length = struct.pack('!I', len(data))
+        s.send(length)
+        s.send(data)
+        length = struct.unpack('!i', s.recv(4))[0]
+        data = s.recv(length)
+        response_msg = MessageFactory.decode(data)
+        print response_msg
+        s.close()
         
     def check_peer_authentical(self):
         """
@@ -364,6 +378,7 @@ class Application(object):
         #GTK show
         self.gtk_main.set_login_status(True)
         #Basic Information
+        self.peer_info.load_from_db()
         self._load_from_db()
         #mark login-successful
         self.is_successful_login = True 
