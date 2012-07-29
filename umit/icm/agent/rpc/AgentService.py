@@ -80,10 +80,13 @@ class AgentProtocol(Protocol):
         self.remote_port = self.transport.getPeer().port
 
         # initiator send AuthenticatePeer message
-        #print "-----------------------------------------------"
-        #print self.local_port, theApp.listen_port
         if self.local_port != theApp.listen_port:
+            g_logger.debug("The local port is %s, the listen_port is %s, \
+            they are not equal,so we should send authentical information to it!"\
+            %(str(self.local_port),str(theApp.listen_port)))
             self._session = self._send_auth_message()
+        
+        g_logger.info("Peer Connection Made, IP:%s,Port:%s"%(str(self.remote_ip),str(self.remote_port)))
 
     def connectionLost(self, reason):
         self.factory.connectionNum = self.factory.connectionNum - 1
@@ -150,17 +153,18 @@ class AgentProtocol(Protocol):
                     #theApp.statistics.super_agents_num = \
                         #theApp.statistics.super_agents_num + 1
             elif self.remote_type == 2:  # desktop agent
+                g_logger.info("Get AuthenticatePeer Request from desktop agent.")
                 res = theApp.peer_manager._normal_peer_connected(
                     self.remote_id, self.remote_ip, serve_port,
                     message.cipheredPublicKey)
-                print "test"
+                print res
                 if res:
                     self._session = DesktopAgentSession(message.agentID,
                                                         self.transport)
                     theApp.peer_manager.sessions[message.agentID] = self._session
                     g_logger.debug("Session %s created." % str(message.agentID))
-                    #theApp.statistics.normal_agents_num = \
-                    #theApp.statistics.super_agents_num + 1
+                    theApp.statistics.normal_agents_num = \
+                        theApp.statistics.super_agents_num + 1
             elif self.remote_type == 3:  # mobile agent
                 if self.remote_id in theApp.peer_manager.mobile_peers:
                     theApp.peer_manager.mobile_peers[self.remote_id]\
@@ -180,6 +184,7 @@ class AgentProtocol(Protocol):
             if not self._auth_sent:
                 self._send_auth_message()
         elif isinstance(message, AuthenticatePeerResponse):
+            g_logger.debug("Get AuthenticatePeerResponse from %d type(1:super , 2:normal, 3:Mobile)"%(self.remote_type))
             if self.remote_type == 1:
                 theApp.peer_manager.super_peers[self.remote_id].Token = \
                       message.token
@@ -191,6 +196,7 @@ class AgentProtocol(Protocol):
                       message.token
         elif isinstance(message, ForwardingMessage):
             if theApp.peer_info.Type == 1:
+                g_logger.debug("Get ForwardingMessage")
                 forward_message = MessageFactory.decode(\
                     base64.b64decode(message.encodedMessage))
                 if message.destination == 0:
@@ -209,14 +215,14 @@ class AgentProtocol(Protocol):
                 self._send_message(response_msg)
             elif message.execType == 1:
                 pass
+        elif self._session is not None:
+            self._session.handle_message(message)
         elif self.is_ma_message(message):
             if message.header.agentID in theApp.peer_manager.mobile_peers:
                 theApp.ma_service.handle_message(message, self.transport)
             else:
                 g_logger.warning("Unauthenticated mobile agent. %s" %
                                  str(message.header.agentID))
-        elif self._session is not None:
-            self._session.handle_message(message)
         else:
             g_logger.warning("Unexpected message. %s" %
                              message.DESCRIPTOR.name)
@@ -239,7 +245,6 @@ class AgentProtocol(Protocol):
         request_msg.agentPort = theApp.listen_port
         request_msg.cipheredPublicKey.mod = str(theApp.key_manager.public_key.mod)
         request_msg.cipheredPublicKey.exp = str(theApp.key_manager.public_key.exp)
-        #theApp.peer_info.CipheredPublicKey
         g_logger.debug("Sending AuthenticatePeer message:\n%s" % request_msg)
         self._send_message(request_msg)
         self._auth_sent = True
