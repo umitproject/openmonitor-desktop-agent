@@ -1,9 +1,9 @@
 [Desktop Entry]
-Name=Umit Network Scanner
-GenericName=Network Scanner
-Comment=Explore the network and scan ports
-Icon=/usr/share/pixmaps/umit/umit_ico_48px.svg
-Exec=gksudo umit
+Name=Open Monitor Desktop Agent
+GenericName=Open Monitor
+Comment=Internet Connectivity Monitor
+Icon=/usr/share/pixmaps/icm-agent/icm-agent.xpm
+Exec=gksudo icm-agent
 Terminal=false
 Type=Application
 Categories=Network;

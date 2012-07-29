@@ -24,7 +24,7 @@ from higwidgets.higboxes import hig_box_space_holder
 from umit.icm.agent.Version import VERSION
 
 class Splash(gtk.Window):
-    def __init__(self, image, time=1700):
+    def __init__(self, image, time=1500):
         gtk.Window.__init__(self, gtk.WINDOW_POPUP)
         self.set_position(gtk.WIN_POS_CENTER)
 

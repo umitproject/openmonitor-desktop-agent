@@ -29,9 +29,10 @@ def create_file_conf(conf_path):
     config = ConfigParser()
 
     config.add_section('application')
-    config.set('application', 'auto_login', False)
+    config.set('application', 'auto_login_swittch', False)
     config.set('application', 'auto_update', True)
     config.set('application', 'startup_on_boot', True)
+    config.set('application', 'auto_update',True)
     config.set('application', 'auto_update_test_mod', True)
 
     config.add_section('logging')
@@ -46,7 +47,7 @@ def create_file_conf(conf_path):
     config.add_section('web')
     config.set('web', 'listen_port', 8080)
 
-    config.set('network', 'aggregator_url', 'http://alpha.openmonitor.org/api')
+    config.set('network', 'aggregator_url', 'http://alpha.openmonitor.org')
     config.set('application', 'selected_tests', '')
 
     config.write(fp)
@@ -64,11 +65,12 @@ def create_db_conf(db_path):
     db_kvp_helper = DBKVPHelper('sqlite')
     db_kvp_helper.connect(db_path)
 
-    db_kvp_helper.write('application|auto_login', False)
+    db_kvp_helper.write('application|auto_login_swittch', False)
     db_kvp_helper.write('application|auto_update', True)
     db_kvp_helper.write('application|startup_on_boot', True)
     db_kvp_helper.write('application|auto_update_test_mod', True)
-
+    db_kvp_helper.write('application|auto_update', False)
+    
     db_kvp_helper.write('logging|log_level', 'INFO')
 
     db_kvp_helper.write('network|max_speer_num', 10)
@@ -79,7 +81,7 @@ def create_db_conf(db_path):
     db_kvp_helper.write('web|listen_port', 8080)
 
     db_kvp_helper.write('network|aggregator_url',
-                        'http://alpha.openmonitor.org/api')
+                        'http://alpha.openmonitor.org')
     db_kvp_helper.write('application|selected_tests', '')
 
     db_kvp_helper.close()

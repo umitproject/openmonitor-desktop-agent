@@ -37,14 +37,14 @@ class FileConfig(ConfigParser):
         if not file_name:
             raise IOError("Read %s failed." % file_name)
 
-    #def get(self, section, option):
-        #try:
-            #result = ConfigParser.get(self, section, option)
-            #return result
-        #except NoOptionError:
-            #return None
-        #except NoSectionError:
-            #return None
+    def get(self, section, option):
+        try:
+            result = ConfigParser.get(self, section, option)
+            return result
+        except NoOptionError:
+            return None
+        except NoSectionError:
+            return None
 
     def set(self, section, option, value):
         if not self.has_section(section):

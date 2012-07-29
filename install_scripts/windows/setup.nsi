@@ -1,6 +1,6 @@
 !define py2exeOutputDir 'dist'
-!define exe             'Umit.exe'
-!define icon            'C:\Umit\share\icons\umit\umit_48.ico'
+!define exe             'icm-agent.exe'
+!define icon            'C:\umit\icmagent\share\images\icm-agent.xpm'
 !define compressor      'lzma'  ;one of 'zlib', 'bzip2', 'lzma'
 !define onlyOneInstance
 

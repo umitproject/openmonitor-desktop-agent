@@ -3,6 +3,7 @@
 # Copyright (C) 2011 Adriano Monteiro Marques
 #
 # Author:  Zhongjie Wang <wzj401@gmail.com>
+#          Tianwei Liu <liutianweidlut@gmail.com>
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -46,21 +47,36 @@ class ReportUploader(object):
         else:
             return None
 
-    def send_report(self, report):
-        #if AggregatorAPI.sendReport(report):
-            #report.status = ReportStatus.SENT_TO_AGGREGATOR
-            #return True
-        #elif DesktopSuperAgentRPC.sendReport(report):
-            #report.status = ReportStatus.SENT_TO_SUPER_AGENT
-            #return True
-        #elif DesktopAgentRPC.sendReport(report):
-            #report.status = ReportStatus.SENT_TO_AGENT
-            #return True
-        #else MobileAgentRPC.sendReport(report):
+    def send_report(self, report_key):
+        """
+        Different priorities of sending report: Aggregator -> Super agent -> desktop normal agent 
+        """
+        from umit.icm.agent.core.ReportManager import ReportStatus
+        
+        send_status = False
+        report_entry = self.report_manager.cached_reports[report_key]
+        #print report_entry
+        if theApp.aggregator.send_report(report_entry.Report):
+            report_entry.Status = ReportStatus.SENT_TO_AGGREGATOR
+            send_status = True
+        
+        #############################################
+        #We should add more mechanisms to send report    
+        #elif DesktopSuperAgentRPC.sendReport(report_entry.Report):
+        #    report_entry.Status = ReportStatus.SENT_TO_SUPER_AGENT
+        #    send_status = True
+        #elif DesktopAgentRPC.sendReport(report_entry.Report):
+        #    report_entry.Status = ReportStatus.SENT_TO_AGENT
+        #    send_status = True
+        #else MobileAgentRPC.sendReport(report_entry.Report):
             #report.status = ReportStatus.SENT_TO_AGGREGATOR
             #return True
         #_retry_list.append
-        pass
+ 
+        #if send_status:
+        #    del self.report_manager.cached_reports[report_key]
+    
+        return send_status
 
     """
     Upload reports
@@ -70,9 +86,11 @@ class ReportUploader(object):
         if theApp.aggregator.available:
             g_logger.info("Sending %d reports to the aggregator." % \
                           len(self.report_manager.cached_reports))
-            for report_entry in self.report_manager.cached_reports.values():
-                theApp.aggregator.send_report(report_entry.Report)
+            for report_key in self.report_manager.cached_reports.keys():    
+                self.send_report(report_key)
+                #theApp.aggregator.send_report(report_entry.Report)
         else:
+            # Later, We should implement other upload path: super peer, normal peer 
             # Choose a random super peer to upload
             speer_id = theApp.peer_manager.get_random_speer_connected()
             if speer_id is not None:
@@ -99,7 +117,7 @@ class ReportUploader(object):
                 else:
                     g_logger.info("No available peers.")
 
-            # Report will be removed from the cached_reports after sent successfully
+            
 
 
 

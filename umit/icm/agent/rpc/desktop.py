@@ -3,6 +3,7 @@
 # Copyright (C) 2011 Adriano Monteiro Marques
 #
 # Author:  Zhongjie Wang <wzj401@gmail.com>
+#          Tianwei liu <liutianweidlut@gmail.com>
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -36,7 +37,6 @@ from umit.icm.agent.utils.FileDownloader import FileDownloader
 from umit.icm.agent.Upgrade import *
 from umit.icm.agent.core.ReportManager import ReportStatus
 
-
 class DesktopAgentSession(Session):
     """"""
 
@@ -49,15 +49,17 @@ class DesktopAgentSession(Session):
     def get_super_peer_list(self, count):
         g_logger.info("Send P2PGetSuperPeerList message to %s" % self.remote_ip)
         request_msg = P2PGetSuperPeerList()
-        request_msg.count = count
+        request_msg.count = int(count)
         self._send_message(request_msg)
 
     def _handle_get_super_peer_list(self, message):
+        if message == None:
+            return
         chosen_peers = theApp.peer_manager.select_super_peers(message.count)
         response_msg = P2PGetSuperPeerListResponse()
         for speer in chosen_peers:
             agent_data = response_msg.peers.add()
-            agent_data.agentID = speer.ID
+            agent_data.agentID = str(speer.ID)
             agent_data.agentIP = speer.IP
             agent_data.agentPort = speer.Port
             agent_data.token = speer.Token
@@ -66,8 +68,10 @@ class DesktopAgentSession(Session):
         self._send_message(response_msg)
 
     def _handle_get_super_peer_list_response(self, message):
+        if message == None:
+            return
         for agent_data in message.peers:
-            if self.remote_id != agent_data.agentID:
+            if str(self.remote_id) != agent_data.agentID:
                 theApp.peer_manager.add_super_peer(agent_data.agentID,
                                                    agent_data.agentIP,
                                                    agent_data.agentPort,
@@ -77,7 +81,7 @@ class DesktopAgentSession(Session):
     def get_peer_list(self, count):
         g_logger.info("Send P2PGetPeerList message to %s" % self.remote_ip)
         request_msg = P2PGetPeerList()
-        request_msg.count = count
+        request_msg.count = int(count)
         self._send_message(request_msg)
 
     def _handle_get_peer_list(self, message):
@@ -85,7 +89,7 @@ class DesktopAgentSession(Session):
         response_msg = P2PGetPeerListResponse()
         for peer in chosen_peers:
             agent_data = response_msg.peers.add()
-            agent_data.agentID = peer.ID
+            agent_data.agentID = str(peer.ID)
             agent_data.agentIP = peer.IP
             agent_data.agentPort = peer.Port
             agent_data.token = peer.Token
@@ -95,7 +99,7 @@ class DesktopAgentSession(Session):
 
     def _handle_get_peer_list_response(self, message):
         for agent_data in message.peers:
-            if self.remote_id != agent_data.agentID:
+            if str(self.remote_id) != agent_data.agentID:
                 theApp.peer_manager.add_normal_peer(agent_data.agentID,
                                                     agent_data.agentIP,
                                                     agent_data.agentPort,
@@ -114,7 +118,7 @@ class DesktopAgentSession(Session):
                                                  self.remote_ip))
         request_msg = SendWebsiteReport()
         request_msg.header.token = theApp.peer_info.AuthToken
-        request_msg.header.agentID = theApp.peer_info.ID
+        request_msg.header.agentID = str(theApp.peer_info.ID)
         request_msg.report.CopyFrom(report)
         self._send_message(request_msg)
         self.pending_report_ids.append(report.header.reportID)
@@ -135,7 +139,7 @@ class DesktopAgentSession(Session):
                                                  self.remote_ip))
         request_msg = SendServiceReport()
         request_msg.header.token = theApp.peer_info.AuthToken
-        request_msg.header.agentID = theApp.peer_info.ID
+        request_msg.header.agentID = str(theApp.peer_info.ID)
         request_msg.report.CopyFrom(report)
         self._send_message(request_msg)
         self.pending_report_ids.append(report.header.reportID)
@@ -181,7 +185,12 @@ class DesktopAgentSession(Session):
         length = struct.pack('!I', len(data))
         self._transport.write(length)
         self._transport.write(data)
-
+    
+    def _hanlde_new_version_response(self,message):
+        """
+        The auto check version response
+        """
+         
     def handle_message(self, message):
         if isinstance(message, P2PGetSuperPeerList):
             self._handle_get_super_peer_list(message)
@@ -197,6 +206,8 @@ class DesktopAgentSession(Session):
             self._handle_send_service_report(message)
         elif isinstance(message, SendReportResponse):
             self._handle_send_report_response(message)
+        elif isinstance(message,NewVersionResponse):
+            self._hanlde_new_version_response(message)         
         elif isinstance(message, AgentUpdateResponse):
             g_logger.info("Peer %s update agent to version %s: %S" %
                           (self.remote_id, message.version, message.result))
@@ -223,7 +234,7 @@ class DesktopSuperAgentSession(Session):
     def get_super_peer_list(self, count):
         g_logger.info("Send P2PGetSuperPeerList message to %s" % self.remote_ip)
         request_msg = P2PGetSuperPeerList()
-        request_msg.count = count
+        request_msg.count = int(count)
         self._send_message(request_msg)
 
     def _handle_get_super_peer_list(self, message):
@@ -231,7 +242,7 @@ class DesktopSuperAgentSession(Session):
         response_msg = P2PGetSuperPeerListResponse()
         for speer in chosen_peers:
             agent_data = response_msg.peers.add()
-            agent_data.agentID = speer.ID
+            agent_data.agentID = str(speer.ID)
             agent_data.agentIP = speer.IP
             agent_data.agentPort = speer.Port
             agent_data.token = speer.Token
@@ -241,7 +252,7 @@ class DesktopSuperAgentSession(Session):
 
     def _handle_get_super_peer_list_response(self, message):
         for agent_data in message.peers:
-            if self.remote_id != agent_data.agentID:
+            if str(self.remote_id) != str(agent_data.agentID):
                 theApp.peer_manager.add_super_peer(agent_data.agentID,
                                                    agent_data.agentIP,
                                                    agent_data.agentPort,
@@ -259,7 +270,7 @@ class DesktopSuperAgentSession(Session):
         response_msg = P2PGetPeerListResponse()
         for peer in chosen_peers:
             agent_data = response_msg.peers.add()
-            agent_data.agentID = peer.ID
+            agent_data.agentID = str(peer.ID)
             agent_data.agentIP = peer.IP
             agent_data.agentPort = peer.Port
             agent_data.token = peer.Token
@@ -289,7 +300,7 @@ class DesktopSuperAgentSession(Session):
                                                  self.remote_ip))
         request_msg = SendWebsiteReport()
         request_msg.header.token = theApp.peer_info.AuthToken
-        request_msg.header.agentID = theApp.peer_info.ID
+        request_msg.header.agentID = str(theApp.peer_info.ID)
         request_msg.report.CopyFrom(report)
         self._send_message(request_msg)
         self.pending_report_ids.append(report.header.reportID)
@@ -310,7 +321,7 @@ class DesktopSuperAgentSession(Session):
                                                  self.remote_ip))
         request_msg = SendServiceReport()
         request_msg.header.token = theApp.peer_info.AuthToken
-        request_msg.header.agentID = theApp.peer_info.ID
+        request_msg.header.agentID = str(theApp.peer_info.ID)
         request_msg.report.CopyFrom(report)
         self._send_message(request_msg)
         self.pending_report_ids.append(report.header.reportID)
@@ -347,7 +358,7 @@ class DesktopSuperAgentSession(Session):
             else:
                 check_code = 0
             downloader.addCallback(update_agent, message.version,
-                                   message.checkCode)
+                                   check_code)
             downloader.start()
 
     def _handle_test_mod_update(self, message):
@@ -369,7 +380,7 @@ class DesktopSuperAgentSession(Session):
         request_msg = ForwardingMessage()
         request_msg.destination = target
         request_msg.identifier = "%s_%d" % \
-                   (theApp.peer_info.ID, int(time.time() * 1000))
+                   (str(theApp.peer_info.ID), int(time.time() * 1000))
         request_msg.encodedMessage = \
                    base64.b64encode(MessageFactory.encode(message))
         defer_ = defer.Deferred()

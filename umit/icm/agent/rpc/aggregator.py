@@ -4,6 +4,7 @@
 #
 # Authors:  Zhongjie Wang <wzj401@gmail.com>
 #           Adriano Marques <adriano@umitproject.org>
+#           Tianwei Liu <liutianweidlut@gmail.com>
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -24,16 +25,20 @@ import os
 import sys
 import urllib
 import random
+import time
 
 from twisted.web import client
 from twisted.web.error import Error
 from twisted.internet import error
+from twisted.web.http_headers import Headers
+from twisted.web.client import Agent
+from twisted.internet import reactor
 
 from google.protobuf.text_format import MessageToString
 
 from umit.icm.agent.rpc.message import *
 from umit.icm.agent.rpc.MessageFactory import MessageFactory
-from umit.icm.agent.rpc import messages_pb2
+from umit.proto import messages_pb2
 
 from umit.icm.agent.logger import g_logger
 from umit.icm.agent.Application import theApp
@@ -44,6 +49,8 @@ from umit.icm.agent.Errors import AggergatorError
 from umit.icm.agent.secure.Key import AESKey
 from umit.icm.agent.Version import VERSION_NUM
 from umit.icm.agent.test import TEST_PACKAGE_VERSION_NUM
+
+from umit.icm.agent.I18N import _
 
 aggregator_api_url = {
     'CheckAggregator': '/api/checkaggregator/',
@@ -63,6 +70,7 @@ aggregator_api_url = {
     'GetNetlist': '/api/get_netlist/',
     'GetBanlist': '/api/get_banlist/',
     'GetBannets': '/api/get_bannets/',
+    #'AssignTask':'/api/assign_task',
 }
 
 #---------------------------------------------------------------------
@@ -74,6 +82,7 @@ class AggregatorAPI(object):
         """Constructor"""
         self.base_url = g_config.get('network', 'aggregator_url') \
             if aggregator is None else aggregator
+        
         self.available = True
         self.pending_report_ids = []
 
@@ -100,6 +109,42 @@ class AggregatorAPI(object):
 
         return message
 
+    def check_aggregator_website(self):
+        """
+        Run aggregator website test
+        """
+        g_logger.info("Testing Aggregator website: %s" % self.base_url)
+        
+        defer_ = Agent(reactor).request('GET',self.base_url,
+                                Headers({'User-Agent':['ICM Website Test']}),
+                                None)
+        defer_.addCallback(self._handle_check_aggregator_website)    
+        defer_.addErrback(self._handle_check_aggregator_website_err)
+        
+        return defer_
+        
+    def _handle_check_aggregator_website(self,message):
+        """
+        """
+        status_code = message.code
+        HTTP_SUCCESS_CODE = (200,302)
+        if int(status_code) in HTTP_SUCCESS_CODE:
+            g_logger.info("Testing Aggregator website: %s" % status_code)
+            self.available = True
+        else:
+            g_logger.info("Cannot connect Aggregator website: %s" % self.base_url)
+            self.available = False
+        
+        return self.available
+    
+    def _handle_check_aggregator_website_err(self,failure):
+        """
+        """
+        g_logger.info("Cannot connect Aggregator website: %s" % self.base_url)
+        self.available = False
+        
+        return self.available
+
     """ Peer """
     #----------------------------------------------------------------------
 
@@ -113,7 +158,7 @@ class AggregatorAPI(object):
         request_msg.agentPublicKey.exp = str(theApp.key_manager.public_key.exp)
         if theApp.peer_info.internet_ip:
             request_msg.ip = theApp.peer_info.internet_ip
-
+        print request_msg
         # send message
         defer_ = self._send_message(request_msg, RegisterAgentResponse)
         defer_.addCallback(self._handle_register_response)
@@ -125,14 +170,19 @@ class AggregatorAPI(object):
             g_logger.error("Empty response while trying to register.")
             return
 
-        g_logger.info("RegisterAgent response: (%d, %s)" %
+        g_logger.info("RegisterAgent response: (%s, %s)" %
                       (message.agentID, message.publicKeyHash))
 
         return {'id': message.agentID, 'hash': message.publicKeyHash}
-
+    
+    def _handle_register_error_response(self,failure):
+        if failure is None:
+            g_logger.error("Error empty response while trying to register.")
+            return 
+        
     def login(self, username, password):
         request_msg = Login()
-        request_msg.agentID = theApp.peer_info.ID
+        request_msg.agentID = str(theApp.peer_info.ID)
 
         self.challenge = str(random.random())
         request_msg.challenge = self.challenge
@@ -148,14 +198,15 @@ class AggregatorAPI(object):
     def _handle_login_step1(self, message):
         if message is None:
             return
-
+        #print "------------------login step1--------------"
+        #print message
         if not theApp.key_manager.aggregator_public_key.verify(
             self.challenge, message.cipheredChallenge):
             g_logger.warning("Challenge doesn't match. Maybe something wrong "
                              "with aggregator public key or the current "
                              "aggregator is fake.")
             return
-
+        #print "-----------------end------------------------"
         request_msg = LoginStep2()
         request_msg.processID = message.processID
         request_msg.cipheredChallenge = theApp.key_manager.private_key.sign(message.challenge)
@@ -180,7 +231,7 @@ class AggregatorAPI(object):
 
     def logout(self):
         request_msg = Logout()
-        request_msg.agentID = theApp.peer_info.ID
+        request_msg.agentID = str(theApp.peer_info.ID)
         defer_ = self._send_message(request_msg)
         defer_.addCallback(self._handle_logout)
 
@@ -200,7 +251,7 @@ class AggregatorAPI(object):
 
     def get_super_peer_list(self, count):
         request_msg = GetSuperPeerList()
-        request_msg.count = count
+        request_msg.count = int(count)
 
         defer_ = self._send_message(request_msg, GetSuperPeerListResponse)
         defer_.addCallback(self._handle_get_super_peer_list_response)
@@ -210,6 +261,9 @@ class AggregatorAPI(object):
     def _handle_get_super_peer_list_response(self, message):
         if message is None:
             return
+        
+        g_logger.info("Got %d super peers from aggregator!"%(len(message.knownSuperPeers)))        
+        
         for speer in message.knownSuperPeers:
             theApp.peer_manager.add_super_peer(speer.agentID,
                                                speer.agentIP,
@@ -217,13 +271,14 @@ class AggregatorAPI(object):
                                                speer.token,
                                                speer.publicKey)
             theApp.peer_manager.connect_to_peer(speer.agentID)
-
+        
+        
         return message
 
     def get_peer_list(self, count):
         url = self.base_url + "/getpeerlist/"
         request_msg = GetPeerList()
-        request_msg.count = count
+        request_msg.count = int(count)
 
         defer_ = self._send_message(request_msg, GetPeerListResponse)
         defer_.addCallback(self._handle_get_peer_list_response)
@@ -233,6 +288,9 @@ class AggregatorAPI(object):
     def _handle_get_peer_list_response(self, message):
         if message is None:
             return
+        
+        g_logger.info("Got %d normal peers from aggregator!"%(len(message.knownPeers))) 
+         
         for peer in message.knownPeers:
             theApp.peer_manager.add_normal_peer(peer.agentID,
                                                 peer.agentIP,
@@ -242,14 +300,44 @@ class AggregatorAPI(object):
             theApp.peer_manager.connect_to_peer(peer.agentID)
 
         return message
+    
+    """ Assign Task"""
+    #----------------------------------------------------------------------
+    def get_task(self):
+        url = self.base_url + "/gettasks/"
+        request_msg = AssignTask()
+        request_msg.header.agentID = str(theApp.peer_info.ID)
+        defer_ = self._send_message(request_msg, AssignTaskResponse)
+        defer_.addCallback(self._handle_get_task_response)
+        defer_.addErrback(self._handle_errback)
+        
+        return defer_
+        
+    def _handle_get_task_response(self,message):
+        if message in None:
+            return 
+        
+        print message
+        print message.header
+        print message.tests
+        
+        g_logger.debug("We have got tasks from aggregator")  
+        
+        return message
+                
 
     """ Event """
     #----------------------------------------------------------------------
-    def get_events(self):
+    def get_events(self,location_user):
         url = self.base_url + "/getevents/"
         request_msg = GetEvents()
-        #self._make_request_header(request_msg.header)
-
+        
+        #print location_user.latitude, location_user.longitude
+        #repeated 
+        location = request_msg.locations.add()
+        location.longitude = location_user.longitude
+        location.latitude  = location_user.latitude
+        
         defer_ = self._send_message(request_msg, GetEventsResponse)
         defer_.addCallback(self._handle_get_events_response)
         defer_.addErrback(self._handle_errback)
@@ -259,6 +347,11 @@ class AggregatorAPI(object):
     def _handle_get_events_response(self, message):
         if message is None:
             return
+        
+        #print message
+        #print message.events
+        
+        g_logger.debug("We have got events from aggregator")
         for event in message.events:
             theApp.event_manager.add_event(event)
 
@@ -279,7 +372,6 @@ class AggregatorAPI(object):
     def send_website_report(self, report):
         url = self.base_url + "/sendwebsitereport/"
         request_msg = SendWebsiteReport()
-        #self._make_request_header(request_msg.header)
         request_msg.report.CopyFrom(report)
 
         defer_ = self._send_message(request_msg, SendReportResponse)
@@ -309,7 +401,8 @@ class AggregatorAPI(object):
     def send_service_report(self, report):
         url = self.base_url + "/sendservicereport/"
         request_msg = SendServiceReport()
-        #self._make_request_header(request_msg.header)
+        #print '~__________________________'
+        #print report
         request_msg.report.CopyFrom(report)
 
         defer_ = self._send_message(request_msg, SendReportResponse)
@@ -342,7 +435,7 @@ class AggregatorAPI(object):
     def send_website_suggestion(self, website_url):
         url = self.base_url + "/websitesuggestion/"
         request_msg = WebsiteSuggestion()
-        #self._make_request_header(request_msg.header)
+
         request_msg.websiteURL = website_url
 
         defer_ = self._send_message(request_msg, TestSuggestionResponse)
@@ -361,7 +454,7 @@ class AggregatorAPI(object):
     def send_service_suggestion(self, service_name, host_name, ip, port):
         url = self.base_url + "/servicesuggestion/"
         request_msg = ServiceSuggestion()
-        #self._make_request_header(request_msg.header)
+
         request_msg.serviceName = service_name
         request_msg.hostName = host_name
         request_msg.ip = ip
@@ -383,8 +476,9 @@ class AggregatorAPI(object):
     """ Version """
     #----------------------------------------------------------------------
     def check_version(self):
+        self.check_message = {}
         request_msg = NewVersion()
-        #self._make_request_header(request_msg.header)
+
         request_msg.agentVersionNo = VERSION_NUM
         request_msg.agentType = 'DESKTOP'
 
@@ -394,27 +488,68 @@ class AggregatorAPI(object):
         return defer_
 
     def _handle_check_version_response(self, message):
+        
         if message is None:
             return
+        g_logger.info("Get check_version_response %s" % message) 
+        
+        #add the record into the Database
+        from umit.icm.agent.gui.SoftwareUpdate import check_update_item_in_db,insert_update_item_in_db,no_updated
+        check_message = {}
+        
+        check_message["download_url"] = message.downloadURL 
+        check_message["version"] = str(message.versionNo)   
+        check_message["news_date"] = time.strftime("%Y-%m-%d",time.localtime())
+        check_message["software_name"] = "OpenMonitor Desktop V" + str(message.versionNo)
+        check_message["is_update"] = no_updated
+        check_message["description"] = "Open Monitor Desktop Agent!" 
+        check_message["check_code"] = ""
+         
+        if not check_update_item_in_db(check_message["version"]):
+            insert_update_item_in_db(check_message)
+            g_logger.info("Write a new update record into DB :%s" % check_message) 
+          
+        return  message
 
-        return message
-
-    def check_tests(self):
+    
+    """ Test sets"""
+    #----------------------------------------------------------------------   
+    def check_tests(self,current_version):
         request_msg = NewTests()
-
-        request_msg.currentTestVersionNo = TEST_PACKAGE_VERSION_NUM
-
+        request_msg.currentTestVersionNo = int(current_version)  #Get current version from DB
+        #print 'test:',request_msg.currentTestVersionNo
         defer_ = self._send_message(request_msg, NewTestsResponse)
         defer_.addCallback(self._handle_check_tests_response)
-        defer_.addErrback(self._handle_errback)
+        defer_.addErrback(self._handle_check_tests_error)
         return defer_
 
     def _handle_check_tests_response(self, message):
         if message is None:
             return
-
+        
+        #print message.tests
+        #print message.testVersionNo
+        
+        g_logger.info("Receive Test Sets!")     
         return message
+    
+    def _handle_check_tests_error(self,failure):
+        g_logger.error("check tests error!%s"%str(failure))
+        #print failure
+        
+    """Test Module"""
+    def check_test_moduler(self):
+        pass
+        
+    def _handle_check_test_moduler_response(self):
+        if message is None:
+            return 
+        
+        g_logger.info("Get Test Moduler Update")             
+        return messge
 
+    """ Other Informations """
+    #----------------------------------------------------------------------
     def get_netlist(self, count):
         request_msg = GetNetlist()
         request_msg.list = count
@@ -438,6 +573,7 @@ class AggregatorAPI(object):
                 theApp.peer_manager.add_normal_peer(node.agentID,
                                                     node.agentIP,
                                                     node.agentPort,
+                                                    node.token,
                                                     node.publicKey,
                                                     node.peerStatus,
                                                     id)
@@ -483,8 +619,6 @@ class AggregatorAPI(object):
         theApp.peer_manager.sync_bannets(message)
 
         return message
-
-
 
     """ Private """
     #----------------------------------------------------------------------
@@ -533,6 +667,9 @@ class AggregatorAPI(object):
 
         return message
 
+    """ utils """
+    #----------------------------------------------------------------------
+    
     def _send_message(self, message, response_msg_type=None):
         postdata = {}
 
@@ -552,9 +689,9 @@ class AggregatorAPI(object):
                 theApp.key_manager.aggregator_public_key.encrypt(
                     base64.b64encode(
                         theApp.key_manager.aggregator_aes_key.get_key())))
-            postdata['msg'] = self._aes_encrypt(message)
+            postdata['msg'] = self._aes_encrypt(message)            
         else:
-            postdata['agentID'] = theApp.peer_info.ID
+            postdata['agentID'] = str(theApp.peer_info.ID)
             postdata['msg'] = self._aes_encrypt(message)
 
         # send message
@@ -603,13 +740,57 @@ class AggregatorAPI(object):
             if isinstance(err, Error):
                 g_logger.error(">>> The Aggregator had an Internal Error:")
                 g_logger.error(err.response)
-
-
+                self._alter_network_informaiton(err.response)
+        
+        #self._alter_network_informaiton(err.response)
+        
     def _decode_errback(self, failure):
         g_logger.error("[AggregatorAPI] - Failed to decode. %s" % failure)
 
     def _handle_errback(self, failure):
         g_logger.error("Aggregator failure: %s" % str(failure))
+    
+    """ alters """
+    #----------------------------------------------------------------------    
+    def _alter_show(self,primary_text,secondary_text):
+        #Add the user-friendly information to the user to check the problem.
+        import gtk
+        from higwidgets.higwindows import HIGAlertDialog
+
+        alter = HIGAlertDialog(primary_text = primary_text,\
+                                       secondary_text = secondary_text)
+        
+        alter.show()
+        alter.run()
+
+        #show login window again
+        theApp.gtk_main.show_login()                
+        
+    def _alter_network_informaiton(self,failure):
+        failure_info_first = None
+        failure_info_second = None
+        
+        if 'error.NoRouteError' in str(failure):
+            failure_info_first  = 'Disconnect to Internet'
+            failure_info_second = 'Please check your network card connection!'
+        elif 'TimeoutError' in str(failure):
+            failure_info_first = 'Cloud Aggregator Server Connect Error'
+            failure_info_second = 'Please check your cloud aggregator URL'         
+        elif 'Agent matching query does not exist' in str(failure) :# or\
+                           # '500 Internal Server Error' in str(failure) or\
+                           # '500 INTERNAL SERVER ERROR' in str(failure):
+            failure_info_first = _('Username/Password Error')
+            failure_info_second = _('Please check your username or password')
+            #clear username and password (there maybe some bugs here)
+            theApp.peer_info.clear_db()
+        else: 
+            print str(failure)
+            pass
+        
+        if failure_info_first == None and failure_info_second == None:
+            return
+        else:
+            self._alter_show(primary_text = failure_info_first,secondary_text =failure_info_second)    
 
 
 if __name__ == "__main__":
@@ -620,8 +801,8 @@ if __name__ == "__main__":
 
     report = WebsiteReport()
     report.header.reportID = 'xw384kkre'
-    report.header.agentID = 10000
-    report.header.testID = 1
+    report.header.agentID = '10000'
+    report.header.testID = '1'
     report.header.timeZone = 8
     report.header.timeUTC = int(time.time())
     report.report.websiteURL = 'http://www.baidu.com'

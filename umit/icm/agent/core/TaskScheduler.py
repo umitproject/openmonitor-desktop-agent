@@ -3,6 +3,7 @@
 # Copyright (C) 2011 Adriano Monteiro Marques
 #
 # Author:  Zhongjie Wang <wzj401@gmail.com>
+#          Tianwei Liu <liutianweidlut@gmail.com>
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -41,7 +42,7 @@ class TaskScheduler(object):
         #self.index = 0
 
     """ Deprecated """
-    def _fetch_one_test(self):
+    def fetch_one_test(self):
         task_list = self.task_manager.task_list
         for i in range(self.index, self.index+len(task_list)):
             idx = i % len(task_list)
@@ -53,7 +54,7 @@ class TaskScheduler(object):
         return None
 
     """ Deprecated """
-    def _run_test(self, entry):
+    def run_test(self, entry):
         entry.LastRunTime = time.time()
         entry.RunFlag = False
         test = test_by_id[entry.ID]()
@@ -62,6 +63,7 @@ class TaskScheduler(object):
 
     def check_run_time(self):
         cur_time = time.gmtime()
+        #check every tasks
         for entry in self.task_manager.task_list:
             if entry.time_to_run(cur_time):
                 entry.RunFlag = True
@@ -71,12 +73,17 @@ class TaskScheduler(object):
         #g_logger.debug(cur_time)
         #if cur_time.tm_min != last_min:
         #last_min = cur_time.tm_min
-
-        self.check_run_time()  # using GMT time
+        
+        g_logger.info("Task scheduler %s"%self.task_manager.task_list)
+        
+        self.check_run_time()  # using GMT time,check every task
+        
         for entry in self.task_manager.task_list:
             if entry.Enabled and entry.RunFlag:
                 entry.LastRunTime = time.time()
                 entry.RunFlag = False
+                
+                #this is the test.py logical, we can call the according test functions
                 test = test_by_id[entry.ID]()
                 test.prepare(entry.Args)
                 defer_ = test.execute()

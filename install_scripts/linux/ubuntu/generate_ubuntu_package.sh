@@ -2,6 +2,7 @@
 # Copyright (C) 2008 Adriano Monteiro Marques.
 #
 # Author: Luis A. Bastiao Silva <luis.kop@gmail.com>
+#		  Tianwei Liu <liutianweidlut@gmail.com>
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -17,12 +18,9 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 
+# This script generate open monitor desktop agent package to ubuntu from trunk
 
-
-# This script generate umit package to ubuntu from trunk
-
-############ Deps: svn, dpkg-dev, dpkg-buildpackage, wget
-
+############ Deps: git, dpkg-dev, dpkg-buildpackage, wget
 
 ###################
 # We are at trunk directory
@@ -31,14 +29,10 @@
 # Generate tarball
 python setup.py sdist
 
-
-
 # Extract tarball
 cd dist
-tar zvxf umit*.tar.gz > extract.log
-cd umit*
-
-
+tar zvxf icm-agent*.tar.gz > extract.log
+cd icm-agent*
 
 ## Copy debian rules
 
@@ -51,5 +45,3 @@ sudo dpkg-buildpackage
 cd ..
 cd ../../
 echo "########## FINISHED - Package was created ! ################"
-
-

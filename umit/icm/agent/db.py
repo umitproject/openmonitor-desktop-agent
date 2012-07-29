@@ -3,6 +3,7 @@
 # Copyright (C) 2011 Adriano Monteiro Marques
 #
 # Authors:  Zhongjie Wang <wzj401@gmail.com>
+#           Tianwei Liu <liutianweidlut@gmail.com>
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -244,17 +245,17 @@ class DBHelper(object):
         if agent:
             return agent
 
-        insert = self.db_conn.execute("INSERT INTO banlist VALUES (%d)" % \
+        insert = self.db_conn.execute("INSERT INTO banlist VALUES ('%s')" % \
                                       agent_id)
         self.db_conn.commit()
 
         return insert
 
     def get_peer(self, agent_id):
-        return self.select("SELECT * FROM peers WHERE id = %d" % agent_id)
+        return self.select("SELECT * FROM peers WHERE id = '%s'" % agent_id)
 
     def remove_peer(self, agent_id):
-        return self.execute("DELETE FROM peers WHERE id = %d" % agent_id)
+        return self.execute("DELETE FROM peers WHERE id = '%s'" % agent_id)
 
     def insert_banned_network(self, start_ip, end_ip, nodes_count, flag):
         bannet = self.get_banned_network(start_ip, end_ip)
@@ -269,7 +270,7 @@ class DBHelper(object):
             # Insert into db
             self.execute("INSERT INTO bannets (start_number, end_number, "
                          "nodes_count, flags, created_at, updated_at) VALUES "
-                         "(%s, %s, %s, %d, %d, %d)" % \
+                         "('%s', '%s', '%s', %d, %d, %d)" % \
                             (start_ip, end_ip, nodes_count, flag,
                              int(time.time()), int(time.time())))
 
@@ -288,7 +289,7 @@ class DBHelper(object):
 
     def get_banned_agent(self, agent_id):
         return self.db_conn.select("SELECT * FROM banlist WHERE "
-                                   "agent_id = %d" % agent_id)
+                                   "agent_id = '%s'" % agent_id)
 
     def agent_is_banned(self, agent_id):
         agent = self.get_banned_agent(agent_id)
@@ -302,6 +303,16 @@ class DBHelper(object):
             return True
         return False
 
+    def check_peer_info(self):
+        """
+        """
+        result = len(self.db_conn.select("SELECT * from peer_info"))
+        if result != 0:
+            return True
+        else:
+            return False
+        
+    
     def get_aggregator_publickey(self):
         return self.get_value('keys', 'aggregator_publickey')
 
@@ -319,8 +330,186 @@ class DBHelper(object):
 
     def get_aggregator_aes_key(self):
         return self.get_value('keys', 'aggregator_aes_key')
-
-
+    
+    ###########
+    #Super Peer
+    def set_super_peer_manual(self,ip,port,description = ""):
+        """
+        add super peer information into super_peer_manual table
+        """
+        sql_str = "insert or replace into super_peers_manual values " \
+                        "('%s', '%s', '%s')" % \
+                        (ip,port,description)
+        g_logger.info("[save_to_db]:save %s into DB"%sql_str)            
+        self.execute(sql_str)
+#       self.commit()      
+    
+    def get_super_peer_first(self):
+        """
+        Get the first record from super information  
+        """
+        result = self.db_conn.select("select ip,port from super_peers_manual") 
+        if result != None and result != []:
+            return result[0]
+        else:
+            return None
+        
+    #####################################################
+    #Methods for Dashboard Window(Timeline or QueryFrame)
+    def get_task_sets(self,task_type = None):
+        """
+        Tasks (All, done, wait)for Dashboard Window
+        """
+        from umit.icm.agent.gui.dashboard.DashboardListBase import TASK_ALL,TASK_SUCCESSED,TASK_FAILED
+        from umit.icm.agent.test import TASK_STATUS_DONE,TASK_STATUS_FAILED
+        if task_type == TASK_ALL:
+            return self.db_conn.select("SELECT * from tasks")
+        elif task_type == TASK_SUCCESSED:
+            return self.db_conn.select("SELECT * from tasks where done_status = '%s' "%(TASK_STATUS_DONE))
+        elif task_type == TASK_FAILED:
+            return self.db_conn.select("SELECT * from tasks where done_status = '%s' "%(TASK_STATUS_FAILED))
+        else:
+            g_logger.error("Didn't input any legal task type for query :%s"%(task_type))
+            return None
+    
+    def get_report_sets(self,report_type = None):
+        """
+        Reports for Dashboar Window (sent, unsent, maybe received)
+        """
+        from umit.icm.agent.gui.dashboard.DashboardListBase import REPORT,REPORT_SENT,REPORT_UNSENT,REPORT_RECEIVED
+        if report_type == REPORT:
+            return None
+        elif report_type == REPORT_SENT:
+            return self.db_conn.select("SELECT * from reports")
+        elif report_type == REPORT_UNSENT:
+            return self.db_conn.select("SELECT * from unsent_reports")
+        elif report_type == REPORT_RECEIVED:
+            return self.db_conn.select("SELECT * from received_reports")
+        else:
+            g_logger.error("Didn't input any legal report type for query :%s"%(report_type))
+            return None
+        
+    def get_test_sets(self,test_type = None):
+        """
+        Test sets for Dashboard Window(successful or failed)
+        """
+        from umit.icm.agent.gui.dashboard.DashboardListBase import CAPA_THROTTLED,CAPACITY,CAPA_SERVICE
+        from umit.icm.agent.test import TASK_STATUS_DONE,TASK_STATUS_FAILED
+        if test_type == CAPA_THROTTLED:
+            return self.db_conn.select("SELECT \
+                                    sequence,test_id,website_url,test_type,done_status,done_result,execute_time \
+                                      from tasks where test_type = 'WEB' ")
+        elif test_type == CAPACITY:
+            return None
+        elif test_type == CAPA_SERVICE:
+            return self.db_conn.select("SELECT \
+                                    sequence,test_id,service_name,service_port,service_ip,test_type,done_status,done_result,execute_time \
+                                      from tasks where test_type = 'Service' ")
+        else:
+            g_logger.error("Didn't input any legal test sets type for query :%s"%(test_type))
+            return None   
+          
+    def timerange_changes_count_generic(self,start,end,choice_tab):
+        """
+        This method helps datagrab get the basic data from database 
+        """   
+        from umit.icm.agent.gui.dashboard.DashboardListBase import CAPA_THROTTLED,CAPACITY,CAPA_SERVICE
+        from umit.icm.agent.gui.dashboard.DashboardListBase import REPORT,REPORT_SENT,REPORT_UNSENT,REPORT_RECEIVED
+        from umit.icm.agent.gui.dashboard.DashboardListBase import TASK_SUCCESSED, TASK_FAILED,TASK_ALL,TASK
+        
+        #g_logger.debug("Timeline Query:start:%s, end:%s, tab:%s"%(start,end,choice_tab))
+        
+        if  choice_tab ==  REPORT_SENT:
+            return len(self.db_conn.select("SELECT * from reports "
+                            "WHERE time_gen >= ? AND time_gen < ? "
+                            "ORDER BY time_gen DESC", (start,end)))
+        elif choice_tab ==  REPORT_UNSENT:
+            return len(self.db_conn.select("SELECT * from unsent_reports "
+                            "WHERE time_gen >= ? AND time_gen < ? "
+                            "ORDER BY time_gen DESC", (start,end)))
+        elif choice_tab ==  REPORT_RECEIVED:
+            return 0
+        elif choice_tab ==  CAPA_THROTTLED:
+            return len(self.db_conn.select("SELECT * from tasks WHERE execute_time >= ? AND execute_time < ? AND test_type = 'WEB' ",(start,end)))
+        elif choice_tab ==  CAPA_SERVICE:
+            return len(self.db_conn.select("SELECT * from tasks WHERE execute_time >= ? AND execute_time < ? AND test_type = 'Service' ",(start,end)))
+        elif choice_tab == TASK_SUCCESSED:
+            return len(self.db_conn.select("SELECT * from tasks WHERE execute_time >= ? AND execute_time < ? AND done_status = 'Success' ",(start,end)))
+        elif choice_tab == TASK_FAILED:
+            return len(self.db_conn.select("SELECT * from tasks WHERE execute_time >= ? AND execute_time < ? AND done_status = 'Failed' ",(start,end)))
+        elif choice_tab == TASK_ALL or choice_tab == TASK:
+            return len(self.db_conn.select("SELECT * from tasks WHERE execute_time >= ? AND execute_time < ? ",(start,end)))
+        else:
+            return 0   
+        
+    def task_web(self,task_web_info):
+        """
+        """
+        
+        self.execute("INSERT INTO tasks VALUES "
+                     "(NULL,'%s', '%s', '%s',NULL,NULL,NULL ,'%s', '%s', '%s')" % \
+                        (task_web_info['test_id'], task_web_info['website_url'], task_web_info['test_type'], 
+                         task_web_info['done_status'],task_web_info['done_result'],str(task_web_info['execute_time'])))        
+        
+        g_logger.info("Store %s WebSite Test Task into Database"%(task_web_info['test_id']))
+        
+    def task_service(self,task_service_info):
+        """
+        """
+        self.execute("INSERT INTO tasks VALUES "
+                     "(NULL,'%s', NULL ,'%s', '%s', '%s', '%s', '%s','%s','%s')" % \
+                        (task_service_info['test_id'], task_service_info['test_type'], 
+                         task_service_info['service_name'], task_service_info['service_port'], task_service_info['service_ip'], 
+                         task_service_info['done_status'],task_service_info['done_result'],str(task_service_info['execute_time'])))
+        
+        g_logger.info("Store %s Service Test Task into Database"%(task_service_info['test_id']))
+    
+    def service_choice_count(self,service_name = None):
+        """
+        """
+        if service_name != None:
+            service_name = service_name.upper()
+            success_cnt = len(self.db_conn.select("SELECT * from tasks WHERE service_name = '%s' AND done_status = 'Success' "%(service_name)))
+            total_cnt = len(self.db_conn.select("SELECT * from tasks WHERE service_name = '%s' "%(service_name)))
+        else:
+            success_cnt = len(self.db_conn.select("SELECT * from tasks WHERE done_status = 'Success' "))
+            total_cnt = len(self.db_conn.select("SELECT * from tasks "))            
+        
+        return (success_cnt,total_cnt)
+  
+    ##################################
+    #Basic Information about the agent
+    def set_information(self,key,value):
+        """
+        """
+        self.execute("insert or replace into information values(?,?)",(key,value))
+        
+    def get_information(self,key,default="0"):
+        
+        try:
+            result = self.db_conn.select("select value from information where key=?",(key,))
+            return result[0]
+        except:
+            g_logger.warning("No value found for key '%s' in SET Information." % key)
+            return default
+    
+    #####################
+    #Stats table operator
+    def set_status(self,key,value):
+        """
+        """
+        self.execute("insert or replace into stats values(?,?)", (key,value))
+        
+    def get_status(self,key,default = "0"):
+        """
+        """
+        try:
+            result = self.db_conn.select("select value from stats where key=?",(key,))
+            return result[0]
+        except:
+            g_logger.warning("No value found for key '%s' in SET stats." % key)
+            return default
+    
 #---------------------------------------------------------------------
 class DBKVPHelper(object):
     """

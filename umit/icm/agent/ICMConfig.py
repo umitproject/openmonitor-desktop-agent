@@ -94,3 +94,44 @@ class ICMConfig(ConfigParser):
                     fp.write("%s = %s\n" %
                              (key, str(value).replace('\n', '\n\t')))
             fp.write("\n")
+
+'''class CrashSettingConf(object):
+   
+    #Crash Report Tools Settings
+    
+    def __init__(self):
+        # Constructor Crash Report Conf 
+        
+        #self.parse = 
+        self.section_name = "Crash_report"
+        self.attributes = {}
+    def create_section(self):
+        print "creating general_setting section"
+        self.parser.add_section(self.section_name)
+        self.crash_report = True
+    
+    def boolean_sanity(self,attr):
+        if attr == True or \
+           attr == "True" or \
+           attr == "true" or \
+           attr == "1"    or \
+           attr == "t":
+            
+            return 1
+        
+        return 0
+        
+    def _get_it(self,p_name,default):
+        return self.parser.get(self.section_name, p_name, default)
+    def _set_it(self,p_name,value):
+        self.parser.set(self.section_name, p_name, value)
+    #API
+    def set_crash_report(self,crash):
+        self._set_it("crash_report", self.boolean_sanity(crash))
+    def get_crash_report(self):
+        return self.boolean_sanity(self._get_it("crash_report", True))
+        
+        
+    crash_report = property(get_crash_report, set_crash_report)   
+'''        
+        

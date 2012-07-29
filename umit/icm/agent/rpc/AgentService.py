@@ -3,6 +3,7 @@
 # Copyright (C) 2011 Adriano Monteiro Marques
 #
 # Author:  Zhongjie Wang <wzj401@gmail.com>
+#          Tianwei Liu <liutiawneidlut@gmail.com>
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -41,7 +42,7 @@ from umit.icm.agent.rpc.MessageFactory import MessageFactory
 from umit.icm.agent.rpc.desktop import DesktopAgentSession, \
      DesktopSuperAgentSession
 from umit.icm.agent.rpc.mobile import MobileAgentSession
-
+from umit.proto import messages_pb2
 
 class AgentProtocol(Protocol):
     """"""
@@ -55,7 +56,7 @@ class AgentProtocol(Protocol):
         self.remote_ip = None
         self.remote_port = 0
 
-        self.remote_id = 0
+        self.remote_id = None
         self.remote_type = 0
 
         self._session = None
@@ -68,7 +69,7 @@ class AgentProtocol(Protocol):
         g_logger.info("New connection #%d established. with Peer: %s" % (
                       self.factory.connectionNum, self.transport.getPeer()))
 
-        maxConnectionNum = g_config.getint('network', 'max_conns_num')
+        maxConnectionNum = g_config.getint('network', 'max_conn_num')
         if self.factory.connectionNum > maxConnectionNum:
             self.transport.write("Too many connections, try later")
             self.transport.loseConnection()
@@ -80,14 +81,19 @@ class AgentProtocol(Protocol):
 
         # initiator send AuthenticatePeer message
         if self.local_port != theApp.listen_port:
+            g_logger.debug("The local port is %s, the listen_port is %s, \
+            they are not equal,so we should send authentical information to it!"\
+            %(str(self.local_port),str(theApp.listen_port)))
             self._session = self._send_auth_message()
+        
+        g_logger.info("Peer Connection Made, IP:%s,Port:%s"%(str(self.remote_ip),str(self.remote_port)))
 
     def connectionLost(self, reason):
         self.factory.connectionNum = self.factory.connectionNum - 1
         g_logger.debug("Connection #%d closed." % self.factory.connectionNum)
 
         if self._session is not None:
-            g_logger.debug("Session %d ended." % self.remote_id)
+            g_logger.debug("Session %s ended." % self.remote_id)
             if self.remote_type == 1:
                 theApp.peer_manager._super_peer_disconnected(self.remote_id)
             elif self.remote_type == 2:
@@ -143,20 +149,22 @@ class AgentProtocol(Protocol):
                     self._session = DesktopSuperAgentSession(message.agentID,
                                                              self.transport)
                     theApp.peer_manager.sessions[message.agentID] = self._session
-                    g_logger.debug("Session %d created." % message.agentID)
+                    g_logger.debug("Session %s created." % str(message.agentID))
                     #theApp.statistics.super_agents_num = \
                         #theApp.statistics.super_agents_num + 1
             elif self.remote_type == 2:  # desktop agent
+                g_logger.info("Get AuthenticatePeer Request from desktop agent.")
                 res = theApp.peer_manager._normal_peer_connected(
                     self.remote_id, self.remote_ip, serve_port,
                     message.cipheredPublicKey)
+                print res
                 if res:
                     self._session = DesktopAgentSession(message.agentID,
                                                         self.transport)
                     theApp.peer_manager.sessions[message.agentID] = self._session
-                    g_logger.debug("Session %d created." % message.agentID)
-                    #theApp.statistics.normal_agents_num = \
-                          #theApp.statistics.super_agents_num + 1
+                    g_logger.debug("Session %s created." % str(message.agentID))
+                    theApp.statistics.normal_agents_num = \
+                        theApp.statistics.super_agents_num + 1
             elif self.remote_type == 3:  # mobile agent
                 if self.remote_id in theApp.peer_manager.mobile_peers:
                     theApp.peer_manager.mobile_peers[self.remote_id]\
@@ -176,6 +184,7 @@ class AgentProtocol(Protocol):
             if not self._auth_sent:
                 self._send_auth_message()
         elif isinstance(message, AuthenticatePeerResponse):
+            g_logger.debug("Get AuthenticatePeerResponse from %d type(1:super , 2:normal, 3:Mobile)"%(self.remote_type))
             if self.remote_type == 1:
                 theApp.peer_manager.super_peers[self.remote_id].Token = \
                       message.token
@@ -187,6 +196,7 @@ class AgentProtocol(Protocol):
                       message.token
         elif isinstance(message, ForwardingMessage):
             if theApp.peer_info.Type == 1:
+                g_logger.debug("Get ForwardingMessage")
                 forward_message = MessageFactory.decode(\
                     base64.b64decode(message.encodedMessage))
                 if message.destination == 0:
@@ -205,14 +215,15 @@ class AgentProtocol(Protocol):
                 self._send_message(response_msg)
             elif message.execType == 1:
                 pass
+        elif self._session is not None:
+            #We will handle the message according by the type of the peer(super peer, normal peer, mobile agent)
+            self._session.handle_message(message)
         elif self.is_ma_message(message):
             if message.header.agentID in theApp.peer_manager.mobile_peers:
                 theApp.ma_service.handle_message(message, self.transport)
             else:
-                g_logger.warning("Unauthenticated mobile agent. %d" %
-                                 message.header.agentID)
-        elif self._session is not None:
-            self._session.handle_message(message)
+                g_logger.warning("Unauthenticated mobile agent. %s" %
+                                 str(message.header.agentID))
         else:
             g_logger.warning("Unexpected message. %s" %
                              message.DESCRIPTOR.name)
@@ -223,18 +234,18 @@ class AgentProtocol(Protocol):
             'GetSuperPeerList',
             'SendWebsiteReport',
             'SendServiceReport',
+            'GetEvents',
             ):
             return True
         return False
 
     def _send_auth_message(self):
         request_msg = AuthenticatePeer()
-        request_msg.agentID = theApp.peer_info.ID
+        request_msg.agentID = str(theApp.peer_info.ID)
         request_msg.agentType = theApp.peer_info.Type
         request_msg.agentPort = theApp.listen_port
         request_msg.cipheredPublicKey.mod = str(theApp.key_manager.public_key.mod)
         request_msg.cipheredPublicKey.exp = str(theApp.key_manager.public_key.exp)
-        #theApp.peer_info.CipheredPublicKey
         g_logger.debug("Sending AuthenticatePeer message:\n%s" % request_msg)
         self._send_message(request_msg)
         self._auth_sent = True

@@ -3,6 +3,7 @@
 # Copyright (C) 2011 Adriano Monteiro Marques
 #
 # Author:  Zhongjie Wang <wzj401@gmail.com>
+#          Tianwei Liu <liutianweidlut@gmail.com>
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -22,9 +23,10 @@ import gtk
 import gobject
 import os
 
+
 from twisted.internet import reactor
 
-from higwidgets import HIGWindow
+from higwidgets.higwindows import HIGWindow
 
 from umit.icm.agent.logger import g_logger
 from umit.icm.agent.Global import *
@@ -50,6 +52,7 @@ class GtkMain(object):
         self.set_login_status(False)
 
     def _create_tray(self):
+        
         self.tray_menu_logged_in = gtk.Menu()
         self.tray_menu_logged_out = gtk.Menu()
 
@@ -62,6 +65,7 @@ class GtkMain(object):
             self.tray_indicator.set_status(appindicator.STATUS_ACTIVE)
             self.tray_indicator.set_attention_icon("indicator-messages-new")
             self.tray_indicator.set_menu(self.tray_menu_logged_out)
+
         else:
             self.tray_icon = gtk.StatusIcon()
             self.tray_icon.connect('popup-menu', self.show_menu)
@@ -92,11 +96,16 @@ class GtkMain(object):
 
         self.tray_menu_logged_in.append(gtk.SeparatorMenuItem())
 
-        menu_item = gtk.MenuItem(_("Preference"))
+        menu_item = gtk.MenuItem(_("Preferences..."))
         menu_item.connect("activate", lambda w: self.show_preference())
         menu_item.show()
         self.tray_menu_logged_in.append(menu_item)
 
+        menu_item = gtk.MenuItem(_("Software Update"))
+        menu_item.connect("activate", lambda w: self.show_software_update())
+        menu_item.show()
+        self.tray_menu_logged_in.append(menu_item)
+        
         menu_item = gtk.MenuItem(_("About"))
         menu_item.connect("activate", lambda w: self.show_about())
         menu_item.show()
@@ -172,9 +181,9 @@ class GtkMain(object):
         webbrowser.open(url)
 
     def show_dashboard(self):
-        from umit.icm.agent.gui.Dashboard import DashboardWindow
+        from umit.icm.agent.gui.dashboard.Dashboard import DashboardWindow
         wnd = DashboardWindow()
-        wnd.show_all()
+        wnd.show_all_modify()
 
     def show_event_list(self):
         from umit.icm.agent.gui.Event import EventWindow
@@ -187,9 +196,14 @@ class GtkMain(object):
         wnd.show_all()
 
     def show_preference(self):
-        from umit.icm.agent.gui.Preference import PreferenceWindow
+        from umit.icm.agent.gui.Preference.Preference import PreferenceWindow
         wnd = PreferenceWindow()
         wnd.show_all()
+        
+    def show_software_update(self):
+        from umit.icm.agent.gui.SoftwareUpdate import SoftwareUpdateDialog
+        self.update_dialog = SoftwareUpdateDialog()
+        self.update_dialog.show_all()
 
     def show_about(self):
         from umit.icm.agent.gui.About import About
@@ -205,8 +219,8 @@ class GtkMain(object):
     def set_to_logging_in(self):
         if appindicator is None:
             self.tray_icon.set_tooltip("Logging in...")
-        self.tray_menu.children()[0].set_sensitive(False)
-
+        self.tray_menu.get_children()[0].set_sensitive(False)
+        #self.tray_menu.children()[0].set_sensitive(False)
 
 if __name__ == "__main__":
     #splash = gtk.Window()

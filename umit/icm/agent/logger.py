@@ -22,7 +22,7 @@ __all__ = ['g_logger']
 
 import os
 
-from umit.icm.agent.BasePaths import *
+from umit.icm.agent.BasePaths import LOG_DIR
 from umit.common.UmitLogging import Log
 
 
@@ -38,8 +38,9 @@ _levels = {
 }
 LOGLEVEL = 'DEBUG'
 
-if not os.path.exists(LOG_DIR):
-    os.mkdir(LOG_DIR)
+print LOG_DIR
+#if not os.path.exists(LOG_DIR):
+#    os.mkdir(LOG_DIR)
 log_path = os.path.join(LOG_DIR, 'icm-desktop.log')
 
 g_logger = Log("ICM Desktop Agent", _levels[LOGLEVEL], log_path)

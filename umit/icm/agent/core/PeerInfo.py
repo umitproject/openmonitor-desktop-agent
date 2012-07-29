@@ -103,4 +103,3 @@ class PeerInfo(object):
 
 if __name__ == "__main__":
     pi = PeerInfo()
-    pi.load_from_db()
