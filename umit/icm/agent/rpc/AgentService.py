@@ -216,6 +216,7 @@ class AgentProtocol(Protocol):
             elif message.execType == 1:
                 pass
         elif self._session is not None:
+            #We will handle the message according by the type of the peer(super peer, normal peer, mobile agent)
             self._session.handle_message(message)
         elif self.is_ma_message(message):
             if message.header.agentID in theApp.peer_manager.mobile_peers:

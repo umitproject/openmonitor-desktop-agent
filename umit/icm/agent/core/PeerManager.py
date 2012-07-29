@@ -290,6 +290,8 @@ class PeerManager:
             self.normal_peers[peer_entry.ID] = peer_entry
 
         self.connected_peer_num = self.connected_peer_num + 1
+        
+        return True
 
     def _normal_peer_disconnected(self, peer_id):
         if peer_id not in self.normal_peers:

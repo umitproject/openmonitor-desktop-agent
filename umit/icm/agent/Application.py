@@ -206,7 +206,7 @@ class Application(object):
         request_msg = AuthenticatePeer()
         request_msg.agentID = theApp.peer_info.ID
         request_msg.agentType = 2
-        request_msg.agentPort = 5898
+        request_msg.agentPort = 5895
         request_msg.cipheredPublicKey.mod = str(mod)
         request_msg.cipheredPublicKey.exp = str(exp)
         data = MessageFactory.encode(request_msg)
@@ -217,7 +217,7 @@ class Application(object):
         data = s.recv(length)
         response_msg = MessageFactory.decode(data)
         print response_msg
-        s.close()
+        
         
     def check_peer_authentical(self):
         """

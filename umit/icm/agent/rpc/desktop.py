@@ -37,7 +37,6 @@ from umit.icm.agent.utils.FileDownloader import FileDownloader
 from umit.icm.agent.Upgrade import *
 from umit.icm.agent.core.ReportManager import ReportStatus
 
-
 class DesktopAgentSession(Session):
     """"""
 
