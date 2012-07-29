@@ -348,8 +348,8 @@ class DBHelper(object):
         """
         Get the first record from super information  
         """
-        result = self.db_conn.select("select ip,port from super_peer_manual")
-        if result != None:
+        result = self.db_conn.select("select ip,port from super_peers_manual") 
+        if result != None and result != []:
             return result[0]
         else:
             return None

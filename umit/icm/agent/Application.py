@@ -184,7 +184,11 @@ class Application(object):
         if self.check_peer_authentical() == True:
             g_logger.info("Now, the desktop agent will try to connect the super peer")
             self.login_simulate()
-            self.build_super_connection("127.0.0.1",10000)
+            super_peer_record = g_db_helper.get_super_peer_first()
+            if super_peer_record != None:
+                self.build_super_connection(str(super_peer_record[0]),int(super_peer_record[1]))
+            else:
+                g_logger.info("Sorry! Your super peer table cannot store any peers, you can add known peer and try again")
         else:
             g_logger.info("Sorry! The desktop agent cannot be authenticated by aggregator ago!")
             self.quit_window_in_wrong(primary_text = _("The desktop agent cannot be authenticated by aggregator ago"), \
@@ -193,9 +197,12 @@ class Application(object):
         """
         """
         from umit.icm.agent.utils.CreateDB import mod,exp 
-        
-        s  = socket.socket(socket.AF_INET, socket.SOCK_STREAM, socket.IPPROTO_TCP)
-        s.connect((host,port))
+        try:
+            s  = socket.socket(socket.AF_INET, socket.SOCK_STREAM, socket.IPPROTO_TCP)
+            s.connect((host,port))
+        except:
+            g_logger.error("Cannot connect to the super peer, maybe it down!")
+            return
         request_msg = AuthenticatePeer()
         request_msg.agentID = theApp.peer_info.ID
         request_msg.agentType = 2
