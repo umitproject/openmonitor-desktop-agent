@@ -342,8 +342,18 @@ class DBHelper(object):
                         (ip,port,description)
         g_logger.info("[save_to_db]:save %s into DB"%sql_str)            
         self.execute(sql_str)
-#        self.commit()      
+#       self.commit()      
     
+    def get_super_peer_first(self):
+        """
+        Get the first record from super information  
+        """
+        result = self.db_conn.select("select ip,port from super_peer_manual")
+        if result != None:
+            return result[0]
+        else:
+            return None
+        
     #####################################################
     #Methods for Dashboard Window(Timeline or QueryFrame)
     def get_task_sets(self,task_type = None):

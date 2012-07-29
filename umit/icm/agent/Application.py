@@ -176,9 +176,9 @@ class Application(object):
     def check_aggregator_failed(self,message):
         """
         """
-        self.super_peer_communication()
+        self.peer_communication()
     
-    def super_peer_communication(self):
+    def peer_communication(self):
         """
         """
         if self.check_peer_authentical() == True:
