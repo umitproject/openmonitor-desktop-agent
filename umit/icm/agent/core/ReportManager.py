@@ -90,10 +90,10 @@ class ReportManager(object):
             return
         report_entry = ReportEntry()
         # required fields
-        report_entry.SourceID = report.header.agentID
+        report_entry.SourceID = str(report.header.agentID).rstrip('L')
         report_entry.TimeGen =  report.header.timeUTC 
-        report_entry.TestID = report.header.testID
-        report_entry.ID = report.header.reportID
+        report_entry.TestID = str(report.header.testID).rstrip('L')
+        report_entry.ID = str(report.header.reportID).rstrip('L')
         report_entry.Report = report
         # optional fields
         #report_entry.SourceIP = report.header.passedNode[0]
