@@ -38,7 +38,7 @@ from google.protobuf.text_format import MessageToString
 
 from umit.icm.agent.rpc.message import *
 from umit.icm.agent.rpc.MessageFactory import MessageFactory
-from umit.icm.agent.rpc import messages_pb2
+from umit.proto import messages_pb2
 
 from umit.icm.agent.logger import g_logger
 from umit.icm.agent.Application import theApp

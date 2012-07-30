@@ -104,7 +104,7 @@ class TestSetsFetcher(object):
         
         from umit.icm.agent.rpc.message import *
         from umit.icm.agent.rpc.MessageFactory import MessageFactory
-        from umit.icm.agent.rpc import messages_pb2
+        from umit.proto import messages_pb2
                 
         #Generate NewTestsResponse(
         tests_response = NewTestsResponse()

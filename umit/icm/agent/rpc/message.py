@@ -20,7 +20,7 @@
 
 import struct
 
-from umit.icm.agent.rpc.messages_pb2 import *
+from umit.proto.messages_pb2 import *
 from umit.icm.agent.rpc.messages_ext_pb2 import *
 from umit.icm.agent.rpc.MessageID import *
 
