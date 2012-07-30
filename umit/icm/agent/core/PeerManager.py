@@ -305,7 +305,9 @@ class PeerManager:
 
     def add_normal_peer(self, peer_id, ip, port, token =None ,ciphered_public_key=None,
                         status='Disconnected', network_id=0):
-        '''if self.agent_is_banned(peer_id) or self.network_is_banned(ip):
+        """
+        """
+        if self.agent_is_banned(peer_id) or self.network_is_banned(ip):
             g_logger.info("Desktop agent %d is banned or is running from a banned "
                           "network %s" % (peer_id, ip))
             
@@ -329,7 +331,7 @@ class PeerManager:
             peer_entry.network_id = network_id
             self.normal_peers[peer_entry.ID] = peer_entry
             self.normal_peer_num = self.normal_peer_num + 1       
-    '''
+    
     def add_mobile_peer(self, peer_id, ip, port, ciphered_public_key=None,
                         status='Disconnected', network_id=0):
         if self.agent_is_banned(peer_id) or self.network_is_banned(ip):
