@@ -42,7 +42,7 @@ from umit.icm.agent.rpc.MessageFactory import MessageFactory
 from umit.icm.agent.rpc.desktop import DesktopAgentSession, \
      DesktopSuperAgentSession
 from umit.icm.agent.rpc.mobile import MobileAgentSession
-
+from umit.proto import messages_pb2
 
 class AgentProtocol(Protocol):
     """"""

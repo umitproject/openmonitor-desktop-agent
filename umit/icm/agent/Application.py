@@ -196,12 +196,13 @@ class Application(object):
     def build_super_connection(self,host,port):
         """
         """
+        """
         from umit.icm.agent.utils.CreateDB import mod,exp 
         try:
             s  = socket.socket(socket.AF_INET, socket.SOCK_STREAM, socket.IPPROTO_TCP)
             s.connect((host,port))
         except:
-            g_logger.error("Cannot connect to the super peer, maybe it down!")
+            g_logger.error('Cannot connect to the super peer, maybe it down!')
             return
         request_msg = AuthenticatePeer()
         request_msg.agentID = theApp.peer_info.ID
@@ -217,7 +218,9 @@ class Application(object):
         data = s.recv(length)
         response_msg = MessageFactory.decode(data)
         print response_msg
-        
+        """ 
+        reactor.connectTCP(host, port, self.factory)
+        #print "connected!"
         
     def check_peer_authentical(self):
         """

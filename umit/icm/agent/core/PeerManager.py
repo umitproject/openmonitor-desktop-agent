@@ -30,7 +30,6 @@ from twisted.internet import reactor
 FAILURE_INCREASE_COUNT = 2
 SUCCESS_REDUCE_COUNT = 1
 
-
 class PeerEntry(object):
     """"""
 
@@ -307,17 +306,17 @@ class PeerManager:
                         status='Disconnected', network_id=0):
         """
         """
-        if self.agent_is_banned(peer_id) or self.network_is_banned(ip):
-            g_logger.info("Desktop agent %d is banned or is running from a banned "
-                          "network %s" % (peer_id, ip))
-            
-            if peer_id in self.normal_peers:
-                self.remove_normal_peer(peer_id)
-
-            return
+        #if self.agent_is_banned(peer_id) or self.network_is_banned(ip):
+        #    g_logger.info("Desktop agent %d is banned or is running from a banned "
+        #                  "network %s" % (peer_id, ip))
+        #    
+        #    if peer_id in self.normal_peers:
+        #        self.remove_normal_peer(peer_id)
+        #
+        #    return
 
         if peer_id in self.normal_peers:
-            g_logger.info("Peer id %d already exists in normal peer list." %
+            g_logger.info("Peer id %s already exists in normal peer list." %
                           peer_id)
         else:
             peer_entry = PeerEntry()
