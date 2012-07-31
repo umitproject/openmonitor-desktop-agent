@@ -23,7 +23,7 @@ import cPickle
 from umit.icm.agent.logger import g_logger
 from umit.icm.agent.Global import *
 from umit.icm.agent.Application import theApp
-
+from umit.icm.agent.Version import PEER_TYPE 
 
 class PeerInfo(object):
     """"""

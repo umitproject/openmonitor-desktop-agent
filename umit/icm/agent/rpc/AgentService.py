@@ -93,7 +93,7 @@ class AgentProtocol(Protocol):
         g_logger.debug("Connection #%d closed." % self.factory.connectionNum)
 
         if self._session is not None:
-            g_logger.debug("Session %d ended." % self.remote_id)
+            g_logger.debug("Session %s ended." % self.remote_id)
             if self.remote_type == 1:
                 theApp.peer_manager._super_peer_disconnected(self.remote_id)
             elif self.remote_type == 2:

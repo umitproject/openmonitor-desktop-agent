@@ -24,7 +24,6 @@ from umit.icm.agent.Global import *
 VERSION = g_db_helper.get_information(key='version',default="Dev")
 VERSION_NUM = int(g_db_helper.get_information(key='version_num',default="1"))
 PEER_ATTRIBUTE = g_db_helper.get_information(key='peer',default="Desktop Agent")
-PEER_TYPE = get_peer_type(PEER_ATTRIBUTE)
 
 higher_version = 1
 lower_version  = -1
@@ -37,6 +36,8 @@ def get_peer_type(peer_attribute):
         return 2
     else:
         return 1
+
+PEER_TYPE = get_peer_type(PEER_ATTRIBUTE)
 
 def compare_version(ver1, ver2):
     #filter meaningless '0' ‘.’
