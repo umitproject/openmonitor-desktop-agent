@@ -71,12 +71,12 @@ class TestSetsFetcher(object):
             g_logger.info("Fetching new test sets from aggregator")
             
             #The real check_tests by using check_tests Aggregator API
-            #defer_ = theApp.aggregator.check_tests(self.current_test_version)
-            #defer_.addCallback(self.execute_test)
-            #defer_.addErrback(self._handler_error)
+            defer_ = theApp.aggregator.check_tests(self.current_test_version)
+            defer_.addCallback(self.execute_test)
+            defer_.addErrback(self._handler_error)
             
             #Test by manual
-            self.execute_test(self.test_by_manually())
+            #self.execute_test(self.test_by_manually())
            
         else:
             g_logger.info("Cannot Fetching new test sets from aggregator") 

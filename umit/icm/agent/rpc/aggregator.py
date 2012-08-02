@@ -158,7 +158,7 @@ class AggregatorAPI(object):
         request_msg.agentPublicKey.exp = str(theApp.key_manager.public_key.exp)
         if theApp.peer_info.internet_ip:
             request_msg.ip = theApp.peer_info.internet_ip
-        #print request_msg
+        print request_msg
         # send message
         defer_ = self._send_message(request_msg, RegisterAgentResponse)
         defer_.addCallback(self._handle_register_response)
