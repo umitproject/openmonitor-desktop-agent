@@ -23,7 +23,7 @@ import cPickle
 from umit.icm.agent.logger import g_logger
 from umit.icm.agent.Global import *
 from umit.icm.agent.Application import theApp
-
+from umit.icm.agent.Version import PEER_TYPE 
 
 class PeerInfo(object):
     """"""
@@ -31,8 +31,8 @@ class PeerInfo(object):
     #----------------------------------------------------------------------
     def __init__(self):
         """Constructor"""
-        self.ID = 0
-        self.Type = 2  # normal peer by default
+        self.ID = None
+        self.Type = PEER_TYPE  # normal peer by default
         self.Username = ''
         self.Password = ''
         self.Email = ''
@@ -54,24 +54,30 @@ class PeerInfo(object):
         else:
             if len(rs) > 1:
                 g_logger.warning("More than one record in user_info. " \
-                                 "Use the last one.")
-            g_logger.debug(rs[-1])
-            self.ID = rs[-1][0]
-            self.Username = rs[-1][1]
-            self.Password = rs[-1][2]
-            self.Email = rs[-1][3]
-            self.CipheredPublicKeyHash = rs[-1][4]
-            self.Type = rs[-1][5]
-            self.is_registered = True
+                                 "Use the first one.")
+            g_logger.debug(rs[0])
+            self.ID = rs[0][0]
+            self.Username = rs[0][1]
+            self.Password = rs[0][2]
+            self.Email = rs[0][3]
+            self.CipheredPublicKeyHash = rs[0][4]
+            self.Type = rs[0][5]
+            self.is_registered = True  
 
     def save_to_db(self):
         if self.is_registered:
-            g_db_helper.execute("insert or replace into peer_info values " \
-                            "(%d, '%s', '%s', '%s', '%s', %d)" % \
+            sql_str = "insert or replace into peer_info values " \
+                            "('%s', '%s', '%s', '%s', '%s', %d)" % \
                             (self.ID, self.Username, self.Password, self.Email,
-                             self.CipheredPublicKeyHash, self.Type))
+                             self.CipheredPublicKeyHash, self.Type)
+            g_logger.info("[save_to_db]:save %s into DB"%sql_str)            
+            g_db_helper.execute(sql_str)
             g_db_helper.commit()
 
+    def clear_db(self):
+        g_db_helper.execute("delete from peer_info")
+        g_db_helper.commit()
+        
     def get_local_ip(self):
         from socket import socket, SOCK_DGRAM, AF_INET
         ip_urls = ["www.google.com", "www.baidu.com"]
@@ -103,3 +109,4 @@ class PeerInfo(object):
 
 if __name__ == "__main__":
     pi = PeerInfo()
+    pi.load_from_db()
