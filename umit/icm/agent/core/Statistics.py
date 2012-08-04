@@ -129,13 +129,13 @@ class Statistics(object):
         
         tmp_str = ""
         for key in self.tasks_done_by_type.keys():
-            tmp_str = tmp_str + key + ":" + self.tasks_done_by_type[key] + ";" 
+            tmp_str = tmp_str + str(key) + ":" + str(self.tasks_done_by_type[key]) + ";" 
 
         g_db_helper.set_status("tasks_done_by_type",str(tmp_str)) 
         
         tmp_str = ""
         for key in self.tasks_failed_by_type.keys():
-            tmp_str = tmp_str + key + ":" + self.tasks_failed_by_type[key] + ";" 
+            tmp_str = tmp_str +  str(key) + ":" + str(self.tasks_failed_by_type[key]) + ";" 
 
         g_db_helper.set_status("tasks_failed_by_type",str(tmp_str)) 
         

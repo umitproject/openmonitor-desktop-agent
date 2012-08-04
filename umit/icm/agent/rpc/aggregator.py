@@ -364,6 +364,7 @@ class AggregatorAPI(object):
             self.pending_report_ids.append(report.header.reportID)
             self.send_website_report(report)
         elif isinstance(report, ServiceReport):
+            print report
             self.pending_report_ids.append(report.header.reportID)
             self.send_service_report(report)
         else:
