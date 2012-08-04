@@ -120,6 +120,9 @@ class tracerouteInfomation():
         """
         Get traceroute inforamtion in Linux and Mac Platform
         """
+        if target_name.startswith("http://") or target_name.startswith("https://"):
+            target_name = target_name.split("://")[1].strip(" ")
+        
         result = {}
         result["target"] = target_name
         result["hops"] = max_hops        
