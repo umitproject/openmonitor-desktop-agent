@@ -369,10 +369,10 @@ class WebsiteTest():
         report.header.agentID = str(theApp.peer_info.ID)
         report.header.timeUTC = int(default_timer())    #here should UTC clock?
         report.header.timeZone =  -(time.timezone/3600)  #8
-        report.header.testID = '1'
-        report.header.reportID = 0#generate_report_id([report.header.agentID,
-                                 #                    report.header.timeUTC,
-                                 #                    report.header.testID])
+        report.header.testID = 1
+        report.header.reportID = generate_report_id([report.header.agentID,
+                                                     report.header.timeUTC,
+                                                     report.header.testID])
         
         report.report.websiteURL = self.url
         report.report.statusCode = self.status_code
@@ -521,10 +521,10 @@ class ServiceTest(Test):
         report.header.agentID = str(theApp.peer_info.ID)
         report.header.timeUTC = int(time.time())    #here should UTC clock?
         report.header.timeZone = -(time.timezone/3600)  #8
-        report.header.testID = '2'
-        report.header.reportID = 1#generate_report_id([report.header.agentID,
-                                 #                    report.header.timeUTC,
-                                 #                    report.header.testID])
+        report.header.testID = 2
+        report.header.reportID = generate_report_id([report.header.agentID,
+                                                     report.header.timeUTC,
+                                                     report.header.testID])
         #We should fix this !!!! it is a tmp
         report.header.traceroute.hops = 0
         report.header.traceroute.target = "255.255.255.0"

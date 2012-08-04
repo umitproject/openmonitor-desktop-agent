@@ -29,8 +29,8 @@ from umit.icm.agent.Global import *
 
 import random
 
-TEST_WEB_TYPE     = 0#"WEB"
-TEST_SERVICE_TYPE = 1#"SERVICE"
+TEST_WEB_TYPE     = 1#"WEB"
+TEST_SERVICE_TYPE = 2#"SERVICE"
  
 
 class TestSetsFetcher(object):
@@ -48,9 +48,10 @@ class TestSetsFetcher(object):
         """
         execute this test right now or randomly timeout
         """
+        
         if message is None:
             return 
-        
+
         g_logger.debug("The received Test Sets are:%s"%str(message))
         
         if message.testVersionNo > self.current_test_version:
@@ -83,6 +84,7 @@ class TestSetsFetcher(object):
     
     def _handler_error(self,failure):
         
+        print failure
         g_logger.error("Fetch new test sets error %s"%str(failure))
         
     def get_current_test_version(self):
