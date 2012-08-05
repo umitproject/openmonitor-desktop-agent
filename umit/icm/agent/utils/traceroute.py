@@ -74,7 +74,7 @@ class tracerouteInfomation():
         ttl = 1     #We will set the ttl from 1 -> max_hops (default: 1 -30)
         
         while True:
-            print "start: --> "
+            #print "start: --> "
             ############
             #socket init
             start_time = time.time()
@@ -101,7 +101,7 @@ class tracerouteInfomation():
             trace["ip"] = str(curr_addr if curr_addr !=None else "")
             trace["packetsTiming"] = int((end_time - start_time)*1000.0)   #ms 
             
-            print trace
+            #print trace
             result["trace"].append(trace)
             
             ttl += 1
@@ -121,7 +121,7 @@ class tracerouteInfomation():
         Get traceroute inforamtion in Linux and Mac Platform
         """
         if target_name.startswith("http://") or target_name.startswith("https://"):
-            target_name = target_name.split("://")[1].strip(" ")
+            target_name = target_name.split("://")[1].rstrip("/")
         
         result = {}
         result["target"] = target_name
@@ -169,7 +169,7 @@ class tracerouteInfomation():
             curr_time = re.findall("(\d+)(\.){0,1}(\d*) ms",line)
             if curr_time == []:
                 curr_time = [(0,),(0,),(0,)]
-            print curr_time
+            #print curr_time
             #################
             #store the result
             trace = {}

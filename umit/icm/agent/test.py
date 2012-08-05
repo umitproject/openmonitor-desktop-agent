@@ -173,10 +173,14 @@ def parse_traceroute(traceroute_dict,traceroute):
     for item in traceroute_dict["trace"]:
         trace = traceroute.traces.add()
         trace.hop = item["hop"]
-        trace.ip  = item["ip"]
-        for item_time in item["packetsTiming"]:
-            packetsTiming = trace.packetsTiming.add()
-            packetsTiming = item_time
+        trace.ip  = item["ip"] if  item["ip"] == None or item["ip"] else "0.0.0.0"
+        
+        #packetsTimingS = trace.packetsTiming.add()
+        #packetsTimingS = int(item["packetsTiming"][0])
+        
+        #for item_time in item["packetsTiming"]:
+        #    packetsTimingS = trace.packetsTiming.add()
+        #    packetsTimingS = int(item_time)
     
     #print traceroute
     return traceroute
@@ -385,7 +389,7 @@ class WebsiteTest():
             print report.header.traceroute
         else:
             report.header.traceroute.hops = 0
-            report.header.traceroute.target = "255.255.255.0"
+            report.header.traceroute.target = "0.0.0.0"
             report.header.traceroute.packetSize = 0            
         
         report.report.responseTime = \
@@ -397,6 +401,7 @@ class WebsiteTest():
         
         theApp.statistics.reports_generated = \
               theApp.statistics.reports_generated + 1
+        print report
         return report
     
     def download_page_to_tmp(self,key):
