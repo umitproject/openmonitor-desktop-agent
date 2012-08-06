@@ -387,10 +387,10 @@ class WebsiteTest():
             trace_result_dict = t.traceroute_system(target_name = self.url)
             parse_traceroute(trace_result_dict,report.header.traceroute)
             print report.header.traceroute
-        #else:
-        #    report.header.traceroute.hops = 0
-        #    report.header.traceroute.target = "0.0.0.0"
-        #    report.header.traceroute.packetSize = 0            
+        else:
+            report.header.traceroute.hops = 0
+            report.header.traceroute.target = "0.0.0.0"
+            report.header.traceroute.packetSize = 0            
         
         report.report.responseTime = \
               int((result['time_end'] - self.time_start) * 1000)
