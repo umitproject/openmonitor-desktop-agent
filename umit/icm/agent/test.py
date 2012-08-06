@@ -99,7 +99,7 @@ def task_done(name,task_type=None,task_detail=None):
         
         task_service_info = {
                          'test_id': task_detail.unitied_test_id,
-                         'service_name' :  task_detail.url,
+                         'service_name' :  task_detail.service_name,
                          'service_ip':task_detail.host,
                          'service_port':task_detail.port,
                          'test_type' : TEST_WEB_TYPE,
@@ -387,10 +387,10 @@ class WebsiteTest():
             trace_result_dict = t.traceroute_system(target_name = self.url)
             parse_traceroute(trace_result_dict,report.header.traceroute)
             print report.header.traceroute
-        else:
-            report.header.traceroute.hops = 0
-            report.header.traceroute.target = "0.0.0.0"
-            report.header.traceroute.packetSize = 0            
+        #else:
+        #    report.header.traceroute.hops = 0
+        #    report.header.traceroute.target = "0.0.0.0"
+        #    report.header.traceroute.packetSize = 0            
         
         report.report.responseTime = \
               int((result['time_end'] - self.time_start) * 1000)
