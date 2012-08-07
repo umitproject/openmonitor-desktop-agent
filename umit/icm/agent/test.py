@@ -173,7 +173,7 @@ def parse_traceroute(traceroute_dict,traceroute):
     for item in traceroute_dict["trace"]:
         trace = traceroute.traces.add()
         trace.hop = item["hop"]
-        trace.ip  = item["ip"] if  item["ip"] == None or item["ip"] else "0.0.0.0"
+        trace.ip  = item["ip"] if  item["ip"] == None or item["ip"]=="" else "0.0.0.0"
         
         #packetsTimingS = trace.packetsTiming.add()
         #packetsTimingS = int(item["packetsTiming"][0])
@@ -532,7 +532,7 @@ class ServiceTest(Test):
                                                      report.header.testID])
         #We should fix this !!!! it is a tmp
         report.header.traceroute.hops = 0
-        report.header.traceroute.target = "255.255.255.0"
+        report.header.traceroute.target = "0.0.0.0"
         report.header.traceroute.packetSize = 0
         
         report.report.serviceName = self.service_name

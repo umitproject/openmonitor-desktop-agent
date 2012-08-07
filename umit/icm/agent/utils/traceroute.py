@@ -124,10 +124,10 @@ class tracerouteInfomation():
             target_name = target_name.split("://")[1].rstrip("/")
         
         result = {}
-        result["target"] = "0.0.0.0"
-        result["hops"] = max_hops        
+        result["target"] = "0.0.0.0"      
         result["packetsize"] = 60   #in default
         result["trace"] = []
+        result["hops"] = 30
         
         ttl = 1
         
@@ -175,6 +175,7 @@ class tracerouteInfomation():
             trace = {}
             trace["hop"] = ttl
             trace["ip"] = str(curr_addr if curr_addr !=None else "")
+            print trace["ip"]
             trace["packetsTiming"] = []
             
             for item in curr_time:
@@ -184,18 +185,19 @@ class tracerouteInfomation():
             
         p.wait()
         
+        ##################
+        #result statistics        
+        result["hops"] = ttl if ttl <= max_hops else max_hops 
+        
         ##########
         #DNS Parse
         try:
-            result = socket.getaddrinfo(target_name, None)
-            result["target"] = str(result[0][4][0])
-        except:
+            resultAddr = socket.getaddrinfo(target_name, None)
+            result["target"] = str(resultAddr[0][4][0])
+        except socket.herror,e:
             g_logger.debug("Notice:Cannot resolve host ip, we will fill '0.0.0.0'")
+            pass
             
-        ##################
-        #result statistics
-        result["hops"] = int(ttl) if ttl <= max_hops else int(max_hops)         
-        
         g_logger.debug(result)
         return result
     
