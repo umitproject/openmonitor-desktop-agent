@@ -111,10 +111,16 @@ class LoginDialog(HIGDialog):
         self.table.set_row_spacings(5)
         self.table.set_col_spacings(10)
         self.action_area.set_homogeneous(False)
+        
+        #tab orders
+        self.orders = [self.username_entry, self.password_entry, self.register_button, self.forgot_password]
 
     def _pack_widgets(self):
 
         self.hbox.set_border_width(8)
+        
+        self.table.set_focus_chain(self.orders)
+        
         self.table.attach(self.logo_image,0,7,0,5,gtk.FILL,gtk.FILL,0,0)
         self.table.attach(self.username_label,0,1,5,6,gtk.FILL,gtk.FILL,0,0)
         self.table.attach(self.username_entry,1,5,5,6,gtk.FILL|gtk.EXPAND,gtk.FILL|gtk.EXPAND,0,0)
