@@ -174,7 +174,7 @@ class tracerouteInfomation():
             #store the result
             trace = {}
             trace["hop"] = ttl
-            trace["ip"] = str(curr_addr if curr_addr !=None else "")
+            trace["ip"] = str(curr_addr if curr_addr !=None else "0.0.0.0")
             print trace["ip"]
             trace["packetsTiming"] = []
             
@@ -194,7 +194,7 @@ class tracerouteInfomation():
         try:
             resultAddr = socket.getaddrinfo(target_name, None)
             result["target"] = str(resultAddr[0][4][0])
-        except socket.herror,e:
+        except :
             g_logger.debug("Notice:Cannot resolve host ip, we will fill '0.0.0.0'")
             pass
             
