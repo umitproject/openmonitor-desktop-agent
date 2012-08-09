@@ -83,6 +83,8 @@ class FeedbackPage(HIGVBox):
         self.service_ip_subhbox = HIGHBox()
         self.service_ip_label = HIGEntryLabel(_("IP:"))
         self.service_ip_entry = gtk.Entry()
+        self.service_port_label = HIGEntryLabel(_("PORT:"))
+        self.service_port_entry = gtk.Entry()        
         self.service_suggestion_sendbtn = HIGButton(_('Send'))
         self.service_suggestion_sendbtn.set_size_request(60, 25)
         self.service_suggestion_sendbtn.connect(
@@ -153,8 +155,13 @@ class FeedbackPage(HIGVBox):
                                            2, 3, 3, 4)
         self.suggestion_table.attach_entry(self.service_ip_entry,
                                            3, 4, 3, 4)
+        self.suggestion_table.attach_label(self.service_port_label,
+                                           2, 3, 4, 5)
+        self.suggestion_table.attach_entry(self.service_port_entry,
+                                           3, 4, 4, 5)        
+        
         self.suggestion_table.attach(self.service_suggestion_sendbtn,
-                                     2, 4, 4, 5, gtk.PACK_START)
+                                     2, 4, 5, 6, gtk.PACK_START)
 
         self.report_subhbox1.pack_start(self.report_namelabel, True, True, 0)
         self.report_subhbox1.pack_start(self.report_nameentry, True, True, 0)
@@ -187,14 +194,15 @@ class FeedbackPage(HIGVBox):
         service_name = self.service_name_entry.child.get_text()
         host_name = self.service_host_entry.get_text()
         ip = self.service_ip_entry.get_text()
-        if service_name == '' or host_name == '' or ip == '':
+        port = int(self.service_port_entry.get_text())
+        if service_name == '' or host_name == '' or ip == '' or port == "":
             alert = HIGAlertDialog(message_format=_("Missing fields."),
                                    secondary_text=_("Please input all fields "\
                                                     "for service suggestion."))
             alert.run()
             alert.destroy()
             return
-        d = theApp.aggregator.send_service_suggestion(service_name, host_name, ip)
+        d = theApp.aggregator.send_service_suggestion(service_name, host_name, ip,port)
         d.addCallback(self.show_result)
 
     def send_bug_report(self):

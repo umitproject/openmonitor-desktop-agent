@@ -673,6 +673,7 @@ class AggregatorAPI(object):
     
     def _send_message(self, message, response_msg_type=None):
         postdata = {}
+        postdata['crypto_v1'] = 1
 
         # encode message
         if isinstance(message, CheckAggregator):
