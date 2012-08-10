@@ -3,6 +3,7 @@
 # Copyright (C) 2011 Adriano Monteiro Marques
 #
 # Author:  Zhongjie Wang <wzj401@gmail.com>
+#          Tianwei Liu <liutianweidlut@gmail.com>
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -46,6 +47,10 @@ else:
 
 #----------------------------------------------------------------------
 from umit.icm.agent.db import DBHelper
+
+#---------
+DB_NAME = g_config.get("database","name")
+DB_PATH = os.path.join(DB_DIR,DB_NAME)
 
 try:
     g_db_helper = DBHelper('sqlite')
