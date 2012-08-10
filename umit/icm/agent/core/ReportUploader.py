@@ -92,6 +92,7 @@ class ReportUploader(object):
         else:
             # Later, We should implement other upload path: super peer, normal peer 
             # Choose a random super peer to upload
+            g_logger.info("Cannot connect to aggregator, so send report to super peer first!")
             speer_id = theApp.peer_manager.get_random_speer_connected()
             if speer_id is not None:
                 g_logger.info("Sending %s reports to the super agent %d." % \
@@ -101,6 +102,7 @@ class ReportUploader(object):
                     theApp.peer_manager.sessions[speer_id].\
                           send_report(report_entry.Report)
             elif theApp.peer_info.Type == 2:
+                g_logger.info("Cannot connect to aggregator and super peer ,so send report to normal peers!")
                 cnt = 0
                 sessions = []
                 for peer_id in theApp.peer_manager.normal_peers:

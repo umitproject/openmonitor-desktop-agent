@@ -176,6 +176,7 @@ class Application(object):
     def check_aggregator_failed(self,message):
         """
         """
+        self.aggregator.available = False
         self.peer_communication()
     
     def peer_communication(self):

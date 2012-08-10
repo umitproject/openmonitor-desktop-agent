@@ -135,7 +135,10 @@ class AgentProtocol(Protocol):
                 serve_port = message.agentPort
             else:
                 serve_port = 0
-
+            
+            print "-------------------------------------"
+            print self.remote_id,self.remote_ip,self.remote_port,self.remote_type
+            print "-------------------------------------"
             if self.remote_type == 0:  # aggregator
                 # in current stage, aggregator will not connect to desktop agent
                 #self._session = AggregatorSession(self.transport)

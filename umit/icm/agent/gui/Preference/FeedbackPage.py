@@ -188,7 +188,8 @@ class FeedbackPage(HIGVBox):
             alert.destroy()
             return
         d = theApp.aggregator.send_website_suggestion(website_url)
-        d.addCallback(self.show_result)
+        d.addCallback(self.show_success)
+        d.addErrback(self.show_failed)
 
     def send_service_suggestion(self):
         service_name = self.service_name_entry.child.get_text()
@@ -204,12 +205,24 @@ class FeedbackPage(HIGVBox):
             return
         d = theApp.aggregator.send_service_suggestion(service_name, host_name, ip,port)
         d.addCallback(self.show_result)
+        d.addErrback(self.show_failed)
+        
 
     def send_bug_report(self):
         pass
-
-    def show_result(self, result):
-        if result is True:
+    
+    def show_failed(self,result):
+        """
+        """
+        alert = HIGAlertDialog(message_format=_("Error."),
+                                   secondary_text=_("Send to aggregaetor failed."))
+        alert.run()
+        alert.destroy()
+        
+    def show_success(self, result):
+        """
+        """
+        if result is not None:
             alert = HIGAlertDialog(message_format=_("Succuss."),
                                    secondary_text=_("Send to aggregaetor successfully."))
             alert.run()
