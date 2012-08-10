@@ -204,7 +204,7 @@ class FeedbackPage(HIGVBox):
             alert.destroy()
             return
         d = theApp.aggregator.send_service_suggestion(service_name, host_name, ip,port)
-        d.addCallback(self.show_result)
+        d.addCallback(self.show_success)
         d.addErrback(self.show_failed)
         
 
