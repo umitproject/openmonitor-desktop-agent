@@ -58,7 +58,7 @@ class DesktopAgentSession(Session):
         g_logger.info("Send P2PGetSuperPeerList message to %s" % self.remote_ip)
         request_msg = NewTests()
         request_msg.currentTestVersionNo = int(current_version)  #Get current version from DB
-        self._send_message(request_msg, NewTestsResponse)        
+        self._send_message(request_msg)        
         
     
     def _handle_get_tests_response(self,test_sets):
@@ -234,6 +234,9 @@ class DesktopAgentSession(Session):
         elif isinstance(message, TestModuleUpdateResponse):
             g_logger.info("Peer %s update test mod to version %s: %S" %
                           (self.remote_id, message.version, message.result))
+        elif isinstance(message, NewTestsResponse):
+            self._handle_get_tests_response(message)
+
 
     def close(self):
         if self.remote_id in theApp.peer_manager.normal_peers:
@@ -430,7 +433,7 @@ class DesktopSuperAgentSession(Session):
         g_logger.info("Send P2PGetSuperPeerList message to %s" % self.remote_ip)
         request_msg = NewTests()
         request_msg.currentTestVersionNo = int(current_version)  #Get current version from DB
-        self._send_message(request_msg, NewTestsResponse)        
+        self._send_message(request_msg)        
         
     def _handle_get_tests(self,message):
         """
@@ -460,8 +463,7 @@ class DesktopSuperAgentSession(Session):
                 test.service.ip = newTest['service_ip']
         
         # send back response
-        self._send_message(response_message,NewTestsResponse)
-        
+        self._send_message(response_message)
     
     def _handle_get_tests_response(self,test_sets):
         """
@@ -495,6 +497,10 @@ class DesktopSuperAgentSession(Session):
             self._handle_test_mod_update(message)
         elif isinstance(message, ForwardingMessageResponse):
             self._handle_forward_message_response(message)
+        elif isinstance(message, NewTestsResponse):
+            self._handle_get_tests_response(message)
+        elif isinstance(message,NewTests):
+            self._handle_get_tests(message)
 
     def close(self):
         if self.remote_id in theApp.peer_manager.super_peers:
