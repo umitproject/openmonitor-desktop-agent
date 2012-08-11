@@ -68,6 +68,7 @@ class DesktopAgentSession(Session):
         
         g_logger.info("Get test sets request from %s"% self.remote_ip)
         
+        newTests = db.get
         
     
     def _handle_get_tests_response(self,test_sets):

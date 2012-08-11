@@ -510,6 +510,29 @@ class DBHelper(object):
             g_logger.warning("No value found for key '%s' in SET stats." % key)
             return default
     
+    #########################
+    #Get test sets by version
+    def get_tests_by_version(self,version):
+        """
+        """
+        test_sets = []
+        try:
+            rs = self.db_conn.select("select * from tasks where test_id >?",(str(version,)))
+            for record in rs:
+                test_result_dict = {}
+                test_result_dict["test_id"]         = record[1]
+                test_result_dict["website_url"]     = record[2]
+                test_result_dict["test_type"]       = record[3]
+                test_result_dict["service_name"]    = record[4]
+                test_result_dict["service_ip"]      = record[5]
+                test_result_dict["service_port"]    = record[6]
+                test_sets.append(test_result_dict)
+                
+            return test_sets
+        except:
+            g_logger.warning("Wrong in get Test sets from database")
+            return []
+    
 #---------------------------------------------------------------------
 class DBKVPHelper(object):
     """
