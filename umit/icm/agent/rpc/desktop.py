@@ -60,36 +60,6 @@ class DesktopAgentSession(Session):
         request_msg.currentTestVersionNo = int(current_version)  #Get current version from DB
         self._send_message(request_msg, NewTestsResponse)        
         
-    def _handle_get_tests(self,message):
-        """
-        """
-        if message == None:
-            return
-        
-        g_logger.info("Get test sets request from %s"% self.remote_ip)
-        response_message = NewTestsResponse()
-        
-        newTests = db.get_tests_by_version(message.currentTestVersionNo)
-        
-        print newTests
-        for newTest in newTests:
-            test = response_message.tests.add()
-            test.testID = theApp.test_sets.current_test_version
-            test.executeAtTimeUTC = 4000
-            
-            from umit.icm.agent.core.TestSetsFetcher import TEST_WEB_TYPE,TEST_SERVICE_TYPE
-            if newTest['test_type'] == TEST_WEB_TYPE:
-                test.testType = TEST_WEB_TYPE
-                test.website.url = newTest['website_url']
-            elif newTest['test_type'] == TEST_SERVICE_TYPE:
-                test.testType = TEST_SERVICE_TYPE
-                test.service.name = newTest['service_name']
-                test.service.port = newTest['service_port']
-                test.service.ip = newTest['service_ip']
-        
-        # send back response
-        self._send_message(response_message,NewTestsResponse)
-        
     
     def _handle_get_tests_response(self,test_sets):
         """
@@ -452,6 +422,57 @@ class DesktopSuperAgentSession(Session):
         length = struct.pack('!I', len(data))
         self._transport.write(length)
         self._transport.write(data)
+
+        
+    def get_tests(self,current_version):
+        """
+        """
+        g_logger.info("Send P2PGetSuperPeerList message to %s" % self.remote_ip)
+        request_msg = NewTests()
+        request_msg.currentTestVersionNo = int(current_version)  #Get current version from DB
+        self._send_message(request_msg, NewTestsResponse)        
+        
+    def _handle_get_tests(self,message):
+        """
+        """
+        if message == None:
+            return
+        
+        g_logger.info("Get test sets request from %s"% self.remote_ip)
+        response_message = NewTestsResponse()
+        
+        newTests = db.get_tests_by_version(message.currentTestVersionNo)
+        
+        print newTests
+        for newTest in newTests:
+            test = response_message.tests.add()
+            test.testID = theApp.test_sets.current_test_version
+            test.executeAtTimeUTC = 4000
+            
+            from umit.icm.agent.core.TestSetsFetcher import TEST_WEB_TYPE,TEST_SERVICE_TYPE
+            if newTest['test_type'] == TEST_WEB_TYPE:
+                test.testType = TEST_WEB_TYPE
+                test.website.url = newTest['website_url']
+            elif newTest['test_type'] == TEST_SERVICE_TYPE:
+                test.testType = TEST_SERVICE_TYPE
+                test.service.name = newTest['service_name']
+                test.service.port = newTest['service_port']
+                test.service.ip = newTest['service_ip']
+        
+        # send back response
+        self._send_message(response_message,NewTestsResponse)
+        
+    
+    def _handle_get_tests_response(self,test_sets):
+        """
+        """
+        if test_sets is None:
+            g_logger.info("Receive Empty Test Sets from %s!!!"% self.remote_ip)
+            return
+                
+        g_logger.info("Receive Test Sets from %s!"% self.remote_ip)  
+        
+        theApp.test_sets.execute_test(test_sets)    
 
     def handle_message(self, message):
         if isinstance(message, P2PGetSuperPeerList):
