@@ -82,6 +82,8 @@ def task_done(name,task_type=None,task_detail=None):
     #################################
     #Write task details into database
     now = (str(datetime.datetime.fromtimestamp(time.time()))).split('.')[0]
+    print "--------------------------------------------"
+    
     if task_type == TEST_WEB_TYPE:
         
         task_web_info = {
@@ -102,7 +104,7 @@ def task_done(name,task_type=None,task_detail=None):
                          'service_name' :  task_detail.service_name,
                          'service_ip':task_detail.host,
                          'service_port':task_detail.port,
-                         'test_type' : TEST_WEB_TYPE,
+                         'test_type' : TEST_SERVICE_TYPE,
                          'done_status' : TASK_STATUS_DONE,
                          'done_result' : TASK_STATUS_DONE,
                          'execute_time' : now,
@@ -145,7 +147,7 @@ def task_failed(name,task_type=None,task_detail=None):
                          'service_name' :  task_detail.service_name,
                          'service_ip':task_detail.host,
                          'service_port':task_detail.port,
-                         'test_type' : TEST_WEB_TYPE,
+                         'test_type' : TEST_SERVICE_TYPE,
                          'done_status' : TASK_STATUS_FAILED,
                          'done_result' : TASK_STATUS_FAILED,
                          'execute_time' : now,
