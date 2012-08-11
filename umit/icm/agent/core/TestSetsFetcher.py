@@ -80,8 +80,14 @@ class TestSetsFetcher(object):
             #self.execute_test(self.test_by_manually())
            
         else:
-            g_logger.info("Cannot Fetching new test sets from aggregator") 
-    
+            g_logger.info("Cannot Fetching new test sets from aggregator, will try to connect super peers")
+            super_id = theApp.peer_manager.get_random_speer_connected()
+            if super_id is not None:
+                g_logger.info("Try to get task tests from %s super peer!"%super_id)
+                theApp.peer_manager.sessions[speer_id].\
+                    get_tests(self.current_test_version)
+                    
+                
     def _handler_error(self,failure):
         
         print failure

@@ -95,9 +95,9 @@ class ReportUploader(object):
             g_logger.info("Cannot connect to aggregator, so send report to super peer first!")
             speer_id = theApp.peer_manager.get_random_speer_connected()
             if speer_id is not None:
-                g_logger.info("Sending %s reports to the super agent %d." % \
+                g_logger.info("Sending %s reports to the super agent %s." % \
                               (len(self.report_manager.cached_reports),
-                               speer_id))
+                               str(speer_id)))
                 for report_entry in self.report_manager.cached_reports.values():
                     theApp.peer_manager.sessions[speer_id].\
                           send_report(report_entry.Report)
