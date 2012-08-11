@@ -173,7 +173,6 @@ def create(conn_str):
               "description TEXT,"
               "constraint pk_super_peers_manual primary key (ip,port))")
     
-    
     # Insert pre-defined values
 
     c.execute("INSERT INTO keys VALUES('aggregator_publickey', ?)",

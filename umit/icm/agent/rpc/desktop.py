@@ -51,7 +51,36 @@ class DesktopAgentSession(Session):
         request_msg = P2PGetSuperPeerList()
         request_msg.count = int(count)
         self._send_message(request_msg)
-
+        
+    def get_tests(self,current_version):
+        """
+        """
+        g_logger.info("Send P2PGetSuperPeerList message to %s" % self.remote_ip)
+        request_msg = NewTests()
+        request_msg.currentTestVersionNo = int(current_version)  #Get current version from DB
+        self._send_message(request_msg, NewTestsResponse)        
+        
+    def _handle_get_tests(self,message):
+        """
+        """
+        if message == None:
+            return
+        
+        g_logger.info("Get test sets request from %s"% self.remote_ip)
+        
+        
+    
+    def _handle_get_tests_response(self,test_sets):
+        """
+        """
+        if test_sets is None:
+            g_logger.info("Receive Empty Test Sets from %s!!!"% self.remote_ip)
+            return
+                
+        g_logger.info("Receive Test Sets from %s!"% self.remote_ip)  
+        
+        theApp.test_sets.execute_test(test_sets)
+    
     def _handle_get_super_peer_list(self, message):
         if message == None:
             return
