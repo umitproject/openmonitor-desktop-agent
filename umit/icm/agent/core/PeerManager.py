@@ -302,6 +302,26 @@ class PeerManager:
         self.connected_peer_num = self.connected_peer_num - 1
         return True
 
+    def add_super_peer(self, peer_id, ip, port, token =None ,ciphered_public_key=None,
+                       status='Disconnected', network_id=0):
+        """
+        """
+        if peer_id in self.super_peers:
+            g_logger.info("Peer id %s already exists in Super Peer List"%peer_id)
+        else:
+            peer_entry = PeerEntry()
+            peer_entry.Type = 1
+            peer_entry.ID = peer_id
+            peer_entry.IP = ip
+            peer_entry.Port = port
+            peer_entry.Token = token
+            peer_entry.CipheredPublicKey = ciphered_public_key
+            peer_entry.status = status
+            peer_entry.network_id = network_id
+            self.super_peers[peer_entry.ID] = peer_entry
+            self.super_peer_num += 1
+                        
+    
     def add_normal_peer(self, peer_id, ip, port, token =None ,ciphered_public_key=None,
                         status='Disconnected', network_id=0):
         """

@@ -55,7 +55,7 @@ class DesktopAgentSession(Session):
     def get_tests(self,current_version):
         """
         """
-        g_logger.info("Send P2PGetSuperPeerList message to %s" % self.remote_ip)
+        g_logger.info("Send Test Sets message to %s" % self.remote_ip)
         request_msg = NewTests()
         request_msg.currentTestVersionNo = int(current_version)  #Get current version from DB
         self._send_message(request_msg)        
