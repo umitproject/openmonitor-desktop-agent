@@ -102,6 +102,8 @@ class PeerInfo(object):
 
     def _handle_get_internet_ip(self, data):
         import re
+        if re.search('\d+\.\d+\.\d+\.\d+', data) == None:
+            return
         ip = re.search('\d+\.\d+\.\d+\.\d+', data).group(0)
         #print(data, ip)
         self.internet_ip = ip
