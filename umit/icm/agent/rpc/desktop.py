@@ -69,12 +69,12 @@ class DesktopAgentSession(Session):
         g_logger.info("[DesktopAgentSession]Get test sets request from %s"% self.remote_ip)
         response_message = NewTestsResponse()
         
-        newTests = db.get_tests_by_version(message.currentTestVersionNo)
+        newTests = g_db_helper.get_tests_by_version(message.currentTestVersionNo)
         
         print newTests
         for newTest in newTests:
             test = response_message.tests.add()
-            test.testID = theApp.test_sets.current_test_version
+            test.testID = str(theApp.test_sets.current_test_version)
             test.executeAtTimeUTC = 4000
             
             from umit.icm.agent.core.TestSetsFetcher import TEST_WEB_TYPE,TEST_SERVICE_TYPE
@@ -500,12 +500,13 @@ class DesktopSuperAgentSession(Session):
         g_logger.info("Get test sets request from %s"% self.remote_ip)
         response_message = NewTestsResponse()
         
-        newTests = db.get_tests_by_version(message.currentTestVersionNo)
-        
+        newTests = g_db_helper.get_tests_by_version(message.currentTestVersionNo)
+        print "------------------"
         print newTests
+        print "-------------------"
         for newTest in newTests:
             test = response_message.tests.add()
-            test.testID = theApp.test_sets.current_test_version
+            test.testID = str(theApp.test_sets.current_test_version)
             test.executeAtTimeUTC = 4000
             
             from umit.icm.agent.core.TestSetsFetcher import TEST_WEB_TYPE,TEST_SERVICE_TYPE
@@ -517,6 +518,8 @@ class DesktopSuperAgentSession(Session):
                 test.service.name = newTest['service_name']
                 test.service.port = newTest['service_port']
                 test.service.ip = newTest['service_ip']
+            else:
+                print "Error!!!!"
         
         # send back response
         self._send_message(response_message)

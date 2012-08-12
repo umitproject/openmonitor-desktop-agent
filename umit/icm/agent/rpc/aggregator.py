@@ -756,6 +756,10 @@ class AggregatorAPI(object):
     #----------------------------------------------------------------------    
     def _alter_show(self,primary_text,secondary_text):
         #Add the user-friendly information to the user to check the problem.
+        if theApp.use_gui == false:
+            g_logger.error(primary_text+secondary_text)
+            return
+        
         import gtk
         from higwidgets.higwindows import HIGAlertDialog
 
