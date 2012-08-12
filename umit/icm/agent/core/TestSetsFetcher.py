@@ -84,7 +84,7 @@ class TestSetsFetcher(object):
             super_id = theApp.peer_manager.get_random_speer_connected()
             if super_id is not None:
                 g_logger.info("Try to get task tests from %s super peer!"%super_id)
-                theApp.peer_manager.sessions[speer_id].\
+                theApp.peer_manager.sessions[super_id].\
                     get_tests(self.current_test_version)
                     
                 

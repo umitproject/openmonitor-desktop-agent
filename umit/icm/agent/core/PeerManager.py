@@ -115,7 +115,12 @@ class PeerManager:
             peer_entry.PublicKey = row[5]
             peer_entry.Geo = row[6]
             if peer_entry.Type == 1:
+                print "--------------------------"
                 self.super_peers[peer_entry.ID] = peer_entry
+                print "!!!"
+                print self.super_peers[peer_entry.ID]
+                print peer_entry.ID
+                print "!!!"
             elif peer_entry.Type == 2:
                 self.normal_peers[peer_entry.ID] = peer_entry
             elif peer_entry.Type == 3:

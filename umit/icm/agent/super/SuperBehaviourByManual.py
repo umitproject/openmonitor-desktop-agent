@@ -79,8 +79,9 @@ class SuperBehaviourByManual(object):
         response_msg = MessageFactory.decode(data)
         print response_msg
         """ 
-        reactor.connectTCP(host, port, self.application.factory)
-        #print "connected!"    
+        #reactor.connectTCP(host, port, self.application.factory)
+        print "------------Try to Load Super Peers-----------------"
+            
         
     def check_peer_authentical(self):
         """

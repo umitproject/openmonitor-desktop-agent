@@ -47,7 +47,7 @@ class DesktopAgentSession(Session):
         self.pending_report_ids = []  # must be a FIFO queue
 
     def get_super_peer_list(self, count):
-        g_logger.info("Send P2PGetSuperPeerList message to %s" % self.remote_ip)
+        g_logger.info("[DesktopAgentSession] Send P2PGetSuperPeerList message to %s" % self.remote_ip)
         request_msg = P2PGetSuperPeerList()
         request_msg.count = int(count)
         self._send_message(request_msg)
@@ -55,26 +55,57 @@ class DesktopAgentSession(Session):
     def get_tests(self,current_version):
         """
         """
-        g_logger.info("Send Test Sets message to %s" % self.remote_ip)
+        g_logger.info("[DesktopAgentSession]  Send Test Sets message to %s" % self.remote_ip)
         request_msg = NewTests()
         request_msg.currentTestVersionNo = int(current_version)  #Get current version from DB
         self._send_message(request_msg)        
         
-    
+    def _handle_get_tests(self,message):
+        """
+        """
+        if message == None:
+            return
+        
+        g_logger.info("[DesktopAgentSession]Get test sets request from %s"% self.remote_ip)
+        response_message = NewTestsResponse()
+        
+        newTests = db.get_tests_by_version(message.currentTestVersionNo)
+        
+        print newTests
+        for newTest in newTests:
+            test = response_message.tests.add()
+            test.testID = theApp.test_sets.current_test_version
+            test.executeAtTimeUTC = 4000
+            
+            from umit.icm.agent.core.TestSetsFetcher import TEST_WEB_TYPE,TEST_SERVICE_TYPE
+            if newTest['test_type'] == TEST_WEB_TYPE:
+                test.testType = TEST_WEB_TYPE
+                test.website.url = newTest['website_url']
+            elif newTest['test_type'] == TEST_SERVICE_TYPE:
+                test.testType = TEST_SERVICE_TYPE
+                test.service.name = newTest['service_name']
+                test.service.port = newTest['service_port']
+                test.service.ip = newTest['service_ip']
+        
+        g_logger.info("[DesktopAgentSession]Get Tests Response %s"% response_message)
+        # send back response
+        self._send_message(response_message)
+            
     def _handle_get_tests_response(self,test_sets):
         """
         """
         if test_sets is None:
-            g_logger.info("Receive Empty Test Sets from %s!!!"% self.remote_ip)
+            g_logger.info("[DesktopAgentSession] Receive Empty Test Sets from %s!!!"% self.remote_ip)
             return
                 
-        g_logger.info("Receive Test Sets from %s!"% self.remote_ip)  
+        g_logger.info("[DesktopAgentSession] Receive Test Sets from %s!"% self.remote_ip)  
         
         theApp.test_sets.execute_test(test_sets)
     
     def _handle_get_super_peer_list(self, message):
         if message == None:
             return
+        g_logger.info("[DesktopAgentSession] Get Super Peer List Request from %s!"% self.remote_ip) 
         chosen_peers = theApp.peer_manager.select_super_peers(message.count)
         response_msg = P2PGetSuperPeerListResponse()
         for speer in chosen_peers:
@@ -85,6 +116,7 @@ class DesktopAgentSession(Session):
             agent_data.token = speer.Token
             agent_data.publicKey = speer.PublicKey
             agent_data.peerStatus = speer.Status
+        g_logger.info("[DesktopAgentSession] Send Super Peer List : %s!"% response_msg) 
         self._send_message(response_msg)
 
     def _handle_get_super_peer_list_response(self, message):
@@ -97,9 +129,10 @@ class DesktopAgentSession(Session):
                                                    agent_data.agentPort,
                                                    agent_data.token,
                                                    agent_data.publicKey)
-
+        g_logger.info("[DesktopAgentSession] Got Super Peer List : %s!"% message) 
+                
     def get_peer_list(self, count):
-        g_logger.info("Send P2PGetPeerList message to %s" % self.remote_ip)
+        g_logger.info("[DesktopAgentSession] Send P2PGetPeerList message to %s" % self.remote_ip)
         request_msg = P2PGetPeerList()
         request_msg.count = int(count)
         self._send_message(request_msg)
@@ -115,6 +148,7 @@ class DesktopAgentSession(Session):
             agent_data.token = peer.Token
             agent_data.publicKey = peer.PublicKey
             agent_data.peerStatus = peer.Status
+        g_logger.info("[DesktopAgentSession] Send Normal Peer List : %s!"% response_msg) 
         self._send_message(response_msg)
 
     def _handle_get_peer_list_response(self, message):
@@ -125,6 +159,9 @@ class DesktopAgentSession(Session):
                                                     agent_data.agentPort,
                                                     agent_data.token,
                                                     agent_data.publicKey)
+                
+        g_logger.info("[DesktopAgentSession] Got Normal Peer List : %s!"% message) 
+        
     def send_report(self, report):
         if isinstance(report, WebsiteReport):
             self.send_website_report(report)
@@ -134,13 +171,16 @@ class DesktopAgentSession(Session):
             g_logger.debug("Unable to recognize the report type.")
 
     def send_website_report(self, report):
-        g_logger.info("Send %s message to %s" % (report.DESCRIPTOR.name,
+        g_logger.info("[DesktopAgentSession] Send %s message to %s" % (report.DESCRIPTOR.name,
                                                  self.remote_ip))
         request_msg = SendWebsiteReport()
         request_msg.header.token = theApp.peer_info.AuthToken
         request_msg.header.agentID = str(theApp.peer_info.ID)
         request_msg.report.CopyFrom(report)
         self._send_message(request_msg)
+        
+        g_logger.info("[DesktopAgentSession] Web site Report has send to peer : %s!"% request_msg) 
+        
         self.pending_report_ids.append(report.header.reportID)
 
     def _handle_send_website_report(self, message):
@@ -152,19 +192,27 @@ class DesktopAgentSession(Session):
         response_msg = SendReportResponse()
         response_msg.header.currentVersionNo = VERSION_NUM
         response_msg.header.currentTestVersionNo = TEST_PACKAGE_VERSION_NUM
+        
         self._send_message(response_msg)
 
     def send_service_report(self, report):
-        g_logger.info("Send %s message to %s" % (report.DESCRIPTOR.name,
+        """
+        """
+        g_logger.info("[DesktopAgentSession]Send %s message to %s" % (report.DESCRIPTOR.name,
                                                  self.remote_ip))
         request_msg = SendServiceReport()
         request_msg.header.token = theApp.peer_info.AuthToken
         request_msg.header.agentID = str(theApp.peer_info.ID)
         request_msg.report.CopyFrom(report)
         self._send_message(request_msg)
+        
+        g_logger.info("[DesktopAgentSession] Service Report has send to peer : %s!"% request_msg) 
         self.pending_report_ids.append(report.header.reportID)
 
     def _handle_send_service_report(self, message):
+        """
+        """
+        
         theApp.statistics.reports_received = \
               theApp.statistics.reports_received + 1
         message.report.header.passedNode.append(str(message.header.agentID))
@@ -176,6 +224,8 @@ class DesktopAgentSession(Session):
         self._send_message(response_msg)
 
     def _handle_send_report_response(self, data):
+        """
+        """
         report_id = self.pending_report_ids.pop(0)
         theApp.statistics.reports_sent_to_normal_agent = \
               theApp.statistics.reports_sent_to_normal_agent + 1
@@ -183,6 +233,8 @@ class DesktopAgentSession(Session):
                                             ReportStatus.SENT_TO_AGENT)
 
     def require_agent_update(self, version, download_url, check_code=0):
+        """
+        """
         g_logger.info("Send AgentUpdate message to %s" % self.remote_ip)
         request_msg = AgentUpdate()
         request_msg.version = version
@@ -192,6 +244,8 @@ class DesktopAgentSession(Session):
         self._send_message(request_msg)
 
     def require_test_mod_update(self, version, download_url, check_code=0):
+        """
+        """
         g_logger.info("Send TestModuleUpdate message to %s" % self.remote_ip)
         request_msg = TestModuleUpdate()
         request_msg.version = version
@@ -236,6 +290,8 @@ class DesktopAgentSession(Session):
                           (self.remote_id, message.version, message.result))
         elif isinstance(message, NewTestsResponse):
             self._handle_get_tests_response(message)
+        elif isinstance(message,NewTests):
+            self._handle_get_tests(message)
 
 
     def close(self):
