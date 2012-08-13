@@ -99,7 +99,7 @@ class Application(object):
         self.speer_by_manual = SuperBehaviourByManual(self)
 
         self.quitting = False
-        self.is_auto_login = True        
+        self.is_auto_login = False        
         self.is_successful_login = False #fix the login failure, save DB problem
                        
     def _load_from_db(self):
@@ -343,7 +343,8 @@ class Application(object):
         Only test GTK features
         """
         #GTK show
-        self.gtk_main.set_login_status(True)
+        if self.use_gui == True:
+            self.gtk_main.set_login_status(True)
         #Basic Information
         self.peer_info.load_from_db()
         self._load_from_db()

@@ -37,7 +37,7 @@ class PeerInfo(object):
         self.Password = ''
         self.Email = ''
         self.CipheredPublicKeyHash = None
-
+        self.AuthToken = None
         self.local_ip = ''
         self.internet_ip = ''
 

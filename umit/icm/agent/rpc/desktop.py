@@ -174,8 +174,8 @@ class DesktopAgentSession(Session):
         g_logger.info("[DesktopAgentSession] Send %s message to %s" % (report.DESCRIPTOR.name,
                                                  self.remote_ip))
         request_msg = SendWebsiteReport()
-        request_msg.header.token = theApp.peer_info.AuthToken
-        request_msg.header.agentID = str(theApp.peer_info.ID)
+        #request_msg.header.token = theApp.peer_info.AuthToken
+        #request_msg.header.agentID = str(theApp.peer_info.ID)
         request_msg.report.CopyFrom(report)
         self._send_message(request_msg)
         
@@ -201,8 +201,8 @@ class DesktopAgentSession(Session):
         g_logger.info("[DesktopAgentSession]Send %s message to %s" % (report.DESCRIPTOR.name,
                                                  self.remote_ip))
         request_msg = SendServiceReport()
-        request_msg.header.token = theApp.peer_info.AuthToken
-        request_msg.header.agentID = str(theApp.peer_info.ID)
+        #request_msg.header.token = theApp.peer_info.AuthToken
+        #request_msg.header.agentID = str(theApp.peer_info.ID)
         request_msg.report.CopyFrom(report)
         self._send_message(request_msg)
         
@@ -378,8 +378,8 @@ class DesktopSuperAgentSession(Session):
         g_logger.info("Send %s message to %s" % (report.DESCRIPTOR.name,
                                                  self.remote_ip))
         request_msg = SendWebsiteReport()
-        request_msg.header.token = theApp.peer_info.AuthToken
-        request_msg.header.agentID = str(theApp.peer_info.ID)
+        #request_msg.header.token = theApp.peer_info.AuthToken
+        #request_msg.header.agentID = str(theApp.peer_info.ID)
         request_msg.report.CopyFrom(report)
         self._send_message(request_msg)
         self.pending_report_ids.append(report.header.reportID)
@@ -399,8 +399,8 @@ class DesktopSuperAgentSession(Session):
         g_logger.info("Send %s message to %s" % (report.DESCRIPTOR.name,
                                                  self.remote_ip))
         request_msg = SendServiceReport()
-        request_msg.header.token = theApp.peer_info.AuthToken
-        request_msg.header.agentID = str(theApp.peer_info.ID)
+        #request_msg.header.token = theApp.peer_info.AuthToken
+        #request_msg.header.agentID = str(theApp.peer_info.ID)
         request_msg.report.CopyFrom(report)
         self._send_message(request_msg)
         self.pending_report_ids.append(report.header.reportID)
