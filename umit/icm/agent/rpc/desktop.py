@@ -29,7 +29,7 @@ from umit.icm.agent.logger import g_logger
 from umit.icm.agent.Application import theApp
 from umit.icm.agent.Global import *
 from umit.icm.agent.Version import *
-from umit.icm.agent.test import TEST_PACKAGE_VERSION
+from umit.icm.agent.test import TEST_PACKAGE_VERSION_NUM
 from umit.icm.agent.rpc.message import *
 from umit.icm.agent.rpc.MessageFactory import MessageFactory
 from umit.icm.agent.rpc.Session import Session
@@ -78,16 +78,22 @@ class DesktopAgentSession(Session):
             test.executeAtTimeUTC = 4000
             
             from umit.icm.agent.core.TestSetsFetcher import TEST_WEB_TYPE,TEST_SERVICE_TYPE
-            if newTest['test_type'] == TEST_WEB_TYPE:
+            if newTest['test_type'] == str(TEST_WEB_TYPE):
                 test.testType = TEST_WEB_TYPE
                 test.website.url = newTest['website_url']
-            elif newTest['test_type'] == TEST_SERVICE_TYPE:
+            elif newTest['test_type'] == str(TEST_SERVICE_TYPE):
                 test.testType = TEST_SERVICE_TYPE
                 test.service.name = newTest['service_name']
-                test.service.port = newTest['service_port']
+                test.service.port = int(newTest['service_port'])
                 test.service.ip = newTest['service_ip']
         
         g_logger.info("[DesktopAgentSession]Get Tests Response %s"% response_message)
+        
+        #other information
+        response_message.header.currentVersionNo = VERSION_NUM
+        response_message.header.currentTestVersionNo = TEST_PACKAGE_VERSION_NUM
+        response_message.testVersionNo = theApp.test_sets.current_test_version
+        
         # send back response
         self._send_message(response_message)
             
@@ -441,7 +447,7 @@ class DesktopSuperAgentSession(Session):
             downloader.start()
 
     def _handle_test_mod_update(self, message):
-        if compare_version(message.version, TEST_PACKAGE_VERSION) > 0:
+        if compare_version(message.version, TEST_PACKAGE_VERSION_NUM) > 0:
             if not os.path.exists(TMP_DIR):
                 os.mkdir(TMP_DIR)
             downloader = FileDownloader(
@@ -510,16 +516,21 @@ class DesktopSuperAgentSession(Session):
             test.executeAtTimeUTC = 4000
             
             from umit.icm.agent.core.TestSetsFetcher import TEST_WEB_TYPE,TEST_SERVICE_TYPE
-            if newTest['test_type'] == TEST_WEB_TYPE:
+            if newTest['test_type'] == str(TEST_WEB_TYPE):
                 test.testType = TEST_WEB_TYPE
                 test.website.url = newTest['website_url']
-            elif newTest['test_type'] == TEST_SERVICE_TYPE:
+            elif newTest['test_type'] == str(TEST_SERVICE_TYPE):
                 test.testType = TEST_SERVICE_TYPE
                 test.service.name = newTest['service_name']
-                test.service.port = newTest['service_port']
+                test.service.port = int(newTest['service_port'])
                 test.service.ip = newTest['service_ip']
             else:
                 print "Error!!!!"
+        
+        #other information
+        response_message.header.currentVersionNo = VERSION_NUM
+        response_message.header.currentTestVersionNo = TEST_PACKAGE_VERSION_NUM
+        response_message.testVersionNo = theApp.test_sets.current_test_version
         
         # send back response
         self._send_message(response_message)

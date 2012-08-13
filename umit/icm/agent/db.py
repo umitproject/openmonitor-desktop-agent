@@ -512,24 +512,25 @@ class DBHelper(object):
     
     #########################
     #Get test sets by version
-    def get_tests_by_version(self,version):
+    def get_tests_by_version(self,test_version):
         """
         """
+        test_version = int(test_version)
         test_sets = []
         try:
-            rs = self.db_conn.select("select * from tasks where test_id >?",(int(version,)))
+            rs = self.db_conn.select("select * from tasks where test_id >?",(test_version,))
             for record in rs:
                 test_result_dict = {}
                 test_result_dict["test_id"]         = record[1]
                 test_result_dict["website_url"]     = record[2]
                 test_result_dict["test_type"]       = record[3]
                 test_result_dict["service_name"]    = record[4]
-                test_result_dict["service_ip"]      = record[5]
-                test_result_dict["service_port"]    = record[6]
+                test_result_dict["service_port"]    = record[5]
+                test_result_dict["service_ip"]      = record[6]
                 test_sets.append(test_result_dict)
             return test_sets
-        except e:
-            g_logger.warning("Wrong in get Test sets from database %s" % e)
+        except Exception,data:
+            g_logger.warning("Wrong in get Test sets from database %s,%s" % (Exception,data))
             return []
     
 #---------------------------------------------------------------------
