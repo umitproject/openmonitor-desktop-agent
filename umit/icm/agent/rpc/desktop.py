@@ -68,7 +68,8 @@ class DesktopAgentSession(Session):
         
         g_logger.info("[DesktopAgentSession]Get test sets request from %s"% self.remote_ip)
         response_message = NewTestsResponse()
-        
+        if message.currentTestVersionNo >= theApp.test_sets.current_test_version:
+            return 
         newTests = g_db_helper.get_tests_by_version(message.currentTestVersionNo)
         
         print newTests

@@ -87,12 +87,13 @@ def task_done(name,task_type=None,task_detail=None):
     if task_type == TEST_WEB_TYPE:
         
         task_web_info = {
-                         'test_id': task_detail.unitied_test_id,
+                         'test_id': str(theApp.test_sets.current_test_version),
                          'website_url' :  task_detail.url,
                          'test_type' : TEST_WEB_TYPE,
                          'done_status' : TASK_STATUS_DONE,
                          'done_result' : TASK_STATUS_DONE,
                          'execute_time' : now,
+                         'unique_id':task_detail.unitied_test_id,
                          }
         
         g_db_helper.task_web(task_web_info)
@@ -100,7 +101,7 @@ def task_done(name,task_type=None,task_detail=None):
     elif task_type == TEST_SERVICE_TYPE:
         
         task_service_info = {
-                         'test_id': task_detail.unitied_test_id,
+                         'test_id': str(theApp.test_sets.current_test_version),
                          'service_name' :  task_detail.service_name,
                          'service_ip':task_detail.host,
                          'service_port':task_detail.port,
@@ -108,6 +109,7 @@ def task_done(name,task_type=None,task_detail=None):
                          'done_status' : TASK_STATUS_DONE,
                          'done_result' : TASK_STATUS_DONE,
                          'execute_time' : now,
+                         'unique_id':task_detail.unitied_test_id,
                          }        
         g_db_helper.task_service(task_service_info)   
         
@@ -130,12 +132,13 @@ def task_failed(name,task_type=None,task_detail=None):
     if task_type == TEST_WEB_TYPE:
         
         task_web_info = {
-                         'test_id': task_detail.unitied_test_id,
+                         'test_id': str(theApp.test_sets.current_test_version),
                          'website_url' :  task_detail.url,
                          'test_type' : TEST_WEB_TYPE,
                          'done_status' : TASK_STATUS_FAILED,
                          'done_result' : TASK_STATUS_FAILED,
                          'execute_time' : now,
+                         'unique_id':task_detail.unitied_test_id,
                          }
         
         g_db_helper.task_web(task_web_info)
@@ -143,7 +146,7 @@ def task_failed(name,task_type=None,task_detail=None):
     elif task_type == TEST_SERVICE_TYPE:
         
         task_service_info = {
-                         'test_id': task_detail.unitied_test_id,
+                         'test_id': str(theApp.test_sets.current_test_version),
                          'service_name' :  task_detail.service_name,
                          'service_ip':task_detail.host,
                          'service_port':task_detail.port,
@@ -151,6 +154,7 @@ def task_failed(name,task_type=None,task_detail=None):
                          'done_status' : TASK_STATUS_FAILED,
                          'done_result' : TASK_STATUS_FAILED,
                          'execute_time' : now,
+                         'unique_id':task_detail.unitied_test_id,
                          }        
         g_db_helper.task_service(task_service_info)       
     

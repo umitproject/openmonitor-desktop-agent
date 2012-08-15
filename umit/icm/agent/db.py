@@ -447,9 +447,10 @@ class DBHelper(object):
         """
         
         self.execute("INSERT INTO tasks VALUES "
-                     "(NULL,'%s', '%s', '%s',NULL,NULL,NULL ,'%s', '%s', '%s')" % \
+                     "(NULL,'%s', '%s', '%s',NULL,NULL,NULL ,'%s', '%s', '%s','%s')" % \
                         (task_web_info['test_id'], task_web_info['website_url'], task_web_info['test_type'], 
-                         task_web_info['done_status'],task_web_info['done_result'],str(task_web_info['execute_time'])))        
+                         task_web_info['done_status'],task_web_info['done_result'],str(task_web_info['execute_time']),
+                         task_web_info['unique_id']))        
         
         g_logger.info("Store %s WebSite Test Task into Database"%(task_web_info['test_id']))
         
@@ -457,10 +458,11 @@ class DBHelper(object):
         """
         """
         self.execute("INSERT INTO tasks VALUES "
-                     "(NULL,'%s', NULL ,'%s', '%s', '%s', '%s', '%s','%s','%s')" % \
+                     "(NULL,'%s', NULL ,'%s', '%s', '%s', '%s', '%s','%s','%s','%s')" % \
                         (task_service_info['test_id'], task_service_info['test_type'], 
                          task_service_info['service_name'], task_service_info['service_port'], task_service_info['service_ip'], 
-                         task_service_info['done_status'],task_service_info['done_result'],str(task_service_info['execute_time'])))
+                         task_service_info['done_status'],task_service_info['done_result'],str(task_service_info['execute_time']),
+                         task_service_info['unique_id']))
         
         g_logger.info("Store %s Service Test Task into Database"%(task_service_info['test_id']))
     
@@ -518,7 +520,7 @@ class DBHelper(object):
         test_version = int(test_version)
         test_sets = []
         try:
-            rs = self.db_conn.select("select * from tasks where test_id >?",(test_version,))
+            rs = self.db_conn.select("select * from tasks where test_id =?",(test_version,))
             for record in rs:
                 test_result_dict = {}
                 test_result_dict["test_id"]         = record[1]
