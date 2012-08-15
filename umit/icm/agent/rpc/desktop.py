@@ -192,7 +192,7 @@ class DesktopAgentSession(Session):
     def _handle_send_website_report(self, message):
         theApp.statistics.reports_received = \
               theApp.statistics.reports_received + 1
-        message.report.header.passedNode.append(str(message.header.agentID))
+        #message.report.header.passedNode.append(str(message.header.agentID))
         theApp.report_manager.add_report(message.report)
         # send response
         response_msg = SendReportResponse()
@@ -221,7 +221,7 @@ class DesktopAgentSession(Session):
         
         theApp.statistics.reports_received = \
               theApp.statistics.reports_received + 1
-        message.report.header.passedNode.append(str(message.header.agentID))
+        #message.report.header.passedNode.append(str(message.header.agentID))
         theApp.report_manager.add_report(message.report)
         # send response
         response_msg = SendReportResponse()
@@ -393,7 +393,7 @@ class DesktopSuperAgentSession(Session):
     def _handle_send_website_report(self, message):
         theApp.statistics.reports_received = \
               theApp.statistics.reports_received + 1
-        message.report.header.passedNode.append(str(message.header.agentID))
+        #message.report.header.passedNode.append(str(message.header.agentID))
         theApp.report_manager.add_report(message.report)
         # send response
         response_msg = SendReportResponse()
@@ -414,7 +414,7 @@ class DesktopSuperAgentSession(Session):
     def _handle_send_service_report(self, message):
         theApp.statistics.reports_received = \
               theApp.statistics.reports_received + 1
-        message.report.header.passedNode.append(str(message.header.agentID))
+        #message.report.header.passedNode.append(str(message.header.agentID))
         theApp.report_manager.add_report(message.report)
         # send response
         response_msg = SendReportResponse()

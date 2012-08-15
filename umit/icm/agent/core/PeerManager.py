@@ -325,6 +325,8 @@ class PeerManager:
             peer_entry.network_id = network_id
             self.super_peers[peer_entry.ID] = peer_entry
             self.super_peer_num += 1
+            
+            g_logger.info("Super peer(%s) is added successfully!"%(peer_entry.ID))
                         
     
     def add_normal_peer(self, peer_id, ip, port, token =None ,ciphered_public_key=None,

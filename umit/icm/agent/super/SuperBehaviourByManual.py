@@ -29,6 +29,7 @@ from umit.icm.agent.BasePaths import *
 from umit.icm.agent.Global import *
 from twisted.internet import reactor
 
+
 class SuperBehaviourByManual(object):
     """
     """
@@ -50,7 +51,8 @@ class SuperBehaviourByManual(object):
             ###############################################
             #check if there are some super peers in peer db,
             #if some are loaded, we will skip this step
-            if self.application.peer_manager.super_peers.values is not None:
+            if self.application.peer_manager.super_peers.values() != []:
+                print self.application.peer_manager.super_peers.values()
                 g_logger.info("Skip super peer add from superpeer by manual list")
                 return
             
@@ -64,13 +66,21 @@ class SuperBehaviourByManual(object):
             self.application.quit_window_in_wrong(primary_text = _("The desktop agent cannot be authenticated by aggregator ago"), \
                                       secondary_text = _("Please email to Open Monitor!"))            
  
-    def build_super_connection(self,host,port):
+    def build_super_connection(self,host=None,port=None):
         """
         this method will connect to host:port, to get necessary super peer information,
         and add them into peer list and super peer session.
         we will get peer_id, token, ciphered_public_key from super peer
         """
-        """
+        if host == None or host == "" or port == None or port == "":
+             g_logger.error("Wrong super peer conection information: host->%s, port->%d"%(host,port))
+             return
+        
+        from umit.icm.agent.rpc.message import *
+        from umit.icm.agent.rpc.MessageFactory import MessageFactory
+        
+        g_logger.error('Try to connect to super peer...., to get necessary information!!!')
+        
         from umit.icm.agent.utils.CreateDB import mod,exp 
         try:
             s  = socket.socket(socket.AF_INET, socket.SOCK_STREAM, socket.IPPROTO_TCP)
@@ -78,8 +88,9 @@ class SuperBehaviourByManual(object):
         except:
             g_logger.error('Cannot connect to the super peer, maybe it down!')
             return
+        
         request_msg = AuthenticatePeer()
-        request_msg.agentID = theApp.peer_info.ID
+        request_msg.agentID = self.application.peer_info.ID
         request_msg.agentType = 2
         request_msg.agentPort = 5895
         request_msg.cipheredPublicKey.mod = str(mod)
@@ -91,10 +102,11 @@ class SuperBehaviourByManual(object):
         length = struct.unpack('!i', s.recv(4))[0]
         data = s.recv(length)
         response_msg = MessageFactory.decode(data)
-        print response_msg
-        """ 
-        #reactor.connectTCP(host, port, self.application.factory)
-        print "------------Try to Load Super Peers-----------------"
+        
+        g_logger.error('Get the super peer information (ip:%s,port:%s,agentID:%s)\
+                        with build_super_connection process'%(host,port,response_msg.token))
+        
+        self.application.peer_manager.add_super_peer(peer_id=response_msg.token,ip=host,port=port)
             
         
     def check_peer_authentical(self):
