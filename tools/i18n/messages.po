@@ -1,0 +1,611 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR ORGANIZATION
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: PACKAGE VERSION\n"
+"POT-Creation-Date: 2012-06-16 00:36+UTC\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf8\n"
+"Content-Transfer-Encoding: ENCODING\n"
+"Generated-By: pygettext.py 1.5\n"
+
+
+#:
+#: /home/tianwei/workspace/icm_agent_new/t/icm-agent/icmagent/umit/icm/agent/gui/AdvancedPage.py:66
+msgid "Timeout Setting (seconds)"
+msgstr "设置时间"
+
+#:
+#: /home/tianwei/workspace/icm_agent_new/t/icm-agent/icmagent/umit/icm/agent/gui/AdvancedPage.py:69
+msgid "Others"
+msgstr "其他"
+
+#:
+#: /home/tianwei/workspace/icm_agent_new/t/icm-agent/icmagent/umit/icm/agent/gui/AdvancedPage.py:72
+msgid "Task Assign"
+msgstr "任务分配"
+
+#:
+#: /home/tianwei/workspace/icm_agent_new/t/icm-agent/icmagent/umit/icm/agent/gui/AdvancedPage.py:73
+msgid "Task Scheduler"
+msgstr "任务调度"
+
+#:
+#: /home/tianwei/workspace/icm_agent_new/t/icm-agent/icmagent/umit/icm/agent/gui/AdvancedPage.py:74
+msgid "Report Uploader"
+msgstr "报告上传"
+
+#:
+#: /home/tianwei/workspace/icm_agent_new/t/icm-agent/icmagent/umit/icm/agent/gui/AdvancedPage.py:75
+msgid "Test sets Fetch"
+msgstr "探测测试集"
+
+#:
+#: /home/tianwei/workspace/icm_agent_new/t/icm-agent/icmagent/umit/icm/agent/gui/AdvancedPage.py:83
+msgid "Language"
+msgstr "语言"
+
+#:
+#: /home/tianwei/workspace/icm_agent_new/t/icm-agent/icmagent/umit/icm/agent/gui/BugReport.py:47
+msgid "Could not open default Web Browser"
+msgstr "无法打开浏览器"
+
+#:
+#: /home/tianwei/workspace/icm_agent_new/t/icm-agent/icmagent/umit/icm/agent/gui/BugReport.py:48
+msgid "Open Monitor was unable to open your default web browser to show the bug tracker page with the report status. Try visiting Open Monitor's bug tracker page to see if your bug was reported."
+msgstr ""
+
+#:
+#: /home/tianwei/workspace/icm_agent_new/t/icm-agent/icmagent/umit/icm/agent/gui/BugReport.py:75
+#: /home/tianwei/workspace/icm_agent_new/t/icm-agent/icmagent/umit/icm/agent/gui/FeedbackPage.py:60
+msgid "Bug Report"
+msgstr ""
+
+#:
+#: /home/tianwei/workspace/icm_agent_new/t/icm-agent/icmagent/umit/icm/agent/gui/BugReport.py:97
+msgid "CrashReport automatically created"
+msgstr ""
+
+#:
+#: /home/tianwei/workspace/icm_agent_new/t/icm-agent/icmagent/umit/icm/agent/gui/BugReport.py:119
+msgid "Category (optional)"
+msgstr ""
+
+#:
+#: /home/tianwei/workspace/icm_agent_new/t/icm-agent/icmagent/umit/icm/agent/gui/BugReport.py:120
+msgid "If you know in which section of the program is the bug, please, select it from the choosebox. If you don't know what section to choose, leave it blank."
+msgstr ""
+
+#:
+#: /home/tianwei/workspace/icm_agent_new/t/icm-agent/icmagent/umit/icm/agent/gui/BugReport.py:126
+msgid "Email"
+msgstr ""
+
+#:
+#: /home/tianwei/workspace/icm_agent_new/t/icm-agent/icmagent/umit/icm/agent/gui/BugReport.py:127
+msgid "Please inform a valid e-mail address from where you can be reached to be notified when the bug gets fixed. Not used for other purposes."
+msgstr ""
+
+#:
+#: /home/tianwei/workspace/icm_agent_new/t/icm-agent/icmagent/umit/icm/agent/gui/BugReport.py:132
+msgid "Summary"
+msgstr ""
+
+#:
+#: /home/tianwei/workspace/icm_agent_new/t/icm-agent/icmagent/umit/icm/agent/gui/BugReport.py:133
+msgid "This should be a quick description of the issue. Try to be clear and concise."
+msgstr ""
+
+#:
+#: /home/tianwei/workspace/icm_agent_new/t/icm-agent/icmagent/umit/icm/agent/gui/BugReport.py:137
+msgid "Description"
+msgstr ""
+
+#:
+#: /home/tianwei/workspace/icm_agent_new/t/icm-agent/icmagent/umit/icm/agent/gui/BugReport.py:138
+msgid "This is where you should write about the bug, describing it as clear as possible and giving as many informations as you can and how to reproduce the bug."
+msgstr ""
+
+#:
+#: /home/tianwei/workspace/icm_agent_new/t/icm-agent/icmagent/umit/icm/agent/gui/BugReport.py:145
+msgid "This Bug Report dialog allows you to easily tell us about a problem that you may have found on Open Monitor. Doing so, you help us to help you, by fixing and improving Open Monitor faster than usual."
+msgstr ""
+
+#:
+#: /home/tianwei/workspace/icm_agent_new/t/icm-agent/icmagent/umit/icm/agent/gui/BugReport.py:153
+msgid "Show Details"
+msgstr ""
+
+#:
+#: /home/tianwei/workspace/icm_agent_new/t/icm-agent/icmagent/umit/icm/agent/gui/BugReport.py:263
+msgid "Bug report is incomplete!"
+msgstr ""
+
+#:
+#: /home/tianwei/workspace/icm_agent_new/t/icm-agent/icmagent/umit/icm/agent/gui/BugReport.py:264
+msgid "The bug report is incomplete. You must inform a description that explains clearly what is happening and a valid e-mail, so you can be contacted when the bug gets fixed."
+msgstr ""
+
+#:
+#: /home/tianwei/workspace/icm_agent_new/t/icm-agent/icmagent/umit/icm/agent/gui/BugReport.py:289
+msgid "Bug not reported!"
+msgstr ""
+
+#:
+#: /home/tianwei/workspace/icm_agent_new/t/icm-agent/icmagent/umit/icm/agent/gui/BugReport.py:290
+msgid "The bug description could not be reported. This problem may be caused by the lack of Internet access or indisponibility of the bug tracker server. Please, verify your internet access, and then try to report the bug once again."
+msgstr ""
+
+#:
+#: /home/tianwei/workspace/icm_agent_new/t/icm-agent/icmagent/umit/icm/agent/gui/BugReport.py:299
+msgid "Bug sucessfully reported!"
+msgstr ""
+
+#:
+#: /home/tianwei/workspace/icm_agent_new/t/icm-agent/icmagent/umit/icm/agent/gui/BugReport.py:300
+msgid "The bug description was sucessfully reported. Thanks for your report! Open Monitor DesktopMonitor will be restarted now."
+msgstr ""
+
+#:
+#: /home/tianwei/workspace/icm_agent_new/t/icm-agent/icmagent/umit/icm/agent/gui/BugReport.py:343
+msgid "Crash Report"
+msgstr ""
+
+#:
+#: /home/tianwei/workspace/icm_agent_new/t/icm-agent/icmagent/umit/icm/agent/gui/BugReport.py:371
+msgid "Bug report details that will be send!"
+msgstr ""
+
+#:
+#: /home/tianwei/workspace/icm_agent_new/t/icm-agent/icmagent/umit/icm/agent/gui/Dashboard.py:82
+#: /home/tianwei/workspace/icm_agent_new/t/icm-agent/icmagent/umit/icm/agent/gui/GtkMain.py:82
+msgid "Dashboard"
+msgstr "控制面板"
+
+#:
+#: /home/tianwei/workspace/icm_agent_new/t/icm-agent/icmagent/umit/icm/agent/gui/Dashboard.py:94
+msgid "Dashboard Menu"
+msgstr ""
+
+#:
+#: /home/tianwei/workspace/icm_agent_new/t/icm-agent/icmagent/umit/icm/agent/gui/Event.py:56
+msgid "Events List"
+msgstr "事件列表"
+
+#:
+#: /home/tianwei/workspace/icm_agent_new/t/icm-agent/icmagent/umit/icm/agent/gui/Event.py:80
+msgid "Locations"
+msgstr "地理位置"
+
+#:
+#: /home/tianwei/workspace/icm_agent_new/t/icm-agent/icmagent/umit/icm/agent/gui/Event.py:81
+#: /home/tianwei/workspace/icm_agent_new/t/icm-agent/icmagent/umit/icm/agent/gui/PeerPage.py:83
+msgid "longitude:"
+msgstr "经度"
+
+#:
+#: /home/tianwei/workspace/icm_agent_new/t/icm-agent/icmagent/umit/icm/agent/gui/Event.py:83
+#: /home/tianwei/workspace/icm_agent_new/t/icm-agent/icmagent/umit/icm/agent/gui/PeerPage.py:85
+msgid "latitude:"
+msgstr "维度"
+
+#:
+#: /home/tianwei/workspace/icm_agent_new/t/icm-agent/icmagent/umit/icm/agent/gui/Event.py:87
+msgid "Get Events"
+msgstr "获取事件"
+
+#:
+#: /home/tianwei/workspace/icm_agent_new/t/icm-agent/icmagent/umit/icm/agent/gui/Event.py:88
+msgid "Refresh"
+msgstr "刷新"
+
+#:
+#: /home/tianwei/workspace/icm_agent_new/t/icm-agent/icmagent/umit/icm/agent/gui/Event.py:188
+msgid "Refresh the Events List!"
+msgstr "刷新事件列表"
+
+#:
+#: /home/tianwei/workspace/icm_agent_new/t/icm-agent/icmagent/umit/icm/agent/gui/Event.py:192
+msgid "Error in Get Events From Aggregator!"
+msgstr ""
+
+#:
+#: /home/tianwei/workspace/icm_agent_new/t/icm-agent/icmagent/umit/icm/agent/gui/Event.py:196
+msgid "No new Events from Aggregator!"
+msgstr ""
+
+#:
+#: /home/tianwei/workspace/icm_agent_new/t/icm-agent/icmagent/umit/icm/agent/gui/FeedbackPage.py:58
+msgid "Test Suggestion"
+msgstr ""
+
+#:
+#: /home/tianwei/workspace/icm_agent_new/t/icm-agent/icmagent/umit/icm/agent/gui/FeedbackPage.py:65
+msgid "Website Suggestion"
+msgstr ""
+
+#:
+#: /home/tianwei/workspace/icm_agent_new/t/icm-agent/icmagent/umit/icm/agent/gui/FeedbackPage.py:67
+msgid "URL:"
+msgstr "网址"
+
+#:
+#: /home/tianwei/workspace/icm_agent_new/t/icm-agent/icmagent/umit/icm/agent/gui/FeedbackPage.py:69
+#: /home/tianwei/workspace/icm_agent_new/t/icm-agent/icmagent/umit/icm/agent/gui/FeedbackPage.py:86
+#: /home/tianwei/workspace/icm_agent_new/t/icm-agent/icmagent/umit/icm/agent/gui/FeedbackPage.py:111
+msgid "Send"
+msgstr "发送"
+
+#:
+#: /home/tianwei/workspace/icm_agent_new/t/icm-agent/icmagent/umit/icm/agent/gui/FeedbackPage.py:75
+msgid "Service Suggestion"
+msgstr "服务建议"
+
+#:
+#: /home/tianwei/workspace/icm_agent_new/t/icm-agent/icmagent/umit/icm/agent/gui/FeedbackPage.py:77
+msgid "Name:"
+msgstr ""
+
+#:
+#: /home/tianwei/workspace/icm_agent_new/t/icm-agent/icmagent/umit/icm/agent/gui/FeedbackPage.py:81
+msgid "Hostname:"
+msgstr ""
+
+#:
+#: /home/tianwei/workspace/icm_agent_new/t/icm-agent/icmagent/umit/icm/agent/gui/FeedbackPage.py:84
+msgid "IP:"
+msgstr ""
+
+#:
+#: /home/tianwei/workspace/icm_agent_new/t/icm-agent/icmagent/umit/icm/agent/gui/FeedbackPage.py:91
+msgid "Your Name:"
+msgstr ""
+
+#:
+#: /home/tianwei/workspace/icm_agent_new/t/icm-agent/icmagent/umit/icm/agent/gui/FeedbackPage.py:95
+msgid "Email:"
+msgstr ""
+
+#:
+#: /home/tianwei/workspace/icm_agent_new/t/icm-agent/icmagent/umit/icm/agent/gui/FeedbackPage.py:177
+#: /home/tianwei/workspace/icm_agent_new/t/icm-agent/icmagent/umit/icm/agent/gui/FeedbackPage.py:191
+msgid "Missing fields."
+msgstr ""
+
+#:
+#: /home/tianwei/workspace/icm_agent_new/t/icm-agent/icmagent/umit/icm/agent/gui/FeedbackPage.py:178
+msgid "Please input all fields for website suggestion."
+msgstr ""
+
+#:
+#: /home/tianwei/workspace/icm_agent_new/t/icm-agent/icmagent/umit/icm/agent/gui/FeedbackPage.py:192
+msgid "Please input all fields for service suggestion."
+msgstr ""
+
+#:
+#: /home/tianwei/workspace/icm_agent_new/t/icm-agent/icmagent/umit/icm/agent/gui/FeedbackPage.py:205
+msgid "Succuss."
+msgstr ""
+
+#:
+#: /home/tianwei/workspace/icm_agent_new/t/icm-agent/icmagent/umit/icm/agent/gui/FeedbackPage.py:206
+msgid "Send to aggregaetor successfully."
+msgstr ""
+
+#:
+#: /home/tianwei/workspace/icm_agent_new/t/icm-agent/icmagent/umit/icm/agent/gui/FeedbackPage.py:210
+msgid "Error."
+msgstr ""
+
+#:
+#: /home/tianwei/workspace/icm_agent_new/t/icm-agent/icmagent/umit/icm/agent/gui/FeedbackPage.py:211
+msgid "Send to aggregaetor failed."
+msgstr ""
+
+#:
+#: /home/tianwei/workspace/icm_agent_new/t/icm-agent/icmagent/umit/icm/agent/gui/GeneralPage.py:60
+#: /home/tianwei/workspace/icm_agent_new/t/icm-agent/icmagent/umit/icm/agent/gui/Preference.py:86
+msgid "General"
+msgstr ""
+
+#:
+#: /home/tianwei/workspace/icm_agent_new/t/icm-agent/icmagent/umit/icm/agent/gui/GeneralPage.py:63
+msgid "Startup OpenMonitor on system startup"
+msgstr ""
+
+#:
+#: /home/tianwei/workspace/icm_agent_new/t/icm-agent/icmagent/umit/icm/agent/gui/GeneralPage.py:64
+msgid "Show Desktop Notifications"
+msgstr ""
+
+#:
+#: /home/tianwei/workspace/icm_agent_new/t/icm-agent/icmagent/umit/icm/agent/gui/GeneralPage.py:65
+msgid "Enable Auto login"
+msgstr ""
+
+#:
+#: /home/tianwei/workspace/icm_agent_new/t/icm-agent/icmagent/umit/icm/agent/gui/GtkMain.py:77
+msgid "ICM Webpage"
+msgstr "ICM 网站"
+
+#:
+#: /home/tianwei/workspace/icm_agent_new/t/icm-agent/icmagent/umit/icm/agent/gui/GtkMain.py:87
+msgid "Event List"
+msgstr "事件列表"
+
+#:
+#: /home/tianwei/workspace/icm_agent_new/t/icm-agent/icmagent/umit/icm/agent/gui/GtkMain.py:92
+#: /home/tianwei/workspace/icm_agent_new/t/icm-agent/icmagent/umit/icm/agent/gui/Logs.py:43
+msgid "Logs"
+msgstr "日志"
+
+#:
+#: /home/tianwei/workspace/icm_agent_new/t/icm-agent/icmagent/umit/icm/agent/gui/GtkMain.py:99
+msgid "Preferences..."
+msgstr "个人偏好"
+
+#:
+#: /home/tianwei/workspace/icm_agent_new/t/icm-agent/icmagent/umit/icm/agent/gui/GtkMain.py:104
+msgid "Software Update"
+msgstr "软件更新"
+
+#:
+#: /home/tianwei/workspace/icm_agent_new/t/icm-agent/icmagent/umit/icm/agent/gui/GtkMain.py:109
+msgid "About"
+msgstr "关于"
+
+#:
+#: /home/tianwei/workspace/icm_agent_new/t/icm-agent/icmagent/umit/icm/agent/gui/GtkMain.py:116
+msgid "Logout"
+msgstr "登出"
+
+#:
+#: /home/tianwei/workspace/icm_agent_new/t/icm-agent/icmagent/umit/icm/agent/gui/GtkMain.py:121
+#: /home/tianwei/workspace/icm_agent_new/t/icm-agent/icmagent/umit/icm/agent/gui/GtkMain.py:135
+msgid "Exit"
+msgstr "退出"
+
+#:
+#: /home/tianwei/workspace/icm_agent_new/t/icm-agent/icmagent/umit/icm/agent/gui/GtkMain.py:128
+msgid "Login"
+msgstr "登录"
+
+#:
+#: /home/tianwei/workspace/icm_agent_new/t/icm-agent/icmagent/umit/icm/agent/gui/Login.py:49
+msgid "Open Monitor 2012"
+msgstr ""
+
+#:
+#: /home/tianwei/workspace/icm_agent_new/t/icm-agent/icmagent/umit/icm/agent/gui/Login.py:67
+msgid "Username"
+msgstr "用户名"
+
+#:
+#: /home/tianwei/workspace/icm_agent_new/t/icm-agent/icmagent/umit/icm/agent/gui/Login.py:72
+msgid "Password"
+msgstr "密码"
+
+#:
+#: /home/tianwei/workspace/icm_agent_new/t/icm-agent/icmagent/umit/icm/agent/gui/Login.py:86
+msgid "<span foreground='blue'>Register id</span>"
+msgstr ""
+
+#:
+#: /home/tianwei/workspace/icm_agent_new/t/icm-agent/icmagent/umit/icm/agent/gui/Login.py:95
+msgid "<span foreground='blue'>Forgot password?</span>"
+msgstr ""
+
+#:
+#: /home/tianwei/workspace/icm_agent_new/t/icm-agent/icmagent/umit/icm/agent/gui/Login.py:103
+msgid "Auto login"
+msgstr "自动登录"
+
+#:
+#: /home/tianwei/workspace/icm_agent_new/t/icm-agent/icmagent/umit/icm/agent/gui/Login.py:106
+msgid "settings"
+msgstr "设置"
+
+#:
+#: /home/tianwei/workspace/icm_agent_new/t/icm-agent/icmagent/umit/icm/agent/gui/PeerPage.py:64
+msgid "Peer Info"
+msgstr ""
+
+#:
+#: /home/tianwei/workspace/icm_agent_new/t/icm-agent/icmagent/umit/icm/agent/gui/PeerPage.py:67
+msgid "Preferred Locations"
+msgstr ""
+
+#:
+#: /home/tianwei/workspace/icm_agent_new/t/icm-agent/icmagent/umit/icm/agent/gui/PeerPage.py:70
+msgid "Cloud Aggregator"
+msgstr ""
+
+#:
+#: /home/tianwei/workspace/icm_agent_new/t/icm-agent/icmagent/umit/icm/agent/gui/PeerPage.py:73
+msgid "Super Peers"
+msgstr ""
+
+#:
+#: /home/tianwei/workspace/icm_agent_new/t/icm-agent/icmagent/umit/icm/agent/gui/PeerPage.py:76
+msgid "Peer ID:"
+msgstr ""
+
+#:
+#: /home/tianwei/workspace/icm_agent_new/t/icm-agent/icmagent/umit/icm/agent/gui/PeerPage.py:77
+msgid "Email Address:"
+msgstr ""
+
+#:
+#: /home/tianwei/workspace/icm_agent_new/t/icm-agent/icmagent/umit/icm/agent/gui/PeerPage.py:78
+msgid "Test Sets Version:"
+msgstr ""
+
+#:
+#: /home/tianwei/workspace/icm_agent_new/t/icm-agent/icmagent/umit/icm/agent/gui/PeerPage.py:89
+msgid "Reset"
+msgstr "重置"
+
+#:
+#: /home/tianwei/workspace/icm_agent_new/t/icm-agent/icmagent/umit/icm/agent/gui/PeerPage.py:98
+#: /home/tianwei/workspace/icm_agent_new/t/icm-agent/icmagent/umit/icm/agent/gui/TestPage.py:94
+msgid "Add"
+msgstr ""
+
+#:
+#: /home/tianwei/workspace/icm_agent_new/t/icm-agent/icmagent/umit/icm/agent/gui/PeerPage.py:101
+msgid "Show all"
+msgstr ""
+
+#:
+#: /home/tianwei/workspace/icm_agent_new/t/icm-agent/icmagent/umit/icm/agent/gui/Preference.py:57
+msgid "OpenMonitor Preferences"
+msgstr ""
+
+#:
+#: /home/tianwei/workspace/icm_agent_new/t/icm-agent/icmagent/umit/icm/agent/gui/Preference.py:76
+msgid "help"
+msgstr "帮助"
+
+#:
+#: /home/tianwei/workspace/icm_agent_new/t/icm-agent/icmagent/umit/icm/agent/gui/Preference.py:89
+msgid "PeerInfo"
+msgstr ""
+
+#:
+#: /home/tianwei/workspace/icm_agent_new/t/icm-agent/icmagent/umit/icm/agent/gui/Preference.py:92
+msgid "Tests"
+msgstr "测试设置"
+
+#:
+#: /home/tianwei/workspace/icm_agent_new/t/icm-agent/icmagent/umit/icm/agent/gui/Preference.py:95
+msgid "Feedback"
+msgstr "反馈"
+
+#:
+#: /home/tianwei/workspace/icm_agent_new/t/icm-agent/icmagent/umit/icm/agent/gui/Preference.py:98
+#: /home/tianwei/workspace/icm_agent_new/t/icm-agent/icmagent/umit/icm/agent/gui/TestPage.py:84
+msgid "Update"
+msgstr "更新"
+
+#:
+#: /home/tianwei/workspace/icm_agent_new/t/icm-agent/icmagent/umit/icm/agent/gui/Preference.py:101
+msgid "Advanced"
+msgstr "高级"
+
+#:
+#: /home/tianwei/workspace/icm_agent_new/t/icm-agent/icmagent/umit/icm/agent/gui/SoftwareUpdate.py:64
+msgid "Open Monitor Software Update Manager"
+msgstr ""
+
+#:
+#: /home/tianwei/workspace/icm_agent_new/t/icm-agent/icmagent/umit/icm/agent/gui/SoftwareUpdate.py:105
+msgid "The newest open monitor in your computer!"
+msgstr ""
+
+#:
+#: /home/tianwei/workspace/icm_agent_new/t/icm-agent/icmagent/umit/icm/agent/gui/SoftwareUpdate.py:137
+msgid "Check"
+msgstr "检测"
+
+#:
+#: /home/tianwei/workspace/icm_agent_new/t/icm-agent/icmagent/umit/icm/agent/gui/SoftwareUpdate.py:138
+msgid "Install"
+msgstr "安装"
+
+#:
+#: /home/tianwei/workspace/icm_agent_new/t/icm-agent/icmagent/umit/icm/agent/gui/SoftwareUpdate.py:142
+msgid "Details"
+msgstr "细节"
+
+#:
+#: /home/tianwei/workspace/icm_agent_new/t/icm-agent/icmagent/umit/icm/agent/gui/SoftwareUpdate.py:153
+msgid "Close"
+msgstr "关闭"
+
+#:
+#: /home/tianwei/workspace/icm_agent_new/t/icm-agent/icmagent/umit/icm/agent/gui/SoftwareUpdate.py:154
+msgid "Settings"
+msgstr "设置"
+
+#:
+#: /home/tianwei/workspace/icm_agent_new/t/icm-agent/icmagent/umit/icm/agent/gui/SoftwareUpdate.py:257
+msgid ""
+"Open Monitor Alpha is coming soon!\n"
+" Designed by UMIT"
+msgstr ""
+
+#:
+#: /home/tianwei/workspace/icm_agent_new/t/icm-agent/icmagent/umit/icm/agent/gui/SuperPeerSetting.py:47
+msgid "Super Peers List"
+msgstr ""
+
+#:
+#: /home/tianwei/workspace/icm_agent_new/t/icm-agent/icmagent/umit/icm/agent/gui/TestPage.py:58
+msgid "Update tests module automatically"
+msgstr ""
+
+#:
+#: /home/tianwei/workspace/icm_agent_new/t/icm-agent/icmagent/umit/icm/agent/gui/TestPage.py:59
+msgid "Load HTTP Throttled Test"
+msgstr ""
+
+#:
+#: /home/tianwei/workspace/icm_agent_new/t/icm-agent/icmagent/umit/icm/agent/gui/TestPage.py:80
+msgid "Installed Tests"
+msgstr ""
+
+#:
+#: /home/tianwei/workspace/icm_agent_new/t/icm-agent/icmagent/umit/icm/agent/gui/TestPage.py:98
+msgid "Add All"
+msgstr ""
+
+#:
+#: /home/tianwei/workspace/icm_agent_new/t/icm-agent/icmagent/umit/icm/agent/gui/TestPage.py:102
+msgid "Remove"
+msgstr ""
+
+#:
+#: /home/tianwei/workspace/icm_agent_new/t/icm-agent/icmagent/umit/icm/agent/gui/TestPage.py:106
+msgid "Remove All"
+msgstr ""
+
+#:
+#: /home/tianwei/workspace/icm_agent_new/t/icm-agent/icmagent/umit/icm/agent/gui/TestPage.py:114
+msgid "Selected Tests"
+msgstr ""
+
+#:
+#: /home/tianwei/workspace/icm_agent_new/t/icm-agent/icmagent/umit/icm/agent/gui/UpdatePage.py:71
+msgid "Update News Detect"
+msgstr ""
+
+#:
+#: /home/tianwei/workspace/icm_agent_new/t/icm-agent/icmagent/umit/icm/agent/gui/UpdatePage.py:73
+msgid "Update Settings"
+msgstr "更新设置"
+
+#:
+#: /home/tianwei/workspace/icm_agent_new/t/icm-agent/icmagent/umit/icm/agent/gui/UpdatePage.py:76
+msgid "Automatically update"
+msgstr "自动更新"
+
+#:
+#: /home/tianwei/workspace/icm_agent_new/t/icm-agent/icmagent/umit/icm/agent/gui/UpdatePage.py:77
+msgid "Software Update Detect Switch"
+msgstr ""
+
+#:
+#: /home/tianwei/workspace/icm_agent_new/t/icm-agent/icmagent/umit/icm/agent/gui/UpdatePage.py:78
+msgid "Auto detect update news"
+msgstr ""
+
+#:
+#: /home/tianwei/workspace/icm_agent_new/t/icm-agent/icmagent/umit/icm/agent/gui/UpdatePage.py:79
+msgid "Update method"
+msgstr "更新方式"
+

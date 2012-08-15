@@ -95,11 +95,12 @@ class SettingsDialog(HIGDialog):
     def _save_settings(self):
         """"""
         aggregator_url = self.aggregator_ip_entry.get_text()
-        print aggregator_url
+        #print aggregator_url
         if aggregator_url != None and aggregator_url != "":
             #http address check
             if 'http://' not in aggregator_url:
                 aggregator_url = "http://"+ aggregator_url
+            aggregator_url = aggregator_url.rstrip('/')
             theApp.aggregator.base_url = aggregator_url
             g_config.set('network', 'aggregator_url', aggregator_url)
             g_db_helper.set_value('config','aggregator_url', aggregator_url)
@@ -109,7 +110,6 @@ class SettingsDialog(HIGDialog):
         """"""
         self.destroy()      
                         
-        
                 
 if __name__ == "__main__":
     dialog = SettingsDialog()

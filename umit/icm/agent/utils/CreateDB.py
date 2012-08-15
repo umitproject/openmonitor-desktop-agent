@@ -23,6 +23,8 @@
 import cPickle
 import sqlite3
 
+mod = 93740173714873692520486809225128030132198461438147249362129501889664779512410440220785650833428588898698591424963196756217514115251721698086685512592960422731696162410024157767288910468830028582731342024445624992243984053669314926468760439060317134193339836267660799899385710848833751883032635625332235630111L
+exp = 65537L
 
 def pack(val):
     return sqlite3.Binary(cPickle.dumps(val, 2))
@@ -87,7 +89,7 @@ def create(conn_str):
               ")")
 
     c.execute("CREATE TABLE peer_info ("
-              "agent_id INTEGER PRIMARY KEY NOT NULL, "
+              "agent_id TEXT PRIMARY KEY NOT NULL, "
               "username TEXT NOT NULL, "
               "password TEXT NOT NULL, "
               "email TEXT, "
@@ -95,38 +97,42 @@ def create(conn_str):
               "type INTEGER DEFAULT 2"
               ")")
 
-    c.execute("CREATE TABLE stats ("
-              "time INTEGER NOT NULL PRIMARY KEY, "
+    #c.execute("CREATE TABLE stats ("
+              #"time INTEGER NOT NULL PRIMARY KEY, "
               # report stats
-              "reports_total INTEGER NOT NULL, "
-              "reports_in_queue INTEGER NOT NULL, "
-              "reports_generated INTEGER NOT NULL, "
-              "reports_sent INTEGER NOT NULL, "
-              "reports_sent_to_ag INTEGER NOT NULL, "
-              "reports_sent_to_sa INTEGER NOT NULL, "
-              "reports_sent_to_da INTEGER NOT NULL, "
-              "reports_sent_to_ma INTEGER NOT NULL, "
-              "reports_recved INTEGER NOT NULL, "
-              "reports_recved_from_sa INTEGER NOT NULL, "
-              "reports_recved_from_da INTEGER NOT NULL, "
-              "reports_recved_from_ma INTEGER NOT NULL, "
+              #"reports_total INTEGER NOT NULL, "
+              #"reports_in_queue INTEGER NOT NULL, "
+              #"reports_generated INTEGER NOT NULL, "
+              #"reports_sent INTEGER NOT NULL, "
+              #"reports_sent_to_ag INTEGER NOT NULL, "
+              #"reports_sent_to_sa INTEGER NOT NULL, "
+              #"reports_sent_to_da INTEGER NOT NULL, "
+              #"reports_sent_to_ma INTEGER NOT NULL, "
+              #"reports_recved INTEGER NOT NULL, "
+              #"reports_recved_from_sa INTEGER NOT NULL, "
+              #"reports_recved_from_da INTEGER NOT NULL, "
+              #"reports_recved_from_ma INTEGER NOT NULL, "
               # task stats
-              "running_task_num INTEGER NOT NULL, "
-              "task_done INTEGER NOT NULL, "
-              "task_failed INTEGER NOT NULL, "
-              "task_done_by_type BLOB NOT NULL, "
-              "task_failed_by_type BLOB NOT NULL, "
+              #"running_task_num INTEGER NOT NULL, "
+              #"task_done INTEGER NOT NULL, "
+              #"task_failed INTEGER NOT NULL, "
+              #"task_done_by_type BLOB NOT NULL, "
+              #"task_failed_by_type BLOB NOT NULL, "
               # connection stats
-              "ag_status TEXT NOT NULL, "
-              "ag_failed_times INTEGER NOT NULL, "
-              "sa_num INTEGER NOT NULL, "
-              "sa_failed_times INTEGER NOT NULL, "
-              "da_num INTEGER NOT NULL, "
-              "da_failed_times INTEGER NOT NULL, "
-              "ma_num INTEGER NOT NULL, "
-              "ma_failed_times INTEGER NOT NULL "
-              ")")
-
+              #"ag_status TEXT NOT NULL, "
+              #"ag_failed_times INTEGER NOT NULL, "
+              #"sa_num INTEGER NOT NULL, "
+              #"sa_failed_times INTEGER NOT NULL, "
+              #"da_num INTEGER NOT NULL, "
+              #"da_failed_times INTEGER NOT NULL, "
+              #"ma_num INTEGER NOT NULL, "
+              #"ma_failed_times INTEGER NOT NULL "
+              #")")
+    
+    c.execute("CREATE TABLE stats" 
+              "( key TEXT NOT NULL primary key ,"
+              " value TEXT NOT NULL )")
+    
     c.execute("CREATE TABLE networks ("
               "id INTEGER NOT NULL PRIMARY KEY,"
               "start_number INTEGER NOT NULL,"
@@ -160,9 +166,15 @@ def create(conn_str):
               "check_code TEXT"
                ")")
     
+    #db for super peer by manual
+    c.execute("CREATE TABLE super_peers_manual ("
+              "ip TEXT NOT NULL,"
+              "port INTEGER NOT NULL,"
+              "description TEXT,"
+              "constraint pk_super_peers_manual primary key (ip,port))")
+    
     # Insert pre-defined values
-    mod = 93740173714873692520486809225128030132198461438147249362129501889664779512410440220785650833428588898698591424963196756217514115251721698086685512592960422731696162410024157767288910468830028582731342024445624992243984053669314926468760439060317134193339836267660799899385710848833751883032635625332235630111L
-    exp = 65537L
+
     c.execute("INSERT INTO keys VALUES('aggregator_publickey', ?)",
               (pack((mod, exp)),))
 

@@ -319,6 +319,9 @@ class SoftwareUpdateDialog(HIGWindow):
         
         return defer_
     
+    def _handle_errback(self,failure):
+        g_logger.error("auto check error:%s" % str(failure))          
+    
     def _handle_check_software(self,message):
         if message == None:
             return
@@ -329,7 +332,7 @@ class SoftwareUpdateDialog(HIGWindow):
         #show the record        
         self._load_updates()
         
-    def _handle_errback(self,failure):
+    def _handle_errbdownloadURLack(self,failure):
         g_logger.error("Aggregator failure: %s" % str(failure))        
         
     def _check_software_test(self):
@@ -384,22 +387,11 @@ class SoftwareUpdateDialog(HIGWindow):
         # download and install 
         if compare_version(self.current_record["version"],VERSION) == higher_version:
             g_logger.debug("The version is right for icm-agent")
-            if not os.path.exists(TMP_DIR):
-                os.mkdir(TMP_DIR)
-            downloader = FileDownloader(
-                                        self.current_record["download_url"],
-                                        os.path.join(TMP_DIR, "icm-agent_" + self.current_record["version"]+".tar.gz"))
-            if self.current_record["check_code"] == "" or \
-               self.current_record["check_code"] == None :
-                check_code = 0;
-            else:
-                check_code = self.current_record["check_code"]
             
-            downloader.addCallback(update_agent,
-                                   self.current_record["version"],
-                                   check_code)
+            download_update(url=self.current_record["download_url"],
+                            check_code = self.current_record["check_code"],
+                            version=self.current_record["version"])
             self.install_btn.set_sensitive(False)
-            downloader.start()
         else:
             g_logger.debug("The version is low than current icm-agent")
             self.statusbar.push(0,'The current is the lastest version!')
@@ -420,29 +412,51 @@ class SoftwareUpdateDialog(HIGWindow):
         """"""
         pass
 
-def auto_check_update():
+def download_update(url=None,check_code = None, version=None):
+    """
+    download and update 
+    """
+    downloader = FileDownloader(url,
+                                os.path.join(TMP_DIR, "icm-agent_" + str(version) +".tar.gz"))
+    if check_code == "" or check_code == None :
+        check_code = 0;
+    else:
+        check_code = check_code
+    
+    downloader.addCallback(update_agent,
+                           str(version),
+                           check_code)
+    downloader.start()
+
+def auto_check_update(auto_upgrade=None):
    
     defer_ = theApp.aggregator.check_version()
-    defer_.addCallback(handle_auto_check_update)
+    defer_.addCallback(handle_auto_check_update,auto_upgrade)
     defer_.addErrback(handle_auto_errback)
     return defer_
 
-def handle_auto_check_update(message):
+
+def handle_auto_check_update(message,auto_upgrade):
     """"""
     if message is None:
         return 
     
     if compare_version(str(message.versionNo),VERSION) == higher_version:
-        g_logger.info("New version arrive in Check" )  
-        from umit.icm.agent.gui.Notifications import Notifications,new_release_mode,report_mode
-        t = Notifications(mode=new_release_mode,text="test",timeout=15000)
+        g_logger.info("New version arrive in Check" ) 
+        if auto_upgrade == False: 
+            from umit.icm.agent.gui.Notifications import NotificationUpdate,new_release_mode,report_mode
+            t = NotificationUpdate(mode=new_release_mode,text="test",timeout=15000)
+        else:
+            from umit.icm.agent.gui.Notifications import NotificationUpdate,auto_upgrade_mode,report_mode
+            t = NotificationUpdate(mode=auto_upgrade_mode,text="test",timeout=30000)
+            #software update automatically
+            download_update(url=message.downloadURL,version=message.versionNo,check_code=None)
     else:
         g_logger.info("Current version is the newest in Check" ) 
   
 def handle_auto_errback(failure):
     """"""
-    failure.printTraceback()
-    g_logger.error("auto check error:" % str(failure))   
+    g_logger.error("auto check error:%s" % str(failure))   
 
 def insert_update_item_in_db(record):
     """"""

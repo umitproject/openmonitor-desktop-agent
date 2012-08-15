@@ -31,7 +31,7 @@ class AggregatorProxy(object):
 
     def _make_request_header(self, header):
         header.token = theApp.peer_info.AuthToken
-        header.agentID = theApp.peer_info.ID
+        header.agentID = str(theApp.peer_info.ID)
 
     def check_aggregator(self):
         g_logger.info("Sending CheckAggregator message to aggregator")

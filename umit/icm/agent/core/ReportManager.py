@@ -3,6 +3,7 @@
 # Copyright (C) 2011 Adriano Monteiro Marques
 #
 # Author:  Zhongjie Wang <wzj401@gmail.com>
+#          Tianwei Liu <liutianweidlut@gmail.com>
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -19,7 +20,7 @@
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
 import base64
-import time
+import time,datetime
 
 from umit.icm.agent.logger import g_logger
 from umit.icm.agent.Application import theApp
@@ -39,16 +40,16 @@ class ReportEntry(object):
     def __init__(self):
         """Constructor"""
         self.ID = ''
-        self.SourceID = 0
+        self.SourceID = ''
         self.TimeGen = 0
-        self.TestID = 0
+        self.TestID = ''
         self.Report = ''
         self.SourceIP = ''
         self.Status = ReportStatus.UNSENT
 
     def __str__(self):
-        return "(id=%s, source_id=%d, time_gen='%s', test_id=%d, "\
-               "report='%s', source_ip=%s, status=%s)" % \
+        return "(id='%s', source_id='%s', time_gen='%s', test_id='%s', "\
+               "report='%s', source_ip='%s', status='%s')" % \
                (self.ID,
                 self.SourceID,
                 time.ctime(self.TimeGen),
@@ -67,6 +68,11 @@ class ReportManager(object):
         self.cached_reports = {}
 
     def add_report(self, report):
+        """
+        Task scheduler calls this callback 
+        """
+        g_logger.debug("call add report is%s"%report)
+        
         # check if in the cache
         if report is None:
             g_logger.critical("Received None as report. Please, investigate.")
@@ -85,7 +91,7 @@ class ReportManager(object):
         report_entry = ReportEntry()
         # required fields
         report_entry.SourceID = report.header.agentID
-        report_entry.TimeGen = report.header.timeUTC
+        report_entry.TimeGen =  report.header.timeUTC 
         report_entry.TestID = report.header.testID
         report_entry.ID = report.header.reportID
         report_entry.Report = report
@@ -117,7 +123,7 @@ class ReportManager(object):
             report_entry = ReportEntry()
             report_entry.ID = record[0]
             report_entry.TestID = record[1]
-            report_entry.TimeGen = record[2]
+            report_entry.TimeGen = int(time.mktime(time.strptime(record[2], "%Y-%m-%d %H:%M:%S")))
             report_entry.Report = MessageFactory.decode(base64.b64decode(record[3]))
             report_entry.SourceID = record[4]
             report_entry.SourceIP = record[5]
@@ -128,15 +134,16 @@ class ReportManager(object):
 
     def load_reports_from_db(self, table_name):
         rs = g_db_helper.select("select * from %s" % table_name)
+        return rs
 
     def save_report_to_db(self, table_name, report_entry):
         sql_stmt = "insert into %s (report_id, test_id, time_gen, content, "\
                    "source_id, source_ip, status) values "\
-                   "('%s', %d, %d, '%s', %d, '%s', '%s')" % \
+                   "('%s', '%s', '%s', '%s', '%s', '%s', '%s')" % \
                    (table_name,
                     report_entry.ID,
                     report_entry.TestID,
-                    report_entry.TimeGen,
+                    datetime.datetime.fromtimestamp(report_entry.TimeGen),
                     base64.b64encode(MessageFactory.encode(report_entry.Report)),
                     report_entry.SourceID,
                     report_entry.SourceIP,

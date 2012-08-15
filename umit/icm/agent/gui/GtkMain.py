@@ -3,6 +3,7 @@
 # Copyright (C) 2011 Adriano Monteiro Marques
 #
 # Author:  Zhongjie Wang <wzj401@gmail.com>
+#          Tianwei Liu <liutianweidlut@gmail.com>
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -21,6 +22,7 @@
 import gtk
 import gobject
 import os
+
 
 from twisted.internet import reactor
 
@@ -50,6 +52,7 @@ class GtkMain(object):
         self.set_login_status(False)
 
     def _create_tray(self):
+        
         self.tray_menu_logged_in = gtk.Menu()
         self.tray_menu_logged_out = gtk.Menu()
 
@@ -93,7 +96,7 @@ class GtkMain(object):
 
         self.tray_menu_logged_in.append(gtk.SeparatorMenuItem())
 
-        menu_item = gtk.MenuItem(_("Preference"))
+        menu_item = gtk.MenuItem(_("Preferences..."))
         menu_item.connect("activate", lambda w: self.show_preference())
         menu_item.show()
         self.tray_menu_logged_in.append(menu_item)
@@ -178,9 +181,9 @@ class GtkMain(object):
         webbrowser.open(url)
 
     def show_dashboard(self):
-        from umit.icm.agent.gui.Dashboard import DashboardWindow
+        from umit.icm.agent.gui.dashboard.Dashboard import DashboardWindow
         wnd = DashboardWindow()
-        wnd.show_all()
+        wnd.show_all_modify()
 
     def show_event_list(self):
         from umit.icm.agent.gui.Event import EventWindow
@@ -193,7 +196,7 @@ class GtkMain(object):
         wnd.show_all()
 
     def show_preference(self):
-        from umit.icm.agent.gui.Preference import PreferenceWindow
+        from umit.icm.agent.gui.Preference.Preference import PreferenceWindow
         wnd = PreferenceWindow()
         wnd.show_all()
         

@@ -29,6 +29,7 @@ import subprocess
 from umit.icm.agent.logger import g_logger
 from umit.icm.agent.Global import *
 from umit.icm.agent.BasePaths import *
+from umit.icm.agent.Application import theApp
 
 def onerror(func,path,exec_info):
     """
@@ -45,6 +46,12 @@ def update_agent(result, *args, **kw):
     """
     update back
     """
+    g_logger.info("Close task looping...")
+    theApp.task_assgin_lc.stop()
+    theApp.task_run_lc.stop()
+    theApp.report_proc_lc.stop()
+    theApp.test_sets_fetch_lc()    
+    
     g_logger.info("Updating Desktop Agent...")
     # args = ((version, check_code=0), {})
     version = args[0]

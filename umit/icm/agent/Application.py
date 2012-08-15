@@ -18,6 +18,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
+
 """
 Entrance of ICM Desktop Agent
 """
@@ -26,10 +27,8 @@ import os
 import signal
 import sys
 import time
-import libcagepeers
-import threading
 import gtk
-import re
+import socket
 
 from twisted.internet import reactor
 from twisted.internet import task
@@ -38,6 +37,8 @@ from umit.icm.agent.logger import g_logger
 from umit.icm.agent.BasePaths import *
 from umit.icm.agent.Global import *
 from umit.icm.agent.Version import VERSION
+from umit.icm.agent.rpc.message import *
+from umit.icm.agent.rpc.MessageFactory import MessageFactory
 
 from umit.icm.agent.I18N import _
 
@@ -53,8 +54,6 @@ def main_is_frozen():
 
 class Application(object):
     def __init__(self):
-        self.cage_instance = libcagepeers
-        self.peer_added = False
         pass
 
     def _init_components(self, aggregator):
@@ -63,7 +62,7 @@ class Application(object):
 
         from umit.icm.agent.core.PeerManager import PeerManager
         self.peer_manager = PeerManager()
-        
+
         from umit.icm.agent.core.EventManager import EventManager
         self.event_manager = EventManager()
 
@@ -80,6 +79,13 @@ class Application(object):
         self.task_scheduler = TaskScheduler(self.task_manager,
                                             self.report_manager)
 
+        from umit.icm.agent.core.TaskAssignFetch import TaskAssignFetch
+        self.task_assign = TaskAssignFetch(self.task_manager)
+        
+        from umit.icm.agent.core.TestSetsFetcher import TestSetsFetcher
+        self.test_sets = TestSetsFetcher(self.task_manager,
+                                         self.report_manager)
+        
         from umit.icm.agent.secure.KeyManager import KeyManager
         self.key_manager = KeyManager()
 
@@ -89,19 +95,28 @@ class Application(object):
         from umit.icm.agent.rpc.aggregator import AggregatorAPI
         self.aggregator = AggregatorAPI(aggregator)
 
+        from umit.icm.agent.super.SuperBehaviourByManual import SuperBehaviourByManual
+        self.speer_by_manual = SuperBehaviourByManual(self)
+
         self.quitting = False
-        self.is_auto_login = True        
+        self.is_auto_login = False        
         self.is_successful_login = False #fix the login failure, save DB problem
-
+                       
     def _load_from_db(self):
-
+        """
+        """
         self.peer_manager.load_from_db()
         # restore unsent reports
         self.report_manager.load_unsent_reports()
+        # desktop agent stats saving
+        self.statistics.load_from_db()
 
-    def init_after_running(self, port=None, username=None, password=None, server_enabled=True):
+    def init_after_running(self, port=None, username=None, password=None,
+                           server_enabled=True, skip_server_check=False):
+        """
+        """
+        #####################################################
         # Create agent service(need to add the port confilct)
-        
         if server_enabled:
             self.listen_port = port if port is not None else g_config.getint('network', 'listen_port')
             try:
@@ -111,25 +126,10 @@ class Application(object):
                 reactor.listenTCP(self.listen_port, self.factory)
             except Exception,info:
                 #There can add more information
-                
-                from higwidgets.higwindows import HIGAlertDialog
-                print 'Exception : %s'%(info)
-                if(re.findall("[Errno 98]",str(info))):
-                    print "Port ", self.listen_port," is already in use. Iterating to next available port.";
-                    self.listen_port = self.listen_port+1
-                    print "Agent is now binding to %d" % self.listen_port
-                    self.init_after_running(self.listen_port, username, password, server_enabled)
-                    return
-                # alter = HIGAlertDialog(primary_text = _("The Listen Port has been used by other applications"),\
-                #                        secondary_text = _("Please check the Port"))
-                # alter.show_all()
-                # result = alter.run()
-                
-                # #cannot write return, if so the program cannot quit, and run in background              
-                # if it is some other exception other than address conflict, then terminate
-                else:
-                    self.terminate()
 
+                self.quit_window_in_wrong(primary_text = _("The Listen Port has been used by other applications"), \
+                                          secondary_text = _("Please check the Port") )
+                
         # Create mobile agent service
         from umit.icm.agent.rpc.mobile import MobileAgentService
         self.ma_service = MobileAgentService()
@@ -139,36 +139,81 @@ class Application(object):
             from umit.icm.agent.gui.GtkMain import GtkMain
             self.gtk_main = GtkMain()
         
-        self.is_auto_login = g_config.getboolean('application', 'auto_login')
-           
-        if  self.is_auto_login:
+        self.is_auto_login = g_config.getboolean('application', 'auto_login_swittch')
+        
+        ###################################################################
+        #debug switch: It can show the gtkWindow without any authentication 
+        if g_config.getboolean('debug','debug_switch') and self.use_gui:
+            self.login_simulate()
+        
+        ######################################
+        #check aggregator can be reached first
+        if not skip_server_check:
+            defer_ = self.aggregator.check_aggregator_website()
+            defer_.addCallback(self.check_aggregator_success)
+            defer_.addErrback(self.check_aggregator_failed)
+         
+    
+    def check_aggregator_success(self,response):
+        """
+        """
+        if response == True:
+            self.login_window_show()
+        else:
+            self.speer_by_manual.peer_communication()
+        
+    def login_window_show(self):       
+        """
+        """
+        if  self.is_auto_login and self.use_gui :
             #login with saved username or password, not credentials
             self.peer_info.load_from_db()
             self.login(self.peer_info.Username,self.peer_info.Password, True)
         else:
-            self.gtk_main.show_login()
-            g_logger.info("Auto-login is disabled. You need to manually login.")
-            
-
+            if self.use_gui:
+                self.gtk_main.show_login()
+            else:
+                self.login_without_gui()
+            g_logger.info("Auto-login is disabled. You need to manually login.")        
+    
+    def check_aggregator_failed(self,message):
+        """
+        """
+        self.aggregator.available = False
+        
+        self.speer_by_manual.peer_communication()
+    
+    
+    def login_without_gui(self):
+        """
+        Users login without username or password
+        """      
+        username  = raw_input("User Name:")
+        password = raw_input("Password:")
+        self.login(username, password, save_login=True) 
+        
     def check_software_auto(self):
         """
         check software: according the time and other configurations
         """
-        if g_config.getboolean('update', 'update_detect'):
-            from umit.icm.agent.gui.SoftwareUpdate import auto_check_update
-            #Here can set some update attributes
-            defer_ = auto_check_update()
+        from umit.icm.agent.gui.SoftwareUpdate import auto_check_update
+        ##############################
+        #Software update automatically
+        if g_config.getboolean('application','auto_update'):
+            defer_ = auto_check_update(auto_upgrade=True)
             defer_.addErrback(self._handle_errback)
-            return defer_
-        
+        else:
+            ############################
+            #Detect update automatically
+            if g_config.getboolean('update', 'update_detect'):
+                #Here can set some update attributes
+                defer_ = auto_check_update(auto_upgrade=False)
+                defer_.addErrback(self._handle_errback)
+                    
     def register_agent(self, username, password):
+        """
+        """
         defer_ = self.aggregator.register(username, password)
-        # Logging for verifying flow
-        g_logger.info("ENTER : register_agent since peer_info does not have username: Checking login flow")
-        g_logger.info("username : %s" % username)
-        g_logger.info("password : %s" % password)
-        self.peer_info.Username = username
-        self.peer_info.Password = password
         defer_.addCallback(self._handle_register)
         defer_.addErrback(self._handle_errback)
         return defer_
@@ -178,20 +223,23 @@ class Application(object):
             self.peer_info.ID = result['id']
             self.peer_info.CipheredPublicKeyHash = result['hash']
             self.peer_info.is_registered = True
-            self.peer_info.save_to_db()
             g_logger.debug("Register to Aggregator: %s" % result['id'])
             
         return result
 
     def _handle_errback(self, failure):
+        """
+        """
         failure.printTraceback()
         g_logger.error(">>> Failure from Application: %s" % failure)
 
     def login(self, username, password, save_login=False, login_only=False):
+        """
+        """
         if self.use_gui:
             self.gtk_main.set_to_logging_in()
 
-        if self.is_auto_login == True:
+        if self.is_auto_login and self.use_gui:
             #auto-login, select the credentials username and password from DB
             return self._login_after_register_callback(None, username,
                                                    password, save_login,
@@ -205,7 +253,7 @@ class Application(object):
                                                    password, save_login,
                                                    login_only)                
             else:
-                #self.peer_info.clear_db()
+                self.peer_info.clear_db()
                 deferred = self.register_agent(username, password)
                 deferred.addCallback(self._login_after_register_callback,
                                  username, password, save_login, login_only)
@@ -226,6 +274,7 @@ class Application(object):
             g_logger.info("Match the username and password, \
                            we will change the default credentials")
             g_logger.debug(rs[0])
+            
             self.peer_info.ID =  rs[0][0]
             self.peer_info.Username = rs[0][1]
             self.peer_info.Password = rs[0][2]
@@ -233,6 +282,7 @@ class Application(object):
             self.peer_info.CipheredPublicKeyHash = rs[0][4]
             self.peer_info.Type = rs[0][5]
             self.peer_info.is_registered = True   
+            
             return True                     
 
     def _login_after_register_callback(self, message, username,
@@ -240,24 +290,30 @@ class Application(object):
         defer_ = self.aggregator.login(username, password)
         defer_.addCallback(self._handle_login, username, password,
                            save_login, login_only)
-
+        defer_.addErrback(self._handle_login_errback)
         return defer_
 
-    def _handle_login(self, result, username, password, save_login,
-                      login_only=False):
+    def _handle_login_errback(self,failure):
+        """
+        """
+        print "------------------login failed!-------------------"
+             
+    def _handle_login(self, result, username, password, save_login,login_only=False):
+        """
+        """
         #login successfully
         if result:
             self.peer_info.Username = username if username !="" and username != None else self.peer_info.Username
             self.peer_info.Password = password if password !="" and password != None else self.peer_info.Password
-            print self.peer_info.Username, self.peer_info.Password 
+            #print self.peer_info.Username, self.peer_info.Password 
             self.peer_info.is_logged_in = True
-            self.aggregator.getlocation()
+            #self.peer_info.clear_db()
             self.peer_info.save_to_db()
             g_logger.debug("Login Successfully :%s@%s" % (username,password))
             if save_login:
-                g_config.set('application', 'auto_login', True)
+                g_config.set('application', 'auto_login_swittch', True)
             else:
-                g_config.set('application', 'auto_login', False)
+                g_config.set('application', 'auto_login_swittch', False)
 
             if self.use_gui:
                 self.gtk_main.set_login_status(True)
@@ -273,56 +329,81 @@ class Application(object):
             
             #mark login-successful
             self.is_successful_login = True
-
-
-            #After successful Login
-            # 1. Get super peer list from the aggregator
-            # 2. Bootstrap libcage using the first super peer.
-            # 3. After successful bootstrapping, add the current peer into the aggregator (Peer / Super peer flag in the request message). Geo location service should be up for this to work in production.
-            # 4. Sync "peers" table with libcage instance.
-
-            g_logger.info("GETTING BOOTSTRAP PEERS FROM AGGREGATOR")
-            if not re.match("^[A-Za-z]+$",self.peer_info.country_code):
-                self.peer_info.country_code='UN';
-            self.aggregator.get_bootstrapping_peers(self.peer_info.country_code)
-
-
+            
+            #Task Looping manager
+            self.task_loop_manager()
+            
         return result
-
-    def bootstrap(self):
-        g_logger.info("VALUE OF CAGE INSTANCE IS : %s" % self.cage_instance)
-        g_logger.info("GETTING PEER AND SUPER PEER LIST FROM THE AGGREGATOR")
-
+    
+    def login_simulate(self):
+        """
+        Only test GTK features
+        """
+        #GTK show
+        if self.use_gui == True:
+            self.gtk_main.set_login_status(True)
+        #Basic Information
+        self.peer_info.load_from_db()
+        self._load_from_db()
+        #mark login-successful
+        self.is_successful_login = True 
+        #TASK LOOP
+        self.task_loop_manager()       
+    
+    def task_loop_manager(self):
+        """"""
         # Add looping calls
-        # Maintain in Peermanager takes care of get_peer_list and get_super_peer_list
         if not hasattr(self, 'peer_maintain_lc'):
             self.peer_maintain_lc = task.LoopingCall(self.peer_manager.maintain)
-            self.peer_maintain_lc.start(10)
-
+            self.peer_maintain_lc.start(7200)
+        
         if not hasattr(self, 'task_run_lc'):
+            g_logger.info("Starting task scheduler looping ")
             self.task_run_lc = task.LoopingCall(self.task_scheduler.schedule)
-            self.task_run_lc.start(30)
-
+            
+            task_scheduler_text = g_config.get("Timer","task_scheduler_timer")
+            if task_scheduler_text != "":
+                indival = float(task_scheduler_text)
+            else:
+                indival = 30
+            
+            self.task_run_lc.start(indival)
+        
         if not hasattr(self, 'report_proc_lc'):
+            g_logger.info("Starting report upload looping ")
             self.report_proc_lc = task.LoopingCall(self.report_uploader.process)
-            self.report_proc_lc.start(30)
-
-        #Bootstrap
-        # Plug in Libcage code - Get port number from command line
-        g_logger.info("List of super peers from the Aggregator : %s" % self.peer_manager.super_peers)
-        g_logger.info("List of normal peers from the Aggregator : %s" % self.peer_manager.normal_peers)
-
-        g_logger.info("BOOTSTRAPPING LIBCAGE BASED ON THE LIST OF PEERS AND SUPER PEERS")
-
-        g_logger.info("Info about super peers : ");
-        if len(self.peer_manager.super_peers)!=0:
-            for superPeer in self.peer_manager.super_peers.values():
-                g_logger.info(superPeer.status, " and PeerID is ",superPeer.ID);
-
-
-        # Add this peer into the peerlist of aggregator
-        g_logger.info("ADDING THIS PEER INTO THE AGGREGATOR'S PEERLIST")
-        #self.peer_manager.add_peer()
+            
+            report_uploade_text = g_config.get("Timer","send_report_timer")
+            if report_uploade_text != "":
+                indival = float(report_uploade_text)
+            else:
+                indival = 30                
+            
+            self.report_proc_lc.start(indival)
+            
+        if not hasattr(self,'task_assign_lc'):
+            g_logger.info("Starting get assigned task from Aggregator")
+            self.task_assgin_lc = task.LoopingCall(self.task_assign.fetch_task)
+            
+            task_assign_text = g_config.get("Timer","task_assign_timer")
+            if task_assign_text != "":
+                indival = float(task_assign_text)
+            else:
+                indival = 30                
+            
+            self.task_assgin_lc.start(indival)
+        
+        if not hasattr(self,'test_sets_fetch_lc'):
+            g_logger.info("Starting get test sets from Aggregator")
+            self.test_sets_fetch_lc = task.LoopingCall(self.test_sets.fetch_tests)
+            
+            test_fetch_text = g_config.get("Timer","test_fetch_timer")
+            if test_fetch_text != "":
+                indival = float(test_fetch_text)
+            else:
+                indival = 30                
+            
+            self.test_sets_fetch_lc.start(indival)             
 
     def logout(self):
         defer_ = self.aggregator.logout()
@@ -334,7 +415,7 @@ class Application(object):
         if self.use_gui:
             self.gtk_main.set_login_status(False)
 
-        g_config.set('application', 'auto_login', False)
+        g_config.set('application', 'auto_login_swittch', False)
 
         return result
 
@@ -343,12 +424,7 @@ class Application(object):
         The Main function
         """
         g_logger.info("Starting ICM agent. Version: %s", VERSION)
-
         self._init_components(aggregator)
-
-        
-
-        #self.task_manager.add_test(1, '* * * * *', {'url':'http://icm-dev.appspot.com'}, 3)
 
         reactor.addSystemEventTrigger('before', 'shutdown', self.on_quit)
 
@@ -356,16 +432,26 @@ class Application(object):
             # This is necessary so the bot can take over and control the agent
             reactor.callWhenRunning(self.init_after_running)
 
-        # TODO IMPORTANT : This must be called only after successful GetPeerlist and successful completion of bootstrapping
-
         if run_reactor:
             # This is necessary so the bot can take over and control the agent
             reactor.run()
 
-        thread.join();
-
+    def quit_window_in_wrong(self,primary_text = "",secondary_text = ""):
+        """
+        """
+        #There can add more information
+        from higwidgets.higwindows import HIGAlertDialog
+        #print 'The exception is %s'%(info)
+        alter = HIGAlertDialog(primary_text = primary_text,\
+                               secondary_text = secondary_text)
+        alter.show_all()
+        result = alter.run()
+        
+        #cannot write return, if so the program cannot quit, and run in background              
+        self.terminate()
+        
     def terminate(self):
-        print 'quit'
+        #print 'quit'
         reactor.callWhenRunning(reactor.stop)
 
     def on_quit(self):
@@ -377,8 +463,16 @@ class Application(object):
         if hasattr(self, 'peer_manager') and self.is_successful_login:
             g_logger.info("[quit]:save peer_manager into DB")
             self.peer_manager.save_to_db()
-
-        #clear peer id
+            
+        if hasattr(self, 'statistics') and  self.is_successful_login:
+            g_logger.info("[quit]:save statistics into DB") 
+            self.statistics.save_to_db()           
+        
+        if hasattr(self,'test_sets') and self.is_successful_login \
+            and os.path.exists(CONFIG_PATH):
+            #store test_version id
+            self.test_sets.set_test_version(self.test_sets.current_test_version)
+ 
         m = os.path.join(ROOT_DIR, 'umit', 'icm', 'agent', 'agent_restart_mark')
         if os.path.exists(m):
             os.remove(m)
@@ -387,9 +481,11 @@ class Application(object):
         
         g_logger.info("ICM Agent quit.")
 
+
 theApp = Application()
 
 
 if __name__ == "__main__":
     #theApp.start()
     pass
+

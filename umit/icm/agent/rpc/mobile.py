@@ -213,6 +213,16 @@ class MobileAgentService(object):
         self._make_response_header(response_msg.header)
         self._send_message(response_msg, transport)
 
+    def _handle_get_events(self,message,transport):
+        """
+        """
+        # send response
+        response_msg = GetEventsResponse()
+        pass
+        
+        self._make_response_header(response_msg.header)
+        self._send_message(response_msg, transport)                
+    
     def _send_message(self, message, transport):
         g_logger.info("Sending a %s message to %s" % (message.DESCRIPTOR.name,
                                                       transport.getPeer()))
@@ -230,3 +240,7 @@ class MobileAgentService(object):
             self._handle_send_website_report(message, transport)
         elif isinstance(message, SendServiceReport):
             self._handle_send_service_report(message, transport)
+        elif isinstance(message, GetEvents):
+            self._handle_get_events(message, transport)
+            
+            

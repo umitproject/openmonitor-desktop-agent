@@ -5,8 +5,9 @@ dist.bat
 dist
 log
 tmp
+*.tar.gz
 Thumbs.db
-*.db3
 .project
 .pydevproject
 .settings
+

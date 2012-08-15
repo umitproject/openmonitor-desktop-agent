@@ -20,7 +20,7 @@
 
 import struct
 
-from umit.icm.agent.rpc.messages_pb2 import *
+from umit.proto.messages_pb2 import *
 from umit.icm.agent.rpc.messages_ext_pb2 import *
 from umit.icm.agent.rpc.MessageID import *
 
@@ -79,7 +79,7 @@ class RawMessage(object):
 if __name__ == "__main__":
     msg_send = WebsiteReport()
     msg_send.agentType = 2
-    msg_send.agentID = 11111
+    msg_send.agentID = '11111'
     msg_send.agentPort = 8000
     print(msg_send)
     str_ = msg_send.SerializeToString()

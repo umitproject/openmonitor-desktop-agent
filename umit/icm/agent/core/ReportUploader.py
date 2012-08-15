@@ -3,6 +3,7 @@
 # Copyright (C) 2011 Adriano Monteiro Marques
 #
 # Author:  Zhongjie Wang <wzj401@gmail.com>
+#          Tianwei Liu <liutianweidlut@gmail.com>
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -46,21 +47,36 @@ class ReportUploader(object):
         else:
             return None
 
-    def send_report(self, report):
-        #if AggregatorAPI.sendReport(report):
-            #report.status = ReportStatus.SENT_TO_AGGREGATOR
-            #return True
-        #elif DesktopSuperAgentRPC.sendReport(report):
-            #report.status = ReportStatus.SENT_TO_SUPER_AGENT
-            #return True
-        #elif DesktopAgentRPC.sendReport(report):
-            #report.status = ReportStatus.SENT_TO_AGENT
-            #return True
-        #else MobileAgentRPC.sendReport(report):
+    def send_report(self, report_key):
+        """
+        Different priorities of sending report: Aggregator -> Super agent -> desktop normal agent 
+        """
+        from umit.icm.agent.core.ReportManager import ReportStatus
+        
+        send_status = False
+        report_entry = self.report_manager.cached_reports[report_key]
+        #print report_entry
+        if theApp.aggregator.send_report(report_entry.Report):
+            report_entry.Status = ReportStatus.SENT_TO_AGGREGATOR
+            send_status = True
+        
+        #############################################
+        #We should add more mechanisms to send report    
+        #elif DesktopSuperAgentRPC.sendReport(report_entry.Report):
+        #    report_entry.Status = ReportStatus.SENT_TO_SUPER_AGENT
+        #    send_status = True
+        #elif DesktopAgentRPC.sendReport(report_entry.Report):
+        #    report_entry.Status = ReportStatus.SENT_TO_AGENT
+        #    send_status = True
+        #else MobileAgentRPC.sendReport(report_entry.Report):
             #report.status = ReportStatus.SENT_TO_AGGREGATOR
             #return True
         #_retry_list.append
-        pass
+ 
+        #if send_status:
+        #    del self.report_manager.cached_reports[report_key]
+    
+        return send_status
 
     """
     Upload reports
@@ -70,19 +86,23 @@ class ReportUploader(object):
         if theApp.aggregator.available:
             g_logger.info("Sending %d reports to the aggregator." % \
                           len(self.report_manager.cached_reports))
-            for report_entry in self.report_manager.cached_reports.values():
-                theApp.aggregator.send_report(report_entry.Report)
+            for report_key in self.report_manager.cached_reports.keys():    
+                self.send_report(report_key)
+                #theApp.aggregator.send_report(report_entry.Report)
         else:
+            # Later, We should implement other upload path: super peer, normal peer 
             # Choose a random super peer to upload
+            g_logger.info("Cannot connect to aggregator, so send report to super peer first!")
             speer_id = theApp.peer_manager.get_random_speer_connected()
             if speer_id is not None:
-                g_logger.info("Sending %s reports to the super agent %d." % \
+                g_logger.info("Sending %s reports to the super agent %s." % \
                               (len(self.report_manager.cached_reports),
-                               speer_id))
+                               str(speer_id)))
                 for report_entry in self.report_manager.cached_reports.values():
                     theApp.peer_manager.sessions[speer_id].\
                           send_report(report_entry.Report)
             elif theApp.peer_info.Type == 2:
+                g_logger.info("Cannot connect to aggregator and super peer ,so send report to normal peers!")
                 cnt = 0
                 sessions = []
                 for peer_id in theApp.peer_manager.normal_peers:
@@ -99,7 +119,7 @@ class ReportUploader(object):
                 else:
                     g_logger.info("No available peers.")
 
-            # Report will be removed from the cached_reports after sent successfully
+            
 
 
 
