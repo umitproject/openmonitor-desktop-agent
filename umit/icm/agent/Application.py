@@ -239,7 +239,7 @@ class Application(object):
         if self.use_gui:
             self.gtk_main.set_to_logging_in()
 
-        if self.is_auto_login == True:
+        if self.is_auto_login and self.use_gui:
             #auto-login, select the credentials username and password from DB
             return self._login_after_register_callback(None, username,
                                                    password, save_login,

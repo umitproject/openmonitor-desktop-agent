@@ -42,7 +42,18 @@ class SuperBehaviourByManual(object):
         """
         if self.check_peer_authentical() == True:
             g_logger.info("Now, the desktop agent will try to connect the super peer")
+            
+            ###############################################
+            #here, we load the necessay information from db
             self.application.login_simulate()
+            
+            ###############################################
+            #check if there are some super peers in peer db,
+            #if some are loaded, we will skip this step
+            if self.application.peer_manager.super_peers.values is not None:
+                g_logger.info("Skip super peer add from superpeer by manual list")
+                return
+            
             super_peer_record = g_db_helper.get_super_peer_first()
             if super_peer_record != None:
                 self.build_super_connection(str(super_peer_record[0]),int(super_peer_record[1]))
@@ -55,6 +66,9 @@ class SuperBehaviourByManual(object):
  
     def build_super_connection(self,host,port):
         """
+        this method will connect to host:port, to get necessary super peer information,
+        and add them into peer list and super peer session.
+        we will get peer_id, token, ciphered_public_key from super peer
         """
         """
         from umit.icm.agent.utils.CreateDB import mod,exp 
