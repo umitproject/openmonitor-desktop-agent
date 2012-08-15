@@ -165,7 +165,7 @@ class Application(object):
     def login_window_show(self):       
         """
         """
-        if  self.is_auto_login:
+        if  self.is_auto_login and self.use_gui :
             #login with saved username or password, not credentials
             self.peer_info.load_from_db()
             self.login(self.peer_info.Username,self.peer_info.Password, True)
@@ -323,9 +323,6 @@ class Application(object):
             
             #Load peers and reports from DB
             self._load_from_db()
-            
-            #mark login-successful
-            self.is_successful_login = True
             
             #check the new software(should appear after login successfully)
             self.check_software_auto()
