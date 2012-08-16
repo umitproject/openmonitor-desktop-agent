@@ -130,6 +130,7 @@ class Application(object):
                 self.quit_window_in_wrong(primary_text = _("The Listen Port has been used by other applications"), \
                                           secondary_text = _("Please check the Port") )
                 
+        #############################
         # Create mobile agent service
         from umit.icm.agent.rpc.mobile import MobileAgentService
         self.ma_service = MobileAgentService()
@@ -165,10 +166,15 @@ class Application(object):
     def login_window_show(self):       
         """
         """
-        if  self.is_auto_login and self.use_gui :
+        if self.is_auto_login and self.use_gui :
+            #######################################################
             #login with saved username or password, not credentials
             self.peer_info.load_from_db()
+            
+            ########################################
+            #Add more condition to check login legal 
             self.login(self.peer_info.Username,self.peer_info.Password, True)
+            
         else:
             if self.use_gui:
                 self.gtk_main.show_login()
@@ -287,10 +293,13 @@ class Application(object):
 
     def _login_after_register_callback(self, message, username,
                                        password, save_login, login_only):
+        """
+        """
         defer_ = self.aggregator.login(username, password)
         defer_.addCallback(self._handle_login, username, password,
                            save_login, login_only)
         defer_.addErrback(self._handle_login_errback)
+        
         return defer_
 
     def _handle_login_errback(self,failure):
