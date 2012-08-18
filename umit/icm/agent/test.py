@@ -538,7 +538,7 @@ class ServiceTest(Test):
                                                      report.header.testID])
         #We should fix this !!!! it is a tmp
         report.header.traceroute.hops = 0
-        report.header.traceroute.target = "0.0.0.0"
+        report.header.traceroute.target = str(self.host)
         report.header.traceroute.packetSize = 0
         
         report.report.serviceName = self.service_name

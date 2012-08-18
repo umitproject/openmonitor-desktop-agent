@@ -194,6 +194,13 @@ class AggregatorAPI(object):
         defer_.addCallback(self._handle_login_step1)
         defer_.addErrback(self._handle_errback)
         return defer_
+    
+    def login_failed_autologin(self,message):
+        """
+        """
+        g_logger.error("[Login Failed]Wrong username or password,will login again")
+        g_logger.error("[Login Failed]More information:%s"%(message))
+        self._alter_network_informaiton(message)
 
     def _handle_login_step1(self, message):
         if message is None:
@@ -727,7 +734,7 @@ class AggregatorAPI(object):
         return d
 
     def _connection_errback(self, failure):
-        g_logger.error("[AggregatorAPI] - %s" % failure)
+        g_logger.error("[AggregatorAPI connection] - %s" % failure)
 
         if isinstance(failure, error.ConnectError) or \
            isinstance(failure, error.DNSLookupError):
@@ -747,7 +754,8 @@ class AggregatorAPI(object):
         #self._alter_network_informaiton(err.response)
         
     def _decode_errback(self, failure):
-        g_logger.error("[AggregatorAPI] - Failed to decode. %s" % failure)
+        g_logger.error("[AggregatorAPI decode] - Failed to decode. %s" % failure)
+        self._alter_network_informaiton(err.response)
 
     def _handle_errback(self, failure):
         g_logger.error("Aggregator failure: %s" % str(failure))
@@ -769,7 +777,12 @@ class AggregatorAPI(object):
         
         alter.show()
         alter.run()
-
+        
+        #clear db
+        theApp.peer_info.clear_db()
+        
+        theApp.is_auto_login = False
+        
         #show login window again
         theApp.gtk_main.show_login()                
         
