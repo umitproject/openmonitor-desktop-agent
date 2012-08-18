@@ -29,6 +29,7 @@ import sys
 import time
 import gtk
 import socket
+import libcagepeers
 
 from twisted.internet import reactor
 from twisted.internet import task
@@ -320,7 +321,12 @@ class Application(object):
 
             if login_only:
                 return result
-            
+
+            #Before starting the Superpeers taskloop manager, we need to get the Bootstrapping super peers from the aggregator.
+            #We send an individual super peer list call to aggregator to check if there are super peers
+
+            #libcagepeers.createCage_firstnode()
+
             #Load peers and reports from DB
             self._load_from_db()
             
