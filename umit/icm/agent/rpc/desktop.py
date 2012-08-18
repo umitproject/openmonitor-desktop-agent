@@ -75,13 +75,14 @@ class DesktopAgentSession(Session):
         print newTests
         for newTest in newTests:
             test = response_message.tests.add()
-            test.testID = str(theApp.test_sets.current_test_version)
+            test.testID = newTest['test_id']
             test.executeAtTimeUTC = 4000
             
             from umit.icm.agent.core.TestSetsFetcher import TEST_WEB_TYPE,TEST_SERVICE_TYPE
             if newTest['test_type'] == str(TEST_WEB_TYPE):
                 test.testType = TEST_WEB_TYPE
                 test.website.url = newTest['website_url']
+                
             elif newTest['test_type'] == str(TEST_SERVICE_TYPE):
                 test.testType = TEST_SERVICE_TYPE
                 test.service.name = newTest['service_name']
@@ -513,7 +514,7 @@ class DesktopSuperAgentSession(Session):
         print "-------------------"
         for newTest in newTests:
             test = response_message.tests.add()
-            test.testID = str(theApp.test_sets.current_test_version)
+            test.testID = newTest['test_id']
             test.executeAtTimeUTC = 4000
             
             from umit.icm.agent.core.TestSetsFetcher import TEST_WEB_TYPE,TEST_SERVICE_TYPE

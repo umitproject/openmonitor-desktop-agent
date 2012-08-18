@@ -180,7 +180,7 @@ class TestSetsFetcher(object):
         if test.website and test.testType == TEST_WEB_TYPE:
             args = {
                     'url':str(test.website.url),
-                    'unitied_test_id':str(test.testID)
+                    'unitied_test_id':test.testID
                     }
             #crontime = self.random_cron_time(executeAtTimeUTC)
             #In test.py logical , we can call the according test functions

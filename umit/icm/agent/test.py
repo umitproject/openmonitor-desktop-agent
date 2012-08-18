@@ -379,7 +379,7 @@ class WebsiteTest():
         report.header.agentID = str(theApp.peer_info.ID)
         report.header.timeUTC = int(default_timer())    #here should UTC clock?
         report.header.timeZone =  -(time.timezone/3600)  #8
-        report.header.testID = int(self.unitied_test_id)
+        report.header.testID = self.unitied_test_id
         report.header.reportID = generate_report_id([report.header.agentID,
                                                      report.header.timeUTC,
                                                      report.header.testID])
@@ -532,7 +532,7 @@ class ServiceTest(Test):
         report.header.agentID = str(theApp.peer_info.ID)
         report.header.timeUTC = int(time.time())    #here should UTC clock?
         report.header.timeZone = -(time.timezone/3600)  #8
-        report.header.testID = int(self.unitied_test_id)
+        report.header.testID = self.unitied_test_id
         report.header.reportID = generate_report_id([report.header.agentID,
                                                      report.header.timeUTC,
                                                      report.header.testID])
