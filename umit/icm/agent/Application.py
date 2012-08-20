@@ -29,7 +29,7 @@ import sys
 import time
 import gtk
 import socket
-import libcagepeers
+
 
 from twisted.internet import reactor
 from twisted.internet import task
@@ -102,6 +102,8 @@ class Application(object):
         self.quitting = False
         self.is_auto_login = False        
         self.is_successful_login = False #fix the login failure, save DB problem
+
+
                        
     def _load_from_db(self):
         """
@@ -266,7 +268,13 @@ class Application(object):
                                  username, password, save_login, login_only)
                 deferred.addErrback(self._handle_errback)
                 return deferred
-        
+
+
+
+
+
+
+
     def check_username(self,username="",password=""):
         """
         check username and password in DB, the information is got from Login-Window
@@ -292,15 +300,11 @@ class Application(object):
             
             return True                     
 
-    def _login_after_register_callback(self, message, username,
-                                       password, save_login, login_only):
-        """
-        """
+    def _login_after_register_callback(self, message, username,password, save_login, login_only):
         defer_ = self.aggregator.login(username, password)
-        defer_.addCallback(self._handle_login, username, password,
-                           save_login, login_only)
+        defer_.addCallback(self._handle_login, username, password,save_login, login_only)
         defer_.addErrback(self._handle_login_errback)
-        
+
         return defer_
 
     def _handle_login_errback(self,failure):
@@ -331,10 +335,7 @@ class Application(object):
             if login_only:
                 return result
 
-            #Before starting the Superpeers taskloop manager, we need to get the Bootstrapping super peers from the aggregator.
-            #We send an individual super peer list call to aggregator to check if there are super peers
 
-            #libcagepeers.createCage_firstnode()
 
             #Load peers and reports from DB
             self._load_from_db()
@@ -347,6 +348,8 @@ class Application(object):
             
             #Task Looping manager
             self.task_loop_manager()
+
+
             
         return result
     

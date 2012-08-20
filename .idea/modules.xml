@@ -2,7 +2,7 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/../aggregator/.idea/aggregator.iml" filepath="$PROJECT_DIR$/../aggregator/.idea/aggregator.iml" />
+      <module fileurl="file://$PROJECT_DIR$/../icm-aggregator/aggregator/.idea/aggregator.iml" filepath="$PROJECT_DIR$/../icm-aggregator/aggregator/.idea/aggregator.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea/icm-agent.iml" filepath="$PROJECT_DIR$/.idea/icm-agent.iml" />
     </modules>
   </component>

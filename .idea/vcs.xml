@@ -1,12 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="VcsDirectoryMappings">
-    <mapping directory="$PROJECT_DIR$/../aggregator" vcs="Git" />
-    <mapping directory="$PROJECT_DIR$/../aggregator/icm-common" vcs="Git" />
-    <mapping directory="$PROJECT_DIR$" vcs="Git" />
-    <mapping directory="$PROJECT_DIR$/deps/higwidgets" vcs="Git" />
-    <mapping directory="$PROJECT_DIR$/deps/icm-common" vcs="Git" />
-    <mapping directory="$PROJECT_DIR$/deps/umit-common" vcs="Git" />
+    <mapping directory="" vcs="Git" />
   </component>
 </project>
 

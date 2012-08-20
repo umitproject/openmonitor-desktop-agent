@@ -26,6 +26,7 @@ import sys
 import urllib
 import random
 import time
+from umit.icm.agent.libcage.example import libcagepeers
 
 from twisted.web import client
 from twisted.web.error import Error
@@ -80,6 +81,7 @@ class AggregatorAPI(object):
     #----------------------------------------------------------------------
     def __init__(self, aggregator=None):
         """Constructor"""
+        self.bootstrapFlag = False
         self.base_url = g_config.get('network', 'aggregator_url') \
             if aggregator is None else aggregator
         
@@ -259,7 +261,7 @@ class AggregatorAPI(object):
     def get_super_peer_list(self, count):
         request_msg = GetSuperPeerList()
         request_msg.count = int(count)
-
+        request_msg.location = "UN"
         defer_ = self._send_message(request_msg, GetSuperPeerListResponse)
         defer_.addCallback(self._handle_get_super_peer_list_response)
         defer_.addErrback(self._handle_errback)
@@ -305,6 +307,29 @@ class AggregatorAPI(object):
                                                 peer.token,
                                                 peer.publicKey)
             theApp.peer_manager.connect_to_peer(peer.agentID)
+
+
+        # Bootstrapping
+        if theApp.aggregator.available:
+            g_logger.debug("CHECK IF THERE ARE PEERS TO BOOTSTRAP")
+            #theApp.aggregator.get_peer_list(5)
+            print 'There are ',len(theApp.peer_manager.normal_peers),' super peers FOR BOOTSTRAPPING';
+
+        if(len(theApp.peer_manager.normal_peers)>0):
+            for peer in theApp.peer_manager.normal_peers.values():
+                print 'Peer : ',peer.ID,'  :  ',peer.IP,'  -  ',peer.Port
+            if not self.bootstrapFlag:
+                print 'Peers present - Bootstrap!'
+                import unicodedata
+                ip = unicodedata.normalize('NFKD', peer.IP).encode('ascii','ignore')
+                libcagepeers.createCage_joinnode("20001",ip,"20000")
+                print "Libcage called - bootstrapped with first peer"
+        else:
+            if not self.bootstrapFlag:
+                print 'No Peers, start new P2P network'
+                libcagepeers.createCage_firstnode("20000")
+                print "Libcage called - new P2P network created"
+        self.bootstrapFlag = True
 
         return message
     
@@ -586,7 +611,7 @@ class AggregatorAPI(object):
                                                     node.peerStatus,
                                                     id)
 
-            theApp.peer_manager.save_to_db()
+            #theApp.peer_manager.save_to_db()
 
         return message
 
