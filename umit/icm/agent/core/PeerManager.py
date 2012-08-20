@@ -49,6 +49,8 @@ class PeerEntry(object):
         self.transport = None
         self.status = 'Disconnected'
 
+
+
     def __unicode__(self):
         return u"Peer Entry %s (%s - %d) %s:%s - Net ID %s" % \
                         (self.ID,
@@ -75,6 +77,16 @@ class PeerManager:
 
         self.connected_peer_num = 0
         self.connected_speer_num = 0
+
+        self.p2ppeers = None
+
+    def save_p2p_to_db(self):
+        for peer in self.p2ppeers:
+            g_db_helper.execute(
+                "insert or replace into p2ppeers values"\
+                "('%s', '%s', %d)" %\
+                (peer.split(",")[0],peer.split(",")[1],int(peer.split(",")[2])))
+        g_db_helper.commit()
 
     def save_to_db(self):
         for peer_entry in self.super_peers.values():

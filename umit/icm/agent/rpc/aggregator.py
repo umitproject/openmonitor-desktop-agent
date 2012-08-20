@@ -331,6 +331,18 @@ class AggregatorAPI(object):
                 print "Libcage called - new P2P network created"
         self.bootstrapFlag = True
 
+        import time
+        time.sleep(2) #Give time to bootstrap
+        theApp.peer_manager.p2ppeers = libcagepeers.getPeers()
+        if(len(theApp.peer_manager.p2ppeers)>0):
+            print 'Storing the peers into the local SQLite DB'
+            for p2ppeer in theApp.peer_manager.p2ppeers:
+                print p2ppeer
+            theApp.peer_manager.save_p2p_to_db();
+
+        else:
+            print 'No new peers to update in DB'
+
         return message
     
     """ Assign Task"""
