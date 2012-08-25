@@ -6,4 +6,4 @@
 	url = git://github.com/umitproject/umit-common.git
 [submodule "deps/icm-common"]
 	path = deps/icm-common
-	url = umitgit@git.umitproject.org:/icm-common.git
+	url = https://github.com/umitproject/openmonitor-common.git
