@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-# Copyright (C) 2011 Adriano Monteiro Marques
+# Copyright (C) 2011 S2S Network Consultoria e Tecnologia da Informacao LTDA
 #
 # Author: Tianwei Liu <liutianweidlut@gmail.com>
 #
