@@ -307,6 +307,8 @@ class Application(object):
         """
         """
         print "------------------login failed!-------------------"
+        failure.printTraceback()
+        g_logger.error(">>> Failure from Application: %s" % failure)        
              
     def _handle_login(self, result, username, password, save_login,login_only=False):
         """
