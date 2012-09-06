@@ -27,7 +27,7 @@ import os
 import signal
 import sys
 import time
-import gtk
+
 import socket
 
 from twisted.internet import reactor
@@ -136,6 +136,7 @@ class Application(object):
         self.ma_service = MobileAgentService()
 
         if self.use_gui:
+            import gtk
             # Init GUI
             from umit.icm.agent.gui.GtkMain import GtkMain
             self.gtk_main = GtkMain()
