@@ -25,6 +25,11 @@ from umit.icm.agent.Global import *
 from umit.icm.agent.Application import theApp
 from umit.icm.agent.Version import PEER_TYPE 
 
+
+"""
+This classes contains the information about the peer. This class is not used to represent other peers.
+It should only used to represent the connected peer.
+"""
 class PeerInfo(object):
     """"""
 

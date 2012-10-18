@@ -91,6 +91,9 @@ class TestEntry(object):
 
 
 #---------------------------------------------------------------------
+"""
+TaskManager management  the tasks to do. The tasks are mainly Tests.
+"""
 class TaskManager(object):
     """"""
 

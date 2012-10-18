@@ -42,6 +42,9 @@ class EventEntry(object):
         self.ServiceReport = None
 
 #---------------------------------------------------------------------
+"""
+EventManager management the events in database. It load and store the evens in database.
+"""
 class EventManager(object):
     """"""
 

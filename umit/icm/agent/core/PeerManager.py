@@ -30,6 +30,9 @@ from twisted.internet import reactor
 FAILURE_INCREASE_COUNT = 2
 SUCCESS_REDUCE_COUNT = 1
 
+"""
+PeerEntry is a object containing information about a peer, used to have access 
+"""
 class PeerEntry(object):
     """"""
 
@@ -57,6 +60,11 @@ class PeerEntry(object):
 
 
 #---------------------------------------------------------------------
+
+"""
+This classes manager the peers. For instance, it contains the information about how 
+many peers are connected and what kind of peers they are. 
+"""
 class PeerManager:
     """"""
 

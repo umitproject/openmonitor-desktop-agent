@@ -28,7 +28,9 @@ from umit.icm.agent.logger import g_logger
 from umit.icm.agent.Application import theApp
 from umit.icm.agent.Global import *
 
-
+"""
+It upload the reports to the Aggregator in a direct or indirect way (i.e. via agent)
+"""
 class ReportUploader(object):
     """"""
 
