@@ -38,8 +38,19 @@ sys.path.insert(0, os.path.join(ROOT_DIR, 'deps', 'umit-common'))
 
 #----------------------------------------------------------------------
 from umit.icm.agent.Global import *
+from umit.icm.agent.BasePaths import *
+from umit.icm.agent.config import FileConfig, DBConfig
 
 from umit.icm.agent.secure.Key import RSAKey
+from umit.icm.agent.utils.CreateDB import create
+
+try:
+    g_config = DBConfig(DB_PATH)
+except IOError:
+    from umit.icm.agent.utils import CreateConf
+    CreateConf.create_db_conf(DB_PATH)
+    g_config = DBConfig(DB_PATH)
+
 
 #ag_key = RSAKey()
 #ag_key.construct()

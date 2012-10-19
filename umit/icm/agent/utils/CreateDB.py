@@ -155,6 +155,20 @@ def create(conn_str):
               "created_at INTEGER NOT NULL,"
               "updated_at INTEGER NOT NULL"
               ")")
+
+    c.execute('CREATE TABLE tasks ('
+              '"sequence" INTEGER, '
+              '"test_id" VARCHAR(100), '
+              '"website_url" VARCHAR(200), '
+              '"test_type" VARCHAR(20), '
+              '"service_name" VARCHAR(20), '
+              '"service_port" VARCHAR(20), '
+              '"service_ip" VARCHAR(20), '
+              '"done_status" VARCHAR(20), '
+              '"done_result" VARCHAR(20), '
+              '"execute_time" TIMESTAMP, '
+              '"unique_id" VARCHAR(100));')
+
     #db table for software update
     c.execute("CREATE TABLE updates ("
               "version TEXT NOT NULL PRIMARY KEY,"

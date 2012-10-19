@@ -246,7 +246,7 @@ class Application(object):
         if self.use_gui:
             self.gtk_main.set_to_logging_in()
 
-        if self.is_auto_login and self.use_gui:
+        if self.is_auto_login and self.use_gui and self.check_username(username,password):
             #auto-login, select the credentials username and password from DB
             return self._login_after_register_callback(None, username,
                                                    password, save_login,
@@ -255,6 +255,8 @@ class Application(object):
             #manually login, we should check whether the username and password exists in database
             #If *NOT*, we should register the username and password to aggregator
             #IF *YES*, we will use credentials in DB
+            g_config.set('application', 'auto_login_swittch', False)
+
             if self.check_username(username,password):
                 return self._login_after_register_callback(None, username,
                                                    password, save_login,

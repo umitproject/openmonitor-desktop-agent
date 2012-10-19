@@ -734,7 +734,7 @@ class AggregatorAPI(object):
         return d
 
     def _connection_errback(self, failure):
-        g_logger.error("[AggregatorAPI connection] - %s" % failure)
+        g_logger.error("[AggregatorAPI connection] - %s - %s" % (failure, failure.printDetailedTraceback()))
 
         if isinstance(failure, error.ConnectError) or \
            isinstance(failure, error.DNSLookupError):
