@@ -8,13 +8,13 @@ echo .
 echo Setting installation variables...
 set PythonEXE=C:\Python26\python.exe
 set UmitOrig=.
-set UmitDir=G:\ICMTemp
+set UmitDir=C:\ICMTemp
 set DistDir=%UmitDir%\dist
 set GTKDir=C:\Python26\Lib\site-packages\gtk-2.0\runtime
-set WinInstallDir=%UmitDir%\icmagent\install_scripts\windows
+set WinInstallDir=%UmitDir%\install_scripts\windows
 set Output=%UmitDir%\win_install.log
 set MakeNSIS="C:\Program Files (x86)\NSIS\makensis.exe"
-set UtilsDir=%UmitDir%\icmagent\install_scripts\utils
+set UtilsDir=%UmitDir%\install_scripts\utils
 
 echo [1] Writing output to %Output%
 rd %Output% /S /Q
