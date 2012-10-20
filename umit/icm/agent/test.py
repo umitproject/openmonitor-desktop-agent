@@ -229,7 +229,7 @@ class WebsiteTest():
         self.pattern = None
         self.benchmark_num = len(benchmark_url_dict)
         self.benchmark_bandwidth = self.info_dict()  #benchmark speed
-        self.test_id = self.benchmark_num + 1
+        self.test_id = str(self.benchmark_num + 1)
         
         self.bandwidth = 0
         self.report = None
@@ -379,7 +379,7 @@ class WebsiteTest():
         report.header.agentID = str(theApp.peer_info.ID)
         report.header.timeUTC = int(default_timer())    #here should UTC clock?
         report.header.timeZone =  -(time.timezone/3600)  #8
-        report.header.testID = int(self.unitied_test_id)
+        report.header.testID = self.unitied_test_id
         report.header.reportID = generate_report_id([report.header.agentID,
                                                      report.header.timeUTC,
                                                      report.header.testID])
