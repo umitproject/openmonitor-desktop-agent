@@ -151,7 +151,10 @@ class CapacityTab(gtk.HBox):
         """
         """
         success_cnt,total_cnt = g_db_helper.service_choice_count()
-        grade = (float(success_cnt) /  total_cnt)*100
+        if (total_cnt == 0 ):
+            grade = 0
+        else:
+            grade = (float(success_cnt) /  total_cnt)*100
 
         if 0.0 <= grade and grade < 20.0:
             grade = 1
