@@ -54,11 +54,13 @@ class TestSetsFetcher(object):
 
         g_logger.debug("The received Test Sets are:%s"%str(message))
         
-        if message.testVersionNo > self.current_test_version:
+        if message.testVersionNo >= self.current_test_version:
             g_logger.info("[Higher Version]Start to execute the tests(%d > %d)"%(message.testVersionNo,self.current_test_version))
             self.set_test_version(message.testVersionNo)
+            g_logger.debug("Test size: " + str(len(message.tests)))
             for test in message.tests:  #tests is a list 
                 self.parse_test_message(test)
+                g_logger.debug("Tests " + str(test))
         else:
             g_logger.info("[Lower Version]Avoid these tests(%d <= %d)"%(message.testVersionNo,self.current_test_version))
         
@@ -179,7 +181,7 @@ class TestSetsFetcher(object):
         ##Website Task Parse
         if test.website and test.testType == TEST_WEB_TYPE:
             args = {
-                    'url':str(test.website.url),
+                    'url':str(test.website.url).strip(),
                     'unitied_test_id':test.testID
                     }
             #crontime = self.random_cron_time(executeAtTimeUTC)
