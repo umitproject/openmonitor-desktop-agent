@@ -230,6 +230,8 @@ class WebsiteTest():
         self.benchmark_num = len(benchmark_url_dict)
         self.benchmark_bandwidth = self.info_dict()  #benchmark speed
         self.test_id = str(self.benchmark_num + 1)
+        self.html_response = "";
+
         
         self.bandwidth = 0
         self.report = None
