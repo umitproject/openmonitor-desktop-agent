@@ -203,7 +203,7 @@ class Application(object):
         """
         check software: according the time and other configurations
         """
-        from umit.icm.agent.gui.SoftwareUpdate import auto_check_update
+        from umit.icm.agent.core.Updater import auto_check_update
         ##############################
         #Software update automatically
         if g_config.getboolean('application','auto_update'):
