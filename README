@@ -53,3 +53,13 @@ and the Aggregator.
 
 Also, the Desktop Agent accept RPC request from the Aggregator and the Super
 Agents.
+
+
+Important notes to INSTALL (@Ubuntu):
+sudo apt-get install python-dev
+sudo pip install pycrypto --upgrade
+
+
+Developers do:
+
+git submodule foreach git pull
