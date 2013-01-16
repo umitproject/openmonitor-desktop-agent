@@ -194,9 +194,20 @@ class Application(object):
     def login_without_gui(self):
         """
         Users login without username or password
-        """      
-        username  = raw_input("User Name:")
-        password = raw_input("Password:")
+        """
+        username = False
+        password = False
+
+        if g_config.has_section("credentials"):
+            username = g_config.get("credentials", "user", False)
+            password = g_config.get("credentials", "password", False)
+        
+        if not username:
+            username  = raw_input("User Name:")
+
+        if not password:
+            password = raw_input("Password:")
+
         self.login(username, password, save_login=True) 
         
     def check_software_auto(self):
