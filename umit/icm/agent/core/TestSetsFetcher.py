@@ -71,7 +71,7 @@ class TestSetsFetcher(object):
         Agent must constantly execute it.
         """
         if theApp.aggregator.available:
-            g_logger.info("Fetching new test sets from aggregator")
+            g_logger.info("Fetching new test sets from aggregator, "+ str(self.current_test_version) )
             
             #The real check_tests by using check_tests Aggregator API
             defer_ = theApp.aggregator.check_tests(self.current_test_version)
@@ -98,6 +98,7 @@ class TestSetsFetcher(object):
     def get_current_test_version(self):
         
         version = g_config.get("Test","test_current_version")
+        version = 0
         return int(version)
         
     def set_test_version(self,version):
