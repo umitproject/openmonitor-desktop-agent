@@ -199,8 +199,8 @@ class Application(object):
         password = False
 
         if g_config.has_section("credentials"):
-            username = g_config.get("credentials", "user", False)
-            password = g_config.get("credentials", "password", False)
+            username = g_config.get("credentials", "user")
+            password = g_config.get("credentials", "password")
         
         if not username:
             username  = raw_input("User Name:")
