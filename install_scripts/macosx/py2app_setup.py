@@ -23,7 +23,28 @@ import os
 # Override the setup name in the main setup.py
 from setuptools import setup
 
+
+
+if hasattr(sys,'frozen'):
+    ROOT_DIR = os.path.dirname(unicode(sys.executable,encoding))
+    ROOT_DIR = os.path.join(ROOT_DIR,'icmagent')  #the address is the EXE execute path
+else:
+    ROOT_DIR = os.path.abspath(
+                    os.path.join(os.path.dirname(unicode(__file__,encoding)),os.path.pardir))
+        
+if os.path.exists(os.path.join(ROOT_DIR,'umit')):
+     sys.path.insert(0, ROOT_DIR)
+     execfile(os.path.join(ROOT_DIR, 'deps', 'umit-common', 'utils', 'importer.py'))
+     sys.path.insert(0, os.path.join(ROOT_DIR, 'deps'))
+     sys.path.insert(0, os.path.join(ROOT_DIR, 'deps', 'icm-common'))
+     sys.path.insert(0, os.path.join(ROOT_DIR, 'deps', 'umit-common'))
+     sys.path.insert(0, os.path.join(ROOT_DIR, 'deps', 'higwidgets'))
+else:
+     raise Exception("Can't find root dir.")
+
 from install_scripts import common
+
+
 
 # py2app requires the values in the app's list to have known extensions, but
 # bin/umit doesn't. Here bin/umit is renamed to bin/umit_main.py and the old
