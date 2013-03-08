@@ -34,7 +34,8 @@ else:
     ROOT_DIR = os.path.abspath(
                     os.path.join(os.path.dirname(unicode(__file__,encoding)),os.path.pardir))
 
-
+print ROOT_DIR
+ROOT_DIR="/Volumes/EXT1/bastiao/Umit/github/openmonitor-desktop-agent"
 if os.path.exists(os.path.join(ROOT_DIR,'umit')):
      sys.path.insert(0, ROOT_DIR)
      execfile(os.path.join(ROOT_DIR, 'deps', 'umit-common', 'utils', 'importer.py'))
@@ -71,16 +72,16 @@ from umit.icm.agent.Version import VERSION
 from install_scripts.common import *
 from install_scripts import common
 
-ROOT_DIR = os.path.abspath(os.path.dirname(__file__))
+#ROOT_DIR = os.path.abspath(os.path.dirname(__file__))
 
 
 # py2app requires the values in the app's list to have known extensions, but
 # bin/umit doesn't. Here bin/umit is renamed to bin/umit_main.py and the old
 # name is stored in common.OLD_UMIT_MAIN so it can be renamed again later.
 import shutil
-shutil.move(common.UMIT_MAIN, common.UMIT_MAIN + '_main.py')
-common.OLD_UMIT_MAIN = common.UMIT_MAIN
-common.UMIT_MAIN = os.path.join(common.BIN_DIRNAME, 'icm-agent')
+#shutil.move(common.UMIT_MAIN, common.ICM_AGENT_MAIN + '_main.py')
+#common.OLD_UMIT_MAIN = common.ICM_AGENT_MAIN
+common.ICM_AGENT_MAIN = os.path.join(common.BIN_DIRNAME, 'icm-agent')
 
 
 
@@ -106,30 +107,24 @@ setup(
         requires     = ['gtk'],
         platforms    = ['Platform Independent'],        
         zipfile      = "lib/library.zip",
-        options = options,
-        data_files   = data_files,
-        scripts      = [os.path.join('icmagent','bin','icm-agent')],
+        #options = options,
+        #data_files   = data_files,
+        #scripts      = [os.path.join('icmagent','bin','icm-agent')],
         
-        windows = [{
-            'dest_base': "icmagent",
-            'script': r'icmagent\bin\icm-agent',
-            'uac_info' : 'requireAdministrator',
-            'icon_resources' :[(1,r'icmagent\share\images\icm-agent.ico') ]
-            }],
-        packages     = ['icmagent',
-                      'icmagent.bin','icmagent.install_scripts',
-                      'icmagent.conf','icmagent.tools',
-                      'icmagent.umit',
-                      'icmagent.umit.icm',
-                      'icmagent.umit.icm.agent',
-                      'icmagent.umit.icm.agent.core',
-                      'icmagent.umit.icm.agent.gui',
-                      'icmagent.umit.icm.agent.rpc',
-                      'icmagent.umit.icm.agent.secure',           
-                      'icmagent.umit.icm.agent.super', 
-                      'icmagent.umit.icm.agent.utils',                                 
+
+        packages     = ['umit', 
+                      #'umit.icm'
+                      #'icmagent.bin','icmagent.install_scripts',
+                      #'icmagent.conf','icmagent.tools',
+                      'umit.icm.agent',
+                      'umit.icm.agent.core',
+                      'umit.icm.agent.gui',
+                      'umit.icm.agent.rpc',
+                      'umit.icm.agent.secure',           
+                      'umit.icm.agent.super', 
+                      'umit.icm.agent.utils',                                 
                      ],
-        package_dir  = {'icmagent' : os.path.join(ROOT_DIR, 'icmagent')},
+        package_dir  = {'icmagent' : os.path.join(ROOT_DIR, 'umit')},
 )
 
 
