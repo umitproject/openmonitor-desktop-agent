@@ -13,8 +13,8 @@ Windows
 4. Twisted: http://twistedmatrix.com/trac/wiki/Downloads - Download and Install it
 5. PyOpenSSL: https://pypi.python.org/pypi/pyOpenSSL - Download and Install it
 6. Extract pip and install with python setup.py install
-7. Download OpenMonitor Desktop Agent: 
-8. tar jxvf openmonitor-desktop-agent.v0.1.tar.bz2
+7. Download OpenMonitor Desktop Agent: https://dl.dropbox.com/u/2859837/openmonitor-desktop-agent.zip
+8. Unzip openmonitor-desktop-agent.zip
 9. cd openmonitor-desktop-agent
 10. C:\Python27\Scripts\pip.exe install -r requirements.txt
 11. python bin/icm-agent
@@ -29,8 +29,8 @@ Linux
 
 1. Download Python 2.7. For instance, in Ubuntu you do: sudo apt-get install python2.7
 2. Install python pip. In Ubuntu you do: sudo apt-get install python-pip
-3. Download OpenMonitor Desktop Agent: 
-4. tar jxvf openmonitor-desktop-agent.v0.1.tar.bz2
+3. Download OpenMonitor Desktop Agent: https://dl.dropbox.com/u/2859837/openmonitor-desktop-agent.zip 
+4. unzip openmonitor-desktop-agent.zip
 5. cd openmonitor-desktop-agent
 6. pip install -r requirements.txt
 7. python bin/icm-agent
@@ -39,13 +39,12 @@ Linux
 
 Mac OS
 ----------------------------------------------------------
-
-
-1. Download Python 2.7. It is isntalled by default on Mac OS.
-2. Download OpenMonitor Desktop Agent: 
-3. tar jxvf openmonitor-desktop-agent.v0.1.tar.bz2
+0. You need XCode and development tools installed
+1. Download Python 2.7. It is installed by default on Mac OS, check it. Probably you can skip.
+2. Download OpenMonitor Desktop Agent: https://dl.dropbox.com/u/2859837/openmonitor-desktop-agent.zip
+3. Unzip openmonitor-desktop-agent.zip
 4. cd openmonitor-desktop-agent
-4. pip install -r requirements.txt
+4. pip install -r requirements.txt && pip install Twisted
 6. python bin/icm-agent
 7. You need to be registered at www.openmonitor.org
 8. You login with your credentials and your Agent will be sent information to the Aggregator. You're contribution to a better world!
