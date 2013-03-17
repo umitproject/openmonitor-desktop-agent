@@ -33,9 +33,12 @@ Linux
 4. unzip openmonitor-desktop-agent.zip
 5. cd openmonitor-desktop-agent
 6. pip install -r pip_requirements.txt
-7. python bin/icm-agent
-8. You need to be registered at www.openmonitor.org
-9. You login with your credentials and your Agent will be sent information to the Aggregator. You're contribution to a better world!
+7. Install Twisted: (@Ubuntu) -> sudo apt-get install python-twisted python-twisted-bin python-twisted-core
+8. Install build-essenctial (gcc, build tools and python development tools): sudo apt-get install build-essential python-dev
+9. Install pycrypto last version 2.6 (sudo pip install pycrypto --upgrade)
+10. python bin/icm-agent
+11. You need to be registered at www.openmonitor.org
+12. You login with your credentials and your Agent will be sent information to the Aggregator. You're contribution to a better world!
 
 Mac OS
 ----------------------------------------------------------
