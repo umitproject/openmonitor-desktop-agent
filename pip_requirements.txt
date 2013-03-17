@@ -1,1 +1,3 @@
-
+protobuf
+zope.interface
+pyasn1
