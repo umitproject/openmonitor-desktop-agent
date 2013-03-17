@@ -9,14 +9,17 @@ Windows
 
 1. Download Python 2.7
 2. Download pip: https://pypi.python.org/pypi/pip#downloads
-3. Extract pip and install with python setup.py install
-4. Download OpenMonitor Desktop Agent: 
-5. tar jxvf openmonitor-desktop-agent.v0.1.tar.bz2
-6. cd openmonitor-desktop-agent
-7. C:\Python27\Scripts\pip.exe install -r requirements.txt
-8. python bin/icm-agent
-9. You need to be registered at www.openmonitor.org
-10. You login with your credentials and your Agent will be sent information to the Aggregator. You're contribution to a better world!
+3. PyCrypto: http://www.voidspace.org.uk/python/modules.shtml#pycrypto - Download and install it
+4. Twisted: http://twistedmatrix.com/trac/wiki/Downloads - Download and Install it
+5. PyOpenSSL: https://pypi.python.org/pypi/pyOpenSSL - Download and Install it
+6. Extract pip and install with python setup.py install
+7. Download OpenMonitor Desktop Agent: 
+8. tar jxvf openmonitor-desktop-agent.v0.1.tar.bz2
+9. cd openmonitor-desktop-agent
+10. C:\Python27\Scripts\pip.exe install -r requirements.txt
+11. python bin/icm-agent
+12. You need to be registered at www.openmonitor.org
+13. You login with your credentials and your Agent will be sent information to the Aggregator. You're contribution to a better world!
 
 
 
