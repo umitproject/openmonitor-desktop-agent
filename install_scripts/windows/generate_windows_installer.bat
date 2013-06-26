@@ -6,14 +6,14 @@ echo ########################################
 echo .
 
 echo Setting installation variables...
-set PythonEXE=C:\Python26\python.exe
+set PythonEXE=C:\Python27\python.exe
 set UmitOrig=.
 set UmitDir=C:\ICMTemp
 set DistDir=%UmitDir%\dist
-set GTKDir=C:\Python26\Lib\site-packages\gtk-2.0\runtime
+set GTKDir=C:\Python27\Lib\site-packages\gtk-2.0\runtime
 set WinInstallDir=%UmitDir%\install_scripts\windows
 set Output=%UmitDir%\win_install.log
-set MakeNSIS="C:\Program Files (x86)\NSIS\makensis.exe"
+set MakeNSIS="C:\Program Files\NSIS\makensis.exe"
 set UtilsDir=%UmitDir%\install_scripts\utils
 
 echo [1] Writing output to %Output%
@@ -34,7 +34,11 @@ mkdir %WinInstallDir%
 
 echo [2] Copying trunk to the temp dir...
 xcopy %UmitOrig%\*.* %UmitDir% /E /S /C /Y /V /I >> %Output%
-xcopy %UmitOrig%\icmagent\install_scripts\windows\setup.nsi %UmitDir% /E /S /C /Y /V /I >> %Output%
+xcopy %UmitOrig%\deps\icm-common\umit\*.* %UmitDir%\umit /E /S /C /Y /V /I >> %Output%
+xcopy %UmitOrig%\deps\umit-common\umit\*.* %UmitDir%\umit /E /S /C /Y /V /I >> %Output%
+mkdir %UmitDir%\higwidgets
+xcopy %UmitOrig%\deps\higwidgets\*.* %UmitDir%\higwidgets /E /S /C /Y /V /I >> %Output%
+xcopy %UmitOrig%\install_scripts\windows\setup.nsi %UmitDir% /E /S /C /Y /V /I >> %Output%
 
 echo [3] Creating dist and dist\share directories...
 mkdir %DistDir%\share
@@ -50,7 +54,7 @@ xcopy %GTKDir%\share\themes\MS-Windows\*.* %DistDir%\share\themes\MS-Windows /S 
 xcopy %GTKDir%\bin\*.dll %DistDir% /Y /S >> %Output%
 
 echo [5] Copying setup.py...
-xcopy %UmitOrig%\setup.py %UmitDir% /Y
+xcopy %UmitOrig%\install_scripts\windows\setup.py %UmitDir% /Y
 
 echo [6] Compiling Umit using py2exe...
 cd %UmitDir%
@@ -62,11 +66,18 @@ echo #######################
 echo .
 
 echo [7] Copying some more GTK files to dist directory...
-xcopy %GTKDir%\lib %DistDir%\lib /S /I >> %Output%
-xcopy %GTKDir%\etc %DistDir%\etc /S /I >> %Output%
+rem xcopy %GTKDir%\lib %DistDir%\lib /S /I >> %Output%
+rem xcopy %GTKDir%\etc %DistDir%\etc /S /I >> %Output%
 
 echo [8] Removing the build directory...
 rd %UmitDir%\build /s /q >> %Output%
+
+echo [9] Copying conf and share into dist folder
+mkdir %UmitDir%\dist\icmagent
+mkdir %UmitDir%\dist\icmagent\conf
+mkdir %UmitDir%\dist\icmagent\share
+xcopy %UmitOrig%\conf %DistDir%\icmagent\conf /S /Y /E >> %Output%
+xcopy %UmitOrig%\share %DistDir%\icmagent\share /S /Y /E >> %Output%
 
 echo .
 echo Creating installer...
@@ -77,3 +88,4 @@ echo Done!
 
 pause
 pause
+

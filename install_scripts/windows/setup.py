@@ -47,10 +47,10 @@ from distutils.command.build import build
 from distutils.command.sdist import sdist
 from distutils import log, dir_util
 
-from icmagent.umit.icm.agent.Version import VERSION
+from umit.icm.agent.Version import VERSION
 
-from icmagent.install_scripts.common import *
-from icmagent.install_scripts import common
+from install_scripts.common import *
+from install_scripts import common
 
 ROOT_DIR = os.path.abspath(os.path.dirname(__file__))
 
@@ -93,7 +93,7 @@ options = { 'py2exe': {
                         'includes' : ['gobject', 'pickle', 'bz2','xml.etree'
                                     ,'twisted.internet','sqlite3','Crypto',
                                     "cairo","gtk","gio","pango","pangocairo","atk",
-                                    'OpenSSL','pygtk_chart','glib','google','google.protobuf'],                          
+                                    'OpenSSL','glib', 'google', 'google.protobuf', 'zope', 'zope.interface'],                          
                         'excludes': ['Tkinter', 'pdb',"pywin", "pywin.debugger"]
                      }
          } 
@@ -115,29 +115,30 @@ setup(
 		zipfile 	 = "lib/library.zip",
 		options = options,
 		data_files   = data_files,
-		scripts      = [os.path.join('icmagent','bin','icm-agent')],
+		scripts      = [os.path.join('.','bin','icm-agent')],
 		
 		windows = [{
 			'dest_base': "icmagent",
-            'script': r'icmagent\bin\icm-agent',
+            'script': r'bin\icm-agent',
             'uac_info' : 'requireAdministrator',
-            'icon_resources' :[(1,r'icmagent\share\images\icm-agent.ico') ]
+            'icon_resources' :[(1,r'share\images\icm-agent.ico') ]
             }],
-		packages     = ['icmagent',
-                      'icmagent.bin','icmagent.install_scripts',
-                      'icmagent.conf','icmagent.tools',
-                      'icmagent.umit',
-                      'icmagent.umit.icm',
-                      'icmagent.umit.icm.agent',
-                      'icmagent.umit.icm.agent.core',
-                      'icmagent.umit.icm.agent.gui',
-                      'icmagent.umit.icm.agent.rpc',
-                      'icmagent.umit.icm.agent.secure',           
-                      'icmagent.umit.icm.agent.super', 
-                      'icmagent.umit.icm.agent.utils',                                 
+		packages     = [
+                      'bin','install_scripts',
+                      'conf','tools',
+                      'umit',
+                      'umit.icm',
+                      'umit.icm.agent',
+                      'umit.icm.agent.core',
+                      'umit.icm.agent.gui',
+                      'umit.icm.agent.rpc',
+                      'umit.icm.agent.secure',           
+                      'umit.icm.agent.super', 
+                      'umit.icm.agent.utils', 
+		      'umit.common',	 
+		      'umit.proto', 
+		      'higwidgets',                              
                      ],
-		package_dir  = {'icmagent' : os.path.join(ROOT_DIR, 'icmagent')},
+		package_dir  = {'.' : os.path.join(ROOT_DIR, '.')},
 )
-
-
 
