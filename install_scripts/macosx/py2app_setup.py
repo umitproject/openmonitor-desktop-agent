@@ -1,9 +1,6 @@
-# Copyright (C) 2005-2006 Insecure.Com LLC.
-# Copyright (C) 2007-2008 Adriano Monteiro Marques
 #
-# Authors: Adriano Monteiro Marques <adriano@umitproject.org>
-#          Cleber Rodrigues <cleber.gnu@gmail.com>
-#                           <cleber@globalred.com.br>
+# Copyright (C) 2011 S2S Network Consultoria e Tecnologia da Informacao LTDA
+# Author: Luis A. Bastiao Silva <luis.kop@gmail.com> 
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -18,6 +15,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
+
 
 import os
 # Override the setup name in the main setup.py

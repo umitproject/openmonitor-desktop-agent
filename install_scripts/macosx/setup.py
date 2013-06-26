@@ -92,7 +92,6 @@ print "%s OpenMonitor Desktop Agent for Mac OS %s %s" % ("#" * 10, VERSION, "#" 
 print
 #########################################################################
 
-
 setup(
         name         = 'icm-agent',
         version      =  VERSION,
@@ -111,7 +110,15 @@ setup(
         #data_files   = data_files,
         #scripts      = [os.path.join('icmagent','bin','icm-agent')],
         
-
+        app = [common.ICM_AGENT_MAIN],
+        options = {'py2app': {
+            'argv_emulation': False,
+            'compressed': True,
+            'packages': [],
+            'includes': []
+            }
+            },
+        setup_requires = ["py2app"],
         packages     = ['umit', 
                       #'umit.icm'
                       #'icmagent.bin','icmagent.install_scripts',
@@ -124,34 +131,7 @@ setup(
                       'umit.icm.agent.super', 
                       'umit.icm.agent.utils',                                 
                      ],
-        package_dir  = {'icmagent' : os.path.join(ROOT_DIR, 'umit')},
+        #package_dir  = {'umit' : os.path.join(ROOT_DIR, 'umit')},
 )
-
-
-
-def revert_rename():
-    if not hasattr(common, 'OLD_UMIT_MAIN'):
-        # The rename hasn't happened.
-        return
-    shutil.move(common.UMIT_MAIN, common.OLD_UMIT_MAIN)
-
-
-py2app_options = dict(
-        app = [common.UMIT_MAIN],
-        options = {'py2app': {
-            'argv_emulation': True,
-            'compressed': True,
-            'packages': [ "gobject", "gtk", "cairo"],
-            'includes': ["atk", "pango", "pangocairo"]
-            }
-            },
-        setup_requires = ["py2app"]
-        )
-
-
-
-if py2app_options:
-    options.update(py2app_options)
-
 
 

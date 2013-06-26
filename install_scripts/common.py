@@ -4,7 +4,7 @@ macosx setup.
 """
 import os
 
-ICM_AGENT_ROOT = 'icmagent'
+ICM_AGENT_ROOT = ''
 BIN_DIRNAME = os.path.join(ICM_AGENT_ROOT,'bin')
 ICM_AGENT_MAIN = os.path.join(BIN_DIRNAME, 'icm-agent')
 
